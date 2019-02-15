@@ -1,0 +1,8 @@
+/Robosub_CV_C++/build
+/Robosub_CV_C++/devel
+/usb_cam_ws/devel
+/usbcam_ws/build
+*.pyc
+*~
+# emacs
+docs/build

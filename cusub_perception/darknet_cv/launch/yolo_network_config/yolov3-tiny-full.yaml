@@ -1,0 +1,18 @@
+yolo_model:
+
+  config_file:
+    name: full.cfg
+  weight_file:
+    name: full_5000.weights
+  threshold:
+    value: 0.3
+  detection_classes:
+    names:
+      - dice1
+      - dice2
+      - dice5
+      - dice6
+      - roulette
+      - start_gate_pole
+      - start_gate_flag
+      - start_gate_full

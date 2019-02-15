@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+  <!-- Console launch prefix -->
+  <arg name="launch_prefix" default=""/>
+  <rosparam command="load" file="$(find ros_indigosdk)/launch/camera.yaml"/>  
+  <node name="localizer_client" pkg="localizer" type="localizer_client.py" output="screen" />
+
+
+  <!-- START GATE -->
+  <node name="gate_localizer" pkg="localizer" type="gate_pnp_color_srv.py" output="screen" /> 
+ <!-- <node name="gate_localizer" pkg="localizer" type="gate_midpoint_srv.py" output="screen" /> -->
+  
+
+
+</launch>

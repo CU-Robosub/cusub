@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+  <!-- Console launch prefix -->
+  <arg name="launch_prefix" default=""/>
+
+  <arg name="detect_sleep_time" default="0.0"/>
+
+  <!-- Config and weights folder. -->
+  <arg name="yolo_weights_path"          default="$(find darknet_cv)/launch/yolo_network_config/weights"/>
+  <arg name="yolo_config_path"           default="$(find darknet_cv)/launch/yolo_network_config/cfg"/>
+
+  <!-- Load parameters -->
+  <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/ros.yaml"/>
+  <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/yolov3-tiny.yaml"/>
+
+  <!-- Start darknet and ros wrapper -->
+  <node pkg="darknet_ros" type="darknet_ros" name="darknet_ros" output="screen" launch-prefix="$(arg launch_prefix)">
+    <param name="yolo_model/threshold/value"          value="0.1" />
+    <param name="weights_path"          value="$(arg yolo_weights_path)" />
+    <param name="config_path"           value="$(arg yolo_config_path)" />
+    <param name="detect_sleep_time"     value="$(arg detect_sleep_time)" />
+    <remap from="/camera/rgb/image_raw"       to="/occam/image0"/>
+  </node>
+
+  <!-- <node pkg="darknet_cv" type="camera_multiplexer.py" name="occam2dark" output="screen" /> -->
+  <!-- <node pkg="darknet_cv" type="localizer.py" name="localizer" output="screen" /> -->
+  <!-- <node pkg="darknet_cv" type="gate_finder.py" name="gate" output="screen" /> -->
+
+ <!--<node name="republish" type="republish" pkg="image_transport" output="screen" 	args="compressed in:=/front_camera/image_raw raw out:=/camera/image_raw" /> -->
+</launch>
