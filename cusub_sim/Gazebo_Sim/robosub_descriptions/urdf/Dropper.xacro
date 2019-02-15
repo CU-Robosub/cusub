@@ -1,0 +1,39 @@
+<robot
+  name="Dropper_robot">
+  <link
+    name="Dropper_link">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.1" />
+        <inertia
+          ixx="0.01"
+          ixy="0.01"
+          ixz="0.01"
+          iyy="0.01"
+          iyz="0.01"
+          izz="0.01" />
+      </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.01"/>
+        <material name="black">
+          <color rgba="1 0.8 0 1"/>
+        </material>
+      </geometry>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.01"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>

@@ -1,0 +1,189 @@
+<launch>
+
+  <!-- Obstacle positions -->
+  <arg name="SG_x" default="15.6"/>
+  <arg name="SG_y" default="23.8"/>
+  <arg name="SG_z" default="-1"/>
+  <arg name="SG_yaw" default="1.017700"/>
+
+  <arg name="PM1_x" default="18.8"/>
+  <arg name="PM1_y" default="22.3"/>
+  <arg name="PM1_z" default="-4.55"/>
+  <arg name="PM1_yaw" default="2.2"/>
+
+  <arg name="D5_x" default="25.1"/>
+  <arg name="D5_y" default="16.8"/>
+  <arg name="D5_z" default="-2.5"/>
+  <arg name="D5_yaw" default="0"/>
+
+  <arg name="D6_x" default="26.3"/>
+  <arg name="D6_y" default="17.2"/>
+  <arg name="D6_z" default="-2.5"/>
+  <arg name="D6_yaw" default="0"/>
+
+  <arg name="PM2_x" default="28.8"/>
+  <arg name="PM2_y" default="14.5"/>
+  <arg name="PM2_z" default="-4.55"/>
+  <arg name="PM2_yaw" default="5.2"/>
+
+  <arg name="RS_x" default="29"/>
+  <arg name="RS_y" default="-6.3"/>
+  <arg name="RS_z" default="-4.8"/>
+  <arg name="RS_yaw" default="0"/>
+
+  <arg name="R_x" default="31"/>
+  <arg name="R_y" default="-6.3"/>
+  <arg name="R_z" default="-4.8"/>
+  <arg name="R_yaw" default="0"/>
+
+  <!-- Start the a underwater world simulation scenario -->
+  <include file="$(find robosub_descriptions)/launch/TRANSDEC.launch"/>
+
+  <!-- Add the Leviathan vehicle to the simulation (namespace: rexrov) -->
+  <include file="$(find leviathan_description)/launch/upload.launch">
+      <arg name="x" default="4.3"/>
+      <arg name="y" default="27.3"/>
+      <arg name="z" default="-1"/>
+      <arg name="yaw" default="90"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="StartGate"/>
+      <arg name="x" default="$(arg SG_x)"/>
+      <arg name="y" default="$(arg SG_y)"/>
+      <arg name="z" default="$(arg SG_z)"/>
+      <arg name="yaw" default="$(arg SG_yaw)"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="PathMarker"/>
+      <arg name="x" default="$(arg PM1_x)"/>
+      <arg name="y" default="$(arg PM1_y)"/>
+      <arg name="z" default="$(arg PM1_z)"/>
+      <arg name="yaw" default="$(arg PM1_yaw)"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="Dice5"/>
+      <arg name="x" default="$(arg D5_x)"/>
+      <arg name="y" default="$(arg D5_y)"/>
+      <arg name="z" default="$(arg D5_z)"/>
+      <arg name="yaw" default="$(arg D5_yaw)"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="Dice6"/>
+      <arg name="x" default="$(arg D6_x)"/>
+      <arg name="y" default="$(arg D6_y)"/>
+      <arg name="z" default="$(arg D6_z)"/>
+      <arg name="yaw" default="$(arg D6_yaw)"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="PathMarker"/>
+      <arg name="postfix" default="_2"/>
+      <arg name="x" default="$(arg PM2_x)"/>
+      <arg name="y" default="$(arg PM2_y)"/>
+      <arg name="z" default="$(arg PM2_z)"/>
+      <arg name="yaw" default="$(arg PM2_yaw)"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="Roulette"/>
+      <arg name="x" default="$(arg R_x)"/>
+      <arg name="y" default="$(arg R_y)"/>
+      <arg name="z" default="$(arg R_z)"/>
+      <arg name="yaw" default="$(arg R_yaw)"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="Roulette_spin"/>
+      <arg name="x" default="$(arg RS_x)"/>
+      <arg name="y" default="$(arg RS_y)"/>
+      <arg name="z" default="$(arg RS_z)"/>
+      <arg name="yaw" default="$(arg RS_yaw)"/>
+  </include>
+
+  <rosparam file="$(find robosub_descriptions)/config/roulette_control.yaml" command="load"/>
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+	   output="screen" ns="/Roulette_spin_1" args="joint_state_controller roulette_velocity_controller"/>
+  <node pkg="rostopic" type="rostopic" name="roulette_speed" args="pub /Roulette_spin_1/roulette_velocity_controller/command std_msgs/Float64 &quot;data: 0.4&quot;"/>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="GoldChip"/>
+      <arg name="x" default="27"/>
+      <arg name="y" default="18"/>
+      <arg name="z" default="-5"/>
+      <arg name="yaw" default="1"/>
+  </include>
+
+  <rosparam file="$(find robosub_descriptions)/config/goldchip_control.yaml" command="load"/>
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+	   output="screen" ns="/GoldChip_1" args="joint_state_controller button_effort_controller"/>
+  <node pkg="rostopic" type="rostopic" name="goldchip_effort" args="pub /GoldChip_1/button_effort_controller/command std_msgs/Float64 &quot;data: 1.0&quot;"/>
+  <node name="GoldChipSpawner_1" pkg="robosub_descriptions" type="GoldChipSpawner.py">
+    <param name="dropperURDF" command="cat $(find robosub_descriptions)/urdf/Dropper.urdf" />
+  </node>
+
+  <!-- TODO Figure out how to make these dynamicly update from Gazebo simulatino data
+            This will probably be replaced with RobotDescriptions for non static items
+       TODO Figure out a way to share this data into TRANSDEC launch so we can move these
+            TRANSDEC model parameters there
+          -->
+  <node name="publish_world_models"
+        pkg="uuv_assistants"
+        type="publish_world_models.py"
+        output="screen">
+        <rosparam subst_value="true">
+            meshes:
+              StartGate_1:
+                mesh: package://robosub_descriptions/meshes/StartGate.dae
+                pose:
+                  position: [$(arg SG_x), $(arg SG_y), $(arg SG_z)]
+                  orientation: [0, 0, $(arg SG_yaw)]
+              PathMarker_1:
+                mesh: package://robosub_descriptions/meshes/PathMarker.dae
+                pose:
+                  position: [$(arg PM1_x), $(arg PM1_y), $(arg PM1_z)]
+                  orientation: [1.57, 0, $(arg PM1_yaw)]
+              Dice5_1:
+                mesh: package://robosub_descriptions/meshes/Dice5.dae
+                pose:
+                  position: [$(arg D5_x), $(arg D5_y), $(arg D5_z)]
+                  orientation: [0, 0, $(arg D5_yaw)]
+              Dice6_1:
+                mesh: package://robosub_descriptions/meshes/Dice6.dae
+                pose:
+                  position: [$(arg D6_x), $(arg D6_y), $(arg D6_z)]
+                  orientation: [0, 0, $(arg D6_yaw)]
+              PathMarker_2:
+                mesh: package://robosub_descriptions/meshes/PathMarker.dae
+                pose:
+                  position: [$(arg PM2_x), $(arg PM2_y), $(arg PM2_z)]
+                  orientation: [1.57, 0, $(arg PM2_yaw)]
+              Roulette:
+                mesh: package://robosub_descriptions/meshes/Roulette.dae
+                pose:
+                  position: [$(arg R_x), $(arg R_y), $(arg R_z)]
+                  orientation: [1.57, 0, $(arg R_yaw)]
+              TRANSEC:
+                mesh: package://robosub_descriptions/meshes/TRANSDEC.dae
+                pose:
+                  position: [0, 0, 0]
+                  orientation: [1.57, 0, 0]
+        </rosparam>
+  </node>
+
+  <!--<node pkg="tf" type="static_transform_publisher" name="baselink_gazebo_broadcaster" args="0 0 0 0 0 0 base_link leviathan/base_link 50" />-->
+  <node pkg="tf" type="static_transform_publisher" name="baselink_gazebo_broadcaster_z_fix" args="0 0 0 0 0 0 odom_z leviathan/base_link 50" />
+
+  <!-- tie the world frame to odom -->
+  <node pkg="tf" type="static_transform_publisher" name="world_odom_broadcaster" args="4.3 27.3 -1 0 0 0 world odom 50" />
+
+  <include file="$(find leviathan_gazebo_drivers)/launch/leviathan_gazebo_drivers.launch"/>
+
+  <node name="fix_odom_z" pkg="leviathan_gazebo_drivers" type="z_odom_repub.py"/>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find leviathan_description)/launch/Leviathan_Startgate_Divewell_Gazebo.rviz" />
+
+</launch>

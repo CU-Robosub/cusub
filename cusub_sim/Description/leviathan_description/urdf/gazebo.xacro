@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Center of buoyancy -->
+    <xacro:property name="leviathan_cob" value="0 0 0.2"/>
+
+    <!-- Vehicle's actual volume (Gazebo cannot compute the volume out of the mesh) -->
+    <xacro:property name="leviathan_volume" value="0.011054"/>
+
+    <!-- Describing the dimensions of the vehicle's bounding box -->
+    <xacro:property name="leviathan_length" value="0.5"/>
+    <xacro:property name="leviathan_width"  value="0.5"/>
+    <xacro:property name="leviathan_height" value="0.5"/>
+
+    <xacro:property name="rho" value="1028"/>
+
+    <xacro:macro name="leviathan_hydro_model" params="namespace">
+      <!-- List of hydrodynamic models this robot's links -->
+      <link name="${namespace}/base_link">
+
+        <fluid_density>${rho}</fluid_density>
+        <flow_velocity_topic>hydrodynamics/current_velocity</flow_velocity_topic>
+
+        <!-- This flag will make the link neutrally buoyant -->
+        <neutrally_buoyant>0</neutrally_buoyant>
+
+        <volume>${leviathan_volume}</volume>
+
+        <box>
+          <width>${leviathan_width}</width>
+          <length>${leviathan_length}</length>
+          <height>${leviathan_height}</height>
+        </box>
+
+        <!-- Center of buoyancy -->
+        <center_of_buoyancy>${leviathan_cob}</center_of_buoyancy>
+
+        <hydrodynamic_model>
+          <type>fossen</type>
+          <added_mass>
+            1.7182 0 0 0 0 0
+            0 0 0 0 0 0
+            0 0 5.468 0 0 0
+            0 0 0 0 0 0
+            0 0 0 0 1.2481 0
+            0 0 0 0 0 0.4006
+          </added_mass>
+          <linear_damping>
+            -8.25 -15 -24.0 -18.75 -33.75 -3.75
+          </linear_damping>
+          <quadratic_damping>
+            0 0 0 0 0 0
+          </quadratic_damping>
+
+        </hydrodynamic_model>
+
+      </link>
+    </xacro:macro>
+
+</robot>

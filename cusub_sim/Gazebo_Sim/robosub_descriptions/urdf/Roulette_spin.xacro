@@ -1,0 +1,77 @@
+<robot name="Roulette_spin_robot">
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0.44277 -0.81157 0.38487" rpy="0 0 0" />
+      <mass value="13.801" />
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robosub_descriptions/meshes/Roulette_base.stl" />
+      </geometry>
+      <material
+        name="">
+        <color rgba="0.79608 0.82353 0.93725 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robosub_descriptions/meshes/Roulette_base.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="table_link">
+    <inertial>
+      <origin
+        xyz="0 0.050895 0"
+        rpy="0 0 0" />
+      <mass
+        value="29.977" />
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robosub_descriptions/meshes/Roulette_table.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robosub_descriptions/meshes/Roulette_table.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="table_joint"
+    type="continuous">
+    <origin
+      xyz="0.44277 -0.81157 0.69602"
+      rpy="1.5708 -6.034E-18 -0.098706" />
+    <parent
+      link="base_link" />
+    <child
+      link="table_link" />
+    <axis xyz="0 1 0" />
+    <dynamics damping="0.0" friction="0.0"/>
+    <limit effort="1000.0" velocity="10.0" />
+  </joint>
+  <transmission name="table_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+      <joint name="table_joint">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="table_servo">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+  </transmission>
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/Roulette_spin_1</robotNamespace>
+    </plugin>
+  </gazebo>
+</robot>

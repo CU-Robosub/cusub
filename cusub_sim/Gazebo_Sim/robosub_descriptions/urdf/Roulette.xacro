@@ -1,0 +1,41 @@
+<robot
+  name="Roulette_robot">
+  <link
+    name="Roulette_link">
+    <inertial>
+      <origin
+        xyz="0.2159 -0.35433 0.00124640000000002"
+        rpy="0 0 0" />
+      <mass
+        value="1.2109" />
+      <inertia
+        ixx="0.0563918765823245"
+        ixy="-3.19365302432761E-17"
+        ixz="1.62630325872824E-19"
+        iyy="0.0214388388460461"
+        iyz="4.36695243940475E-06"
+        izz="0.0777246544530727" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robosub_descriptions/meshes/Roulette.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robosub_descriptions/meshes/Roulette.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="Roulette_link">
+      <turnGravityOff>false</turnGravityOff>
+  </gazebo>
+</robot>

@@ -1,0 +1,112 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="divewell">
+    <static>true</static>
+    <link name="link">
+      <visual name="ground">
+        <cast_shadows>false</cast_shadows>
+        <pose>0 0 -4 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>18 12 .1</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://materials/scripts/pool.material</uri>
+            <name>Robosub/PoolWall</name>
+          </script>
+        </material>
+      </visual>
+
+      <collision name="ground">
+        <pose>0 0 -4 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>18 12 .1</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <visual name="surface">
+        <cast_shadows>false</cast_shadows>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>18 12 .1</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://Media/materials/scripts/water.material</uri>
+            <name>UUVSimulator/StaticDeepWater</name>
+          </script>
+        </material>
+      </visual>
+
+      <visual name="north">
+        <cast_shadows>false</cast_shadows>
+        <pose>9 0 -2 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>.1 12 4</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://materials/scripts/pool.material</uri>
+            <name>Robosub/PoolWall</name>
+          </script>
+        </material>
+      </visual>
+
+      <visual name="south">
+        <cast_shadows>false</cast_shadows>
+        <pose>-9 0 -2 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>.1 12 4</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://materials/scripts/pool.material</uri>
+            <name>Robosub/PoolWall</name>
+          </script>
+        </material>
+      </visual>
+
+      <visual name="east">
+        <cast_shadows>false</cast_shadows>
+        <pose>0 -6 -2 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>18 .1 4</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://materials/scripts/pool.material</uri>
+            <name>Robosub/PoolWall</name>
+          </script>
+        </material>
+      </visual>
+
+      <visual name="west">
+        <cast_shadows>false</cast_shadows>
+        <pose>0 6 -2 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>18 .1 4</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://materials/scripts/pool.material</uri>
+            <name>Robosub/PoolWall</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

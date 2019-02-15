@@ -1,0 +1,22 @@
+<package>
+    <name>cusub_sim</name>
+    <version>0.1.0</version>
+    <description>gazebo sim related packages</description>
+    <maintainer email="jeve0658@colorado.edu">Jeff Venicx</maintainer>
+    <author>Michael Marques, Jeff Venicx, Luke Barbier</author>
+    <url type="repository">https://github.com/CU-Robosub </url>
+    <license>BSD</license>
+    
+    <buildtool_depend>catkin</buildtool_depend>
+    
+    <run_depend>leviathan_description</run_depend>
+    <run_depend>leviathan_gazebo_drivers</run_depend>
+    <run_depend>robosub_descriptions</run_depend>
+    <run_depend>robosub_scenarios</run_depend>
+    <run_depend>uuv_simulator</run_depend>
+
+    <export>
+        <metapackage/>
+    </export>
+</package>
+

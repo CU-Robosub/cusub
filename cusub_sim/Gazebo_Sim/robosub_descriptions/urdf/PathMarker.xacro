@@ -1,0 +1,41 @@
+<robot
+  name="PathMarker_robot">
+  <link
+    name="PathMarker_link">
+    <inertial>
+      <origin
+        xyz="0.41608 0.099278 -0.093901"
+        rpy="0 0 0" />
+      <mass
+        value="0.01482" />
+      <inertia
+        ixx="0.0325532246844383"
+        ixy="0.031316880775089"
+        ixz="0.00124326094393445"
+        iyy="0.0951869546300968"
+        iyz="0.00176581385028333"
+        izz="0.0988406120595301" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robosub_descriptions/meshes/PathMarker.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robosub_descriptions/meshes/PathMarker.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="PathMarker_link">
+      <turnGravityOff>false</turnGravityOff>
+  </gazebo>
+</robot>

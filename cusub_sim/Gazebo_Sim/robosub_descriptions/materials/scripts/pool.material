@@ -1,0 +1,81 @@
+material Robosub/PoolWall
+{
+  receive_shadows on
+  technique
+  {
+    pass
+    {
+       ambient 0.5 0.5 0.9 1.0
+       diffuse 0.5 0.5 0.9 1.0
+       specular 1 1 1 1 20
+       emissive 0.0 0.0 0.0 1.0
+
+    }
+  }
+}
+
+material Robosub/orange
+{
+  receive_shadows on
+  technique
+  {
+    pass
+    {
+       ambient 0.15 0.025 0.0 1.0
+       diffuse 0.15 0.025 0.0 1.0
+       specular 1 1 1 1 20
+       emissive 0.0 0.0 0.0 1.0
+
+    }
+  }
+}
+
+material Robosub/red
+{
+  receive_shadows on
+  technique
+  {
+    pass
+    {
+       ambient 0.1 0.01 0.01 1.0
+       diffuse 0.1 0.01 0.01 1.0
+       specular 1 1 1 1 20
+       emissive 0.0 0.0 0.0 1.0
+
+    }
+  }
+}
+
+material Robosub/black
+{
+  receive_shadows on
+  technique
+  {
+    pass
+    {
+       ambient 0.0 0.0 0.0 1.0
+       diffuse 0.0 0.0 0.0 1.0
+       specular 1 1 1 1 20
+       emissive 0.0 0.0 0.0 1.0
+
+    }
+  }
+}
+
+material Robosub/Dice5
+{
+  receive_shadows on
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        // Relative to the location of the material script
+        texture ../../../textures/5dice.jpg
+        // Repeat the texture over the surface (4 per face)
+        scale 1.0 1.0
+      }
+    }
+  }
+}

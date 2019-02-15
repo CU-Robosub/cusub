@@ -1,0 +1,19 @@
+<launch>
+
+  <!-- Start the a underwater world simulation scenario -->
+  <include file="$(find uuv_descriptions)/launch/herkules_ship_wreck.launch"/>
+
+  <include file="$(find leviathan_description)/launch/upload.launch">
+      <arg name="x" default="-25"/>
+      <arg name="y" default="25"/>
+      <arg name="z" default="0"/>
+      <arg name="yaw" default="-0.8"/>
+  </include>
+
+  <node pkg="tf" type="static_transform_publisher" name="baselink_gazebo_broadcaster" args="0 0 0 0 0 0 base_link leviathan/base_link 50" />
+
+  <include file="$(find leviathan_gazebo_drivers)/launch/leviathan_gazebo_drivers.launch"/>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find leviathan_description)/launch/leviathan.rviz" />
+
+</launch>

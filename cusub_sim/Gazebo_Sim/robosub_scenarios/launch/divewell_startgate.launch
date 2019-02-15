@@ -1,0 +1,53 @@
+<launch>
+
+  <arg name="SG_x" default="4.0"/>
+  <arg name="SG_y" default="0.0"/>
+  <arg name="SG_z" default="0.5"/>
+  <arg name="SG_yaw" default="1.57"/>
+
+  <!-- Start the a underwater world simulation scenario -->
+  <include file="$(find robosub_descriptions)/launch/divewell.launch"/>
+
+  <!-- Add the RexROV vehicle to the simulation (namespace: rexrov) -->
+  <include file="$(find leviathan_description)/launch/upload.launch">
+      <arg name="x" default="-7.5"/>
+      <arg name="y" default="0"/>
+      <arg name="z" default="-1"/>
+      <arg name="yaw" default="0"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="StartGate"/>
+      <arg name="x" default="$(arg SG_x)"/>
+      <arg name="y" default="$(arg SG_y)"/>
+      <arg name="z" default="$(arg SG_z)"/>
+      <arg name="yaw" default="$(arg SG_yaw)"/>
+  </include>
+
+  <!--<node pkg="tf" type="static_transform_publisher" name="baselink_gazebo_broadcaster" args="0 0 0 0 0 0 base_link leviathan/base_link 50" />-->
+  <node pkg="tf" type="static_transform_publisher" name="baselink_gazebo_broadcaster_z_fix" args="0 0 0 0 0 0 odom_z leviathan/base_link 50" />
+
+  <!-- tie the world frame to odom -->
+  <node pkg="tf" type="static_transform_publisher" name="world_odom_broadcaster" args="-7.5 0 -1 0 0 0 world odom 50" />
+
+  <include file="$(find leviathan_gazebo_drivers)/launch/leviathan_gazebo_drivers.launch"/>
+
+  <node name="fix_odom_z" pkg="leviathan_gazebo_drivers" type="z_odom_repub.py"/>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find leviathan_description)/launch/Leviathan_Startgate_Divewell_Gazebo.rviz" />
+
+  <node name="publish_world_models"
+        pkg="uuv_assistants"
+        type="publish_world_models.py"
+        output="screen">
+        <rosparam subst_value="true">
+            meshes:
+              StartGate_1:
+                mesh: package://robosub_descriptions/meshes/StartGate.dae
+                pose:
+                  position: [$(arg SG_x), $(arg SG_y), $(arg SG_z)]
+                  orientation: [0, 0, $(arg SG_yaw)]
+        </rosparam>
+  </node>
+
+</launch>

@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="camera_macro" params="robot_namespace camera_id frame *axis *origin">
+
+  <!--camera_link-->
+  <link name="${robot_namespace}/camera_${camera_id}">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <!--mesh filename="package://simple_arm/meshes/camera.dae"/-->
+        <sphere radius="0.01"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <!--mesh filename="package://simple_arm/meshes/camera.dae"/-->
+        <sphere radius="0.01"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1.0 0 0 1.0"/>
+      </material>
+    </visual>
+  </link>
+
+  <joint name="${robot_namespace}/camera_${camera_id}_joint" type="fixed">
+    <xacro:insert_block name="axis" />
+    <xacro:insert_block name="origin" />
+    <parent link="${namespace}/base_link"/>
+    <child link="${robot_namespace}/camera_${camera_id}"/>
+  </joint>
+
+  <gazebo reference="${robot_namespace}/camera_${camera_id}">
+    <sensor type="camera" name="rgb_camera">
+      <update_rate>30.0</update_rate>
+      <camera name="rgb_camera">
+        <horizontal_fov>1.0397</horizontal_fov>
+        <vertical_fov>0.6443</vertical_fov>
+        <image>
+          <width>752</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>camera_${camera_id}</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>${frame}</frameName>
+        <hackBaseline>0.0</hackBaseline>
+        <distortionK1>-0.360085</distortionK1>
+        <distortionK2>0.115116</distortionK2>
+        <distortionK3>0.007768</distortionK3>
+        <distortionT1>0.004616</distortionT1>
+        <distortionT2>0.000000</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+  </xacro:macro>
+
+  <xacro:macro name="thruster_macro" params="robot_namespace thruster_id *axis *origin">
+    <link name="${robot_namespace}/thruster_${thruster_id}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 1.5707963 0"/>
+        <geometry>
+          <cylinder radius="0.046" length="0.04"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 1.5707963 0"/>
+        <geometry>
+          <cylinder radius="0.046" length="0.04"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="0.001" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.000000017" ixy="0.0" ixz="0.0"
+               iyy="0.000000017" iyz="0.0"
+               izz="0.000000017" />
+      </inertial>
+    </link>
+
+    <joint name="${robot_namespace}/thruster_${thruster_id}_joint" type="continuous">
+      <xacro:insert_block name="axis" />
+      <xacro:insert_block name="origin" />
+      <parent link="${robot_namespace}/base_link" />
+      <child link="${robot_namespace}/thruster_${thruster_id}" />
+    </joint>
+
+    <gazebo>
+      <plugin name="${robot_namespace}_${thruster_id}_thruster_model" filename="libuuv_thruster_ros_plugin.so">
+        <linkName>${robot_namespace}/thruster_${thruster_id}</linkName>
+        <jointName>${robot_namespace}/thruster_${thruster_id}_joint</jointName>
+        <thrusterID>${thruster_id}</thrusterID>
+        <gain>5</gain>
+        <dynamics>
+          <type>FirstOrder</type>
+          <timeConstant>0.2</timeConstant>
+        </dynamics>
+        <conversion>
+          <type>Basic</type>
+          <rotorConstant>0.00001</rotorConstant>
+        </conversion>
+      </plugin>
+    </gazebo>
+
+    <gazebo reference="${robot_namespace}/thruster_${thruster_id}">
+      <selfCollide>false</selfCollide>
+    </gazebo>
+  </xacro:macro>
+
+</robot>

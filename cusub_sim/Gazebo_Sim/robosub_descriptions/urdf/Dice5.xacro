@@ -1,0 +1,127 @@
+<robot
+  name="Dice5_robot">
+  <link name="Dice5/base_link">
+    <inertial>
+      <origin
+        xyz="0.1143 -0.1143 -0.1143"
+        rpy="0 0 0" />
+      <mass
+        value="0.5" />
+      <inertia
+        ixx="0.014047076006077"
+        ixy="3.28827308175579E-18"
+        ixz="-1.89307007035867E-17"
+        iyy="0.014047076006077"
+        iyz="-7.70371977754894E-34"
+        izz="0.014047076006077" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robosub_descriptions/meshes/Dice5.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.5707963267949 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robosub_descriptions/meshes/Dice.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link name = "Dice5/string_link">
+  <inertial>
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <mass
+      value="0.05" />
+    <inertia
+      ixx="0.00014047076006077"
+      ixy="3.28827308175579E-18"
+      ixz="-1.89307007035867E-17"
+      iyy="0.00014047076006077"
+      iyz="-7.70371977754894E-34"
+      izz="0.00014047076006077" />
+  </inertial>
+  </link>
+  <link name = "Dice5/anchor_link">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="2.0" />
+      <inertia
+        ixx="0.014047076006077"
+        ixy="3.28827308175579E-18"
+        ixz="-1.89307007035867E-17"
+        iyy="0.014047076006077"
+        iyz="-7.70371977754894E-34"
+        izz="0.014047076006077" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="Dice5/base_joint" type="continuous">
+    <origin
+      xyz="0.1143 -0.1143 -0.2286"
+      rpy="0 0 0" />
+    <parent link="Dice5/base_link"/>
+    <child link="Dice5/string_link"/>
+  </joint>
+  <joint name="Dice5/anchor_joint" type="continuous">
+    <origin
+      xyz="0 0 -2"
+      rpy="0 0 0" />
+    <parent link="Dice5/string_link"/>
+    <child link="Dice5/anchor_link"/>
+  </joint>
+
+  <gazebo>
+    <plugin filename="libuuv_underwater_object_ros_plugin.so" name="uuv_plugin">
+    <fluid_density>1028.0</fluid_density>
+    <flow_velocity_topic>hydrodynamics/current_velocity</flow_velocity_topic>
+    <debug>0</debug>
+    <link name="Dice5/base_link">
+        <fluid_density>1028</fluid_density>
+        <flow_velocity_topic>hydrodynamics/current_velocity</flow_velocity_topic>
+        <neutrally_buoyant>0</neutrally_buoyant>
+        <volume>0.001</volume>
+
+        <box>
+          <width>0.1</width>
+          <length>0.1</length>
+          <height>0.1</height>
+        </box>
+
+        <!-- Center of buoyancy -->
+        <center_of_buoyancy>0 0 0 </center_of_buoyancy>
+
+        <hydrodynamic_model>
+          <type>sphere</type>
+          <radius>0.1</radius>
+        </hydrodynamic_model>
+      </link>
+    </plugin>
+  </gazebo>
+</robot>

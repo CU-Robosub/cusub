@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!--
+    Some examples of sensors that can be added to the vehicle frame.
+    Set the origin of the sensor frames correctly for your application
+    Look into the sensor macros in the package uuv_sensor_ros_plugins/urdf for
+    more examples or add you own custom sensor units.
+  -->
+
+  <!-- Mount a Pose 3D sensor. -->
+  <xacro:default_pose_3d namespace="${namespace}" parent_link="${namespace}/base_link" />
+
+  <!-- DVL  -->
+  <xacro:default_dvl namespace="${namespace}" parent_link="${namespace}/base_link">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:default_dvl>
+
+  <!-- Pressure  -->
+  <xacro:default_pressure namespace="${namespace}" parent_link="${namespace}/base_link">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:default_pressure>
+
+  <!-- IMU  -->
+  <xacro:default_imu namespace="${namespace}" parent_link="${namespace}/base_link">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:default_imu>
+
+  <xacro:camera_macro robot_namespace="${namespace}" camera_id="0" frame="occam0_frame">
+    <axis xyz="0 0 0" />
+    <origin xyz="0.055 0 0.22" rpy="0 0 0"/>
+  </xacro:camera_macro>
+
+  <xacro:camera_macro robot_namespace="${namespace}" camera_id="1" frame="occam1_frame">
+    <axis xyz="0 0 1" />
+    <origin xyz="0.0169 -0.0523 0.22" rpy="0 0 -1.2566370"/>
+  </xacro:camera_macro>
+
+  <xacro:camera_macro robot_namespace="${namespace}" camera_id="2" frame="occam2_frame">
+    <axis xyz="0 0 1" />
+    <origin xyz="-0.0444 -0.0323 0.22" rpy="0 0 -2.5132741"/>
+  </xacro:camera_macro>
+
+  <xacro:camera_macro robot_namespace="${namespace}" camera_id="3" frame="occam3_frame">
+    <axis xyz="0 0 1" />
+    <origin xyz="-0.0444 0.0323 0.22" rpy="0 0 -3.7699111"/>
+  </xacro:camera_macro>
+
+  <xacro:camera_macro robot_namespace="${namespace}" camera_id="4" frame="occam4_frame">
+    <axis xyz="0 0 1" />
+    <origin xyz="0.0169 0.0523 0.22" rpy="0 0 -5.0265482"/>
+  </xacro:camera_macro>
+
+  <xacro:camera_macro robot_namespace="${namespace}" camera_id="5" frame="downcam_frame">
+    <axis xyz="0 0 1" />
+    <origin xyz="0 0 -0.1" rpy="0 1.57 0"/>
+  </xacro:camera_macro>
+
+<!--
+  <xacro:regular_camera_plugin_macro
+       namespace="${namespace}"
+       suffix=""
+       parent_link="${namespace}/base_link"
+       topic="camera"
+       mass="0.0015"
+       update_rate="15"
+       hfov="1.8125"
+       width="768"
+       height="492"
+       stddev="0.02"
+       scale="0.5">
+       <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.00" iyz="0.0" izz="0.0" />
+       <origin xyz="0.0 0.2 0.0" rpy="0 0 1.5707963"/>
+   </xacro:regular_camera_plugin_macro>
+-->
+</robot>

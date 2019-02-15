@@ -1,0 +1,164 @@
+<robot name="GoldChip_robot">
+  <link
+    name="goldchip_base_link">
+    <inertial>
+      <origin
+        xyz="0.42417 -1.0 0.2"
+        rpy="0 0 0" />
+      <mass
+        value="8.8008" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robosub_descriptions/meshes/goldchip_base_link.stl" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robosub_descriptions/meshes/goldchip_base_link.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="goldchip_button_holder_link">
+    <inertial>
+      <origin
+        xyz="1.3341E-07 -0.074895 0.024858"
+        rpy="0 0 0" />
+      <mass
+        value="0.01293" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robosub_descriptions/meshes/goldchip_button_holder_link.stl" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+  </link>
+  <joint
+    name="goldchip_button_holder_joint"
+    type="prismatic">
+    <origin
+      xyz="0.42417 -1.0265 1.2902"
+      rpy="0.32046 1.3133E-08 1.5708" />
+    <parent
+      link="goldchip_base_link" />
+    <child
+      link="goldchip_button_holder_link" />
+    <axis
+      xyz="0 0 1" />
+      <limit
+        lower="0"
+        upper="0"
+        effort="0"
+        velocity="0" />
+  </joint>
+  <link
+    name="goldchip_button_link">
+    <inertial>
+      <origin
+        xyz="0 2.2204E-15 0.066992"
+        rpy="0 0 0" />
+      <mass
+        value="0.1287" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robosub_descriptions/meshes/GoldChipButton.dae" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://robosub_descriptions/meshes/goldchip_button_link.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="goldchip_button_joint"
+    type="prismatic">
+    <origin
+      xyz="0 -0.096428 0.032004"
+      rpy="1.1376 -0.72203 0.29662" />
+    <parent
+      link="goldchip_button_holder_link" />
+    <child
+      link="goldchip_button_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-0.0381"
+      upper="0.0"
+      effort="10"
+      velocity="10" />
+  </joint>
+  <transmission name="goldchip_button_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+      <joint name="goldchip_button_joint">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="goldchip_button_servo">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+  </transmission>
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/GoldChip_1</robotNamespace>
+    </plugin>
+  </gazebo>
+</robot>

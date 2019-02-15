@@ -1,0 +1,24 @@
+<launch>
+
+  <node name="gazebo_depth" pkg="leviathan_gazebo_drivers" type="depth_sensor.py"/>
+  <node name="gazebo_dvl" pkg="leviathan_gazebo_drivers" type="dvl.py"/>
+  <node name="gazebo_leviathan_motor_control" pkg="leviathan_gazebo_drivers" type="motor_control.py"/>
+
+  <node name="gazebo_actuators" pkg="leviathan_gazebo_drivers" type="ActuatorService.py">
+    <param name="dropperURDF"
+           command="$(find xacro)/xacro '$(find robosub_descriptions)/urdf/Dropper.xacro'" />
+  </node>
+
+  <!--<node name="relay_dvl" pkg="topic_tools" type="relay" args="/leviathan/dvl_twist /drivers/dvl/vel"/>-->
+  <node name="imu" pkg="topic_tools" type="relay" args="/leviathan/imu /imu/data"/>
+  <node name="depth" pkg="topic_tools" type="relay" args="/depth /drivers/depth_sensor/depth"/>
+
+  <node name="relay_occam0" pkg="topic_tools" type="relay" args="/leviathan/camera_0/image_raw /occam/image0"/>
+  <node name="relay_occam1" pkg="topic_tools" type="relay" args="/leviathan/camera_1/image_raw /occam/image1"/>
+  <node name="relay_occam2" pkg="topic_tools" type="relay" args="/leviathan/camera_2/image_raw /occam/image2"/>
+  <node name="relay_occam3" pkg="topic_tools" type="relay" args="/leviathan/camera_3/image_raw /occam/image3"/>
+  <node name="relay_occam4" pkg="topic_tools" type="relay" args="/leviathan/camera_4/image_raw /occam/image4"/>
+
+  <node name="relay_downcam" pkg="topic_tools" type="relay" args="/leviathan/camera_5/image_raw /downcam"/>
+
+</launch>
