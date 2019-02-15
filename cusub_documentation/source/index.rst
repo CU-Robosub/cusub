@@ -37,6 +37,7 @@ The software is structered loosly around the Open System Interconnect Model (OSI
    :maxdepth: 1
    :caption: Contents:
 
+   getting_started
    cusub_sim
    cusub_common
    cusub_perception
