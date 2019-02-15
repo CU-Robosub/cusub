@@ -52,15 +52,12 @@
   <build_depend>cusub_common</build_depend>
   <build_depend>cusub_perception</build_depend>
   <build_depend>cusub_sim</build_depend>
-  <build_depend>cusub_cortex</build_depend>
   <build_export_depend>cusub_common</build_export_depend>
   <build_export_depend>cusub_perception</build_export_depend>
   <build_export_depend>cusub_sim</build_export_depend>
-  <build_export_depend>cusub_cortex</build_export_depend>
   <exec_depend>cusub_common</exec_depend>
   <exec_depend>cusub_perception</exec_depend>
   <exec_depend>cusub_sim</exec_depend>
-  <exec_depend>cusub_cortex</exec_depend>
 
 
 
