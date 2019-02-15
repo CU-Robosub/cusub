@@ -1,0 +1,42 @@
+forget cal2D
+restoreFieldCal 1 set drop
+restartCompassCalcs 1 set drop
+( -- )
+: cal2D
+  calmode 2 set drop
+  250 delay
+  ." Calibration starting" cr
+  calCommand cal_start set
+  250 delay
+  ." Press any key to take next point, ESC to finish" cr
+  begin
+    key 27 = 0= while
+    begin
+      ?key 0= while
+      ." $YAW= " yaw di@ 0 2 rot ff.
+      ." PITCH= " pitch di@ 0 2 rot ff.
+      ." ROLL= " roll di@ 0 2 rot ff. ." \r\n"
+      250 delay
+    repeat
+    key drop
+    calCommand cal_capture set drop
+    500 delay
+    ." $calNumPoints=" calNumPoints di@ . ." \r\n"
+  repeat
+  calCommand cal_end_capture set drop
+  300 delay
+  ." Starting error settling" cr
+  ." Press any key to terminate" cr
+  begin
+    ?key 0= while
+    ." $magErr= " magErr di@ f. ." \r\n"
+    250 delay
+  repeat
+  ." Calibration done!" cr
+  300 delay
+  calCommand cal_end set drop
+  300 delay
+  calmode 0 set drop
+  300 delay
+  ." $Score: " magFieldCalErr di@ f. ." \r\n" cr
+;

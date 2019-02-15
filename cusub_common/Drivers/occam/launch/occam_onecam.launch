@@ -1,0 +1,13 @@
+<launch>
+  <arg name="camera_info_url" default="/$(find ros_indigosdk)/launch/camera.yaml"/>
+  <arg name="camera_num" default="3"/>
+  <param name="/occam/camera_info_url" value="$(arg camera_info_url)"/>
+  <param name="/occam/camera_num" value="$(arg camera_num)"/>
+
+  <node name="camera_info" pkg="ros_indigosdk" type="camera_info_pub.py" output="screen"/>
+
+  <node name="camera_set_servers" pkg="ros_indigosdk" type="camera_set_server.py"/>
+
+  <node name="occam" pkg="ros_indigosdk" type="ros_indigosdk_node" output="screen"/>
+
+</launch>

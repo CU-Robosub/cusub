@@ -1,0 +1,108 @@
+<launch>
+    <node name="Pose_PID" pkg="controller" type="Pose_PID.py" output="screen" >
+    </node>
+    <node name="PID_Pololu" pkg="controller" type="PID_Pololu_matrix.py" output="screen" >
+    </node>
+
+     <!--<node name="pitch_PID" pkg="pid" type="controller" >
+        <param name="node_name" value="pitch_PID" />
+        <param name="topic_from_controller" value="/local_control/pid/pitch/control_effort" />
+        <param name="topic_from_plant" value="/local_control/pid/pitch/state" />
+        <param name="setpoint_topic" value="/local_control/pid/pitch/setpoint" />
+        <param name="Kp" value="20.0" />
+        <param name="Ki" value="0.0" />
+        <param name="Kd" value="0.0" />
+        <param name="rate" value="25" />
+        <param name="upper_limit" value="100" />
+        <param name="lower_limit" value="-100" />
+        <param name="windup_limit" value=".001" />
+        <param name="diagnostic_period" value="0.25" />
+        <param name="max_loop_frequency" value="25.0" />
+        <param name="min_loop_frequency" value="25.0" />
+      </node>
+      <node name="roll_PID" pkg="pid" type="controller" >
+         <param name="node_name" value="roll_PID" />
+         <param name="topic_from_controller" value="/local_control/pid/roll/control_effort" />
+         <param name="topic_from_plant" value="/local_control/pid/roll/state" />
+         <param name="setpoint_topic" value="/local_control/pid/roll/setpoint" />
+         <param name="Kp" value="20.0" />
+         <param name="Ki" value="0.0" />
+         <param name="Kd" value="0.0" />
+         <param name="rate" value="25" />
+         <param name="upper_limit" value="100" />
+         <param name="lower_limit" value="-100" />
+         <param name="windup_limit" value=".001" />
+         <param name="diagnostic_period" value="0.25" />
+         <param name="max_loop_frequency" value="25.0" />
+         <param name="min_loop_frequency" value="25.0" />
+       </node>-->
+       <node name="depth_PID" pkg="pid" type="controller" >
+          <param name="node_name" value="depth_PID" />
+          <param name="topic_from_controller" value="/local_control/pid/depth/control_effort" />
+          <param name="topic_from_plant" value="/local_control/pid/depth/state" />
+          <param name="setpoint_topic" value="/local_control/pid/depth/setpoint" />
+          <param name="Kp" value="100.0" />
+          <param name="Ki" value="0.0" />
+          <param name="Kd" value="50.0" />
+          <param name="rate" value="25" />
+          <param name="upper_limit" value="100" />
+          <param name="lower_limit" value="-100" />
+          <param name="windup_limit" value=".001" />
+          <param name="diagnostic_period" value="0.25" />
+          <param name="max_loop_frequency" value="25.0" />
+          <param name="min_loop_frequency" value="25.0" />
+        </node>
+        <!-- All of the PID controllers are below this -->
+        <!--
+        <node name="yaw_PID" pkg="pid" type="controller" >
+           <param name="node_name" value="yaw_PID" />
+           <param name="topic_from_controller" value="/local_control/pid/yaw/control_effort" />
+           <param name="topic_from_plant" value="/local_control/pid/yaw/state" />
+           <param name="setpoint_topic" value="/local_control/pid/yaw/setpoint" />
+           <param name="Kp" value="500.0" />
+           <param name="Ki" value="250.0" />
+           <param name="Kd" value="0.0" />
+           <param name="rate" value="25" />
+           <param name="upper_limit" value="100" />
+           <param name="lower_limit" value="-100" />
+           <param name="windup_limit" value=".001" />
+           <param name="diagnostic_period" value="0.25" />
+           <param name="max_loop_frequency" value="25.0" />
+           <param name="min_loop_frequency" value="25.0" />
+           <param name="angle_error" value="true" />
+         </node>
+        <node name="drive_PID" pkg="pid" type="controller" >
+           <param name="node_name" value="drive_PID" />
+           <param name="topic_from_controller" value="/local_control/pid/drive/control_effort" />
+           <param name="topic_from_plant" value="/local_control/pid/drive/state" />
+           <param name="setpoint_topic" value="/local_control/pid/drive/setpoint" />
+           <param name="Kp" value="30.0" />
+           <param name="Ki" value="0.0" />
+           <param name="Kd" value="0.0" />
+           <param name="rate" value="25" />
+           <param name="upper_limit" value="100" />
+           <param name="lower_limit" value="-100" />
+           <param name="windup_limit" value=".001" />
+           <param name="diagnostic_period" value="0.25" />
+           <param name="max_loop_frequency" value="25.0" />
+           <param name="min_loop_frequency" value="25.0" />
+         </node>
+         <node name="strafe_PID" pkg="pid" type="controller" >
+            <param name="node_name" value="strafe_PID" />
+            <param name="topic_from_controller" value="/local_control/pid/strafe/control_effort" />
+            <param name="topic_from_plant" value="/local_control/pid/strafe/state" />
+            <param name="setpoint_topic" value="/local_control/pid/strafe/setpoint" />
+            <param name="Kp" value="50.0" />
+            <param name="Ki" value="0.0" />
+            <param name="Kd" value="0.0" />
+            <param name="rate" value="25" />
+            <param name="upper_limit" value="100" />
+            <param name="lower_limit" value="-100" />
+            <param name="windup_limit" value=".001" />
+            <param name="diagnostic_period" value="0.25" />
+            <param name="max_loop_frequency" value="25.0" />
+            <param name="min_loop_frequency" value="25.0" />
+          </node>
+        -->
+
+</launch>

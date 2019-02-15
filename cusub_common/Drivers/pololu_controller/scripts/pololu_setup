@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+#add 99 pololu rules
+sudo cp 99-pololu.rules /etc/udev/rules.d/
+#add user to dailout group
+sudo adduser $USER dialout

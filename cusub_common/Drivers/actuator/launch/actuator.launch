@@ -1,0 +1,7 @@
+
+<launch>
+  <group ns="actuator">
+    <node name="actuator_activate" pkg="actuator" type="actuator_activate.py" output="screen" >
+    </node>
+  </group>
+</launch>

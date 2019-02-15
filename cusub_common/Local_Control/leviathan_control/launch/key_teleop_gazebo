@@ -1,0 +1,33 @@
+<launch>
+  <!-- Vehicle's initial pose -->
+  <arg name="x"     default="-25"/>
+  <arg name="y"     default="25"/>
+  <arg name="z"     default="-55"/>
+  <arg name="yaw"   default="-0.8"/>
+
+  <!-- Start the a underwater world simulation scenario -->
+  <include file="$(find uuv_descriptions)/launch/herkules_ship_wreck.launch"/>
+
+  <!-- Add the RexROV vehicle to the simulation (namespace: rexrov) -->
+  <include file="$(find microsub_description)/launch/upload.launch">
+      <arg name="x" default="-25"/>
+      <arg name="y" default="25"/>
+      <arg name="z" default="-55"/>
+      <arg name="yaw" default="-0.8"/>
+  </include>
+
+  <node name="microsub_joy_teleop" pkg="microsub_joy_teleop" type="microsub_joy_teleop.py"/>
+
+  <node name="joy_node" pkg="joy" type="joy_node"/>
+
+  <!-- Load joint controller configurations from YAML file to parameter server -->
+  <rosparam file="$(find microsub_control)/config/microsub_control.yaml" command="load"/>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find leviathan_description)/launch/leviathan.rviz" />
+
+  <!-- load the controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+	output="screen" ns="/microsub" args="joint_state_controller
+					  thruster0_position_controller thruster1_position_controller thruster2_position_controller thruster3_position_controller"/>
+
+</launch>

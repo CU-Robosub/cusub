@@ -1,0 +1,3 @@
+<launch>
+  <node name="dvl" pkg="dvl" type="dvl.py" output="screen"/>
+</launch>

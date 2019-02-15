@@ -1,0 +1,25 @@
+<launch>
+  <!-- Vehicle's initial pose -->
+  <arg name="x"     default="-20"/>
+  <arg name="y"     default="20"/>
+  <arg name="z"     default="-55"/>
+  <arg name="yaw"   default="-0.8"/>
+
+  <!-- Start the a underwater world simulation scenario -->
+  <include file="$(find uuv_descriptions)/launch/herkules_ship_wreck.launch"/>
+
+  <!-- Add the RexROV vehicle to the simulation (namespace: rexrov) -->
+  <include file="$(find leviathan_description)/launch/upload.launch">
+      <arg name="x" default="-25"/>
+      <arg name="y" default="25"/>
+      <arg name="z" default="-55"/>
+      <arg name="yaw" default="-0.8"/>
+  </include>
+
+  <node name="joy_node" pkg="joy" type="joy_node"/>
+
+  <node name="key_teleop" pkg="leviathan_control" type="key_teleop.py"/>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find leviathan_description)/launch/leviathan.rviz" />
+
+</launch>

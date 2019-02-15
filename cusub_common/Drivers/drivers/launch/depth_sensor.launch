@@ -1,0 +1,5 @@
+<launch>
+  <group ns="drivers">
+    <include file="$(find depth_sensor)/launch/depth_sensor.launch"/>
+  </group>
+</launch>

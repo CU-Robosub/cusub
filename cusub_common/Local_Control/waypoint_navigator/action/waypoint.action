@@ -1,0 +1,10 @@
+# Define the goal
+int32 movement_mode
+float64 target_yaw
+geometry_msgs/PoseStamped goal_pose
+---
+# Define the end result
+bool complete
+---
+# Define a feedback message that can be incrementally sent
+nav_msgs/Odometry subs_pose

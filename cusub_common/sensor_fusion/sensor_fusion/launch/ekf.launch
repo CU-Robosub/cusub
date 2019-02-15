@@ -1,0 +1,16 @@
+<launch>
+<group ns="sensor_fusion">
+  <node pkg="tf" type="static_transform_publisher" name="imu_broadcaster" args="0 0 1.57 0 0 0  base_link SpartonCompassIMU 10"/>
+  <!--node pkg="tf" type="static_transform_publisher" name="imu_broadcaster" args="0 0 0 0 0 0 base_link imu 100" /-->
+  <node pkg="tf" type="static_transform_publisher" name="dvl_broadcaster" args="0 0 0 1.57 0 0  base_link base_dvl 100"/>
+  <node pkg="tf" type="static_transform_publisher" name="depth_broadcaster" args="0 0 0 0 0 0 odom depth_frame 100"/>
+
+  <node pkg="tf" type="static_transform_publisher" name="occam0_broadcaster" args="0 0 0.2  0     0 0 base_link leviathan/occam0_frame 50" />
+  <node pkg="tf" type="static_transform_publisher" name="occam1_broadcaster" args="0 0 0.2  1.25  0 0 base_link leviathan/occam1_frame 50" />
+  <node pkg="tf" type="static_transform_publisher" name="occam4_broadcaster" args="0 0 0.2 -1.25  0 0 base_link leviathan/occam4_frame 50" />
+
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
+      <rosparam command="load" file="$(find sensor_fusion)/launch/ekf_template.yaml" />
+  </node>
+</group>
+</launch>

@@ -1,0 +1,5 @@
+<launch>
+  <group ns="local_control">
+    <include file="$(find controller)/launch/controller_matrix.launch"/>
+  </group>
+</launch>

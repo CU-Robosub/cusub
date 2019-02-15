@@ -1,0 +1,43 @@
+<package>
+    <name>cusub_common</name>
+    <version>0.1.0</version>
+    <description>common packages for running subs</description>
+    <maintainer email="jeve0658@colorado.edu">Jeff Venicx</maintainer>
+    <author>Michael Marques, Jeff Venicx, Luke Barbier</author>
+    <url type="repository">https://github.com/CU-Robosub </url>
+    <license>BSD</license>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <!-- driver packages -->
+    <run_depend>drivers</run_depend>
+    <run_depend>actuator</run_depend>
+    <run_depend>depth_sensor</run_depend>
+    <run_depend>dvl</run_depend>
+    <run_depend>kill_switch</run_depend>
+    <run_depend>ros_indigosdk</run_depend>
+    <run_depend>pni_trax_imu</run_depend>
+    <run_depend>pololu_controller</run_depend>
+    <run_depend>sparton_imu</run_depend>
+
+    <!-- debugging packages -->
+    <run_depend>console</run_depend>
+    <run_depend>qt_console</run_depend>
+    <run_depend>teleop</run_depend>
+
+    <!-- local controll packages -->
+    <run_depend>controller</run_depend>
+    <run_depend>leviathan_control</run_depend>
+    <run_depend>local_control</run_depend>
+    <run_depend>planner</run_depend>
+    <run_depend>thrust</run_depend>
+    <run_depend>waypoint_navigator</run_depend>
+
+    <!-- sensor fusion package -->
+    <run_depend>sensor_fusion</run_depend>
+
+
+    <export>
+        <metapackage/>
+    </export>
+</package>

@@ -1,0 +1,105 @@
+# Pololu based motors
+
+front:
+  pololu_id: 12
+  motor_id: 0
+  init: 1500
+  min: 1000
+  max: 2000
+  reverse: true
+  calibration:
+    min_pulse: 1000
+    min_angle: -180
+    max_pulse: 2000
+    max_angle: 180
+
+front_right:
+  pololu_id: 12
+  motor_id: 6
+  init: 1500
+  min: 1000
+  max: 2000
+  reverse: true
+  calibration:
+    min_pulse: 1000
+    min_angle: -180
+    max_pulse: 2000
+    max_angle: 180
+
+front_left:
+  pololu_id: 12
+  motor_id: 2
+  init: 1500
+  min: 1000
+  max: 2000
+  reverse: true
+  calibration:
+    min_pulse: 1000
+    min_angle: -180
+    max_pulse: 2000
+    max_angle: 180
+
+back_right:
+  pololu_id: 12
+  motor_id: 3
+  init: 1500
+  min: 1000
+  max: 2000
+  reverse: true
+  calibration:
+    min_pulse: 1000
+    min_angle: -180
+    max_pulse: 2000
+    max_angle: 180
+
+back_left:
+  pololu_id: 12
+  motor_id: 5
+  init: 1500
+  min: 1000
+  max: 2000
+  reverse: true
+  calibration:
+    min_pulse: 1000
+    min_angle: -180
+    max_pulse: 2000
+    max_angle: 180
+
+back:
+  pololu_id: 12
+  motor_id: 4
+  init: 1500
+  min: 1000
+  max: 2000
+  reverse: true
+  calibration:
+    min_pulse: 1000
+    min_angle: -180
+    max_pulse: 2000
+    max_angle: 180
+
+left:
+  pololu_id: 12
+  motor_id: 9
+  init: 1500
+  min: 1000
+  max: 2000
+  reverse: true
+  calibration:
+    min_pulse: 1000
+    min_angle: -180
+    max_pulse: 2000
+    max_angle: 180
+
+right:
+  pololu_id: 12
+  motor_id: 8
+  init: 1500
+  min: 1000
+  max: 2000
+  reverse: true
+  calibration:
+    min_pulse: 1000
+    min_angle: -180
+    max_pulse: 2000
+    max_angle: 180
