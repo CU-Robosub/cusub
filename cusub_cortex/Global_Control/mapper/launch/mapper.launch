@@ -1,0 +1,4 @@
+<launch>
+    <node name="mapper" pkg="mapper" type="mapper.py" output="screen" >
+    </node>
+</launch>

@@ -1,0 +1,5 @@
+<launch>
+   <node pkg="rosbag" type="record" name="sub_rosbag"
+       args=" -o /home/leviathan/Final_Build/bag/ /occam/image0 /sensor_fusion/odometry/filtered /Global_State/start_gate" />
+
+</launch>

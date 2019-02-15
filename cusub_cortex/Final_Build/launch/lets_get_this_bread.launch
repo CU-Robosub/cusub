@@ -1,0 +1,11 @@
+<launch>
+    <!-- <include file="$(find local_control)/launch/local_control.launch" /> -->
+    <!-- <include file="$(find global_control)/launch/global_control.launch" /> -->
+    <!-- <include file="$(find sensor_fusion)/launch/ekf.launch" /> -->
+    <!-- <include file="$(find drivers)/launch/drivers.launch" /> -->
+    <include file="$(find darknet_cv)/launch/darknet_ros.launch" />
+    <include file="$(find localizer)/launch/localizer.launch" />
+    <include file="$(find mapper)/launch/mapper.launch" />
+    <!-- <include file="$(find state_machine)/launch/smach_launch.launch" /> -->
+    <include file="$(find waypoint_navigator)/launch/waypoint_navigator.launch" />
+</launch>

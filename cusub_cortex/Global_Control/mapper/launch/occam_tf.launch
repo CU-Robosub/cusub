@@ -1,0 +1,3 @@
+<launch>
+    <node name="setpoint" pkg="mapper" type="mapper.py" output="screen" />
+</launch>

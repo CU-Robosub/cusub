@@ -1,0 +1,19 @@
+# Mission Config of the sub
+# ALL UNITS IN M
+
+# Search Algorithms: simple
+
+tasks:
+ start_gate:
+  prior: [4,-1,1.5]
+  search_alg: simple
+  dist_behind_gate: 1.0
+  failed_repeat: true   # If aborted, repeat the task?
+ dice:
+  prior: [1,1,1]
+  search_alg: simple
+  failed_repeat: false
+  
+mission_tasks: # Tasks To Do In Order
+ - start_gate
+ - visit_dice

@@ -1,0 +1,8 @@
+TasksInOrder: ['StartGate']
+
+StartGate:
+ SearchAlg: 'simple'
+ DistBehindGate: 1.0
+ TimeOutSecs: 200
+ ObjectPriors:
+  Gate: [2,2,2]

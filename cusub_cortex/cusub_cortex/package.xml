@@ -1,0 +1,25 @@
+<package>
+    <name>cusub_cortex</name>
+    <version>0.1.0</version>
+    <description>higher level thinking package for the sub</description>
+    <maintainer email="jeve0658@colorado.edu">Jeff Venicx</maintainer>
+    <author>Michael Marques, Jeff Venicx, Luke Barbier</author>
+    <url type="repository">https://github.com/CU-Robosub </url>
+    <license>BSD</license>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <!-- global controller -->
+    <run_depend>config</run_depend>
+    <run_depend>global_control</run_depend>
+    <run_depend>mapper</run_depend>
+    <run_depend>mrgostraight</run_depend>
+    <run_depend>mrprequalify</run_depend>
+    <run_depend>state_machine</run_depend>
+    <run_depend>waypoint_navigator</run_depend>
+    <run_depend>cusub_bringup</run_depend>
+
+  <export>
+        <metapackage/>
+    </export>
+</package>

@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="rosbag" type="record" name="sub_rosbag" args=" -o /mnt/bag/ /occam/image0 /occam/image1 /occam/image2 /occam/image3 /occam/image4 /occam/image5 /occam/image/camera_info /tf /sensor_fusion/odometry/filtered" />
+</launch>

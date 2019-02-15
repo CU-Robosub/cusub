@@ -1,0 +1,7 @@
+<launch>
+  <group ns="global_control">
+    <include file="$(find mapper)/launch/mapper.launch"/>
+    <!--  State machine closed for construction-->
+    <include file="$(find state_machine)/launch/state_machine.launch"/>
+  </group>
+</launch>

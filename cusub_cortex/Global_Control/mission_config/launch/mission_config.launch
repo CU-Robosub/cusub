@@ -1,0 +1,4 @@
+<launch>
+  <arg name="config_filename" default="mission_config.yaml"/>
+	<rosparam command="load" file="$(find mission_config)/config/$(arg config_filename)"/>
+</launch>

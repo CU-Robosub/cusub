@@ -1,0 +1,25 @@
+# Mission Config of the sub
+# ALL UNITS IN M
+
+tasks:
+ start_gate:
+  prior: [10,1.25,1.5]
+  search_alg: simple
+  dist_behind_gate: 1.0
+  failed_repeat: true
+ bangbang_dice:
+  prior: [7.0,2.0,1.7]
+  search_alg: simple
+  dist_behind_gate: 1.0
+  failed_repeat: false
+ roulette:
+  prior: [0.65,-4.8,2.5]
+  search_alg: simple
+  dist_behind_gate: 1.0
+  failed_repeat: false
+
+# All tasks to be carried out by the sub in order
+mission_tasks:
+ - start_gate
+ - bangbang_dice
+ - visit_roulette

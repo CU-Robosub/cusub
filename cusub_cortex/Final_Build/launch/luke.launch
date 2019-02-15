@@ -1,0 +1,8 @@
+<launch>
+    <include file="$(find local_control)/launch/local_control.launch" />  
+    <include file="$(find sensor_fusion)/launch/ekf.launch" /> 
+    <include file="$(find drivers)/launch/drivers.launch" /> 
+   
+   
+
+</launch>

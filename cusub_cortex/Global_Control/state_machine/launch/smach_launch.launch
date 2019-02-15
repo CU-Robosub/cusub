@@ -1,0 +1,7 @@
+<launch>
+
+    <!-- Include the mission config parameters -->
+    <include file="$(find mission_config)/launch/mission_config.launch" />
+    
+    <node name="state_machine_node" pkg="state_machine" type="smach_top.py" output="screen" />
+</launch>

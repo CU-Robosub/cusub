@@ -1,0 +1,28 @@
+45 Minutes:
+1: Cut github branch and upload to sub
+2: Test Tether
+3: Turn off DVL
+4: Check Camera
+5: Check USB status
+6: Check collars
+7: Check Seals!
+    1: Midcap
+    2: Parascope
+    3: Camera
+    4: Hydrophones
+8: Check Vent!
+9: Check Batteries
+    1: Check O-ring
+    2: Ensure Batteries are connected
+12: Motor Test
+    1: All motors
+30 MInutes:
+1: Teleop in Dolphin Pool
+    1: Down
+    2: Yaw
+    3: Forward
+    4: Strafe
+At testing:
+1: Unspool E-Net
+2: Lower Into Pool
+3: Check kill switch status

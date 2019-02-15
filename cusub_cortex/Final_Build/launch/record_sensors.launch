@@ -1,0 +1,6 @@
+<launch>
+   <node pkg="rosbag" type="record" name="sub_rosbag"
+       args=" -o /home/leviathan/Final_Build/bag/ /drivers/depth_sensor/depth /drivers/dvl/depth /drivers/dvl/vel /drivers/pololu_control/command /drivers/trax/ahrs /drivers/trax/imu_data /drivers/trax/mag /sensor_fusion/odometry/filtered /occam/image0 /occam/image3/camera_info" />
+ 
+</launch>
+
