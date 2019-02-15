@@ -21,6 +21,7 @@ The CUSub software stack consists of 4 meta-packages that contain all the runtim
 in order to setup the CUSub workspace clone the repo into the src folder of you catkin_ws
 ::
 
+    cd ~/<your_catkin_ws>/src
     git clone https://github.com/CU-Robosub/cusub
 
 The software stack depends on a few external repositories that have been included as submodules.
@@ -53,6 +54,10 @@ to install catkin build
     sudo apt install python-catkin-tools
 
 once the catkin build tools are installed you can build each meta-package individually to ensure your environment is properly setup.
+first move back to the root of your ws
+::
+
+    cd ~/<your_caktin_ws>
 
 The recommended order is:
 ::
