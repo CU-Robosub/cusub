@@ -36,7 +36,6 @@
       <update_rate>30.0</update_rate>
       <camera name="rgb_camera">
         <horizontal_fov>1.0397</horizontal_fov>
-        <vertical_fov>0.6443</vertical_fov>
         <image>
           <width>752</width>
           <height>480</height>
@@ -46,6 +45,14 @@
           <near>0.02</near>
           <far>300</far>
         </clip>
+        <distortion>
+          <k1>-0.360085</k1>
+          <k2>0.115116</k2>
+          <k3>0.0</k3>
+          <p1>0.007768</p1>
+          <p2>0.004616</p2>
+          <center>0.5 0.5</center>
+        </distortion>
       </camera>
       <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
         <alwaysOn>true</alwaysOn>
@@ -54,12 +61,11 @@
         <imageTopicName>image_raw</imageTopicName>
         <cameraInfoTopicName>camera_info</cameraInfoTopicName>
         <frameName>${frame}</frameName>
-        <hackBaseline>0.0</hackBaseline>
         <distortionK1>-0.360085</distortionK1>
         <distortionK2>0.115116</distortionK2>
-        <distortionK3>0.007768</distortionK3>
-        <distortionT1>0.004616</distortionT1>
-        <distortionT2>0.000000</distortionT2>
+        <distortionK3>0.000000</distortionK3>
+        <distortionT1>0.007768</distortionT1>
+        <distortionT2>0.004616</distortionT2>
       </plugin>
     </sensor>
   </gazebo>
