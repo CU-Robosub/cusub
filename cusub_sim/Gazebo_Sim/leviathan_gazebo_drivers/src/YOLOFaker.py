@@ -9,6 +9,7 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 from cv_bridge import CvBridge, CvBridgeError
+from darknet_ros_msgs.msg import BoundingBox, BoundingBoxes
 
 class YOLOObjectClass():
 
@@ -90,6 +91,7 @@ class YOLOFaker():
             detections = self.getDetections(obj, camera)
 
             if detections is not None:
+
                 for box in detections:
                     cv2.rectangle(
                         cv_image,
@@ -97,6 +99,28 @@ class YOLOFaker():
                         (int(box[0][1]), int(box[0][3])),
                         box[1], 2
                         )
+
+                # Fake darknet yolo detections message
+                bbs = BoundingBoxes()
+
+                bbs.header = image.header
+                bbs.image_header = image.header
+                bbs.image = image
+                bbs.bounding_boxes = []
+
+                for det in detections:
+
+                    bb = BoundingBox()
+
+                    bb.Class = box[2]
+                    bb.probability = 1.0
+                    bb.xmin = int(det[0][0])
+                    bb.xmax = int(det[0][1])
+                    bb.ymin = int(det[0][2])
+                    bb.ymax = int(det[0][3])
+                    bbs.bounding_boxes.append(bb)
+
+                self.darknetDetectionPub.publish(bbs)
 
         image_message = self.bridge.cv2_to_imgmsg(cv_image, encoding="rgb8")
 
@@ -144,7 +168,7 @@ class YOLOFaker():
                 bb = self.boundingBoxFromPoints(result[0], camera)
 
                 if bb[1] - bb[0] > 10 and bb[3] - bb[2] > 10:
-                    detections.append((bb, objClass.color))
+                    detections.append((bb, objClass.color, objClass.name))
 
         return detections
 
@@ -180,11 +204,11 @@ class YOLOFaker():
         self.listener = tf.TransformListener()
         self.br = tf.TransformBroadcaster()
 
-        self.pose_leviathan = rospy.Subscriber("/leviathan/pose_gt", Odometry, self.leviathanOdometryCallback)
-
-        self.yaw_cv_ce_pub = rospy.Publisher('/leviathan/local_control/cv/yaw/control_effort', Float64, queue_size=1)
-
         self.bridge = CvBridge()
+
+        self.darknetDetectionPub = rospy.Publisher('/darknet_ros/bounding_boxes', BoundingBoxes, queue_size=1)
+
+        self.pose_leviathan = rospy.Subscriber("/leviathan/pose_gt", Odometry, self.leviathanOdometryCallback)
 
         self.occam0_image = rospy.Subscriber('/occam/image0', Image, self.occam0Image)
         self.occam0_image_pub = rospy.Publisher('/occam/image0_context', Image)
