@@ -1,0 +1,11 @@
+<!-- Launches YOLO faker which generates bounding boxes similar to yolo from ground truth when you cant use yolo for some reason -->
+<launch>
+
+    <!-- Config holds camera and object parameters for generating bounding boxes -->
+    <arg name="config_filename" default="fakeyolo_default.yaml"/>
+
+    <node name="fakeyolo" pkg="leviathan_gazebo_drivers" type="YOLOFaker.py">
+	    <rosparam command="load" file="$(find leviathan_gazebo_drivers)/config/$(arg config_filename)"/>
+    </node>
+
+</launch>

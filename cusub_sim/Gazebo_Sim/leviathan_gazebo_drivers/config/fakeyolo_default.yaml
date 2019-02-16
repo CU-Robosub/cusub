@@ -1,0 +1,42 @@
+# Default fake yolo launch for leviathan
+# generates bounding boxes similar to yolo for testing without GPU grunt, or before network is trained
+
+bounding_boxes_topic: '/darknet_ros/bounding_boxes'
+sub_pose_topic: '/leviathan/pose_gt'
+
+# Cameras to run fake yolo on
+cameras:
+  occam0:
+    frame: 'leviathan_gt/occam0_frame'
+    image_topic: '/occam/image0'
+    debug_image_enabled: True
+    debug_image_topic: '/occam/image0_debug'
+    camera_info_topic: '/occam/image0/camera_info'
+
+# Objects to run fake yolo on
+# You can have multiple classes per object with different point offsets, like the 2 start gate poles
+objects:
+ startgate:
+  link: 'StartGate_1/base_link'
+  odom_topic: '/StartGate_1/pose_gt'
+  classes:
+   - name: 'startgate_pole'
+     debug_color: [0, 255, 0]
+     points: [[ 1.500, -0.075,  0.000],[ 1.600, -0.075,  0.000],[ 1.500,  0.075,  0.000],[ 1.650,  0.075,  0.000],[ 1.550, -0.075, -1.500],[ 1.650, -0.075, -1.500],[ 1.550,  0.075, -1.500],[ 1.650,  0.075, -1.500]]
+   - name: 'startgate_pole'
+     debug_color: [0, 255, 0]
+     points: [[-1.500, -0.075,  0.000],[-1.600, -0.075,  0.000],[-1.500,  0.075,  0.000],[-1.650,  0.075,  0.000],[-1.550, -0.075, -1.500],[-1.650, -0.075, -1.500],[-1.550,  0.075, -1.500],[-1.650,  0.075, -1.500]]
+ dice5:
+  link: 'Dice5_1/base_link'
+  odom_topic: '/Dice5_1/pose_gt'
+  classes:
+   - name: 'dice5'
+     debug_color: [255, 255, 0]
+     points: [[ 0.0000, -0.2286,  0.0000],[ 0.2286, -0.2286,  0.0000],[ 0.0000,  0.0000,  0.0000],[ 0.2286,  0.0000,  0.0000],[ 0.0000, -0.2286, -0.2286],[ 0.2286, -0.2286, -0.2286],[ 0.0000,  0.0000, -0.2286],[ 0.2286,  0.0000, -0.2286]]
+ dice6:
+  link: 'Dice6_1/base_link'
+  odom_topic: '/Dice6_1/pose_gt'
+  classes:
+   - name: 'dice6'
+     debug_color: [0, 255, 255]
+     points: [[ 0.0000, -0.2286,  0.0000],[ 0.2286, -0.2286,  0.0000],[ 0.0000,  0.0000,  0.0000],[ 0.2286,  0.0000,  0.0000],[ 0.0000, -0.2286, -0.2286],[ 0.2286, -0.2286, -0.2286],[ 0.0000,  0.0000, -0.2286],[ 0.2286,  0.0000, -0.2286]]
