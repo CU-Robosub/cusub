@@ -2,7 +2,7 @@
 
   <arg name="SG_x" default="4.0"/>
   <arg name="SG_y" default="0.0"/>
-  <arg name="SG_z" default="0.5"/>
+  <arg name="SG_z" default="-0.5"/>
   <arg name="SG_yaw" default="1.57"/>
 
   <!-- Start the a underwater world simulation scenario -->
