@@ -6,12 +6,17 @@ import cv2
 import numpy as np
 from std_msgs.msg import Float64
 from nav_msgs.msg import Odometry
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CameraInfo
 from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 from cv_bridge import CvBridge, CvBridgeError
+from functools import partial
 from darknet_ros_msgs.msg import BoundingBox, BoundingBoxes
 
-class YOLOObjectClass():
+class YOLOObjectClass(object):
+    """
+    Holds object information for a bounding box clase (i.e. the pole part of the startgate)
+    This is for sub parts of objects that need to be classified rather than classifying the object as a whole
+    """
 
     name = None
     color = None
@@ -22,7 +27,10 @@ class YOLOObjectClass():
         self.color = color
         self.points = points
 
-class YOLOObject():
+class YOLOObject(object):
+    """
+    Holds object information required for bounding box generation
+    """
 
     frameID = None
     classes = None
@@ -31,7 +39,10 @@ class YOLOObject():
         self.frameID = frameID
         self.classes = classes
 
-class Camera():
+class Camera(object):
+    """
+    Holds camera information required for bounding box generation
+    """
 
     frame = None
 
@@ -41,14 +52,32 @@ class Camera():
     cameraMatrix = None
     distortionCoeff = None
 
-    def __init__(self, frame, w, h, cameraMatrix, distortionCoeff):
+    debugImageEnabled = False
+    debugImagePub = None
+
+    def __init__(self, frame, w=None, h=None, cameraMatrix=None, distortionCoeff=None, debugImageEnabled=False, debugImagePub=None):
         self.frame = frame
         self.w = w
         self.h = h
         self.cameraMatrix = cameraMatrix
         self.distortionCoeff = distortionCoeff
+        self.debugImageEnabled = debugImageEnabled
+        self.debugImagePub = debugImagePub
 
-class YOLOFaker():
+    def isReady(self):
+        """
+        If the camera parameters have been set returns true
+        """
+        if(self.cameraMatrix is not None and self.distortionCoeff is not None):
+            return True
+        return False
+
+class YOLOFaker(object):
+    """
+    YOLO Faker Node
+    Takes in configuration yaml for camera, robot, and obstacle configurations and generates bounding boxes
+    Requires pose sensors on objects
+    """
 
     # Constants, used everytime we do project points
     rvec = np.array([0, 0, 0], dtype=np.float)
@@ -64,12 +93,18 @@ class YOLOFaker():
         pass
 
     def objectOdomCallback(self, odom, obj):
+        """
+        Callback to publish transforms for objects so we can transform the object points in to the camera frame later
+        """
 
         tvec = (odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z)
         rvec = (odom.pose.pose.orientation.x, odom.pose.pose.orientation.y, odom.pose.pose.orientation.z, odom.pose.pose.orientation.w)
         self.br.sendTransform(tvec, rvec, odom.header.stamp, obj.frameID, "world")
 
-    def leviathanOdometryCallback(self, odom):
+    def robotOdometryCallback(self, odom):
+        """
+        Callback to broadcast ground truth of robot so we can transform into the real camera frame laster
+        """
 
         tvec = (odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z)
         rvec = (odom.pose.pose.orientation.x, odom.pose.pose.orientation.y, odom.pose.pose.orientation.z, odom.pose.pose.orientation.w)
@@ -79,54 +114,79 @@ class YOLOFaker():
         rvec = (0, 0, 0, 1)
         self.br.sendTransform(tvec, rvec, odom.header.stamp, "leviathan_gt/occam0_frame", "leviathan_gt/base_link")
 
-    def occam0Image(self, image):
+    def cameraInfoCallback(self, info, camera):
+        """
+        Get camera info for each camera we are running on for accurate point projection
+        """
 
-        # TODO lambda to spec camera in main loop
-        camera = self.cameras['occam0']
+        if not camera.isReady():
+
+            camera.cameraMatrix = np.array(info.K)
+            camera.cameraMatrix.shape = (3, 3)
+            camera.distortionCoeff = np.array(info.D)
+
+            camera.w = info.width
+            camera.h = info.height
+
+    def cameraImageCallback(self, image, camera):
+        """
+        Compute where the bounding boxes should be in the image, and fake YOLO bounding boxes output
+        We also draw the debug image potentialy
+        """
 
         cv_image = self.bridge.imgmsg_to_cv2(image, desired_encoding="rgb8")
 
-        for objName, obj in self.objects.iteritems():
+        if camera.isReady():
 
-            detections = self.getDetections(obj, camera)
+            # Fake darknet yolo detections message
+            bbs = BoundingBoxes()
 
-            if detections is not None:
+            bbs.header = image.header
+            bbs.image_header = image.header
+            bbs.image = image
+            bbs.bounding_boxes = []
 
-                for box in detections:
-                    cv2.rectangle(
-                        cv_image,
-                        (int(box[0][0]), int(box[0][2])),
-                        (int(box[0][1]), int(box[0][3])),
-                        box[1], 2
-                        )
+            for objName, obj in self.objects.iteritems():
 
-                # Fake darknet yolo detections message
-                bbs = BoundingBoxes()
+                detections = self.getDetections(obj, camera)
 
-                bbs.header = image.header
-                bbs.image_header = image.header
-                bbs.image = image
-                bbs.bounding_boxes = []
+                if detections is not None:
 
-                for det in detections:
+                    if camera.debugImageEnabled:
 
-                    bb = BoundingBox()
+                        for box in detections:
+                            cv2.rectangle(
+                                cv_image,
+                                (int(box[0][0]), int(box[0][2])),
+                                (int(box[0][1]), int(box[0][3])),
+                                box[1], 2
+                                )
 
-                    bb.Class = box[2]
-                    bb.probability = 1.0
-                    bb.xmin = int(det[0][0])
-                    bb.xmax = int(det[0][1])
-                    bb.ymin = int(det[0][2])
-                    bb.ymax = int(det[0][3])
-                    bbs.bounding_boxes.append(bb)
+                    for det in detections:
 
+                        bb = BoundingBox()
+
+                        bb.Class = box[2]
+                        bb.probability = 1.0
+                        bb.xmin = int(det[0][0])
+                        bb.xmax = int(det[0][1])
+                        bb.ymin = int(det[0][2])
+                        bb.ymax = int(det[0][3])
+                        bbs.bounding_boxes.append(bb)
+
+            # only publish detection if there are boxes in it
+            if len(bbs.bounding_boxes) > 0:
                 self.darknetDetectionPub.publish(bbs)
 
-        image_message = self.bridge.cv2_to_imgmsg(cv_image, encoding="rgb8")
 
-        self.occam0_image_pub.publish(image_message)
+        if camera.debugImageEnabled:
+            image_message = self.bridge.cv2_to_imgmsg(cv_image, encoding="rgb8")
+            camera.debugImagePub.publish(image_message)
 
     def getDetections(self, obj, camera):
+        """
+        Takes in object and camera and finds objects in the cameras view
+        """
 
         detections = []
 
@@ -167,12 +227,16 @@ class YOLOFaker():
 
                 bb = self.boundingBoxFromPoints(result[0], camera)
 
+                # Filter objects when they get to narrow to realistically be detected
                 if bb[1] - bb[0] > 10 and bb[3] - bb[2] > 10:
                     detections.append((bb, objClass.color, objClass.name))
 
         return detections
 
     def boundingBoxFromPoints(self, pts, camera):
+        """
+        Generate a bounding box from a set of image points
+        """
 
         xmin = camera.w
         xmax = 0
@@ -206,103 +270,47 @@ class YOLOFaker():
 
         self.bridge = CvBridge()
 
-        self.darknetDetectionPub = rospy.Publisher('/darknet_ros/bounding_boxes', BoundingBoxes, queue_size=1)
+        boudingBoxesTopic = rospy.get_param('~bounding_boxes_topic')
+        subPoseTopic = rospy.get_param('~sub_pose_topic')
 
-        self.pose_leviathan = rospy.Subscriber("/leviathan/pose_gt", Odometry, self.leviathanOdometryCallback)
+        # Fake darknet YOLO
+        self.darknetDetectionPub = rospy.Publisher(boudingBoxesTopic, BoundingBoxes, queue_size=1)
 
-        self.occam0_image = rospy.Subscriber('/occam/image0', Image, self.occam0Image)
-        self.occam0_image_pub = rospy.Publisher('/occam/image0_context', Image)
+        # Get robot pose so we can have its ground truth for transforms
+        rospy.Subscriber(subPoseTopic, Odometry, self.robotOdometryCallback)
 
-        """
-        Set up cameras and objects
-        TODO move to yaml
-        """
-
-        dice5Classes = [
-            YOLOObjectClass(
-                'dice',
-                (255, 0, 0),
-                np.array(
-                    [
-                        [ 0.0000, -0.2286,  0.0000],
-                        [ 0.2286, -0.2286,  0.0000],
-                        [ 0.0000,  0.0000,  0.0000],
-                        [ 0.2286,  0.0000,  0.0000],
-                        [ 0.0000, -0.2286, -0.2286],
-                        [ 0.2286, -0.2286, -0.2286],
-                        [ 0.0000,  0.0000, -0.2286],
-                        [ 0.2286,  0.0000, -0.2286]
-                    ], dtype=np.float)
-                )
-        ]
-        dice6Classes = [
-            YOLOObjectClass(
-                'dice',
-                (255, 255, 0),
-                np.array(
-                    [
-                        [ 0.0000, -0.2286,  0.0000],
-                        [ 0.2286, -0.2286,  0.0000],
-                        [ 0.0000,  0.0000,  0.0000],
-                        [ 0.2286,  0.0000,  0.0000],
-                        [ 0.0000, -0.2286, -0.2286],
-                        [ 0.2286, -0.2286, -0.2286],
-                        [ 0.0000,  0.0000, -0.2286],
-                        [ 0.2286,  0.0000, -0.2286]
-                    ], dtype=np.float)
-                )
-        ]
-        startgateClasses = [
-            YOLOObjectClass(
-                'start_gate_pole',
-                (0, 255, 0),
-                np.array(
-                    [
-                        [ 1.500, -0.075,  0.000],
-                        [ 1.600, -0.075,  0.000],
-                        [ 1.500,  0.075,  0.000],
-                        [ 1.650,  0.075,  0.000],
-                        [ 1.550, -0.075, -1.500],
-                        [ 1.650, -0.075, -1.500],
-                        [ 1.550,  0.075, -1.500],
-                        [ 1.650,  0.075, -1.500]
-                    ], dtype=np.float)
-                ),
-            YOLOObjectClass(
-                'start_gate_pole',
-                (0, 255, 0),
-                np.array(
-                    [
-                        [-1.500, -0.075,  0.000],
-                        [-1.600, -0.075,  0.000],
-                        [-1.500,  0.075,  0.000],
-                        [-1.650,  0.075,  0.000],
-                        [-1.550, -0.075, -1.500],
-                        [-1.650, -0.075, -1.500],
-                        [-1.550,  0.075, -1.500],
-                        [-1.650,  0.075, -1.500]
-                    ], dtype=np.float)
-                )
-        ]
-
-        self.objects = {}
-
-        self.objects['dice5'] = YOLOObject('Dice5_1/base_link', dice5Classes)
-        self.objects['dice6'] = YOLOObject('Dice6_1/base_link', dice6Classes)
-        self.objects['startgate'] = YOLOObject('StartGate_1/base_link', startgateClasses)
-
-        self.pose_dice5 = rospy.Subscriber("/Dice5_1/pose_gt", Odometry, lambda odom : self.objectOdomCallback(odom, self.objects['dice5']), queue_size=1)
-        self.pose_dice6 = rospy.Subscriber("/Dice6_1/pose_gt", Odometry, lambda odom : self.objectOdomCallback(odom, self.objects['dice6']), queue_size=1)
-        self.pose_dice6 = rospy.Subscriber("/StartGate_1/pose_gt", Odometry, lambda odom : self.objectOdomCallback(odom, self.objects['startgate']), queue_size=1)
-
-        # TODO get from occam camera parameters publishing node
-        occam_camera_matrix = np.array([656.926137, 0.000000, 376.5, 0.000000, 656.926137, 240.5, 0.000000, 0.000000, 1.000000], dtype=np.float)
-        occam_camera_matrix.shape = (3,3)
-        occam_distortion_coefs = np.array([-0.360085, 0.115116, 0.007768, 0.004616, 0.000000], dtype=np.float)
-
+        # Setup cameras
         self.cameras = {}
-        self.cameras['occam0'] = Camera('leviathan_gt/occam0_frame', 752, 480, occam_camera_matrix, occam_distortion_coefs)
+        cameras = rospy.get_param('~cameras')
+        for cameraname, camera in cameras.iteritems():
 
+            self.cameras[cameraname] = Camera(camera['frame'], debugImageEnabled=camera['debug_image_enabled'])
+
+            infocallback = partial(self.cameraInfoCallback, camera=self.cameras[cameraname])
+            imagecallback = partial(self.cameraImageCallback, camera=self.cameras[cameraname])
+
+            rospy.Subscriber(camera['camera_info_topic'], CameraInfo, infocallback)
+            rospy.Subscriber(camera['image_topic'], Image, imagecallback)
+
+            if(camera['debug_image_enabled']):
+                self.cameras[cameraname].debugImagePub = rospy.Publisher(camera['debug_image_topic'], Image, queue_size=1)
+
+        # Setup objects
+        self.objects = {}
+        objects = rospy.get_param('~objects')
+        for objectname, obj in objects.iteritems():
+
+            objectClasses = []
+
+            for objClass in obj['classes']:
+                objectClasses.append(
+                    YOLOObjectClass(objClass['name'], objClass['debug_color'], np.array(objClass['points'], dtype=np.float)))
+
+            self.objects[objectname] = YOLOObject(obj['link'], objectClasses)
+
+            # Subscribe to get odometry to generate world transforms for points
+            odomcallback = partial(self.objectOdomCallback, obj=self.objects[objectname])
+            rospy.Subscriber(obj['odom_topic'], Odometry, odomcallback, queue_size=1)
 
         rospy.spin()
 
@@ -312,4 +320,4 @@ if __name__ == "__main__":
     try:
         a.run()
     except rospy.ROSInterruptException:
-      rospy.logerr("YOLOFaker has died!");
+      rospy.logerr("YOLOFaker has died!")
