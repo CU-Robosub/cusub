@@ -34,11 +34,12 @@ The software is structered loosly around the Open System Interconnect Model (OSI
    
    
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 3
    :caption: Contents:
+   :hidden:
 
    getting_started
-   cusub_sim
+   cusub_sim/cusub_sim
    cusub_common
    cusub_perception
    cusub_cortex
