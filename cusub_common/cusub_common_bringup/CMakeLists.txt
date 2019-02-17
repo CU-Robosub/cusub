@@ -1,3 +1,3 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(drivers)
+project(cusub_common_bringup)
 find_package(catkin REQUIRED)
