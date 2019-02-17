@@ -43,7 +43,7 @@
         <rosparam subst_value="true">
             meshes:
               StartGate_1:
-                mesh: package://robosub_descriptions/meshes/StartGate.dae
+                mesh: package://robosub_descriptions/models/StartGate/StartGate.dae
                 pose:
                   position: [$(arg SG_x), $(arg SG_y), $(arg SG_z)]
                   orientation: [0, 0, $(arg SG_yaw)]

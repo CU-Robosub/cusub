@@ -1,6 +1,13 @@
-<robot
-  name="Dice5_robot">
-  <link name="Dice5/base_link">
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro"
+  name="dice2_robot">
+
+<!-- Loading file with sensor macros -->
+<xacro:include filename="$(find uuv_sensor_ros_plugins)/urdf/sensor_snippets.xacro"/>
+
+<xacro:macro name="dice2_base" params="namespace">
+
+  <link name="${namespace}/base_link">
     <inertial>
       <origin
         xyz="0.1143 -0.1143 -0.1143"
@@ -21,7 +28,7 @@
         rpy="1.5707963267949 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/Dice5.dae" />
+          filename="package://robosub_descriptions/models/Dice2/Dice2.dae" />
       </geometry>
     </visual>
     <collision>
@@ -30,11 +37,12 @@
         rpy="1.5707963267949 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/Dice.stl" />
+          filename="package://robosub_descriptions/models/shared/Dice.stl" />
       </geometry>
     </collision>
   </link>
-  <link name = "Dice5/string_link">
+  <xacro:default_pose_3d namespace="${namespace}" parent_link="${namespace}/base_link" />
+  <link name = "dice2/string_link">
   <inertial>
     <origin
       xyz="0 0 0"
@@ -50,7 +58,7 @@
       izz="0.00014047076006077" />
   </inertial>
   </link>
-  <link name = "Dice5/anchor_link">
+  <link name = "dice2/anchor_link">
     <inertial>
       <origin
         xyz="0 0 0"
@@ -82,19 +90,19 @@
       </geometry>
     </collision>
   </link>
-  <joint name="Dice5/base_joint" type="continuous">
+  <joint name="dice2/base_joint" type="continuous">
     <origin
       xyz="0.1143 -0.1143 -0.2286"
       rpy="0 0 0" />
-    <parent link="Dice5/base_link"/>
-    <child link="Dice5/string_link"/>
+    <parent link="${namespace}/base_link"/>
+    <child link="dice2/string_link"/>
   </joint>
-  <joint name="Dice5/anchor_joint" type="continuous">
+  <joint name="dice2/anchor_joint" type="continuous">
     <origin
-      xyz="0 0 -2"
+      xyz="0 0 -1.6"
       rpy="0 0 0" />
-    <parent link="Dice5/string_link"/>
-    <child link="Dice5/anchor_link"/>
+    <parent link="dice2/string_link"/>
+    <child link="dice2/anchor_link"/>
   </joint>
 
   <gazebo>
@@ -102,7 +110,7 @@
     <fluid_density>1028.0</fluid_density>
     <flow_velocity_topic>hydrodynamics/current_velocity</flow_velocity_topic>
     <debug>0</debug>
-    <link name="Dice5/base_link">
+    <link name="${namespace}/base_link">
         <fluid_density>1028</fluid_density>
         <flow_velocity_topic>hydrodynamics/current_velocity</flow_velocity_topic>
         <neutrally_buoyant>0</neutrally_buoyant>
@@ -124,4 +132,9 @@
       </link>
     </plugin>
   </gazebo>
+
+</xacro:macro>
+
+<xacro:dice2_base namespace="$(arg namespace)"/>
+
 </robot>

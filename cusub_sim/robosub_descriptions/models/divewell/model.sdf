@@ -13,7 +13,7 @@
         </geometry>
         <material>
           <script>
-            <uri>file://materials/scripts/pool.material</uri>
+            <uri>file://models/shared/pool.material</uri>
             <name>Robosub/PoolWall</name>
           </script>
         </material>
@@ -54,7 +54,7 @@
         </geometry>
         <material>
           <script>
-            <uri>file://materials/scripts/pool.material</uri>
+            <uri>file://models/shared/pool.material</uri>
             <name>Robosub/PoolWall</name>
           </script>
         </material>
@@ -70,7 +70,7 @@
         </geometry>
         <material>
           <script>
-            <uri>file://materials/scripts/pool.material</uri>
+            <uri>file://models/shared/pool.material</uri>
             <name>Robosub/PoolWall</name>
           </script>
         </material>
@@ -86,7 +86,7 @@
         </geometry>
         <material>
           <script>
-            <uri>file://materials/scripts/pool.material</uri>
+            <uri>file://models/shared/pool.material</uri>
             <name>Robosub/PoolWall</name>
           </script>
         </material>
@@ -102,7 +102,7 @@
         </geometry>
         <material>
           <script>
-            <uri>file://materials/scripts/pool.material</uri>
+            <uri>file://models/shared/pool.material</uri>
             <name>Robosub/PoolWall</name>
           </script>
         </material>

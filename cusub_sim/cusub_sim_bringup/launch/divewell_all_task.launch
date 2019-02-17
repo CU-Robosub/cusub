@@ -1,15 +1,25 @@
 <launch>
 
   <!-- Obstacle positions -->
+  <arg name="D1_x" default="-1.75"/>
+  <arg name="D1_y" default="2.75"/>
+  <arg name="D1_z" default="-1"/>
+  <arg name="D1_yaw" default="-0.25"/>
+
+  <arg name="D2_x" default="-1.0"/>
+  <arg name="D2_y" default="3.5"/>
+  <arg name="D2_z" default="-1"/>
+  <arg name="D2_yaw" default="-0.2"/>
+
   <arg name="D5_x" default="-1.0"/>
-  <arg name="D5_y" default="3.25"/>
+  <arg name="D5_y" default="2.5"/>
   <arg name="D5_z" default="-1"/>
-  <arg name="D5_yaw" default="0"/>
+  <arg name="D5_yaw" default="0.78"/>
 
   <arg name="D6_x" default="-1.75"/>
-  <arg name="D6_y" default="2.75"/>
+  <arg name="D6_y" default="3.25"/>
   <arg name="D6_z" default="-1"/>
-  <arg name="D6_yaw" default="0"/>
+  <arg name="D6_yaw" default="0.4"/>
 
   <arg name="SG_x" default="4.0"/>
   <arg name="SG_y" default="0.0"/>
@@ -48,6 +58,22 @@
       <arg name="y" default="$(arg SG_y)"/>
       <arg name="z" default="$(arg SG_z)"/>
       <arg name="yaw" default="$(arg SG_yaw)"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="Dice1"/>
+      <arg name="x" default="$(arg D1_x)"/>
+      <arg name="y" default="$(arg D1_y)"/>
+      <arg name="z" default="$(arg D1_z)"/>
+      <arg name="yaw" default="$(arg D1_yaw)"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="Dice2"/>
+      <arg name="x" default="$(arg D2_x)"/>
+      <arg name="y" default="$(arg D2_y)"/>
+      <arg name="z" default="$(arg D2_z)"/>
+      <arg name="yaw" default="$(arg D2_yaw)"/>
   </include>
 
   <include file="$(find robosub_descriptions)/launch/upload.launch">
@@ -110,32 +136,42 @@
         <rosparam subst_value="true">
             meshes:
               StartGate_1:
-                mesh: package://robosub_descriptions/meshes/StartGate.dae
+                mesh: package://robosub_descriptions/models/StartGate/StartGate.dae
                 pose:
                   position: [$(arg SG_x), $(arg SG_y), $(arg SG_z)]
                   orientation: [0, 0, $(arg SG_yaw)]
               PathMarker_1:
-                mesh: package://robosub_descriptions/meshes/PathMarker.dae
+                mesh: package://robosub_descriptions/models/PathMarker/PathMarker.dae
                 pose:
                   position: [$(arg PM1_x), $(arg PM1_y), $(arg PM1_z)]
                   orientation: [1.57, 0, $(arg PM1_yaw)]
+              Dice1_1:
+                mesh: package://robosub_descriptions/models/Dice1/Dice1.dae
+                pose:
+                  position: [$(arg D1_x), $(arg D1_y), $(arg D1_z)]
+                  orientation: [0, 0, $(arg D1_yaw)]
+              Dice2_1:
+                mesh: package://robosub_descriptions/models/Dice2/Dice2.dae
+                pose:
+                  position: [$(arg D2_x), $(arg D2_y), $(arg D2_z)]
+                  orientation: [0, 0, $(arg D2_yaw)]
               Dice5_1:
-                mesh: package://robosub_descriptions/meshes/Dice5.dae
+                mesh: package://robosub_descriptions/models/Dice5/Dice5.dae
                 pose:
                   position: [$(arg D5_x), $(arg D5_y), $(arg D5_z)]
                   orientation: [0, 0, $(arg D5_yaw)]
               Dice6_1:
-                mesh: package://robosub_descriptions/meshes/Dice6.dae
+                mesh: package://robosub_descriptions/models/Dice6/Dice6.dae
                 pose:
                   position: [$(arg D6_x), $(arg D6_y), $(arg D6_z)]
                   orientation: [0, 0, $(arg D6_yaw)]
               PathMarker_2:
-                mesh: package://robosub_descriptions/meshes/PathMarker.dae
+                mesh: package://robosub_descriptions/models/PathMarker/PathMarker.dae
                 pose:
                   position: [$(arg PM2_x), $(arg PM2_y), $(arg PM2_z)]
                   orientation: [1.57, 0, $(arg PM2_yaw)]
               Roulette:
-                mesh: package://robosub_descriptions/meshes/Roulette.dae
+                mesh: package://robosub_descriptions/models/Roulette/Roulette.dae
                 pose:
                   position: [$(arg R_x), $(arg R_y), $(arg R_z)]
                   orientation: [1.57, 0, $(arg R_yaw)]

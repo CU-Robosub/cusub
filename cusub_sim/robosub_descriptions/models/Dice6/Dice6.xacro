@@ -28,7 +28,7 @@
         rpy="1.5707963267949 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/Dice6.dae" />
+          filename="package://robosub_descriptions/models/Dice6/Dice6.dae" />
       </geometry>
     </visual>
     <collision>
@@ -37,7 +37,7 @@
         rpy="1.5707963267949 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/Dice.stl" />
+          filename="package://robosub_descriptions/models/shared/Dice.stl" />
       </geometry>
     </collision>
   </link>
@@ -99,7 +99,7 @@
   </joint>
   <joint name="Dice6/anchor_joint" type="continuous">
     <origin
-      xyz="0 0 -1.75"
+      xyz="0 0 -2.2"
       rpy="0 0 0" />
     <parent link="Dice6/string_link"/>
     <child link="Dice6/anchor_link"/>

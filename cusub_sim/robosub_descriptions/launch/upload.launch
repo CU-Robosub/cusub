@@ -27,7 +27,7 @@
 
   <group ns="$(arg obstacle)$(arg postfix)">
     <param name="robot_description"
-           command="$(find xacro)/xacro '$(find robosub_descriptions)/urdf/$(arg obstacle).xacro' debug:=$(arg debug) namespace:=$(arg namespace)" />
+           command="$(find xacro)/xacro '$(find robosub_descriptions)/models/$(arg obstacle)/$(arg obstacle).xacro' debug:=$(arg debug) namespace:=$(arg namespace)" />
 
     <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
     <group if="$(arg use_geodetic)">
