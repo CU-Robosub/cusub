@@ -1,35 +1,7 @@
 *********
 CUSub_Sim
 *********
-
 This section will go into the details of the gazebo based robosub simulator.
-
-Building the sim
-################
-
-in your workspace clone the cusub_sim repository into <your_robosub_ws>/src/ folder
-::
-
-	git clone https://github.com/CU-Robosub/cusub_sim
-
-Next you will have to use the git submodule to import the UUV simulator packages.
-::
-	
-	cd cusub_sim
-	git submodule init
-	git submodule update
-
-Building UUV sim requires the protobuf C complier as a dependency
-::
-	sudo apt-get install protobuf-c-compiler # Ubuntu
-
-
-Once you have pulled both the cusub_sim repo as well as the UUV simulator submodule you will want to build the system from the root of your workspace.
-::
-
-	cd ~/<your_robosub_ws>
-	catkin_make
-
 
 Running the sim
 ###############
@@ -46,16 +18,25 @@ if you have any issues or questions be sure to post within the slack or attend t
 
 System Packages
 ###############
+.. toctree::
+    :hidden:
+
+    cusub_sim_bringup
+    leviathan_description
+    leviathan_gazebo_drivers
+    robosub_descriptions
+    uuv_simulator <https://uuvsimulator.github.io/>
+
 
 cusub_sim: meta-package for organizing software stack
 
-:doc:`leviathan_description <cusub_sim/leviathan_description>`: all the files containing the leviathan's model and descriptions for gazebo.
+:doc:`cusub_sim_bringup <cusub_sim_bringup>`: contains the launch files to start the gazebo environment
 
-:doc:`leviathan_gazebo_drivers <cusub_sim/leviathan_gazebo_drivers>`: contains drivers for translation of Gazebo commands to rest of cusub software stack
+:doc:`leviathan_description <leviathan_description>`: all the files containing the leviathan's model and descriptions for gazebo.
 
-:doc:`robosub_descriptions <cusub_sim/robosub_descriptions>`: contains all of the world assets for the gazebo sim including, TRANSDEC, the divewell, and Obstacles
+:doc:`leviathan_gazebo_drivers <leviathan_gazebo_drivers>`: contains drivers for translation of Gazebo commands to rest of cusub software stack
 
-:doc:`robosub_scenarios <cusub_sim/robosub_scenarios>`: contains the launch files to start the gazebo environment
+:doc:`robosub_descriptions <robosub_descriptions>`: contains all of the world assets for the gazebo sim including, TRANSDEC, the divewell, and Obstacles
 
 .. TODO add uuv to intersphinx? or just hyperlink?
 
