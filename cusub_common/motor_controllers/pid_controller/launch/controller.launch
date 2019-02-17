@@ -1,7 +1,7 @@
 <launch>
-    <node name="Pose_PID" pkg="controller" type="Pose_PID.py" output="screen" >
+    <node name="Pose_PID" pkg="pid_controller" type="Pose_PID.py" output="screen" >
     </node>
-    <node name="PID_Pololu" pkg="controller" type="PID_Pololu.py" output="screen" >
+    <node name="PID_Pololu" pkg="pid_controller" type="PID_Pololu.py" output="screen" >
     </node>
 
     <!-- All of the PID controllers are below this -->
