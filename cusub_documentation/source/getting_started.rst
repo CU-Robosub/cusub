@@ -9,9 +9,9 @@ Setting up your workspace
 #########################
 The CUSub software stack consists of 4 meta-packages that contain all the runtime code for running the sub in sim and on the platform.
 
-:doc:`\cusub_sim`: Contains all of the code related to the simulated underwater environment and descriptions of the subs.
+:doc:`\cusub_sim/cusub_sim`: Contains all of the code related to the simulated underwater environment and descriptions of the subs.
 
-:doc:`\cusub_common`: Hosts all of the drivers, motor controllers, sensor fusion, debugging tools and basic waypoint navigation server.
+:doc:`\cusub_common/cusub_common`: Hosts all of the drivers, motor controllers, sensor fusion, debugging tools and basic waypoint navigation server.
 
 :doc:`\cusub_perception`: image classification, feature extraction, and localization of objects.
 
