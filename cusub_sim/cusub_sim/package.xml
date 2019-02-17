@@ -12,7 +12,7 @@
     <run_depend>leviathan_description</run_depend>
     <run_depend>leviathan_gazebo_drivers</run_depend>
     <run_depend>robosub_descriptions</run_depend>
-    <run_depend>robosub_scenarios</run_depend>
+    <run_depend>cusub_sim_bringup</run_depend>
     <run_depend>uuv_simulator</run_depend>
 
     <export>
