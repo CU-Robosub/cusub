@@ -10,7 +10,7 @@
   <node pkg="tf" type="static_transform_publisher" name="occam4_broadcaster" args="0 0 0.2 -1.25  0 0 base_link leviathan/occam4_frame 50" />
 
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
-      <rosparam command="load" file="$(find sensor_fusion)/launch/ekf_template.yaml" />
+      <rosparam command="load" file="$(find cusub_common_bringup)/config/ekf_template.yaml" />
   </node>
 </group>
 </launch>
