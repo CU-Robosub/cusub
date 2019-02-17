@@ -9,8 +9,7 @@
 
     <buildtool_depend>catkin</buildtool_depend>
 
-    <!-- driver packages -->
-    <run_depend>drivers</run_depend>
+    <!-- drivers  -->
     <run_depend>actuator</run_depend>
     <run_depend>depth_sensor</run_depend>
     <run_depend>dvl</run_depend>
@@ -22,19 +21,17 @@
 
     <!-- debugging packages -->
     <run_depend>console</run_depend>
+    <run_depend>leviathan_control</run_depend>
     <run_depend>qt_console</run_depend>
     <run_depend>teleop</run_depend>
 
     <!-- local controll packages -->
-    <run_depend>controller</run_depend>
-    <run_depend>leviathan_control</run_depend>
-    <run_depend>local_control</run_depend>
-    <run_depend>planner</run_depend>
-    <run_depend>thrust</run_depend>
-    <run_depend>waypoint_navigator</run_depend>
+    <run_depend>pid_controller</run_depend>
+    <run_depend>bangbang</run_depend>
 
-    <!-- sensor fusion package -->
-    <run_depend>sensor_fusion</run_depend>
+    <!-- other packages -->
+    <run_depend>waypoint_navigator</run_depend>
+    <run_depend>cusub_common_bringup</run_depend>
 
 
     <export>
