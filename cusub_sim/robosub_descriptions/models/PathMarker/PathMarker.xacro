@@ -22,7 +22,7 @@
         rpy="1.5707963267949 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/PathMarker.dae" />
+          filename="package://robosub_descriptions/models/PathMarker/PathMarker.dae" />
       </geometry>
     </visual>
     <collision>
@@ -31,7 +31,7 @@
         rpy="1.5707963267949 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/PathMarker.stl" />
+          filename="package://robosub_descriptions/models/PathMarker/PathMarker.stl" />
       </geometry>
     </collision>
   </link>

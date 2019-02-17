@@ -28,7 +28,7 @@
         rpy="1.5707963267949 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/Dice2.dae" />
+          filename="package://robosub_descriptions/models/Dice2/Dice2.dae" />
       </geometry>
     </visual>
     <collision>
@@ -37,7 +37,7 @@
         rpy="1.5707963267949 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/Dice.stl" />
+          filename="package://robosub_descriptions/models/shared/Dice.stl" />
       </geometry>
     </collision>
   </link>

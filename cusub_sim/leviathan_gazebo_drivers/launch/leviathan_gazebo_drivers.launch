@@ -6,7 +6,7 @@
 
   <node name="gazebo_actuators" pkg="leviathan_gazebo_drivers" type="ActuatorService.py">
     <param name="dropperURDF"
-           command="$(find xacro)/xacro '$(find robosub_descriptions)/urdf/Dropper.xacro'" />
+           command="$(find xacro)/xacro '$(find robosub_descriptions)/models/Dropper/Dropper.xacro'" />
   </node>
 
   <!--<node name="relay_dvl" pkg="topic_tools" type="relay" args="/leviathan/dvl_twist /drivers/dvl/vel"/>-->

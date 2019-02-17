@@ -21,7 +21,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/goldchip_base_link.stl" />
+          filename="package://robosub_descriptions/models/GoldChip/goldchip_base_link.stl" />
       </geometry>
       <material
         name="">
@@ -35,7 +35,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/goldchip_base_link.stl" />
+          filename="package://robosub_descriptions/models/GoldChip/goldchip_base_link.stl" />
       </geometry>
     </collision>
   </link>
@@ -61,7 +61,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/goldchip_button_holder_link.stl" />
+          filename="package://robosub_descriptions/models/GoldChip/goldchip_button_holder_link.stl" />
       </geometry>
       <material
         name="">
@@ -110,7 +110,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/GoldChipButton.dae" />
+          filename="package://robosub_descriptions/models/GoldChip/GoldChipButton.dae" />
       </geometry>
       <material
         name="">
@@ -124,7 +124,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/goldchip_button_link.stl" />
+          filename="package://robosub_descriptions/models/GoldChip/goldchip_button_link.stl" />
       </geometry>
     </collision>
   </link>

@@ -22,7 +22,7 @@
         rpy="1.5707963267949 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/Roulette.dae" />
+          filename="package://robosub_descriptions/models/Roulette/Roulette.dae" />
       </geometry>
     </visual>
     <collision>
@@ -31,7 +31,7 @@
         rpy="1.5707963267949 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/Roulette.stl" />
+          filename="package://robosub_descriptions/models/Roulette/Roulette.stl" />
       </geometry>
     </collision>
   </link>

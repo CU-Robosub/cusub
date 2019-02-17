@@ -8,7 +8,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://robosub_descriptions/meshes/Roulette_base.stl" />
+        <mesh filename="package://robosub_descriptions/models/Roulette_spin/Roulette_base.stl" />
       </geometry>
       <material
         name="">
@@ -18,7 +18,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://robosub_descriptions/meshes/Roulette_base.stl" />
+        <mesh filename="package://robosub_descriptions/models/Roulette_spin/Roulette_base.stl" />
       </geometry>
     </collision>
   </link>
@@ -35,13 +35,13 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://robosub_descriptions/meshes/Roulette_table.dae" />
+        <mesh filename="package://robosub_descriptions/models/Roulette_spin/Roulette_table.dae" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://robosub_descriptions/meshes/Roulette_table.stl" />
+        <mesh filename="package://robosub_descriptions/models/Roulette_spin/Roulette_table.stl" />
       </geometry>
     </collision>
   </link>
