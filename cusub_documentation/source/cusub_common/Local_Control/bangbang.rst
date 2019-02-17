@@ -7,9 +7,8 @@ Publishers
 ##########
 
 - Control Effort
-    ~control_effort_topic
-
-    std_msgs/Float64
+    :Topicname: ~control_effort_topic (From Parameter)
+    :Type: std_msgs/Float64
 
     Outputs Control Effort
 
@@ -17,16 +16,14 @@ Subscribers
 ###########
 
 - Setpoint
-    ~setpoint_topic
-
-    std_msgs/Float64
+    :Topicname: ~setpoint_topic (From Parameter)
+    :Type: std_msgs/Float64
 
     Sets desired state for control loop to achive
 
 - State
-    ~state_topic
-
-    std_msgs/Float64
+    :Topicname: ~state_topic (From Parameter)
+    :Type: std_msgs/Float64
 
     Feedback on current state
 
@@ -34,43 +31,37 @@ Parameters
 ##########
 
 - ~setpoint_topic
-    type = string
-
-    Required
+    :Type: string
+    :Default: Required (No default)
 
     Topic to subscribe to setpoints
 
 - ~state_topic
-    type = string
-
-    Required
+    :Type: string
+    :Default: Required (No default)
 
     Topic to get state feedback on
 
 - ~control_effort_topic
-    type = string
-
-    Required
+    :Type: string
+    :Default: Required (No default)
 
     Topic to publish control effort on.
 
 - ~deadzone_size
-    type = float
-
-    default = 1.0
+    :Type: float
+    :Default: 1.0
 
     Size of the deadzone where control effort will be set to zero.  Deadzone is centered around the setpoint.
 
 - ~left_bang_effort
-    type = float
-
-    default = 1.0
+    :Type: float
+    :Default: 1.0
 
     Control Effort that is output when state is less than setpoint - (deadzone_size / 2).
 
 - ~right_bang_effort
-    type = float
-
-    default = 1.0
+    :Type: float
+    :Default: -1.0
 
     Control Effort that is output when state is greater than setpoint + (deadzone_size / 2).
