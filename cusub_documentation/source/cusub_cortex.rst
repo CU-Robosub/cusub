@@ -1,3 +1,3 @@
 ************
-CUSub_Cortex
+CUSub Cortex
 ************

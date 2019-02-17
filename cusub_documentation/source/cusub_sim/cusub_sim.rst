@@ -1,5 +1,5 @@
 *********
-CUSub_Sim
+CUSub Sim
 *********
 This section will go into the details of the gazebo based robosub simulator.
 
@@ -30,13 +30,13 @@ System Packages
 
 cusub_sim: meta-package for organizing software stack
 
-:doc:`cusub_sim_bringup <cusub_sim_bringup>`: contains the launch files to start the gazebo environment
+:doc:`CUSub Simulator Bringup <cusub_sim_bringup>`: contains the launch files to start the gazebo environment
 
-:doc:`leviathan_description <leviathan_description>`: all the files containing the leviathan's model and descriptions for gazebo.
+:doc:`Leviathan Description <leviathan_description>`: all the files containing the leviathan's model and descriptions for gazebo.
 
-:doc:`leviathan_gazebo_drivers <leviathan_gazebo_drivers>`: contains drivers for translation of Gazebo commands to rest of cusub software stack
+:doc:`Leviathan Gazebo Drivers <leviathan_gazebo_drivers>`: contains drivers for translation of Gazebo commands to rest of cusub software stack
 
-:doc:`robosub_descriptions <robosub_descriptions>`: contains all of the world assets for the gazebo sim including, TRANSDEC, the divewell, and Obstacles
+:doc:`Robosub Descriptions <robosub_descriptions>`: contains all of the world assets for the gazebo sim including, TRANSDEC, the divewell, and Obstacles
 
 .. TODO add uuv to intersphinx? or just hyperlink?
 

@@ -40,7 +40,7 @@ The software is structered loosly around the Open System Interconnect Model (OSI
 
    getting_started
    cusub_sim/cusub_sim
-   cusub_common
+   cusub_common/cusub_common
    cusub_perception
    cusub_cortex
    git_rules
