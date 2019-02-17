@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro"
-  name="Dice6_robot">
+  name="dice2_robot">
 
 <!-- Loading file with sensor macros -->
 <xacro:include filename="$(find uuv_sensor_ros_plugins)/urdf/sensor_snippets.xacro"/>
 
-<xacro:macro name="dice6_base" params="namespace">
+<xacro:macro name="dice2_base" params="namespace">
 
   <link name="${namespace}/base_link">
     <inertial>
@@ -28,7 +28,7 @@
         rpy="1.5707963267949 0 0" />
       <geometry>
         <mesh
-          filename="package://robosub_descriptions/meshes/Dice6.dae" />
+          filename="package://robosub_descriptions/meshes/Dice2.dae" />
       </geometry>
     </visual>
     <collision>
@@ -42,7 +42,7 @@
     </collision>
   </link>
   <xacro:default_pose_3d namespace="${namespace}" parent_link="${namespace}/base_link" />
-  <link name = "Dice6/string_link">
+  <link name = "dice2/string_link">
   <inertial>
     <origin
       xyz="0 0 0"
@@ -58,7 +58,7 @@
       izz="0.00014047076006077" />
   </inertial>
   </link>
-  <link name = "Dice6/anchor_link">
+  <link name = "dice2/anchor_link">
     <inertial>
       <origin
         xyz="0 0 0"
@@ -90,19 +90,19 @@
       </geometry>
     </collision>
   </link>
-  <joint name="Dice6/base_joint" type="continuous">
+  <joint name="dice2/base_joint" type="continuous">
     <origin
       xyz="0.1143 -0.1143 -0.2286"
       rpy="0 0 0" />
     <parent link="${namespace}/base_link"/>
-    <child link="Dice6/string_link"/>
+    <child link="dice2/string_link"/>
   </joint>
-  <joint name="Dice6/anchor_joint" type="continuous">
+  <joint name="dice2/anchor_joint" type="continuous">
     <origin
-      xyz="0 0 -2.2"
+      xyz="0 0 -1.6"
       rpy="0 0 0" />
-    <parent link="Dice6/string_link"/>
-    <child link="Dice6/anchor_link"/>
+    <parent link="dice2/string_link"/>
+    <child link="dice2/anchor_link"/>
   </joint>
 
   <gazebo>
@@ -135,6 +135,6 @@
 
 </xacro:macro>
 
-<xacro:dice6_base namespace="$(arg namespace)"/>
+<xacro:dice2_base namespace="$(arg namespace)"/>
 
 </robot>

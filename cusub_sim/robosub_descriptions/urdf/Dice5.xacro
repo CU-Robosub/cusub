@@ -1,6 +1,13 @@
-<robot
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro"
   name="Dice5_robot">
-  <link name="Dice5/base_link">
+
+<!-- Loading file with sensor macros -->
+<xacro:include filename="$(find uuv_sensor_ros_plugins)/urdf/sensor_snippets.xacro"/>
+
+<xacro:macro name="dice5_base" params="namespace">
+
+  <link name="${namespace}/base_link">
     <inertial>
       <origin
         xyz="0.1143 -0.1143 -0.1143"
@@ -34,6 +41,7 @@
       </geometry>
     </collision>
   </link>
+  <xacro:default_pose_3d namespace="${namespace}" parent_link="${namespace}/base_link" />
   <link name = "Dice5/string_link">
   <inertial>
     <origin
@@ -86,12 +94,12 @@
     <origin
       xyz="0.1143 -0.1143 -0.2286"
       rpy="0 0 0" />
-    <parent link="Dice5/base_link"/>
+    <parent link="${namespace}/base_link"/>
     <child link="Dice5/string_link"/>
   </joint>
   <joint name="Dice5/anchor_joint" type="continuous">
     <origin
-      xyz="0 0 -2"
+      xyz="0 0 -1.8"
       rpy="0 0 0" />
     <parent link="Dice5/string_link"/>
     <child link="Dice5/anchor_link"/>
@@ -102,7 +110,7 @@
     <fluid_density>1028.0</fluid_density>
     <flow_velocity_topic>hydrodynamics/current_velocity</flow_velocity_topic>
     <debug>0</debug>
-    <link name="Dice5/base_link">
+    <link name="${namespace}/base_link">
         <fluid_density>1028</fluid_density>
         <flow_velocity_topic>hydrodynamics/current_velocity</flow_velocity_topic>
         <neutrally_buoyant>0</neutrally_buoyant>
@@ -124,4 +132,9 @@
       </link>
     </plugin>
   </gazebo>
+
+</xacro:macro>
+
+<xacro:dice5_base namespace="$(arg namespace)"/>
+
 </robot>

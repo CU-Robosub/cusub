@@ -1,15 +1,25 @@
 <launch>
 
   <!-- Obstacle positions -->
+  <arg name="D1_x" default="-1.75"/>
+  <arg name="D1_y" default="2.75"/>
+  <arg name="D1_z" default="-1"/>
+  <arg name="D1_yaw" default="-0.25"/>
+
+  <arg name="D2_x" default="-1.0"/>
+  <arg name="D2_y" default="3.5"/>
+  <arg name="D2_z" default="-1"/>
+  <arg name="D2_yaw" default="-0.2"/>
+
   <arg name="D5_x" default="-1.0"/>
-  <arg name="D5_y" default="3.25"/>
+  <arg name="D5_y" default="2.5"/>
   <arg name="D5_z" default="-1"/>
-  <arg name="D5_yaw" default="0"/>
+  <arg name="D5_yaw" default="0.78"/>
 
   <arg name="D6_x" default="-1.75"/>
-  <arg name="D6_y" default="2.75"/>
+  <arg name="D6_y" default="3.25"/>
   <arg name="D6_z" default="-1"/>
-  <arg name="D6_yaw" default="0"/>
+  <arg name="D6_yaw" default="0.4"/>
 
   <arg name="SG_x" default="4.0"/>
   <arg name="SG_y" default="0.0"/>
@@ -48,6 +58,22 @@
       <arg name="y" default="$(arg SG_y)"/>
       <arg name="z" default="$(arg SG_z)"/>
       <arg name="yaw" default="$(arg SG_yaw)"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="Dice1"/>
+      <arg name="x" default="$(arg D1_x)"/>
+      <arg name="y" default="$(arg D1_y)"/>
+      <arg name="z" default="$(arg D1_z)"/>
+      <arg name="yaw" default="$(arg D1_yaw)"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="Dice2"/>
+      <arg name="x" default="$(arg D2_x)"/>
+      <arg name="y" default="$(arg D2_y)"/>
+      <arg name="z" default="$(arg D2_z)"/>
+      <arg name="yaw" default="$(arg D2_yaw)"/>
   </include>
 
   <include file="$(find robosub_descriptions)/launch/upload.launch">
