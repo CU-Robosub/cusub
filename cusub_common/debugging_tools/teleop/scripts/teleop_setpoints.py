@@ -12,17 +12,17 @@ from sensor_msgs.msg import Imu
 class Motor_Controller():
     def __init__(self):
 
-        self.yaw_setpoint_pub = rospy.Publisher('/local_control/pid/yaw/setpoint',Float64,queue_size=1)
+        self.yaw_setpoint_pub = rospy.Publisher('/leviathan/local_control/pid/yaw/setpoint',Float64,queue_size=1)
         self.yaw_setpoint_pub_data = Float64()
-        self.roll_setpoint_pub = rospy.Publisher('/local_control/pid/roll/setpoint',Float64,queue_size=1)
+        self.roll_setpoint_pub = rospy.Publisher('/leviathan/local_control/pid/roll/setpoint',Float64,queue_size=1)
         self.roll_setpoint_pub_data = Float64()
-        self.pitch_setpoint_pub = rospy.Publisher('/local_control/pid/pitch/setpoint',Float64,queue_size=1)
+        self.pitch_setpoint_pub = rospy.Publisher('/leviathan/local_control/pid/pitch/setpoint',Float64,queue_size=1)
         self.pitch_setpoint_pub_data = Float64()
-        self.depth_setpoint_pub = rospy.Publisher('/local_control/pid/depth/setpoint',Float64,queue_size=1)
+        self.depth_setpoint_pub = rospy.Publisher('/leviathan/local_control/pid/depth/setpoint',Float64,queue_size=1)
         self.depth_setpoint_pub_data = Float64()
-        self.drive_setpoint_pub = rospy.Publisher('/local_control/pid/drive/setpoint',Float64,queue_size=1)
+        self.drive_setpoint_pub = rospy.Publisher('/leviathan/local_control/pid/drive/setpoint',Float64,queue_size=1)
         self.drive_setpoint_pub_data = Float64()
-        self.strafe_setpoint_pub = rospy.Publisher('/local_control/pid/strafe/setpoint',Float64,queue_size=1)
+        self.strafe_setpoint_pub = rospy.Publisher('/leviathan/local_control/pid/strafe/setpoint',Float64,queue_size=1)
         self.strafe_setpoint_pub_data = Float64()
 
         self.yaw = 0
