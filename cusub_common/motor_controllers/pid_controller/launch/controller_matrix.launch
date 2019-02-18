@@ -2,10 +2,10 @@
 
       <arg name="namespace" default="leviathan" />
 
-      <node name="Pose_PID" pkg="controller" type="Pose_PID.py" output="screen">
+      <node name="Pose_PID" pkg="pid_controller" type="Pose_PID.py" output="screen">
         <param name="namespace" value="/$(arg namespace)" />
       </node>
-      <node name="PID_Pololu" pkg="controller" type="PID_Pololu_matrix.py" output="screen">
+      <node name="PID_Pololu" pkg="pid_controller" type="PID_Pololu_matrix.py" output="screen">
         <param name="namespace" value="/$(arg namespace)" />
       </node>
 
