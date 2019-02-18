@@ -4,23 +4,69 @@ CUSub Common
 
 This section will go into the details of the common parts of the CU robosub.
 
+Running Common
+##############
+
+this section will include launch details for the meta-package
+
+
 System Packages
 ###############
 .. toctree::
+    :maxdepth: 1
     :hidden:
 
-    Debugging-Console
-    Drivers
-    Local_Control/Local_Control
-    sensor_fusion
+    cusub_common_bringup
+    waypoint_navigator
 
 
 cusub_common: meta-package for organizing software stack
 
-:doc:`Debugging-Console <Debugging-Console>`: Contiains launch files for teleoperating the sub.
+:doc:`cusub_common_bringup <cusub_common_bringup>`:
 
-:doc:`Drivers <Drivers>`: Drivers for the hardware in the subs.
+:doc:`Waypoint Navigator <waypoint_navigator>`:
 
-:doc:`Local Control <Local_Control/Local_Control>`: Launches control loops for the sub, point and shoot controls.
+Debugging Tools
+___________________
+.. toctree::
+    :hidden:
 
-:doc:`Sensor Fusion <sensor_fusion>`: EKF for getting pose estimate from DVL, IMU, and depth sensor.
+    debugging-tools/leviathan_control
+
+Console: unknown
+
+leviathan_control: teleop?
+
+qt_console: unknown
+
+teleop: teleop
+
+Drivers
+_______
+
+empty stub for now
+
+Motor Controllers
+_________________
+
+.. toctree::
+    :hidden:
+
+    motor-controllers/bangbang
+    motor-controllers/pid_controller
+
+:doc:`bangbang <motor-controllers/bangbang>`:
+
+:doc:`pid_controller <motor-controllers/pid_controller>`:
+
+
+
+ROS Topic Interface
+###################
+
+Will contain a list of topics typically created by this meta-package, the namespace conventions and basic uses.
+
+Known Issues
+############
+
+will provide known issues and solutions for this meta-package
