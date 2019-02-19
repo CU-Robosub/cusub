@@ -26,35 +26,35 @@
     <origin xyz="0 0 0" rpy="0 0 0"/>
   </xacro:default_imu>
 
-  <xacro:camera_macro robot_namespace="${namespace}" camera_id="0" frame="occam0_frame">
+  <xacro:occam_camera_macro robot_namespace="${namespace}" camera_id="0" frame="occam0_frame">
     <axis xyz="0 0 0" />
     <origin xyz="0.055 0 0.22" rpy="0 0 0"/>
-  </xacro:camera_macro>
+  </xacro:occam_camera_macro>
 
-  <xacro:camera_macro robot_namespace="${namespace}" camera_id="1" frame="occam1_frame">
+  <xacro:occam_camera_macro robot_namespace="${namespace}" camera_id="1" frame="occam1_frame">
     <axis xyz="0 0 1" />
     <origin xyz="0.0169 -0.0523 0.22" rpy="0 0 -1.2566370"/>
-  </xacro:camera_macro>
+  </xacro:occam_camera_macro>
 
-  <xacro:camera_macro robot_namespace="${namespace}" camera_id="2" frame="occam2_frame">
+  <xacro:occam_camera_macro robot_namespace="${namespace}" camera_id="2" frame="occam2_frame">
     <axis xyz="0 0 1" />
     <origin xyz="-0.0444 -0.0323 0.22" rpy="0 0 -2.5132741"/>
-  </xacro:camera_macro>
+  </xacro:occam_camera_macro>
 
-  <xacro:camera_macro robot_namespace="${namespace}" camera_id="3" frame="occam3_frame">
+  <xacro:occam_camera_macro robot_namespace="${namespace}" camera_id="3" frame="occam3_frame">
     <axis xyz="0 0 1" />
     <origin xyz="-0.0444 0.0323 0.22" rpy="0 0 -3.7699111"/>
-  </xacro:camera_macro>
+  </xacro:occam_camera_macro>
 
-  <xacro:camera_macro robot_namespace="${namespace}" camera_id="4" frame="occam4_frame">
+  <xacro:occam_camera_macro robot_namespace="${namespace}" camera_id="4" frame="occam4_frame">
     <axis xyz="0 0 1" />
     <origin xyz="0.0169 0.0523 0.22" rpy="0 0 -5.0265482"/>
-  </xacro:camera_macro>
+  </xacro:occam_camera_macro>
 
-  <xacro:camera_macro robot_namespace="${namespace}" camera_id="5" frame="downcam_frame">
+  <xacro:downcam_camera_macro robot_namespace="${namespace}" camera_id="5" frame="downcam_frame">
     <axis xyz="0 0 1" />
     <origin xyz="0 0 -0.1" rpy="0 1.57 0"/>
-  </xacro:camera_macro>
+  </xacro:downcam_camera_macro>
 
 <!--
   <xacro:regular_camera_plugin_macro

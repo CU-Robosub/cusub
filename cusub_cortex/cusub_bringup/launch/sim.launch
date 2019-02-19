@@ -3,19 +3,19 @@
     <arg name="environment" default="divewell_all_tasks"/> <!-- enviroment to launch into: transdec, divewell, etc. -->
 
     <!-- Controls/SensorFusion -->
-    <include file="$(find controller)/launch/controller_matrix.launch"/>
-    <include file="$(find sensor_fusion)/launch/ekf.launch"/>
+    <include file="$(find pid_controller)/launch/controller_matrix.launch"/>
+    <include file="$(find cusub_common_bringup)/launch/ekf.launch"/>
 
     <group if="$(eval arg('environment')=='divewell_all_tasks')">
-        <include file="$(find robosub_scenarios)/launch/divewell_all_task.launch"/>
+        <include file="$(find cusub_sim_bringup)/launch/divewell_all_task.launch"/>
     </group>
 
     <group if="$(eval arg('environment')=='divewell_startgate')">
-        <include file="$(find robosub_scenarios)/launch/divewell_startgate.launch"/>
+        <include file="$(find cusub_sim_bringup)/launch/divewell_startgate.launch"/>
     </group>
 
     <group if="$(eval arg('environment')=='transdec')">
-        <include file="$(find robosub_scenarios)/launch/TRANSDEC_21.launch"/>
+        <include file="$(find cusub_sim_bringup)/launch/TRANSDEC_21.launch"/>
     </group>
 
 </launch>

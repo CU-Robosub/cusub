@@ -9,16 +9,49 @@
            command="$(find xacro)/xacro '$(find robosub_descriptions)/models/Dropper/Dropper.xacro'" />
   </node>
 
-  <!--<node name="relay_dvl" pkg="topic_tools" type="relay" args="/leviathan/dvl_twist /drivers/dvl/vel"/>-->
   <node name="imu" pkg="topic_tools" type="relay" args="/leviathan/imu /imu/data"/>
   <node name="depth" pkg="topic_tools" type="relay" args="/depth /drivers/depth_sensor/depth"/>
 
+  <node name="caminfo_occam0" pkg="leviathan_gazebo_drivers" type="CameraInfoPublisher.py">
+    <param name="camera_info_topic" value="/occam/image0/camera_info"/>
+    <param name="frameid" value="leviathan/occam0_frame"/>
+    <rosparam command="load" file="$(find leviathan_gazebo_drivers)/config/gazebo_occam_params.yaml"/>
+  </node>
   <node name="relay_occam0" pkg="topic_tools" type="relay" args="/leviathan/camera_0/image_raw /occam/image0"/>
+
+  <node name="caminfo_occam1" pkg="leviathan_gazebo_drivers" type="CameraInfoPublisher.py">
+    <param name="camera_info_topic" value="/occam/image1/camera_info"/>
+    <param name="frameid" value="leviathan/occam1_frame"/>
+    <rosparam command="load" file="$(find leviathan_gazebo_drivers)/config/gazebo_occam_params.yaml"/>
+  </node>
   <node name="relay_occam1" pkg="topic_tools" type="relay" args="/leviathan/camera_1/image_raw /occam/image1"/>
+
+  <node name="caminfo_occam2" pkg="leviathan_gazebo_drivers" type="CameraInfoPublisher.py">
+    <param name="camera_info_topic" value="/occam/image2/camera_info"/>
+    <param name="frameid" value="leviathan/occam2_frame"/>
+    <rosparam command="load" file="$(find leviathan_gazebo_drivers)/config/gazebo_occam_params.yaml"/>
+  </node>
   <node name="relay_occam2" pkg="topic_tools" type="relay" args="/leviathan/camera_2/image_raw /occam/image2"/>
+
+  <node name="caminfo_occam3" pkg="leviathan_gazebo_drivers" type="CameraInfoPublisher.py">
+    <param name="camera_info_topic" value="/occam/image3/camera_info"/>
+    <param name="frameid" value="leviathan/occam3_frame"/>
+    <rosparam command="load" file="$(find leviathan_gazebo_drivers)/config/gazebo_occam_params.yaml"/>
+  </node>
   <node name="relay_occam3" pkg="topic_tools" type="relay" args="/leviathan/camera_3/image_raw /occam/image3"/>
+
+  <node name="caminfo_occam4" pkg="leviathan_gazebo_drivers" type="CameraInfoPublisher.py">
+    <param name="camera_info_topic" value="/occam/image4/camera_info"/>
+    <param name="frameid" value="leviathan/occam4_frame"/>
+    <rosparam command="load" file="$(find leviathan_gazebo_drivers)/config/gazebo_occam_params.yaml"/>
+  </node>
   <node name="relay_occam4" pkg="topic_tools" type="relay" args="/leviathan/camera_4/image_raw /occam/image4"/>
 
+  <node name="caminfo_downcam" pkg="leviathan_gazebo_drivers" type="CameraInfoPublisher.py">
+    <param name="camera_info_topic" value="/downcam/camera_info"/>
+    <param name="frameid" value="leviathan/downcam_frame"/>
+    <rosparam command="load" file="$(find leviathan_gazebo_drivers)/config/gazebo_downcam_params.yaml"/>
+  </node>
   <node name="relay_downcam" pkg="topic_tools" type="relay" args="/leviathan/camera_5/image_raw /downcam"/>
 
 </launch>
