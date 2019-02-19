@@ -45,10 +45,10 @@ from cv_bridge import CvBridge
 
 import cv2
 
-RVEC = np.array([0, 0, 0], dtype=np.float)
-""" numpy.array : Constant array of zeros, used as rotation vector for project points"""
-TVEC = np.array([0, 0, 0], dtype=np.float)
-""" numpy.array : Constant array of zeros, used as translation vector for project points"""
+ZEROSX3 = np.array([0, 0, 0], dtype=np.float)
+""" numpy.array : Constant array of zeros, used as rotation & translation
+vector for project points
+"""
 
 class YOLOObjectClass(object):
     """ Detection class object
@@ -87,19 +87,25 @@ class YOLOObjectClass(object):
 
     @property
     def points(self):
-        """ Points representing bounding volume
+        """Points representing bounding volume
 
         Returns
         -------
         numpy.array
-            The points that define the bounding area of the
+            The points that define the bounding volume of the
             class relative to the object link
         """
         return self._points
 
     @property
     def color(self):
-        """Color to use for debug image of detections of class"""
+        """ Debug image color
+
+        Returns
+        -------
+        tuple
+            Color to use for debug image of detections of class
+        """
         return self._color
 
 class YOLOObject(object):
@@ -130,7 +136,7 @@ class YOLOObject(object):
 
     @property
     def classes(self):
-        """ Detection Classes
+        """Detection Classes
 
         Returns
         -------
@@ -176,7 +182,7 @@ class Camera(object):
         Parameters
         ----------
         frame : str
-
+            Name of frame the camera is centered at
         """
         self._frame = frame
 
@@ -192,7 +198,7 @@ class Camera(object):
         return self._frame
 
     def is_ready(self):
-        """ Is the camera ready?
+        """Is the camera ready?
 
         Checks to see if the camera is ready by seeing if the object
         contiains the camera matrix and distortion coefficents needed
@@ -213,6 +219,8 @@ class YOLOFaker(object):
     Takes in configuration yaml for camera, robot, and obstacle
     configurations and generates bounding boxes
     """
+    # pylint: disable=too-many-instance-attributes
+    # This is a node that needs a lot of parameters
 
     objects = {}
     """dict : Dictionary of objects used for bounding box generation"""
@@ -231,6 +239,11 @@ class YOLOFaker(object):
 
     darknet_detection_pub = None
     """rospy.Publisher : Publisher to send detections to"""
+
+    min_pixel_size = 10
+    """int: Minimum width or height of bounding box in pixels that will
+    be shown as a detection
+    """
 
     show_points = False
     """bool : Show debug bounding volume points"""
@@ -258,10 +271,10 @@ class YOLOFaker(object):
         self.broadcaster.sendTransform(tvec, rvec, odom.header.stamp, obj.frame_id, "world")
 
     def robot_odometry_callback(self, odom):
-        """ Robot odometry
+        """Robot odometry
 
         Callback to broadcast ground truth of robot so we can transform
-        into the real camera frame laster
+        into the real camera frame
 
         Parameters
         ----------
@@ -303,7 +316,7 @@ class YOLOFaker(object):
             camera.height = info.height
 
     def render_debug_context(self, cv_image, detections, camera):
-        """ Renders debug information to image
+        """Renders debug information to image
 
         Parameters
         ----------
@@ -337,7 +350,7 @@ class YOLOFaker(object):
                         )
 
     def camera_image_callback(self, image, camera):
-        """ Gets images from camera to generate detections on
+        """Gets images from camera to generate detections on
 
         Computes where the bounding boxes should be in the image, and
         fakes YOLO bounding boxes output as well as publishing a debug
@@ -445,14 +458,14 @@ class YOLOFaker(object):
             if new_pts is not None:
 
                 new_pts = np.array(new_pts, dtype=np.float)
-                image_pts = cv2.projectPoints(new_pts, RVEC, TVEC,
+                image_pts = cv2.projectPoints(new_pts, ZEROSX3, ZEROSX3,
                                               camera.camera_matrix, camera.distortion_coeff)
 
                 bounding_box = self.bounding_box_from_points(image_pts[0], camera)
 
                 # Filter objects when they get to narrow to realistically be detected
-                if bounding_box[1] - bounding_box[0] > 10 \
-                   and bounding_box[3] - bounding_box[2] > 10:
+                if bounding_box[1] - bounding_box[0] > self.min_pixel_size \
+                   and bounding_box[3] - bounding_box[2] > self.min_pixel_size:
                     detections.append((bounding_box, obj_class.color,
                                        obj_class.name, image_pts[0]))
 
@@ -501,7 +514,7 @@ class YOLOFaker(object):
 
     def run(self):
         """
-        Starts the yolofaker node by initalizing all the subscribers
+        Starts the yolo_faker node by initalizing all the subscribers
         and publishers.  Spins for rest of nodes life.
         """
 
@@ -510,8 +523,12 @@ class YOLOFaker(object):
 
         self.bridge = CvBridge()
 
+        # Topic to publish fake detections to
         bouding_boxes_topic = rospy.get_param('~bounding_boxes_topic')
         sub_pose_topic = rospy.get_param('~sub_pose_topic')
+
+        # Parameter for smallest width/height allowed for bounding box in pixels
+        self.min_pixel_size = rospy.get_param('~min_pixel_size', 10)
 
         # Shows bounding volume points for debugging
         self.show_points = rospy.get_param('~show_points', False)
