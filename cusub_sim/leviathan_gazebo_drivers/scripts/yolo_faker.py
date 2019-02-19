@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This module contains the YOLOFaker node.  It generates bounding boxes
 for objects in the sub simulator by taking in information about the
@@ -27,7 +28,6 @@ correctly unless you adjust the cameras field of view bigger than it
 actually is and then provide a camera matrix with the correct parameters
 which gazebo will not publish.
 """
-#!/usr/bin/env python
 
 from functools import partial
 
@@ -70,9 +70,9 @@ class YOLOObjectClass(object):
             List of points bounding the volume of the object to generate
             a detection for
         """
-        self.name = name
-        self.color = color
-        self.points = points
+        self._name = name
+        self._color = color
+        self._points = points
 
     @property
     def name(self):
@@ -83,7 +83,7 @@ class YOLOObjectClass(object):
         str
             Name of detection
         """
-        return self.name
+        return self._name
 
     @property
     def points(self):
@@ -95,12 +95,12 @@ class YOLOObjectClass(object):
             The points that define the bounding area of the
             class relative to the object link
         """
-        return self.points
+        return self._points
 
     @property
     def color(self):
         """Color to use for debug image of detections of class"""
-        return self.color
+        return self._color
 
 class YOLOObject(object):
     """Holds object information required for bounding box generation"""
@@ -114,8 +114,8 @@ class YOLOObject(object):
         classes : list
             List of classes object can have detected in it
         """
-        self.frame_id = frame_id
-        self.classes = classes
+        self._frame_id = frame_id
+        self._classes = classes
 
     @property
     def frame_id(self):
@@ -126,7 +126,7 @@ class YOLOObject(object):
         str
             Frame ID the object is referenced to
         """
-        return self.frame_id
+        return self._frame_id
 
     @property
     def classes(self):
@@ -137,7 +137,7 @@ class YOLOObject(object):
         list
             Classes of detections the object generates
         """
-        return self.classes
+        return self._classes
 
 class Camera(object):
     """
@@ -178,7 +178,7 @@ class Camera(object):
         frame : str
 
         """
-        self.frame = frame
+        self._frame = frame
 
     @property
     def frame(self):
@@ -189,7 +189,7 @@ class Camera(object):
         str
             The name of the frame that the camera is in
         """
-        return self.frame
+        return self._frame
 
     def is_ready(self):
         """ Is the camera ready?
@@ -252,7 +252,7 @@ class YOLOFaker(object):
         tvec = (odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z)
         rvec = (odom.pose.pose.orientation.x, odom.pose.pose.orientation.y,
                 odom.pose.pose.orientation.z, odom.pose.pose.orientation.w)
-        self.broadcaster.sendTransform(tvec, rvec, odom.header.stamp, obj.frame_id(), "world")
+        self.broadcaster.sendTransform(tvec, rvec, odom.header.stamp, obj.frame_id, "world")
 
     def robot_odometry_callback(self, odom):
         """ Robot odometry
@@ -297,9 +297,9 @@ class YOLOFaker(object):
 
         if not camera.is_ready():
 
-            camera.cameraMatrix = np.array(info.K)
-            camera.cameraMatrix.shape = (3, 3)
-            camera.distortionCoeff = np.array(info.D)
+            camera.camera_matrix = np.array(info.K)
+            camera.camera_matrix.shape = (3, 3)
+            camera.distortion_coeff = np.array(info.D)
 
             camera.width = info.width
             camera.height = info.height
@@ -322,7 +322,7 @@ class YOLOFaker(object):
 
         cv_image = self.bridge.imgmsg_to_cv2(image, desired_encoding="rgb8")
 
-        if camera.isReady():
+        if camera.is_ready():
 
             # Fake darknet yolo detections message
             bounding_boxes = BoundingBoxes()
@@ -364,10 +364,9 @@ class YOLOFaker(object):
             if bounding_boxes.bounding_boxes:
                 self.darknet_detection_pub.publish(bounding_boxes)
 
-
-        if camera.debugImageEnabled:
+        if camera.debug_image_pub:
             image_message = self.bridge.cv2_to_imgmsg(cv_image, encoding="rgb8")
-            camera.debugImagePub.publish(image_message)
+            camera.debug_image_pub.publish(image_message)
 
     def get_detections(self, obj, camera):
         """Takes in object and camera and finds objects in the cameras view
@@ -387,13 +386,13 @@ class YOLOFaker(object):
 
         detections = []
 
-        for obj_class in obj.classes():
+        for obj_class in obj.classes:
 
             new_pts = []
             for point in obj_class.points:
 
                 obj_pose_stamped = PoseStamped()
-                obj_pose_stamped.header.frame_id = obj.frame_id()
+                obj_pose_stamped.header.frame_id = obj.frame_id
                 pose = Pose()
                 position = Point()
                 position.x = point[0]
@@ -421,14 +420,14 @@ class YOLOFaker(object):
 
                 new_pts = np.array(new_pts, dtype=np.float)
                 result = cv2.projectPoints(new_pts, RVEC, TVEC,
-                                           camera.cameraMatrix, camera.distortionCoeff)
+                                           camera.camera_matrix, camera.distortion_coeff)
 
                 bounding_box = self.bounding_box_from_points(result[0], camera)
 
                 # Filter objects when they get to narrow to realistically be detected
                 if bounding_box[1] - bounding_box[0] > 10 \
                    and bounding_box[3] - bounding_box[2] > 10:
-                    detections.append((bounding_box, obj_class.color(), obj_class.name()))
+                    detections.append((bounding_box, obj_class.color, obj_class.name))
 
         return detections
 
