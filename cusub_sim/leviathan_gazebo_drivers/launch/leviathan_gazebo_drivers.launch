@@ -47,6 +47,11 @@
   </node>
   <node name="relay_occam4" pkg="topic_tools" type="relay" args="/leviathan/camera_4/image_raw /occam/image4"/>
 
+  <node name="caminfo_downcam" pkg="leviathan_gazebo_drivers" type="CameraInfoPublisher.py">
+    <param name="camera_info_topic" value="/downcam/camera_info"/>
+    <param name="frameid" value="leviathan/downcam_frame"/>
+    <rosparam command="load" file="$(find leviathan_gazebo_drivers)/config/gazebo_downcam_params.yaml"/>
+  </node>
   <node name="relay_downcam" pkg="topic_tools" type="relay" args="/leviathan/camera_5/image_raw /downcam"/>
 
 </launch>

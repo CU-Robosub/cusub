@@ -232,6 +232,9 @@ class YOLOFaker(object):
     darknet_detection_pub = None
     """rospy.Publisher : Publisher to send detections to"""
 
+    show_points = False
+    """bool : Show debug bounding volume points"""
+
     def __init__(self):
         pass
 
@@ -272,11 +275,6 @@ class YOLOFaker(object):
         self.broadcaster.sendTransform(tvec, rvec, odom.header.stamp,
                                        "leviathan_gt/base_link", "world")
 
-        tvec = (0.055, 0, 0.22)
-        rvec = (0, 0, 0, 1)
-        self.broadcaster.sendTransform(tvec, rvec, odom.header.stamp,
-                                       "leviathan_gt/occam0_frame", "leviathan_gt/base_link")
-
     @staticmethod
     def camera_info_callback(info, camera):
         """Get camera info for each camera we are running on for accurate point projection
@@ -303,6 +301,40 @@ class YOLOFaker(object):
 
             camera.width = info.width
             camera.height = info.height
+
+    def render_debug_context(self, cv_image, detections, camera):
+        """ Renders debug information to image
+
+        Parameters
+        ----------
+        cv_image : numpy.ndarray
+            Image to render detections on
+        detections : tuple
+            Detection data to render for debug
+        show_points : bool
+            Render bounding volume points?
+        """
+
+        for det in detections:
+
+            # Draw bounding box
+            cv2.rectangle(
+                cv_image,
+                (int(det[0][0]), int(det[0][2])),
+                (int(det[0][1]), int(det[0][3])),
+                det[1], 2
+                )
+
+            # Draw bounding volume points
+            if self.show_points:
+                for point in det[3]:
+                    cv2.circle(
+                        cv_image,
+                        (int(point[0][0]), camera.height - int(point[0][1])),
+                        3,
+                        det[1],
+                        2
+                        )
 
     def camera_image_callback(self, image, camera):
         """ Gets images from camera to generate detections on
@@ -340,13 +372,7 @@ class YOLOFaker(object):
 
                     if camera.debug_image_pub:
 
-                        for box in detections:
-                            cv2.rectangle(
-                                cv_image,
-                                (int(box[0][0]), int(box[0][2])),
-                                (int(box[0][1]), int(box[0][3])),
-                                box[1], 2
-                                )
+                        self.render_debug_context(cv_image, detections, camera)
 
                     for det in detections:
 
@@ -381,7 +407,7 @@ class YOLOFaker(object):
         Returns
         -------
         list
-            List of detections (Bounding Box, Color, Name) in current camera image
+            List of detections (Bounding Box, Color, Name, Points) in current camera image
         """
 
         detections = []
@@ -419,15 +445,16 @@ class YOLOFaker(object):
             if new_pts is not None:
 
                 new_pts = np.array(new_pts, dtype=np.float)
-                result = cv2.projectPoints(new_pts, RVEC, TVEC,
-                                           camera.camera_matrix, camera.distortion_coeff)
+                image_pts = cv2.projectPoints(new_pts, RVEC, TVEC,
+                                              camera.camera_matrix, camera.distortion_coeff)
 
-                bounding_box = self.bounding_box_from_points(result[0], camera)
+                bounding_box = self.bounding_box_from_points(image_pts[0], camera)
 
                 # Filter objects when they get to narrow to realistically be detected
                 if bounding_box[1] - bounding_box[0] > 10 \
                    and bounding_box[3] - bounding_box[2] > 10:
-                    detections.append((bounding_box, obj_class.color, obj_class.name))
+                    detections.append((bounding_box, obj_class.color,
+                                       obj_class.name, image_pts[0]))
 
         return detections
 
@@ -485,6 +512,9 @@ class YOLOFaker(object):
 
         bouding_boxes_topic = rospy.get_param('~bounding_boxes_topic')
         sub_pose_topic = rospy.get_param('~sub_pose_topic')
+
+        # Shows bounding volume points for debugging
+        self.show_points = rospy.get_param('~show_points', False)
 
         # Fake darknet YOLO
         self.darknet_detection_pub = rospy.Publisher(bouding_boxes_topic,

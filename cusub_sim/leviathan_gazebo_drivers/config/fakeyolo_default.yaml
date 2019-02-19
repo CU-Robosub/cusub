@@ -12,6 +12,12 @@ cameras:
     debug_image_enabled: True
     debug_image_topic: '/occam/image0_debug'
     camera_info_topic: '/occam/image0/camera_info'
+  downcam:
+    frame: 'leviathan_gt/downcam_frame'
+    image_topic: '/downcam'
+    debug_image_enabled: True
+    debug_image_topic: '/downcam_debug'
+    camera_info_topic: '/downcam/camera_info'
 
 # Objects to run fake yolo on
 # You can have multiple classes per object with different point offsets, like the 2 start gate poles
@@ -26,6 +32,41 @@ objects:
    - name: 'startgate_pole'
      debug_color: [0, 255, 0]
      points: [[-1.500, -0.075,  0.000],[-1.600, -0.075,  0.000],[-1.500,  0.075,  0.000],[-1.650,  0.075,  0.000],[-1.550, -0.075, -1.500],[-1.650, -0.075, -1.500],[-1.550,  0.075, -1.500],[-1.650,  0.075, -1.500]]
+ pathmarker1:
+  link: 'PathMarker_1/base_link'
+  odom_topic: '/PathMarker_1/pose_gt'
+  classes:
+   - name: 'pathmarker'
+     debug_color: [255, 0, 0]
+     points: [[-0.076, 0.076,  0.000],[-0.076, -0.076,  0.000],[ 0.427,  0.076,  0.000],[ 0.498, -0.076,  0.00],[ 0.780,  0.427,  0.000],[ 0.888,  0.325,  0.00],[ 0.600,  0.325, -0.256],[ 0.780,  0.145, -0.256],[ 0.130,  0.130, -0.256],[ 0.130, -0.130, -0.256]]
+ pathmarker2:
+  link: 'PathMarker_2/base_link'
+  odom_topic: '/PathMarker_2/pose_gt'
+  classes:
+   - name: 'pathmarker'
+     debug_color: [255, 0, 0]
+     points: [[-0.076, 0.076,  0.000],[-0.076, -0.076,  0.000],[ 0.427,  0.076,  0.000],[ 0.498, -0.076,  0.00],[ 0.780,  0.427,  0.000],[ 0.888,  0.325,  0.00],[ 0.600,  0.325, -0.256],[ 0.780,  0.145, -0.256],[ 0.130,  0.130, -0.256],[ 0.130, -0.130, -0.256]]
+ roulette:
+  link: 'Roulette_1/base_link'
+  odom_topic: '/Roulette_1/pose_gt'
+  classes:
+   - name: 'roulette'
+     debug_color: [255, 127, 80]
+     points: [[ 0.00, 0.00,  0.00],[ 0.43, 0.00,  0.00],[ 0.00, -0.70,  0.00],[ 0.43, -0.70,  0.00]]
+ dice1:
+  link: 'dice1_1/base_link'
+  odom_topic: '/Dice1_1/pose_gt'
+  classes:
+   - name: 'dice1'
+     debug_color: [0, 255, 180]
+     points: [[ 0.0000, -0.2286,  0.0000],[ 0.2286, -0.2286,  0.0000],[ 0.0000,  0.0000,  0.0000],[ 0.2286,  0.0000,  0.0000],[ 0.0000, -0.2286, -0.2286],[ 0.2286, -0.2286, -0.2286],[ 0.0000,  0.0000, -0.2286],[ 0.2286,  0.0000, -0.2286]]
+ dice2:
+  link: 'dice2_1/base_link'
+  odom_topic: '/Dice2_1/pose_gt'
+  classes:
+   - name: 'dice2'
+     debug_color: [255, 165, 0]
+     points: [[ 0.0000, -0.2286,  0.0000],[ 0.2286, -0.2286,  0.0000],[ 0.0000,  0.0000,  0.0000],[ 0.2286,  0.0000,  0.0000],[ 0.0000, -0.2286, -0.2286],[ 0.2286, -0.2286, -0.2286],[ 0.0000,  0.0000, -0.2286],[ 0.2286,  0.0000, -0.2286]]
  dice5:
   link: 'Dice5_1/base_link'
   odom_topic: '/Dice5_1/pose_gt'
