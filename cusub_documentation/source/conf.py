@@ -16,6 +16,10 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../cusub_sim/leviathan_gazebo_drivers/scripts/'))
+
 
 # -- Project information -----------------------------------------------------
 
@@ -40,7 +44,10 @@ release = u'0.0.1'
 # ones.
 extensions = [
     'sphinx.ext.intersphinx',
-    'sphinx.ext.viewcode'
+    'sphinx.ext.viewcode',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.mathjax'
 ]
 
 intersphinx_mapping = {

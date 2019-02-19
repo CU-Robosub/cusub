@@ -1,7 +1,14 @@
-<robot
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro"
   name="Roulette_robot">
+
+<!-- Loading file with sensor macros -->
+<xacro:include filename="$(find uuv_sensor_ros_plugins)/urdf/sensor_snippets.xacro"/>
+
+<xacro:macro name="roulette" params="namespace">
+
   <link
-    name="Roulette_link">
+    name="${namespace}/base_link">
     <inertial>
       <origin
         xyz="0.2159 -0.35433 0.00124640000000002"
@@ -35,7 +42,13 @@
       </geometry>
     </collision>
   </link>
-  <gazebo reference="Roulette_link">
+  <xacro:default_pose_3d namespace="${namespace}" parent_link="${namespace}/base_link" />
+  <gazebo reference="${namespace}/base_link">
       <turnGravityOff>false</turnGravityOff>
   </gazebo>
+
+</xacro:macro>
+
+<xacro:roulette namespace="$(arg namespace)"/>
+
 </robot>
