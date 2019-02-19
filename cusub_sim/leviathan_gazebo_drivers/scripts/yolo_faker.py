@@ -379,7 +379,7 @@ class YOLOFaker(object):
 
             for _, obj in self.objects.iteritems():
 
-                detections = self.get_detections(obj, camera)
+                detections = self.get_detections(obj, camera, image.header.stamp)
 
                 if detections is not None:
 
@@ -407,7 +407,7 @@ class YOLOFaker(object):
             image_message = self.bridge.cv2_to_imgmsg(cv_image, encoding="rgb8")
             camera.debug_image_pub.publish(image_message)
 
-    def get_detections(self, obj, camera):
+    def get_detections(self, obj, camera, time):
         """Takes in object and camera and finds objects in the cameras view
 
         Parameters
@@ -416,6 +416,8 @@ class YOLOFaker(object):
             Object containg detection classes to find in image space
         camera : Camera
             Camera parameters to use when projecting object points into image space
+        time : Time
+            Time to get detections for
 
         Returns
         -------
@@ -432,6 +434,7 @@ class YOLOFaker(object):
 
                 obj_pose_stamped = PoseStamped()
                 obj_pose_stamped.header.frame_id = obj.frame_id
+                obj_pose_stamped.header.stamp = time
                 pose = Pose()
                 position = Point()
                 position.x = point[0]
