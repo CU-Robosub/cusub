@@ -86,7 +86,7 @@ class WaypointNavigator(object):
 
             if self.movement_mode == STRAFE_MODE:
 
-                targetyaw = math.radians(self.waypoint_yaw)
+                targetyaw = self.waypoint_yaw
 
                 # we are fixed yaw in this mode drive with drive/strafe
                 yaw_f64 = Float64()
