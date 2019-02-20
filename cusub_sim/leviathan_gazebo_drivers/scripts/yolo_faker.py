@@ -449,6 +449,7 @@ class YOLOFaker(object):
                 pose.orientation = orientation
                 obj_pose_stamped.pose = pose
 
+                self.listener.waitForTransform(camera.frame, obj.frame_id, time, rospy.Duration(1))
                 new_pt = self.listener.transformPose(camera.frame, obj_pose_stamped)
                 new_pt = [-1*new_pt.pose.position.y, new_pt.pose.position.z, new_pt.pose.position.x]
                 new_pts.append(new_pt)
