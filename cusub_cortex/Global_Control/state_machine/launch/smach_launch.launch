@@ -1,7 +1,11 @@
 <launch>
 
+    <arg name="config_filename" default="mission_config.yaml"/>
+
     <!-- Include the mission config parameters -->
-    <include file="$(find mission_config)/launch/mission_config.launch" />
+    <include file="$(find mission_config)/launch/mission_config.launch">
+        <arg name="config_filename" default="$(arg config_filename)"/>
+    </include>
     
     <node name="state_machine_node" pkg="state_machine" type="smach_top.py" output="screen" />
 </launch>
