@@ -8,12 +8,12 @@ tasks:
   dist_behind_gate: 1.0
   failed_repeat: true
  bangbang_dice:
-  prior: [7.0,2.0,1.7]
+  prior: [8.5,2.0,1.7]
   search_alg: simple
   dist_behind_gate: 1.0
   failed_repeat: false
- roulette:
-  prior: [0.65,-4.8,2.5]
+ bangbang_roulette:
+  prior: [0.5,-4.5,2.5]
   search_alg: simple
   dist_behind_gate: 1.0
   failed_repeat: false
@@ -22,4 +22,4 @@ tasks:
 mission_tasks:
  - start_gate
  - bangbang_dice
- - visit_roulette
+ - bangbang_roulette
