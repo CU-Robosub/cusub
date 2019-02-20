@@ -63,13 +63,13 @@ class PID_Pololu():
         self.yaw_sub = rospy.Subscriber(self.namespace + '/local_control/mux/yaw/control_effort',
                                         Float64, self.yaw_callback)
         ## Subscriber for the depth pid topic
-        self.depth_sub = rospy.Subscriber(self.namespace + '/local_control/pid/depth/control_effort',
+        self.depth_sub = rospy.Subscriber(self.namespace + '/local_control/mux/depth/control_effort',
                                           Float64, self.depth_callback)
         ## Subscriber for the drive pid topic
-        self.drive_sub = rospy.Subscriber(self.namespace + '/local_control/pid/drive/control_effort',
+        self.drive_sub = rospy.Subscriber(self.namespace + '/local_control/mux/drive/control_effort',
                                           Float64, self.drive_callback)
         ## Subscriber for the strafe pid topic
-        self.strafe_sub = rospy.Subscriber(self.namespace + '/local_control/pid/strafe/control_effort',
+        self.strafe_sub = rospy.Subscriber(self.namespace + '/local_control/mux/strafe/control_effort',
                                            Float64, self.strafe_callback)
 
 
