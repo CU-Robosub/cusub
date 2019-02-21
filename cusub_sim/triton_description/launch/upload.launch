@@ -5,7 +5,7 @@
   <!-- Vehicle's initial pose -->
   <arg name="x"     default="0"/>
   <arg name="y"     default="0"/>
-  <arg name="z"     default="-20"/>
+  <arg name="z"     default="-99"/>
   <arg name="roll"  default="0"/>
   <arg name="pitch" default="0"/>
   <arg name="yaw"   default="0"/>
@@ -56,7 +56,7 @@
   </group>
 
   <!-- Publish state and tf for in relation to the world frame -->
-  <include file="$(find uuv_gazebo_worlds)/launch/message_to_tf.launch">
+  <include file="$(find uuv_descriptions)/launch/message_to_tf.launch">
     	<arg name="namespace" value="$(arg namespace)"/>
   </include>
 

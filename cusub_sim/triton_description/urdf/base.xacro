@@ -29,12 +29,12 @@
     the mesh pose will have to be corrected below in the <visual> block.
     Open the meshes for the RexROV vehicle in Blender to see an example on the mesh placement.
   -->
-  <xacro:property name="visual_mesh_file" value="file://$(find triton_description)/meshes/TritonMesh.stl"/>
+  <xacro:property name="visual_mesh_file" value="file://$(find triton_description)/meshes/TritonMesh.STL"/>
 
   <!-- Collision geometry mesh, usually in STL format (it is recommended to keep
   this geometry as simple as possible to improve the performance the physics engine
   regarding the computation of collision forces) -->
-  <xacro:property name="collision_mesh_file" value="file://$(find triton_description)/meshes/TritonMesh.stl"/>
+  <xacro:property name="collision_mesh_file" value="file://$(find triton_description)/meshes/TritonMesh.STL"/>
 
   <!-- Vehicle macro -->
   <xacro:macro name="triton_base" params="namespace *gazebo">
