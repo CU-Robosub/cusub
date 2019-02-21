@@ -11,50 +11,50 @@
     <!-- Right Motor -->
     <xacro:thruster_macro robot_namespace="${namespace}" thruster_id="0">
         <axis xyz="1 0 0"/>
-        <origin xyz="0.073152 -0.281686 0.032258" rpy="0 0 0" />
+        <origin xyz="0 -0.281686 0" rpy="0 0 0" />
     </xacro:thruster_macro>
 
     <!-- Left Motor -->
     <xacro:thruster_macro robot_namespace="${namespace}" thruster_id="1">
         <axis xyz="1 0 0"/>
         <!-- zxy -->
-        <origin xyz="0.073152 0.281686 0.032258" rpy="0 0 0" />
+        <origin xyz="0 0.281686 0" rpy="0 0 0" />
     </xacro:thruster_macro>
 
     <!-- Front Left Motor -->
     <xacro:thruster_macro robot_namespace="${namespace}" thruster_id="2">
         <axis xyz="1 0 0"/>
-    <origin xyz="0.37084 0.163068 -0.078486 " rpy="0 -1.5707963 0" />
+    <origin xyz="0.20284 0.199 0" rpy="0 -1.5707963 0" />
     </xacro:thruster_macro>
 
     <!-- Front Right Motor -->
     <xacro:thruster_macro robot_namespace="${namespace}" thruster_id="3">
         <axis xyz="1 0 0"/>
-    <origin xyz="0.37084 -0.163068 -0.078486" rpy="0 -1.5707963 0" />
+    <origin xyz="0.20284 -0.199 0" rpy="0 -1.5707963 0" />
     </xacro:thruster_macro>
 
     <!-- Back Left Motor -->
     <xacro:thruster_macro robot_namespace="${namespace}" thruster_id="4">
         <axis xyz="1 0 0"/>
-    <origin xyz="-0.38481 0.163068 -0.078486" rpy="0 -1.5707963 0" />
+    <origin xyz="-0.20481 0.199 0" rpy="0 -1.5707963 0" />
     </xacro:thruster_macro>
 
     <!-- Back Right Motor -->
     <xacro:thruster_macro robot_namespace="${namespace}" thruster_id="5">
         <axis xyz="1 0 0"/>
-    <origin xyz="-0.38481 -0.163068  -0.078486" rpy="0 -1.5707963 0" />
+    <origin xyz="-0.20481 -0.199 0" rpy="0 -1.5707963 0" />
     </xacro:thruster_macro>
 
     <!-- Front Motor -->
     <xacro:thruster_macro robot_namespace="${namespace}" thruster_id="6">
         <axis xyz="1 0 0"/>
-    <origin xyz="0.439166 -0.007874 -0.060706" rpy="0 0 -1.5707963" />
+    <origin xyz="0.289166 0 -0.010706" rpy="0 0 -1.5707963" />
     </xacro:thruster_macro>
 
     <!-- Back Motor -->
     <xacro:thruster_macro robot_namespace="${namespace}" thruster_id="7">
         <axis xyz="1 0 0"/>
-    <origin xyz="-0.453136 -0.007874 -0.060706" rpy="0 0 -1.5707963" />
+    <origin xyz="-0.289166 0 -0.010706" rpy="0 0 -1.5707963" />
     </xacro:thruster_macro>
 
 </robot>

@@ -25,7 +25,7 @@
   <!-- Mount a camera  -->
   <xacro:ocam_camera_macro robot_namespace="${namespace}" camera_id="0" frame="ocam0_frame">
     <axis xyz="0 0 0" />
-    <origin xyz="0.055 0 0.22" rpy="0 -0.785398 0"/>
-  </xacro:occam_camera_macro>
+    <origin xyz="0.06 0 -0.05" rpy="0 -0.785398 0"/>
+  </xacro:ocam_camera_macro>
 
 </robot>
