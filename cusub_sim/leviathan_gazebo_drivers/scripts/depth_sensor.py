@@ -41,7 +41,8 @@ class DepthSensor(object):
         # create stepped depth resolution to match real sensor
         depth = round(depth / self.resolution_m) * self.resolution_m
 
-        self.depth_pose.pose.pose.position.z = depth
+        # -1 Z up
+        self.depth_pose.pose.pose.position.z = -1.0*depth
 
     def depth_sensor(self):
         """Republishes presure as depth pose"""

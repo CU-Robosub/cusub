@@ -3,17 +3,17 @@
 
 tasks:
  start_gate:
-  prior: [10,1.25,1.5]
+  prior: [10,1.25,-1.5]
   search_alg: simple
   dist_behind_gate: 1.0
   failed_repeat: true
  bangbang_dice:
-  prior: [8.5,2.0,1.7]
+  prior: [8.5,1.0,-2.3]
   search_alg: simple
   dist_behind_gate: 1.0
   failed_repeat: false
  bangbang_roulette:
-  prior: [0.5,-4.5,2.5]
+  prior: [0.5,-4.5,-2.5]
   search_alg: simple
   dist_behind_gate: 1.0
   failed_repeat: false

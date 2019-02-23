@@ -50,9 +50,9 @@
           <param name="topic_from_controller" value="/$(arg namespace)/local_control/pid/depth/control_effort" />
           <param name="topic_from_plant" value="/$(arg namespace)/local_control/pid/depth/state" />
           <param name="setpoint_topic" value="/$(arg namespace)/local_control/pid/depth/setpoint" />
-          <param name="Kp" value="100.0" />
+          <param name="Kp" value="-100.0" />
           <param name="Ki" value="0.0" />
-          <param name="Kd" value="50.0" />
+          <param name="Kd" value="-50.0" />
           <param name="rate" value="25" />
           <param name="upper_limit" value="100" />
           <param name="lower_limit" value="-100" />
@@ -128,7 +128,7 @@
            <param name="right_bang_effort" value="-60" />
          </node>
         <node pkg="topic_tools" type="mux" name="$(arg namespace)_strafe_mux" args="/$(arg namespace)/local_control/mux/strafe/control_effort /$(arg namespace)/local_control/pid/strafe/control_effort /$(arg namespace)/local_control/cv/strafe/control_effort">
-          <remap from="mux" to="strafe_mux"/>
+          <remap from="mux" to="$(arg namespace)_strafe_mux"/>
           <param name="initial_topic " value="/$(arg namespace)/local_control/pid/strafe/control_effort" />
         </node>
          <node name="$(arg namespace)_strafe_pid" pkg="pid" type="controller" >

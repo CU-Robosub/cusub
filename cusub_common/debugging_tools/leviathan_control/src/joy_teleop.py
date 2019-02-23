@@ -113,7 +113,7 @@ def joy_teleop():
         strafe_f64.data = -1*strafe_val*THRUSTER_POWER
         pub_strafe.publish(strafe_f64)
 
-        depth_f64.data = depth_f64.data - depth_val/10.0
+        depth_f64.data = depth_f64.data + depth_val/10.0
         pub_depth.publish(depth_f64)
 
         #pitch_f64.data = pitch_val*math.radians(15.0) # allow 15 deg pitch

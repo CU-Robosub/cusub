@@ -135,8 +135,8 @@
       <arg name="yaw" default="$(arg R_yaw)"/>
   </include>
 
-  <node pkg="tf" type="static_transform_publisher" name="world_leviathan_odom_broadcaster" args="$(arg leviathan_x) $(arg leviathan_y) $(arg leviathan_z) 0 0 0 world leviathan/odom 50" />
-  <node pkg="tf" type="static_transform_publisher" name="world_triton_odom_broadcaster" args="$(arg triton_x) $(arg triton_y) $(arg triton_z) 0 0 0 world triton/odom 50" />
+  <node pkg="tf" type="static_transform_publisher" name="world_leviathan_odom_broadcaster" args="$(arg leviathan_x) $(arg leviathan_y) 0 0 0 0 world leviathan/odom 50" />
+  <node pkg="tf" type="static_transform_publisher" name="world_triton_odom_broadcaster" args="$(arg triton_x) $(arg triton_y) 0 0 0 0 world triton/odom 50" />
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find leviathan_description)/launch/Leviathan_Startgate_Divewell_Gazebo.rviz" />
 
