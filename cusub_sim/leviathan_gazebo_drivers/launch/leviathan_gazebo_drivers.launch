@@ -1,8 +1,12 @@
 <launch>
 
-  <node name="gazebo_depth" pkg="leviathan_gazebo_drivers" type="depth_sensor.py"/>
+  <node name="gazebo_depth" pkg="leviathan_gazebo_drivers" type="depth_sensor.py">
+    <param name="namespace" value="leviathan"/>
+  </node>
   <node name="gazebo_dvl" pkg="leviathan_gazebo_drivers" type="dvl.py"/>
-  <node name="gazebo_leviathan_motor_control" pkg="leviathan_gazebo_drivers" type="motor_control.py"/>
+  <node name="gazebo_leviathan_motor_control" pkg="leviathan_gazebo_drivers" type="motor_control.py">
+    <param name="namespace" value="leviathan"/>
+  </node>
 
   <node name="gazebo_actuators" pkg="leviathan_gazebo_drivers" type="ActuatorService.py">
     <param name="dropperURDF"
