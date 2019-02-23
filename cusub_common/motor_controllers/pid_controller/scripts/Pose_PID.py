@@ -38,7 +38,7 @@ class Pose_PID():
         self.first = True
     	self.last_pose = Odometry()
         ## This listens to transforms from tf2 package for Odometry
-        self.listener = tf.TransformListener();
+        self.listener = tf.TransformListener()
         ## Publish to PID yaw state
         self.yaw_pub_data = Float64()
         self.yaw_pub = rospy.Publisher(self.namespace + '/local_control/pid/yaw/state',Float64,queue_size=1)
@@ -62,7 +62,7 @@ class Pose_PID():
 
         self.last_yaw = 0
 
-        self.state = rospy.Subscriber('/sensor_fusion/odometry/filtered', Odometry, self.state_callback, queue_size=1)
+        self.state = rospy.Subscriber(self.namespace + '/sensor_fusion/odometry/filtered', Odometry, self.state_callback, queue_size=1)
 
 
     def state_callback(self, msg):

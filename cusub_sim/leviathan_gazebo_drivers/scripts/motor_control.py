@@ -1,52 +1,71 @@
 #!/usr/bin/env python
+"""
+This module takes motor pwm commands and mapps them to thrust commands
+for gazebo
+"""
 
 import rospy
 
-from std_msgs.msg import Float64MultiArray, Float64
+from std_msgs.msg import Float64MultiArray
 from uuv_gazebo_ros_plugins_msgs.msg import FloatStamped
 
-def motor_command_callback(data):
-
-    global thrust
-
-    thrust[0].data = (data.data[7] - 1500.0) / -3.0 # Right
-    thrust[1].data = (data.data[6] - 1500.0) / -3.0 # Left
-
-    thrust[2].data = (data.data[2] - 1420.0) / 1.5 # Front Left
-    thrust[3].data = (data.data[1] - 1420.0) / 1.5 # Front Right
-    thrust[4].data = (data.data[4] - 1420.0) / 1.5 # Back Left
-    thrust[5].data = (data.data[3] - 1420.0) / 1.5 # Back Right
-
-    thrust[6].data = (data.data[0] - 1500.0) / 3.0 # Front
-    thrust[7].data = (data.data[5] - 1500.0) / 3.0 # Back
-
-def motor_control():
-
-    global thrust
+class MotorControl(object):
+    """This node takes motor pwm commands and mapps them to thrust commands
+    for gazebo
+    """
 
     thrust = []
-    for i in xrange(8):
-        thrust.append(FloatStamped())
-        thrust[i].data = 0
+    """list: List of FloatStamped containt motor thrust commands"""
 
-    rospy.init_node('gazebo_motor_control', anonymous=True)
-    rospy.Subscriber('/drivers/pololu_control/command', Float64MultiArray, motor_command_callback)
+    def __init__(self):
+        pass
 
-    pub_thrust = []
-    for i in xrange(8):
-        pub_thrust.append(rospy.Publisher('/leviathan/thrusters/'+str(i)+'/input', FloatStamped, queue_size=1))
+    def motor_command_callback(self, data):
+        """Get motor pwms and generate thrust commands from them"""
 
-    rate = rospy.Rate(30)
+        self.thrust[0].data = (data.data[7] - 1500.0) / -3.0 # Right
+        self.thrust[1].data = (data.data[6] - 1500.0) / -3.0 # Left
 
-    while not rospy.is_shutdown():
+        self.thrust[2].data = (data.data[2] - 1420.0) / 1.5 # Front Left
+        self.thrust[3].data = (data.data[1] - 1420.0) / 1.5 # Front Right
+        self.thrust[4].data = (data.data[4] - 1420.0) / 1.5 # Back Left
+        self.thrust[5].data = (data.data[3] - 1420.0) / 1.5 # Back Right
+
+        self.thrust[6].data = (data.data[0] - 1500.0) / 3.0 # Front
+        self.thrust[7].data = (data.data[5] - 1500.0) / 3.0 # Back
+
+    def motor_control(self):
+        """Main loop manages updating motor thrusts"""
 
         for i in xrange(8):
-            pub_thrust[i].publish(thrust[i])
+            self.thrust.append(FloatStamped())
+            self.thrust[i].data = 0
 
-        rate.sleep()
+        rospy.init_node('gazebo_motor_control', anonymous=True)
+
+        namespace = rospy.get_param('~namespace')
+
+        rospy.Subscriber(namespace + '/drivers/pololu_control/command',
+                         Float64MultiArray, self.motor_command_callback)
+
+        pub_thrust = []
+        for i in xrange(8):
+            pub_thrust.append(rospy.Publisher(namespace + '/thrusters/' \
+                                              + str(i) + '/input',
+                                              FloatStamped, queue_size=1))
+
+        rate = rospy.Rate(30)
+
+        while not rospy.is_shutdown():
+
+            for i in xrange(8):
+                pub_thrust[i].publish(self.thrust[i])
+
+            rate.sleep()
 
 if __name__ == '__main__':
+    MOTOR_CONTROL = MotorControl()
     try:
-        motor_control()
+        MOTOR_CONTROL.motor_control()
     except rospy.ROSInterruptException:
-        rospy.loginfo("Mother fucker!")
+        rospy.loginfo("Motor control died!")

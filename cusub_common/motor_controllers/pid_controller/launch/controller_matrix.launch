@@ -2,15 +2,15 @@
 
       <arg name="namespace" default="leviathan" />
 
-      <node name="Pose_PID" pkg="pid_controller" type="Pose_PID.py" output="screen">
+      <node name="$(arg namespace)_pose_pid" pkg="pid_controller" type="Pose_PID.py" output="screen">
         <param name="namespace" value="/$(arg namespace)" />
       </node>
-      <node name="PID_Pololu" pkg="pid_controller" type="PID_Pololu_matrix.py" output="screen">
+      <node name="$(arg namespace)_pid_Pololu" pkg="pid_controller" type="PID_Pololu_matrix.py" output="screen">
         <param name="namespace" value="/$(arg namespace)" />
       </node>
 
-     <node name="pitch_PID" pkg="pid" type="controller" >
-        <param name="node_name" value="pitch_PID" />
+     <node name="$(arg namespace)_pitch_pid" pkg="pid" type="controller" >
+        <param name="node_name" value="$(arg namespace)_pitch_pid" />
         <param name="topic_from_controller" value="/$(arg namespace)/local_control/pid/pitch/control_effort" />
         <param name="topic_from_plant" value="/$(arg namespace)/local_control/pid/pitch/state" />
         <param name="setpoint_topic" value="/$(arg namespace)/local_control/pid/pitch/setpoint" />
@@ -25,8 +25,8 @@
         <param name="max_loop_frequency" value="25.0" />
         <param name="min_loop_frequency" value="25.0" />
       </node>
-      <node name="roll_PID" pkg="pid" type="controller" >
-         <param name="node_name" value="roll_PID" />
+      <node name="$(arg namespace)_roll_pid" pkg="pid" type="controller" >
+         <param name="node_name" value="$(arg namespace)_roll_pid" />
          <param name="topic_from_controller" value="/$(arg namespace)/local_control/pid/roll/control_effort" />
          <param name="topic_from_plant" value="/$(arg namespace)/local_control/pid/roll/state" />
          <param name="setpoint_topic" value="/$(arg namespace)/local_control/pid/roll/setpoint" />
@@ -41,12 +41,12 @@
          <param name="max_loop_frequency" value="25.0" />
          <param name="min_loop_frequency" value="25.0" />
        </node>
-       <node pkg="topic_tools" type="mux" name="depth_mux" args="/$(arg namespace)/local_control/mux/depth/control_effort /$(arg namespace)/local_control/pid/depth/control_effort /$(arg namespace)/local_control/cv/depth/control_effort">
-          <remap from="mux" to="depth_mux"/>
+       <node pkg="topic_tools" type="mux" name="$(arg namespace)_depth_mux" args="/$(arg namespace)/local_control/mux/depth/control_effort /$(arg namespace)/local_control/pid/depth/control_effort /$(arg namespace)/local_control/cv/depth/control_effort">
+          <remap from="mux" to="$(arg namespace)_depth_mux"/>
           <param name="initial_topic " value="/$(arg namespace)/local_control/pid/depth/control_effort" />
        </node>
-       <node name="depth_PID" pkg="pid" type="controller" >
-          <param name="node_name" value="depth_PID" />
+       <node name="$(arg namespace)_depth_pid" pkg="pid" type="controller" >
+          <param name="node_name" value="$(arg namespace)_depth_pid" />
           <param name="topic_from_controller" value="/$(arg namespace)/local_control/pid/depth/control_effort" />
           <param name="topic_from_plant" value="/$(arg namespace)/local_control/pid/depth/state" />
           <param name="setpoint_topic" value="/$(arg namespace)/local_control/pid/depth/setpoint" />
@@ -61,7 +61,7 @@
           <param name="max_loop_frequency" value="25.0" />
           <param name="min_loop_frequency" value="25.0" />
         </node>
-       <node name="depth_cv" pkg="bangbang" type="bangbang.py">
+       <node name="$(arg namespace)_depth_cv" pkg="bangbang" type="bangbang.py">
           <param name="setpoint_topic" value="/$(arg namespace)/local_control/cv/depth/setpoint" />
           <param name="state_topic" value="/$(arg namespace)/local_control/cv/depth/state" />
           <param name="control_effort_topic" value="/$(arg namespace)/local_control/cv/depth/control_effort" />
@@ -70,12 +70,12 @@
           <param name="right_bang_effort" value="75" />
        </node>
         <!-- All of the PID controllers are below this -->
-        <node pkg="topic_tools" type="mux" name="yaw_mux" args="/$(arg namespace)/local_control/mux/yaw/control_effort /$(arg namespace)/local_control/pid/yaw/control_effort /$(arg namespace)/local_control/cv/yaw/control_effort">
-          <remap from="mux" to="yaw_mux"/>
+        <node pkg="topic_tools" type="mux" name="$(arg namespace)_yaw_mux" args="/$(arg namespace)/local_control/mux/yaw/control_effort /$(arg namespace)/local_control/pid/yaw/control_effort /$(arg namespace)/local_control/cv/yaw/control_effort">
+          <remap from="mux" to="$(arg namespace)_yaw_mux"/>
           <param name="initial_topic " value="/$(arg namespace)/local_control/pid/yaw/control_effort" />
         </node>
-        <node name="yaw_PID" pkg="pid" type="controller" >
-           <param name="node_name" value="yaw_PID" />
+        <node name="$(arg namespace)_yaw_pid" pkg="pid" type="controller" >
+           <param name="node_name" value="$(arg namespace)_yaw_pid" />
            <param name="topic_from_controller" value="/$(arg namespace)/local_control/pid/yaw/control_effort" />
            <param name="topic_from_plant" value="/$(arg namespace)/local_control/pid/yaw/state" />
            <param name="setpoint_topic" value="/$(arg namespace)/local_control/pid/yaw/setpoint" />
@@ -91,7 +91,7 @@
            <param name="min_loop_frequency" value="25.0" />
            <param name="angle_error" value="true" />
          </node>
-         <node name="yaw_cv" pkg="bangbang" type="bangbang.py">
+         <node name="$(arg namespace)_yaw_cv" pkg="bangbang" type="bangbang.py">
            <param name="setpoint_topic" value="/$(arg namespace)/local_control/cv/yaw/setpoint" />
            <param name="state_topic" value="/$(arg namespace)/local_control/cv/yaw/state" />
            <param name="control_effort_topic" value="/$(arg namespace)/local_control/cv/yaw/control_effort" />
@@ -99,12 +99,12 @@
            <param name="left_bang_effort" value="40" />
            <param name="right_bang_effort" value="-40" />
          </node>
-        <node pkg="topic_tools" type="mux" name="drive_mux" args="/$(arg namespace)/local_control/mux/drive/control_effort /$(arg namespace)/local_control/pid/drive/control_effort /$(arg namespace)/local_control/cv/drive/control_effort">
-          <remap from="mux" to="drive_mux"/>
+        <node pkg="topic_tools" type="mux" name="$(arg namespace)_drive_mux" args="/$(arg namespace)/local_control/mux/drive/control_effort /$(arg namespace)/local_control/pid/drive/control_effort /$(arg namespace)/local_control/cv/drive/control_effort">
+          <remap from="mux" to="$(arg namespace)_drive_mux"/>
           <param name="initial_topic " value="/$(arg namespace)/local_control/pid/drive/control_effort" />
         </node>
-        <node name="drive_PID" pkg="pid" type="controller" >
-           <param name="node_name" value="drive_PID" />
+        <node name="$(arg namespace)_drive_pid" pkg="pid" type="controller" >
+           <param name="node_name" value="$(arg namespace)_drive_pid" />
            <param name="topic_from_controller" value="/$(arg namespace)/local_control/pid/drive/control_effort" />
            <param name="topic_from_plant" value="/$(arg namespace)/local_control/pid/drive/state" />
            <param name="setpoint_topic" value="/$(arg namespace)/local_control/pid/drive/setpoint" />
@@ -119,7 +119,7 @@
            <param name="max_loop_frequency" value="25.0" />
            <param name="min_loop_frequency" value="25.0" />
          </node>
-         <node name="drive_cv" pkg="bangbang" type="bangbang.py">
+         <node name="$(arg namespace)_drive_cv" pkg="bangbang" type="bangbang.py">
            <param name="setpoint_topic" value="/$(arg namespace)/local_control/cv/drive/setpoint" />
            <param name="state_topic" value="/$(arg namespace)/local_control/cv/drive/state" />
            <param name="control_effort_topic" value="/$(arg namespace)/local_control/cv/drive/control_effort" />
@@ -127,12 +127,12 @@
            <param name="left_bang_effort" value="60" />
            <param name="right_bang_effort" value="-60" />
          </node>
-        <node pkg="topic_tools" type="mux" name="strafe_mux" args="/$(arg namespace)/local_control/mux/strafe/control_effort /$(arg namespace)/local_control/pid/strafe/control_effort /$(arg namespace)/local_control/cv/strafe/control_effort">
+        <node pkg="topic_tools" type="mux" name="$(arg namespace)_strafe_mux" args="/$(arg namespace)/local_control/mux/strafe/control_effort /$(arg namespace)/local_control/pid/strafe/control_effort /$(arg namespace)/local_control/cv/strafe/control_effort">
           <remap from="mux" to="strafe_mux"/>
           <param name="initial_topic " value="/$(arg namespace)/local_control/pid/strafe/control_effort" />
         </node>
-         <node name="strafe_PID" pkg="pid" type="controller" >
-            <param name="node_name" value="strafe_PID" />
+         <node name="$(arg namespace)_strafe_pid" pkg="pid" type="controller" >
+            <param name="node_name" value="$(arg namespace)_strafe_pid" />
             <param name="topic_from_controller" value="/$(arg namespace)/local_control/pid/strafe/control_effort" />
             <param name="topic_from_plant" value="/$(arg namespace)/local_control/pid/strafe/state" />
             <param name="setpoint_topic" value="/$(arg namespace)/local_control/pid/strafe/setpoint" />
@@ -147,7 +147,7 @@
             <param name="max_loop_frequency" value="25.0" />
             <param name="min_loop_frequency" value="25.0" />
           </node>
-         <node name="strafe_cv" pkg="bangbang" type="bangbang.py">
+         <node name="$(arg namespace)_strafe_cv" pkg="bangbang" type="bangbang.py">
            <param name="setpoint_topic" value="/$(arg namespace)/local_control/cv/strafe/setpoint" />
            <param name="state_topic" value="/$(arg namespace)/local_control/cv/strafe/state" />
            <param name="control_effort_topic" value="/$(arg namespace)/local_control/cv/strafe/control_effort" />

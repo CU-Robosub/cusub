@@ -2,9 +2,25 @@
 
     <arg name="environment" default="divewell_all_tasks"/> <!-- enviroment to launch into: transdec, divewell, etc. -->
 
-    <!-- Controls/SensorFusion -->
-    <include file="$(find pid_controller)/launch/controller_matrix.launch"/>
-    <include file="$(find cusub_common_bringup)/launch/ekf.launch"/>
+    <!-- Leviathan Controls/SensorFusion -->
+    <include file="$(find pid_controller)/launch/controller_matrix.launch">
+        <arg name="namespace" default="leviathan"/>
+    </include>
+    <include file="$(find cusub_common_bringup)/launch/ekf.launch">
+        <arg name="robot_name" default="leviathan"/>
+    </include>
+    <node pkg="tf" type="static_transform_publisher" name="leviathan_depth_broadcaster" args="0 0 0 0 0 0 leviathan/odom leviathan/depth_frame 100"/>
+    <include file="$(find leviathan_gazebo_drivers)/launch/leviathan_gazebo_drivers.launch"/>
+
+    <!-- Triton Controls/SensorFusion -->
+    <include file="$(find pid_controller)/launch/controller_matrix.launch">
+        <arg name="namespace" default="triton"/>
+    </include>
+    <include file="$(find cusub_common_bringup)/launch/ekf.launch">
+        <arg name="robot_name" default="triton"/>
+    </include>
+    <node pkg="tf" type="static_transform_publisher" name="triton_depth_broadcaster" args="0 0 0 0 0 0 triton/odom triton/depth_frame 100"/>
+    <include file="$(find leviathan_gazebo_drivers)/launch/triton_gazebo_drivers.launch"/>
 
     <group if="$(eval arg('environment')=='divewell_all_tasks')">
         <include file="$(find cusub_sim_bringup)/launch/divewell_all_task.launch"/>

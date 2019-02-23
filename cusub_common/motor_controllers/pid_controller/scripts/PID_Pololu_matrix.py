@@ -46,7 +46,7 @@ class PID_Pololu():
                                           1500, 1500, 1500, 1500])
 
         ## Publisher for sending commands to the pololu
-        self.motor_pub = rospy.Publisher('/drivers/pololu_control/command',
+        self.motor_pub = rospy.Publisher(self.namespace + '/drivers/pololu_control/command',
                                          Float64MultiArray, queue_size=1)
 
         rospy.Timer(rospy.Duration(.02), self.motor_publish)
@@ -78,7 +78,7 @@ class PID_Pololu():
         self.yaw_setpoint_pub_data = Float64()
 
         print "waiting for yaw"
-        msg = rospy.wait_for_message('/sensor_fusion/odometry/filtered', Odometry)
+        msg = rospy.wait_for_message(self.namespace + '/sensor_fusion/odometry/filtered', Odometry)
 
         orientation =  msg.pose.pose.orientation
         (roll, pitch, yaw) = tf.transformations.euler_from_quaternion([orientation.x,
@@ -88,7 +88,6 @@ class PID_Pololu():
         self.yaw_setpoint_pub_data = yaw
         self.yaw_setpoint_pub.publish(self.yaw_setpoint_pub_data)
         print "set yaw setpoint"
-
 
     def roll_callback(self,msg): self.effort_array[0] = msg.data
 
