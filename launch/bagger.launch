@@ -1,0 +1,54 @@
+<!-- Quick Rosbagger for the topics on Sim and Leviathan -->
+<launch>
+
+	<!-- Always default to the sim unless the user is leviathan -->
+	<arg name="sim" value="1" />
+	<arg name="sim" value="0" if="$(eval env('USER') == 'leviathan')" /> 
+	<arg name="downcam" default="1" />
+	<arg name="occam" default="tffff" /> <!-- modes 'tffff' or 'ttttt' -->
+	<arg name="bag_dir" value="$(env HOME)/bags/" />
+
+<!-- SIM BAGGING -->
+<group if="$(arg sim)" >
+       <group if="$(arg downcam)" >
+       	      <!-- Record Occam0 and Downcam -->
+              <group if="$(eval arg('occam') == 'tffff')" >
+       	      <node pkg="rosbag" type="record" name="rosbag_record_cam"
+	             args="record -o $(arg bag_dir) /leviathan/camera_0/image_raw /downcam" />
+	      </group>
+
+	      <!-- Record all cameras -->
+       	      <group unless="$(eval arg('occam') == 'tffff')" >
+              <node pkg="rosbag" type="record" name="rosbag_record_cam"
+	             args="record -o $(arg bag_dir) 
+		     	/leviathan/camera_0/image_raw
+		     	/leviathan/camera_1/image_raw 
+			/leviathan/camera_2/image_raw 
+			/leviathan/camera_3/image_raw 
+			/leviathan/camera_4/image_raw
+			/downcam" />
+       	      </group> 
+       </group>
+       <group unless="$(arg downcam)" >
+       	      <!-- Record just occam 0 -->
+              <group if="$(eval arg('occam') == 'tffff')" >
+       	      <node pkg="rosbag" type="record" name="rosbag_record_cam"
+	             args="record -o $(arg bag_dir) /leviathan/camera_0/image_raw" />
+	      </group>
+	      <!-- Record all Occam Cameras but not downcam -->
+       	      <group unless="$(eval arg('occam') == 'tffff')" >
+              <node pkg="rosbag" type="record" name="rosbag_record_cam"
+	             args="record -o $(arg bag_dir)
+		     	/leviathan/camera_0/image_raw
+		     	/leviathan/camera_1/image_raw 
+			/leviathan/camera_2/image_raw 
+			/leviathan/camera_3/image_raw 
+			/leviathan/camera_4/image_raw" />
+       	      </group> 
+       </group>
+</group>
+
+<!-- HARDWARE BAGGING -->
+
+</launch>
+
