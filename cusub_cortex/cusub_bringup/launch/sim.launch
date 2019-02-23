@@ -5,6 +5,7 @@
     <!-- Leviathan Controls/SensorFusion -->
     <include file="$(find pid_controller)/launch/controller_matrix.launch">
         <arg name="namespace" default="leviathan"/>
+        <arg name="setpoint" default="true"/>
     </include>
     <include file="$(find cusub_common_bringup)/launch/ekf.launch">
         <arg name="robot_name" default="leviathan"/>
@@ -15,6 +16,7 @@
     <!-- Triton Controls/SensorFusion -->
     <include file="$(find pid_controller)/launch/controller_matrix.launch">
         <arg name="namespace" default="triton"/>
+        <arg name="setpoint" default="false"/>
     </include>
     <include file="$(find cusub_common_bringup)/launch/ekf.launch">
         <arg name="robot_name" default="triton"/>

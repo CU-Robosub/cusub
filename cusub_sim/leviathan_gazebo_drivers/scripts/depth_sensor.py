@@ -78,4 +78,4 @@ if __name__ == '__main__':
     try:
         DEPTH_SENSOR.depth_sensor()
     except rospy.ROSInterruptException:
-        rospy.loginfo("Mother fucker!")
+        rospy.loginfo("Depth sensor died!")
