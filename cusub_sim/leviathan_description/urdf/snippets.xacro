@@ -4,7 +4,7 @@
   <xacro:macro name="occam_camera_macro" params="robot_namespace camera_id frame *axis *origin">
 
   <!--camera_link-->
-  <link name="${robot_namespace}/camera_${camera_id}">
+  <link name="${robot_namespace}/${frame}">
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
@@ -28,10 +28,10 @@
     <xacro:insert_block name="axis" />
     <xacro:insert_block name="origin" />
     <parent link="${namespace}/base_link"/>
-    <child link="${robot_namespace}/camera_${camera_id}"/>
+    <child link="${robot_namespace}/${frame}"/>
   </joint>
 
-  <gazebo reference="${robot_namespace}/camera_${camera_id}">
+  <gazebo reference="${robot_namespace}/${frame}">
     <sensor type="camera" name="rgb_camera">
       <update_rate>30.0</update_rate>
       <camera name="rgb_camera">
@@ -81,7 +81,7 @@
   <xacro:macro name="downcam_camera_macro" params="robot_namespace camera_id frame *axis *origin">
 
   <!--camera_link-->
-  <link name="${robot_namespace}/camera_${camera_id}">
+  <link name="${robot_namespace}/${frame}">
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
@@ -105,10 +105,10 @@
     <xacro:insert_block name="axis" />
     <xacro:insert_block name="origin" />
     <parent link="${namespace}/base_link"/>
-    <child link="${robot_namespace}/camera_${camera_id}"/>
+    <child link="${robot_namespace}/${frame}"/>
   </joint>
 
-  <gazebo reference="${robot_namespace}/camera_${camera_id}">
+  <gazebo reference="${robot_namespace}/${frame}">
     <sensor type="camera" name="rgb_camera">
       <update_rate>30.0</update_rate>
       <camera name="rgb_camera">

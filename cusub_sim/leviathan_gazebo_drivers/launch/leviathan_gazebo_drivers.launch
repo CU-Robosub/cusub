@@ -13,7 +13,6 @@
            command="$(find xacro)/xacro '$(find robosub_descriptions)/models/Dropper/Dropper.xacro'" />
   </node>
 
-  <node name="imu" pkg="topic_tools" type="relay" args="/leviathan/imu /imu/data"/>
   <node name="depth" pkg="topic_tools" type="relay" args="/depth /drivers/depth_sensor/depth"/>
 
   <node name="caminfo_occam0" pkg="leviathan_gazebo_drivers" type="CameraInfoPublisher.py">

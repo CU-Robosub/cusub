@@ -114,7 +114,7 @@ class GatePNPColorServer():
         pose = Pose()
         pose.position.x = tvec[2]
         pose.position.y = -1*tvec[0]
-        pose.position.z = tvec[1]
+        pose.position.z = -1*tvec[1]
 
         # TODO move this to the mapper
         # pose = self.expAvg.get_new_avg_pose(pose)

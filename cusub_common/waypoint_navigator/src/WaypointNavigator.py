@@ -138,7 +138,7 @@ class WaypointNavigator(object):
         self.strafe_state_sub = rospy.Subscriber(self.namespace + "/local_control/pid/strafe/state", Float64, self.strafeStateCallback)
 
         # get current sub position to figure out how to get where we want
-        self.pose_sub = rospy.Subscriber("/sensor_fusion/odometry/filtered", Odometry, self.odometryCallback)
+        self.pose_sub = rospy.Subscriber(self.namespace + "/sensor_fusion/odometry/filtered", Odometry, self.odometryCallback)
 
         # service to add waypoints to drive to
         s = rospy.Service('addWaypoint', AddWaypoint, self.addWaypoint)

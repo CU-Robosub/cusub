@@ -98,7 +98,6 @@ class Attack(Objective):
     def imuCallback(self, imu):
         if imu.linear_acceleration.x < -0.15:
             self.spike = True
-            rospy.loginfo("SPIKE!")
 
     def __init__(self, prior):
 
@@ -122,10 +121,10 @@ class Attack(Objective):
 
         self.depthStateSub = rospy.Subscriber("/leviathan/local_control/pid/depth/state", Float64, self.depthStateCallback)
 
-        self.imuSub = rospy.Subscriber("/imu/data", Imu, self.imuCallback)
+        self.imuSub = rospy.Subscriber("/leviathan/imu", Imu, self.imuCallback)
 
-        self.yawSelect = rospy.ServiceProxy('/yaw_mux/select', MuxSelect)
-        self.depthSelect = rospy.ServiceProxy('/depth_mux/select', MuxSelect)
+        self.yawSelect = rospy.ServiceProxy('/leviathan_yaw_mux/select', MuxSelect)
+        self.depthSelect = rospy.ServiceProxy('/leviathan_depth_mux/select', MuxSelect)
 
         super(Attack, self).__init__(self.outcomes, "Attack")
 

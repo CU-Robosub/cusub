@@ -19,6 +19,8 @@ from pose_filter import filter_poses
 class Mapper():
     def __init__(self):
 
+        self.namespace = rospy.get_param('~namespace')
+
         # new
         self.pose_sub = rospy.Subscriber('/Global_State/task_poses', Detection, self.pose_received)
 
@@ -125,7 +127,7 @@ class Mapper():
         # occam_pose.header.stamp = now
 
         # Gotta love tf
-        odom_pose = self.listener.transformPose('odom', occam_pose)
+        odom_pose = self.listener.transformPose(self.namespace + '/odom', occam_pose)
         return odom_pose
 
 
