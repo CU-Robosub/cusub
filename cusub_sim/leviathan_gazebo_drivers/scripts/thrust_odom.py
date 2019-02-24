@@ -3,7 +3,7 @@
 
 import rospy
 
-from nav_msgs.msg import Odometry
+from geometry_msgs.msg import TwistWithCovarianceStamped
 
 class ThrustOdom(object):
     """Publishes thrust odometry to stabalize EKF"""
@@ -13,13 +13,12 @@ class ThrustOdom(object):
 
         rospy.init_node('depth_sensor_gazebo', anonymous=True)
 
-        namespace = rospy.get_param('~namespace')
+        thrust_odom_pub = rospy.Publisher('thrust_odom',
+                                          TwistWithCovarianceStamped, queue_size=1)
 
-        thrust_odom_pub = rospy.Publisher(namespace + '/thrust_odom', Odometry, queue_size=1)
-
-        thrust_odom = Odometry()
+        thrust_odom = TwistWithCovarianceStamped()
         thrust_odom.header.seq = 0
-        thrust_odom.header.frame_id = namespace + '/dvl_link'
+        thrust_odom.header.frame_id = 'base_link'
         thrust_odom.twist.twist.angular.x = 0
         thrust_odom.twist.twist.angular.y = 0
         thrust_odom.twist.twist.angular.z = 0

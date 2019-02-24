@@ -20,7 +20,7 @@
     <param name="weights_path"          value="$(arg yolo_weights_path)" />
     <param name="config_path"           value="$(arg yolo_config_path)" />
     <param name="detect_sleep_time"     value="$(arg detect_sleep_time)" />
-    <remap from="/camera/rgb/image_raw"       to="/occam/image0"/>
+    <remap from="/camera/rgb/image_raw"       to="/leviathan/occam/image0"/>
   </node>
 
   <!-- <node pkg="darknet_cv" type="camera_multiplexer.py" name="occam2dark" output="screen" /> -->

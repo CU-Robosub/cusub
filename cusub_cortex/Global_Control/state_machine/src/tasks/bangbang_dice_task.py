@@ -123,8 +123,8 @@ class Attack(Objective):
 
         self.imuSub = rospy.Subscriber("/leviathan/imu", Imu, self.imuCallback)
 
-        self.yawSelect = rospy.ServiceProxy('/leviathan_yaw_mux/select', MuxSelect)
-        self.depthSelect = rospy.ServiceProxy('/leviathan_depth_mux/select', MuxSelect)
+        self.yawSelect = rospy.ServiceProxy('/leviathan/yaw_mux/select', MuxSelect)
+        self.depthSelect = rospy.ServiceProxy('/leviathan/depth_mux/select', MuxSelect)
 
         super(Attack, self).__init__(self.outcomes, "Attack")
 

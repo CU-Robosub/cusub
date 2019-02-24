@@ -24,8 +24,6 @@ class Pose_PID():
 
     def __init__(self):
 
-        self.namespace = rospy.get_param("~namespace")
-
         ## Last X position
         self.last_x = 0
         ## Last Y position
@@ -41,28 +39,28 @@ class Pose_PID():
         self.listener = tf.TransformListener()
         ## Publish to PID yaw state
         self.yaw_pub_data = Float64()
-        self.yaw_pub = rospy.Publisher(self.namespace + '/local_control/pid/yaw/state',Float64,queue_size=1)
+        self.yaw_pub = rospy.Publisher('local_control/pid/yaw/state',Float64,queue_size=1)
         ## Publish to PID roll state
         self.roll_pub_data = Float64()
-        self.roll_pub = rospy.Publisher(self.namespace + '/local_control/pid/roll/state',Float64,queue_size=1)
+        self.roll_pub = rospy.Publisher('local_control/pid/roll/state',Float64,queue_size=1)
         ## Publish to PID pitch state
         self.pitch_pub_data = Float64()
-        self.pitch_pub = rospy.Publisher(self.namespace + '/local_control/pid/pitch/state',Float64,queue_size=1)
+        self.pitch_pub = rospy.Publisher('local_control/pid/pitch/state',Float64,queue_size=1)
 
         self.depth_pub_data = Float64()
-        self.depth_pub = rospy.Publisher(self.namespace + '/local_control/pid/depth/state',Float64,queue_size=1)
+        self.depth_pub = rospy.Publisher('local_control/pid/depth/state',Float64,queue_size=1)
         ## Publish to PID drive state
         self.drive_sum = 0
-        self.drive_pub = rospy.Publisher(self.namespace + '/local_control/pid/drive/state',Float64,queue_size=1)
+        self.drive_pub = rospy.Publisher('local_control/pid/drive/state',Float64,queue_size=1)
 
         ## Publish to PID strafe state
 
         self.strafe_sum = 0
-        self.strafe_pub = rospy.Publisher(self.namespace + '/local_control/pid/strafe/state',Float64,queue_size=1)
+        self.strafe_pub = rospy.Publisher('local_control/pid/strafe/state',Float64,queue_size=1)
 
         self.last_yaw = 0
 
-        self.state = rospy.Subscriber(self.namespace + '/sensor_fusion/odometry/filtered', Odometry, self.state_callback, queue_size=1)
+        self.state = rospy.Subscriber('sensor_fusion/odometry/filtered', Odometry, self.state_callback, queue_size=1)
 
 
     def state_callback(self, msg):
@@ -139,8 +137,8 @@ class Pose_PID():
         temp.pose = msg.pose.pose
         temp.header.stamp = rospy.Time(0)
         try:
-            self.trans = self.listener.waitForTransform('/odom','/base_link',rospy.Time(0),rospy.Duration(.1))
-            self.trans = self.listener.lookupTransform('/odom','/base_link',rospy.Time(0))
+            self.trans = self.listener.waitForTransform('odom', 'base_link', rospy.Time(0), rospy.Duration(.1))
+            self.trans = self.listener.lookupTransform('odom', 'base_link', rospy.Time(0))
         except Exception as e:
             return
         #Next we turn the quaternions into euler angles
