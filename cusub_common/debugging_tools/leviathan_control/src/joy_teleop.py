@@ -62,34 +62,32 @@ class JoyTeleop(object):
 
         rospy.init_node('joy_teleop', anonymous=True)
 
-        namespace = rospy.get_param('~namespace')
-
         setpoint = rospy.get_param('~setpoint', True)
 
         if setpoint:
 
-            pub_yaw = rospy.Publisher(namespace + '/local_control/pid/yaw/setpoint',
+            pub_yaw = rospy.Publisher('local_control/pid/yaw/setpoint',
                                       Float64, queue_size=10)
-            pub_drive = rospy.Publisher(namespace + '/local_control/pid/drive/setpoint',
+            pub_drive = rospy.Publisher('local_control/pid/drive/setpoint',
                                         Float64, queue_size=10)
-            pub_strafe = rospy.Publisher(namespace + '/local_control/pid/strafe/setpoint',
+            pub_strafe = rospy.Publisher('local_control/pid/strafe/setpoint',
                                          Float64, queue_size=10)
 
         else: 
 
-            pub_yaw = rospy.Publisher(namespace + '/local_control/mux/yaw/control_effort',
+            pub_yaw = rospy.Publisher('local_control/mux/yaw/control_effort',
                                       Float64, queue_size=10)
-            pub_drive = rospy.Publisher(namespace + '/local_control/mux/drive/control_effort',
+            pub_drive = rospy.Publisher('local_control/mux/drive/control_effort',
                                          Float64, queue_size=10)
-            pub_strafe = rospy.Publisher(namespace + '/local_control/mux/strafe/control_effort',
+            pub_strafe = rospy.Publisher('local_control/mux/strafe/control_effort',
                                          Float64, queue_size=10)
 
-        pub_pitch = rospy.Publisher(namespace + '/local_control/pid/pitch/setpoint',
+        pub_pitch = rospy.Publisher('local_control/pid/pitch/setpoint',
                                     Float64, queue_size=10)
-        pub_roll = rospy.Publisher(namespace + '/local_control/pid/roll/setpoint',
+        pub_roll = rospy.Publisher('local_control/pid/roll/setpoint',
                                    Float64, queue_size=10)
 
-        pub_depth = rospy.Publisher(namespace + '/local_control/pid/depth/setpoint',
+        pub_depth = rospy.Publisher('local_control/pid/depth/setpoint',
                                     Float64, queue_size=10)
 
         self.strafe_axes = rospy.get_param("~strafe_axes", self.strafe_axes)
@@ -116,7 +114,7 @@ class JoyTeleop(object):
         roll_f64 = Float64()
         roll_f64.data = 0
 
-        rospy.Subscriber("/joy", Joy, self.joystick_state)
+        rospy.Subscriber("joy", Joy, self.joystick_state)
 
         rate = rospy.Rate(30)
 

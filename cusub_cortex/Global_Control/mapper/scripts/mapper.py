@@ -127,7 +127,7 @@ class Mapper():
         # occam_pose.header.stamp = now
 
         # Gotta love tf
-        odom_pose = self.listener.transformPose(self.namespace + '/odom', occam_pose)
+        odom_pose = self.listener.transformPose('odom', occam_pose)
         return odom_pose
 
 

@@ -43,14 +43,12 @@ class MotorControl(object):
 
         rospy.init_node('gazebo_motor_control', anonymous=True)
 
-        namespace = rospy.get_param('~namespace')
-
-        rospy.Subscriber(namespace + '/drivers/pololu_control/command',
+        rospy.Subscriber('drivers/pololu_control/command',
                          Float64MultiArray, self.motor_command_callback)
 
         pub_thrust = []
         for i in xrange(8):
-            pub_thrust.append(rospy.Publisher(namespace + '/thrusters/' \
+            pub_thrust.append(rospy.Publisher('thrusters/' \
                                               + str(i) + '/input',
                                               FloatStamped, queue_size=1))
 

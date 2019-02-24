@@ -164,7 +164,7 @@ pose0_rejection_threshold: 1
 #       rolldot,pitchdot,yawdot,
 #       xddot,yddot,zddot
 
-twist0: '/triton/thrust_est/vel'
+twist0: '/triton/thrust_odom'
 twist0_config: [false, false, false,
                 false, false, false,
                 true,  true,  true,

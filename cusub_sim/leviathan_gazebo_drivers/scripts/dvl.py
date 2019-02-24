@@ -1,30 +1,42 @@
 #!/usr/bin/env python
+"""
+Remaps DVL with correct orientation for simulating sub
+"""
 
 import rospy
 
 from geometry_msgs.msg import TwistWithCovarianceStamped
 
-dvl_pub = None
+class DVLRemap(object):
+    """Remaps and transforms the DVL data from gazebo to be like the
+    real sub
+    """
 
-def twist_callback(data):
+    dvl_pub = None
 
-    global dvl_pub
-    #data.twist.twist.linear.y = -1*data.twist.twist.linear.y
-    data.twist.twist.linear.z = -1*data.twist.twist.linear.z
-    dvl_pub.publish(data)
+    def twist_callback(self, data):
+        """Gets simulated gazebo DVL data and transforms it to match
+        what the dvl in the sub outputs
+        """
 
-def dvl():
+        data.twist.twist.linear.z = -1*data.twist.twist.linear.z
+        self.dvl_pub.publish(data)
 
-    global dvl_pub
+    def run(self):
+        """Starts the DVL remap node by setting up pubs/subs
+        """
 
-    rospy.init_node('dvl_gazebo', anonymous=True)
-    rospy.Subscriber('/leviathan/dvl_twist', TwistWithCovarianceStamped, twist_callback)
-    dvl_pub = rospy.Publisher('/drivers/dvl/vel', TwistWithCovarianceStamped, queue_size=1)
+        rospy.init_node('dvl_gazebo', anonymous=True)
+        rospy.Subscriber('/leviathan/dvl_twist', TwistWithCovarianceStamped, self.twist_callback)
+        self.dvl_pub = rospy.Publisher('/leviathan/dvl', TwistWithCovarianceStamped, queue_size=1)
 
-    rospy.spin()
+        rospy.spin()
 
 if __name__ == '__main__':
+
+    DVL_REMAP = DVLRemap()
+
     try:
-        dvl()
+        DVL_REMAP.run()
     except rospy.ROSInterruptException:
         rospy.loginfo("Gazebo DVL driver died!")

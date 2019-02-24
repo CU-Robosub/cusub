@@ -8,16 +8,16 @@ sub_pose_topic: '/leviathan/pose_gt'
 cameras:
   occam0:
     frame: 'leviathan_gt/occam0_frame'
-    image_topic: '/occam/image0'
+    image_topic: '/leviathan/occam/image0'
     debug_image_enabled: True
-    debug_image_topic: '/occam/image0_debug'
-    camera_info_topic: '/occam/image0/camera_info'
+    debug_image_topic: '/leviathan/occam/image0_debug'
+    camera_info_topic: '/leviathan/occam/image0/camera_info'
   downcam:
     frame: 'leviathan_gt/downcam_frame'
-    image_topic: '/downcam'
+    image_topic: '/leviathan/downcam'
     debug_image_enabled: True
-    debug_image_topic: '/downcam_debug'
-    camera_info_topic: '/downcam/camera_info'
+    debug_image_topic: '/leviathan/downcam_debug'
+    camera_info_topic: '/leviathan/downcam/camera_info'
 
 # Objects to run fake yolo on
 # You can have multiple classes per object with different point offsets, like the 2 start gate poles
