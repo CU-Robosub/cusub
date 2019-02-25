@@ -132,70 +132,84 @@ public:
 };
 
 class ImagePublisher : public Publisher {
+
   image_transport::Publisher pub;
   OccamDataName req;
   std::atomic<int> subscribers;
-public:
-  ImagePublisher(OccamDataName _req, image_transport::ImageTransport it)
-    : Publisher(_req),
-      req(_req) {
+  std::string frame_id;
 
-    std::string req_name = dataNameString(req);
-    ROS_INFO("advertising %s",req_name.c_str());
-    pub = it.advertise(req_name, 1);
-  }
-  virtual bool isRequested() {
-    if (pub.getNumSubscribers()>0)
-      ROS_INFO_THROTTLE(5,"subscribers of data %s = %i",dataNameString(req).c_str(),pub.getNumSubscribers());
-    return pub.getNumSubscribers()>0;
-  }
-  virtual void publish(void* data, const ros::Time& now) {
-    OccamImage* img0 = (OccamImage*)data;
-    if (!img0)
-      return;
+  public:
 
-    ROS_INFO_THROTTLE(1,"sending data %s...",dataNameString(req).c_str());
+    ImagePublisher(OccamDataName _req, image_transport::ImageTransport it, std::string _frame_id)
+      : Publisher(_req),
+        req(_req) {
 
-    const char* image_encoding = 0;
-    int bpp = 1;
-    switch (img0->format) {
-    case OCCAM_GRAY8:
-      bpp = 1;
-      image_encoding = "mono8";
-      break;
-    case OCCAM_RGB24:
-      bpp = 3;
-      image_encoding = "rgb8";
-      break;
-    case OCCAM_SHORT1:
-      bpp = 2;
-      image_encoding = "8SC1";
-      break;
+      std::string req_name = dataNameString(req);
+      ROS_INFO("advertising %s",req_name.c_str());
+      pub = it.advertise(req_name, 1);
+
+      // Create frame id depending on camera number
+      char camera_idx = req_name.at(req_name.length() - 1);
+      frame_id = _frame_id + camera_idx + "_frame";
+
     }
 
-    int width = img0->width;
-    int height = img0->height;
+    virtual bool isRequested() {
 
-    sensor_msgs::Image img1;
-    img1.header.frame_id = "occam";
-    img1.header.stamp = now;
-    img1.encoding = image_encoding;
-    img1.height = height;
-    img1.width = width;
-    img1.step = width*bpp;
-    img1.data.resize(img1.height*img1.step);
-    img1.is_bigendian = 0;
-    const uint8_t* srcp = img0->data[0];
-    int src_step = img0->step[0];
-    uint8_t* dstp = &img1.data[0];
-    int dst_step = img1.step;
-    for (int j=0;j<height;++j,dstp+=dst_step,srcp+=src_step)
-      memcpy(dstp,srcp,width*bpp);
+      if (pub.getNumSubscribers()>0)
+        ROS_INFO_THROTTLE(5,"subscribers of data %s = %i",dataNameString(req).c_str(),pub.getNumSubscribers());
+      return pub.getNumSubscribers()>0;
 
-    pub.publish(img1);
+    }
 
-    occamFreeImage(img0);
-  }
+    virtual void publish(void* data, const ros::Time& now) {
+
+      OccamImage* img0 = (OccamImage*) data;
+      if (!img0)
+        return;
+
+      ROS_INFO_THROTTLE(1, "sending data %s...", dataNameString(req).c_str());
+
+      const char* image_encoding = 0;
+      int bpp = 1;
+      switch (img0->format) {
+      case OCCAM_GRAY8:
+        bpp = 1;
+        image_encoding = "mono8";
+        break;
+      case OCCAM_RGB24:
+        bpp = 3;
+        image_encoding = "rgb8";
+        break;
+      case OCCAM_SHORT1:
+        bpp = 2;
+        image_encoding = "8SC1";
+        break;
+      }
+
+      int width = img0->width;
+      int height = img0->height;
+
+      sensor_msgs::Image img1;
+      img1.header.frame_id = frame_id;
+      img1.header.stamp = now;
+      img1.encoding = image_encoding;
+      img1.height = height;
+      img1.width = width;
+      img1.step = width*bpp;
+      img1.data.resize(img1.height*img1.step);
+      img1.is_bigendian = 0;
+      const uint8_t* srcp = img0->data[0];
+      int src_step = img0->step[0];
+      uint8_t* dstp = &img1.data[0];
+      int dst_step = img1.step;
+      for (int j=0;j<height;++j,dstp+=dst_step,srcp+=src_step)
+        memcpy(dstp,srcp,width*bpp);
+
+      pub.publish(img1);
+
+      occamFreeImage(img0);
+    }
 };
 
 class PointCloudPublisher : public Publisher {
@@ -467,6 +481,7 @@ public:
 
 class OccamNode {
 public:
+
   ros::NodeHandle nh;
 
   // not occam
@@ -478,48 +493,67 @@ public:
   std::shared_ptr<OccamConfig> config;
 
   OccamNode() :
+
     nh("~"),
+
     device(0) {
 
-    int r;
+      int r;
 
-    OccamDeviceList* device_list;
-    OCCAM_CHECK(occamEnumerateDeviceList(2000, &device_list));
-    ROS_INFO("%i devices found", device_list->entry_count);
-    int dev_index = 0;
-    for (int i=0;i<device_list->entry_count;++i) {
-      if (!cid.empty() && device_list->entries[i].cid == cid) {
-	dev_index = i;
+      std::string frame_id;
+      nh.param<std::string>("frame_id", frame_id, "occam");
+
+      OccamDeviceList* device_list;
+      OCCAM_CHECK(occamEnumerateDeviceList(2000, &device_list));
+      ROS_INFO("%i devices found", device_list->entry_count);
+
+      int dev_index = 0;
+      for (int i=0;i<device_list->entry_count;++i) {
+        if (!cid.empty() && device_list->entries[i].cid == cid) {
+          dev_index = i;
+        }
+        ROS_INFO("device[%i]: cid = %s",i,device_list->entries[i].cid);
       }
-      ROS_INFO("device[%i]: cid = %s",i,device_list->entries[i].cid);
+
+      if (dev_index<0 || dev_index >= device_list->entry_count){
+        return;
+      }
+
+      if (!cid.empty() && device_list->entries[dev_index].cid != cid) {
+        ROS_INFO("Requested cid %s not found",cid.c_str());
+        return;
+      }
+
+      OCCAM_CHECK(occamOpenDevice(device_list->entries[dev_index].cid, &device));
+      OCCAM_CHECK(occamFreeDeviceList(device_list));
+
+      image_transport::ImageTransport it(nh);
+
+      int req_count;
+      OccamDataName* req;
+      OccamDataType* types;
+      OCCAM_CHECK(occamDeviceAvailableData(device, &req_count, &req, &types));
+
+      for (int j=0;j<req_count;++j) {
+
+        if (types[j] == OCCAM_IMAGE) {
+
+          pubs.push_back(std::make_shared<ImagePublisher>(req[j],it, frame_id));
+
+        } else if (types[j] == OCCAM_POINT_CLOUD) {
+
+          pubs.push_back(std::make_shared<PointCloudPublisher>(req[j],nh));
+
+        }
+
+      }
+
+      occamFree(req);
+      occamFree(types);
+
+      config = std::make_shared<OccamConfig>(nh,cid,device);
+
     }
-    if (dev_index<0 || dev_index >= device_list->entry_count)
-      return;
-    if (!cid.empty() && device_list->entries[dev_index].cid != cid) {
-      ROS_INFO("Requested cid %s not found",cid.c_str());
-      return;
-    }
-
-    OCCAM_CHECK(occamOpenDevice(device_list->entries[dev_index].cid, &device));
-    OCCAM_CHECK(occamFreeDeviceList(device_list));
-
-    image_transport::ImageTransport it(nh);
-
-    int req_count;
-    OccamDataName* req;
-    OccamDataType* types;
-    OCCAM_CHECK(occamDeviceAvailableData(device, &req_count, &req, &types));
-    for (int j=0;j<req_count;++j) {
-      if (types[j] == OCCAM_IMAGE)
-	pubs.push_back(std::make_shared<ImagePublisher>(req[j],it));
-      else if (types[j] == OCCAM_POINT_CLOUD)
-	pubs.push_back(std::make_shared<PointCloudPublisher>(req[j],nh));
-    }
-    occamFree(req);
-    occamFree(types);
-
-    config = std::make_shared<OccamConfig>(nh,cid,device);
-  }
 
   virtual ~OccamNode() {
     if (device)
