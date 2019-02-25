@@ -4,5 +4,6 @@
             <rosparam command="load" file="$(find cusub_common_bringup)/config/leviathan_ekf.yaml" />
         </node>
         <include file="$(find pid_controller)/launch/controller_matrix.launch"/>
+        <include file="$(find gazebo_drivers)/launch/leviathan_gazebo_drivers.launch"/>
     </group>
 </launch>
