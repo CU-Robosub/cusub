@@ -44,12 +44,19 @@ class JoyTeleop(object):
 
     dropper_triggered = False
 
+    left_torpedo_triggered = False
+    right_torpedo_triggered = False
+
     def joystick_state(self, data):
         """Gets joystick data to figure out what to have the sub do
         """
 
         if(data.buttons[0]):
             self.dropper_triggered = True
+        if(data.buttons[4]):
+            self.left_torpedo_triggered = True
+        if(data.buttons[5]):
+            self.right_torpedo_triggered = True
 
         self.strafe_val  = data.axes[self.strafe_axes]
         self.drive_val = data.axes[self.drive_axes]
@@ -155,10 +162,20 @@ class JoyTeleop(object):
             roll_f64.data = self.roll_val*math.radians(15.0) # allow 15 deg roll
             pub_roll.publish(roll_f64)
 
-            if(self.dropper_triggered):
-                activate_actuator = rospy.ServiceProxy('/activateActuator', ActivateActuator)
-                activate_actuator(1, 100) # Activate actuator 1 for 100 seconds
+            if self.dropper_triggered:
+                activate_actuator = rospy.ServiceProxy('activateActuator', ActivateActuator)
+                activate_actuator(1, 100) # Activate actuator 1 for 100 miliseconds
                 self.dropper_triggered = False
+
+            if self.left_torpedo_triggered:
+                activate_actuator = rospy.ServiceProxy('activateActuator', ActivateActuator)
+                activate_actuator(2, 100)
+                self.left_torpedo_triggered = False
+
+            if self.right_torpedo_triggered:
+                activate_actuator = rospy.ServiceProxy('activateActuator', ActivateActuator)
+                activate_actuator(3, 100)
+                self.right_torpedo_triggered = False
 
             rate.sleep()
 
