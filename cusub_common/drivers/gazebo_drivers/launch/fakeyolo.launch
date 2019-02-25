@@ -10,8 +10,8 @@
     <node pkg="tf" type="static_transform_publisher" name="occam0_gt_broadcaster" args="0.055 0 0.22 0 0 0 leviathan_gt/base_link leviathan_gt/occam0_frame 50" />
     <node pkg="tf" type="static_transform_publisher" name="downcam_gt_broadcaster" args="0.0 0 -0.1 0 1.57 0 leviathan_gt/base_link leviathan_gt/downcam_frame 50" />
 
-    <node name="fakeyolo" pkg="leviathan_gazebo_drivers" type="yolo_faker.py">
-	    <rosparam command="load" file="$(find leviathan_gazebo_drivers)/config/$(arg config_filename)"/>
+    <node name="fakeyolo" pkg="gazebo_drivers" type="yolo_faker.py">
+	    <rosparam command="load" file="$(find gazebo_drivers)/config/$(arg config_filename)"/>
         <param name="~show_points" value="$(arg show_points)"/>
     </node>
 

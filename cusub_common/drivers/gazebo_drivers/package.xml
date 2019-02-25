@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>leviathan_gazebo_drivers</name>
+  <name>gazebo_drivers</name>
   <version>0.0.0</version>
   <description>The leviathan_gazebo_drivers package</description>
 
