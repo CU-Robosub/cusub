@@ -27,7 +27,7 @@
   <arg name="mode" default="default"/>
 
   <!-- Vehicle's namespace -->
-  <arg name="namespace" default="triton"/>
+  <arg name="namespace" default="triton/cusub_sim"/>
 
   <arg name="world_frame" default="world"/>
 
