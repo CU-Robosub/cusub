@@ -48,8 +48,9 @@ class DepthSensor(object):
         """Republishes presure as depth pose"""
 
         rospy.init_node('depth_sensor_gazebo', anonymous=True)
+        desc_ns = rospy.get_param("namespace/robot_description")
 
-        rospy.Subscriber('pressure', FluidPressure, self.pressure_callback)
+        rospy.Subscriber(desc_ns + 'pressure', FluidPressure, self.pressure_callback)
 
         robot_name = rospy.get_namespace().split('/')[1]
 
