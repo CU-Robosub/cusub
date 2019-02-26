@@ -18,7 +18,7 @@ class DVLRemap(object):
         """Gets simulated gazebo DVL data and transforms it to match
         what the dvl in the sub outputs
         """
-
+        print "test"
         data.twist.twist.linear.z = -1*data.twist.twist.linear.z
         self.dvl_pub.publish(data)
 
@@ -27,8 +27,9 @@ class DVLRemap(object):
         """
 
         rospy.init_node('dvl_gazebo', anonymous=True)
-        rospy.Subscriber('/leviathan/dvl_twist', TwistWithCovarianceStamped, self.twist_callback)
-        self.dvl_pub = rospy.Publisher('/leviathan/dvl', TwistWithCovarianceStamped, queue_size=1)
+        desc_ns = rospy.get_param("namespace/robot_description")
+        rospy.Subscriber(desc_ns + "/dvl_twist", TwistWithCovarianceStamped, self.twist_callback)
+        self.dvl_pub = rospy.Publisher('dvl', TwistWithCovarianceStamped, queue_size=1)
 
         rospy.spin()
 
