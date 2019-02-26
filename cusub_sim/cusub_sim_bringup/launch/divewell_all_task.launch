@@ -64,6 +64,7 @@
         <arg name="y" default="$(arg leviathan_y)"/>
         <arg name="z" default="$(arg leviathan_z)"/>
         <arg name="yaw" default="$(arg leviathan_yaw)"/>
+        <arg name="namespace" default="leviathan/description"/>
     </include>
     <node pkg="tf" type="static_transform_publisher" name="world_leviathan_odom_broadcaster" args="$(arg leviathan_x) $(arg leviathan_y) 0 0 0 0 world leviathan/odom 50" />
   </group>
@@ -74,6 +75,8 @@
         <arg name="y" default="$(arg triton_y)"/>
         <arg name="z" default="$(arg triton_z)"/>
         <arg name="yaw" default="$(arg triton_yaw)"/>
+        <arg name="namespace" default="triton/description"/>
+
     </include>
     <node pkg="tf" type="static_transform_publisher" name="world_triton_odom_broadcaster" args="$(arg triton_x) $(arg triton_y) 0 0 0 0 world triton/odom 50" />
   </group>
