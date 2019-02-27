@@ -3,10 +3,13 @@
   <node name="gazebo_depth" pkg="gazebo_drivers" type="depth_sensor.py">
     <param name="namespace" value="leviathan"/>
   </node>
+
   <node name="gazebo_dvl" pkg="gazebo_drivers" type="dvl.py"/>
-  <node name="gazebo_leviathan_motor_control" pkg="gazebo_drivers" type="motor_control.py">
-    <param name="namespace" value="leviathan"/>
-  </node>
+
+  <node name="gazebo_leviathan_motor_control" pkg="gazebo_drivers" type="motor_control.py"/>
+
+  <node name="imu_repub" pkg="gazebo_drivers" type="imu_repub.py"/>
+
 
   <node name="gazebo_actuators" pkg="gazebo_drivers" type="ActuatorService.py">
     <param name="dropperURDF"
