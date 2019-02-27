@@ -18,7 +18,7 @@
   <arg name="altitude_ref" default="0"/>
 
   <arg name="mode" default="default"/>
-  <arg name="namespace" default="leviathan/cusub_sim"/>
+  <arg name="namespace" default="leviathan/description"/>
   <arg name="world_frame" default="world"/>
 
   <group ns="$(arg namespace)">
