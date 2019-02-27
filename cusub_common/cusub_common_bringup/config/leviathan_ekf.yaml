@@ -60,7 +60,7 @@ publish_acceleration: false
 #         estimation node from robot_localization! However, that instance should *not* fuse the global data.
 map_frame: leviathan/map              # Defaults to "map" if unspecified
 odom_frame: leviathan/odom            # Defaults to "odom" if unspecified
-base_link_frame: leviathan/base_link  # Defaults to "base_link" if unspecified
+base_link_frame: leviathan/description/base_link  # Defaults to "base_link" if unspecified
 world_frame: leviathan/odom           # Defaults to the value of odom_frame if unspecified
 
 initial_state: [0.0,  0.0,  0.0,
@@ -145,7 +145,7 @@ initial_state: [0.0,  0.0,  0.0,
 
 
 
-pose0: 'depth'
+pose0: "depth"
 pose0_config: [false,  false,  true,
                false, false, false,
                false, false, false,
