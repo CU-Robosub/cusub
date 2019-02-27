@@ -73,7 +73,8 @@ class GatePNPColorServer():
     occam_distortion_coefs = np.array([-0.360085, 0.115116, 0.007768, 0.004616, 0.000000])
 
     def __init__(self):
-        self.server = rospy.Service("/localize_start_gate_pole", ClassicalBox2Pose, self.localize)
+        ns = rospy.get_namespace()
+        self.server = rospy.Service( ns +"localize_start_gate_pole", ClassicalBox2Pose, self.localize)
         self.occam_camera_matrix.shape = (3,3)
         rospy.loginfo("Gate PNP Color Initialized")
         self.expAvg = ExpWeightedAvg( 5 ) # average over five poses
@@ -114,7 +115,7 @@ class GatePNPColorServer():
         pose = Pose()
         pose.position.x = tvec[2]
         pose.position.y = -1*tvec[0]
-        pose.position.z = tvec[1]
+        pose.position.z = -1*tvec[1]
 
         # TODO move this to the mapper
         # pose = self.expAvg.get_new_avg_pose(pose)

@@ -18,7 +18,7 @@ def dvl():
     global dvl_pub
 
     rospy.init_node('dvl_gazebo', anonymous=True)
-    rospy.Subscriber("/leviathan/dvl_twist", TwistWithCovarianceStamped, twist_callback)
+    rospy.Subscriber('/leviathan/dvl_twist', TwistWithCovarianceStamped, twist_callback)
     dvl_pub = rospy.Publisher('/drivers/dvl/vel', TwistWithCovarianceStamped, queue_size=1)
 
     rospy.spin()
@@ -27,4 +27,4 @@ if __name__ == '__main__':
     try:
         dvl()
     except rospy.ROSInterruptException:
-        rospy.loginfo("Mother fucker!")
+        rospy.loginfo("Gazebo DVL driver died!")

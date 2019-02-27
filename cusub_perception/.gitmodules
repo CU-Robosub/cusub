@@ -1,3 +1,0 @@
-[submodule "darknet_ros/darknet"]
-	path = darknet_ros/darknet
-	url = https://github.com/pjreddie/darknet

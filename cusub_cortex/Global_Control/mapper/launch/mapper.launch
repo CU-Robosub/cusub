@@ -1,4 +1,9 @@
 <launch>
-    <node name="mapper" pkg="mapper" type="mapper.py" output="screen" >
+
+    <arg name="namespace" default="leviathan"/>
+
+    <node name="mapper" pkg="mapper" type="mapper.py" output="screen">
+        <param name="namespace" value="$(arg namespace)"/>
     </node>
+
 </launch>

@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Center of buoyancy -->
+    <xacro:property name="triton_cob" value="0 0 0.2"/>
+
+    <!-- Vehicle's actual volume (Gazebo cannot compute the volume out of the mesh) -->
+    <xacro:property name="triton_volume" value="0.00439"/>
+
+    <!-- Describing the dimensions of the vehicle's bounding box -->
+    <xacro:property name="triton_length" value="0.25"/>
+    <xacro:property name="triton_width"  value="0.25"/>
+    <xacro:property name="triton_height" value="0.25"/>
+
+    <xacro:macro name="triton_hydro_model" params="namespace">
+      <!-- List of hydrodynamic models this robot's links -->
+      <link name="${namespace}/base_link">
+        <!-- This flag will make the link neutrally buoyant -->
+        <neutrally_buoyant>0</neutrally_buoyant>
+
+        <!-- Link's volume -->
+        <volume>${triton_volume}</volume>
+
+        <!-- Link's bounding box, it is used to recalculate the immersed
+        volume when close to the surface.
+        This is a workaround the invalid bounding box given by Gazebo-->
+        <box>
+          <width>${triton_width}</width>
+          <length>${triton_length}</length>
+          <height>${triton_height}</height>
+        </box>
+
+        <!-- Center of buoyancy -->
+        <center_of_buoyancy>${triton_cob}</center_of_buoyancy>
+
+        <hydrodynamic_model>
+          <type>fossen</type>
+          <added_mass>
+           4.20515 0       0       0       0       0
+           0       4.20515 0       0       0       0
+           0       0       4.20515 0       0       0
+           0       0       0       0       0       0
+           0       0       0       0       0       0
+           0       0       0       0       0       0
+          </added_mass>
+          <linear_damping>
+            -1 -1 -1 -1 -1 -1 
+          </linear_damping>
+          <quadratic_damping>
+            -12.6155 -12.6155 -12.6155 0 0 0
+          </quadratic_damping>
+
+        </hydrodynamic_model>
+        <!--
+        <hydrodynamic_model>
+          <type>sphere</type>
+          <radius>0.125</radius>
+        </hydrodynamic_model>
+        -->
+
+      </link>
+    </xacro:macro>
+
+</robot>

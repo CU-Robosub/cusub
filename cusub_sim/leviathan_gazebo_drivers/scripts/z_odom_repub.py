@@ -10,7 +10,7 @@ def odom_callback(odom):
 
     global new_odom_pub
 
-    odom.pose.pose.position.z = -1*odom.pose.pose.position.z;
+    odom.pose.pose.position.z = -1*odom.pose.pose.position.z
     br = tf.TransformBroadcaster()
     br.sendTransform((0,0,odom.pose.pose.position.z*2),
                     tf.transformations.quaternion_from_euler(0,0,0),
@@ -23,11 +23,13 @@ def z_odom_repub():
 
     global new_odom_pub
 
+    namespace = '/leviathan'
+
     rospy.init_node('new_odom_pub', anonymous=True)
 
-    new_odom_pub = rospy.Publisher("/sensor_fusion/odometry/filtered_z_flip", Odometry, queue_size=1)
+    new_odom_pub = rospy.Publisher(namespace + "/sensor_fusion/odometry/filtered_z_flip", Odometry, queue_size=1)
 
-    pose_sub = rospy.Subscriber("/sensor_fusion/odometry/filtered", Odometry, odom_callback)
+    pose_sub = rospy.Subscriber(namespace + '/sensor_fusion/odometry/filtered', Odometry, odom_callback)
 
     rospy.spin()
 

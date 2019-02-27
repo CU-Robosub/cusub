@@ -19,7 +19,8 @@ METERS_AHEAD = 6
 class GateMidpointServer():
 
     def __init__(self):
-        self.server = rospy.Service("/localize_start_gate_pole", ClassicalBox2Pose, self.localize)
+        ns = rospy.get_namespace()
+        self.server = rospy.Service(ns + "localize_start_gate_pole", ClassicalBox2Pose, self.localize)
         rospy.loginfo("Gate Midpoint Initialized")
 
     def _orderBoxesLeft2Right(self, box1, box2):

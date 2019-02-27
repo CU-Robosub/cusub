@@ -20,8 +20,9 @@ from localizer.srv import ClassicalBox2Pose
 
 class Localizer():
     def __init__(self):
-        self.darknet_sub = rospy.Subscriber('/darknet_ros/bounding_boxes', BoundingBoxes, self.boxes_received, queue_size=1, buff_size=10000000)
-        self.pose_pub = rospy.Publisher('/Global_State/task_poses', Detection, queue_size=1)
+        self.darknet_sub = rospy.Subscriber('darknet_ros/bounding_boxes', BoundingBoxes,self.boxes_received, queue_size=1, buff_size=10000000)
+        ns = rospy.get_namespace()
+        self.pose_pub = rospy.Publisher( ns + 'Global_State/task_poses', Detection, queue_size=1)
         rospy.loginfo("Localizer Client Initialized")
 
     # main callback
@@ -65,8 +66,8 @@ class Localizer():
 
             # Make the service call
             try:
-                rospy.loginfo("Waiting for service: /localize_"+box.Class)
-                localize_handler = rospy.ServiceProxy('/localize_'+box.Class, req)
+                rospy.loginfo("Waiting for service: localize_"+box.Class)
+                localize_handler = rospy.ServiceProxy('localize_'+box.Class, req)
                 res = localize_handler(req.image, req.boxes)
                 rospy.loginfo("Publishing to {}".format(topic_name))
                 self.publish_pose(topic_name, msg.image_header.frame_id, msg.image_header, res.pose)
