@@ -42,19 +42,31 @@ class TrainingDataGenerator(object):
 
         det_strs = []
 
+        w = float(bounding_boxes.image.width)
+        h = float(bounding_boxes.image.height)
+
         # Find bounding box class matches and generate detection text for them
         for bounding_box in bounding_boxes.bounding_boxes:
+
+            """ Need to ignore boxes with points near edge of camera frame.  Could be partial detections with out of frame components. """
+            if(bounding_box.xmax < 60 \
+            or bounding_box.ymax < 60 \
+            or bounding_box.xmin > w - 60 \
+            or bounding_box.ymin > h - 60):
+                continue
+
             for detection_class in self.detection_classes:
                 if bounding_box.Class == detection_class['name']:
+
                     # <object-class> <x> <y> <width> <height>
                     # <object-class> integer number of boject 0 to classes-1
                     # <x> <y> <width> <height> float values relative to width
                     #  and height of image 0.0 - 1.0
                     det_text = str(detection_class['number']) \
-                             + ' ' + str((bounding_box.xmin + bounding_box.xmax) / 2.0 / 752.0) \
-                             + ' ' + str((bounding_box.ymin + bounding_box.ymax) / 2.0 / 480.0) \
-                             + ' ' + str((bounding_box.xmax - bounding_box.xmin) / 752.0) \
-                             + ' ' + str((bounding_box.ymax - bounding_box.ymin) / 480.0)
+                             + ' ' + str((bounding_box.xmin + bounding_box.xmax) / 2.0 / w) \
+                             + ' ' + str((bounding_box.ymin + bounding_box.ymax) / 2.0 / h) \
+                             + ' ' + str((bounding_box.xmax - bounding_box.xmin) / w) \
+                             + ' ' + str((bounding_box.ymax - bounding_box.ymin) / h)
                     det_strs.append(det_text)
                     break
 
