@@ -47,8 +47,11 @@ class MotorControl(object):
                          Float64MultiArray, self.motor_command_callback)
 
         pub_thrust = []
+        desc_ns = rospy.get_param("namespace/robot_description")
+
         for i in xrange(8):
-            pub_thrust.append(rospy.Publisher('thrusters/' \
+
+            pub_thrust.append(rospy.Publisher(desc_ns + '/thrusters/' \
                                               + str(i) + '/input',
                                               FloatStamped, queue_size=1))
 
