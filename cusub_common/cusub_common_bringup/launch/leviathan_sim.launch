@@ -1,9 +1,12 @@
 <launch>
     <group ns="leviathan/cusub_common">
-        <node name="leviathan_ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true">
+        <param name="namespace/robot_description" value="/leviathan/description"/>
+        <param name="namespace/sim" value="leviathan/cusub_sim"/>
+
+        <!--node name="leviathan_ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true">
             <rosparam command="load" file="$(find cusub_common_bringup)/config/leviathan_ekf.yaml" />
         </node>
-        <include file="$(find pid_controller)/launch/controller_matrix.launch"/>
+        <include file="$(find pid_controller)/launch/controller_matrix.launch"/-->
         <include file="$(find gazebo_drivers)/launch/leviathan_gazebo_drivers.launch"/>
     </group>
 </launch>
