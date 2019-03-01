@@ -1,8 +1,4 @@
 <launch>
-
-  <arg name="upload_leviathan" default="true"/>
-  <arg name="upload_triton" default="false"/>
-
   <!-- Obstacle positions -->
   <arg name="D1_x" default="-1.75"/>
   <arg name="D1_y" default="2.75"/>
@@ -44,42 +40,8 @@
   <arg name="R_z" default="-3.5"/>
   <arg name="R_yaw" default="0"/>
 
-  <!-- Robot positions -->
-  <arg name="leviathan_x" default="-7.5"/>
-  <arg name="leviathan_y" default="1"/>
-  <arg name="leviathan_z" default="-1"/>
-  <arg name="leviathan_yaw" default="0"/>
-
-  <arg name="triton_x" default="-7.5"/>
-  <arg name="triton_y" default="-1"/>
-  <arg name="triton_z" default="-1"/>
-  <arg name="triton_yaw" default="0"/>
-
   <!-- Start the a underwater world simulation scenario -->
   <include file="$(find robosub_descriptions)/launch/divewell.launch"/>
-
-  <group if="$(arg upload_leviathan)">
-    <include file="$(find leviathan_description)/launch/upload.launch">
-        <arg name="x" default="$(arg leviathan_x)"/>
-        <arg name="y" default="$(arg leviathan_y)"/>
-        <arg name="z" default="$(arg leviathan_z)"/>
-        <arg name="yaw" default="$(arg leviathan_yaw)"/>
-        <arg name="namespace" default="leviathan/description"/>
-    </include>
-    <node pkg="tf" type="static_transform_publisher" name="world_leviathan_odom_broadcaster" args="$(arg leviathan_x) $(arg leviathan_y) 0 0 0 0 world leviathan/odom 50" />
-  </group>
-
-  <group if="$(arg upload_triton)">
-    <include file="$(find triton_description)/launch/upload.launch">
-        <arg name="x" default="$(arg triton_x)"/>
-        <arg name="y" default="$(arg triton_y)"/>
-        <arg name="z" default="$(arg triton_z)"/>
-        <arg name="yaw" default="$(arg triton_yaw)"/>
-        <arg name="namespace" default="triton/description"/>
-
-    </include>
-    <node pkg="tf" type="static_transform_publisher" name="world_triton_odom_broadcaster" args="$(arg triton_x) $(arg triton_y) 0 0 0 0 world triton/odom 50" />
-  </group>
 
   <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="StartGate"/>
@@ -146,7 +108,6 @@
       <arg name="yaw" default="$(arg R_yaw)"/>
   </include>
 
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find leviathan_description)/launch/Leviathan_Startgate_Divewell_Gazebo.rviz" />
 
   <node name="publish_world_models"
         pkg="uuv_assistants"

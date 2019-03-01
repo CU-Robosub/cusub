@@ -1,0 +1,21 @@
+<launch>
+    <group ns="leviathan">
+        <arg name="x" default="-7.5"/>
+        <arg name="y" default="1"/>
+        <arg name="z" default="-1"/>
+        <arg name="yaw" default="0"/>
+        <arg name="namespace" default="leviathan/description" />
+
+        <include file="$(find leviathan_description)/launch/upload.launch">
+            <arg name="x" default="$(arg x)"/>
+            <arg name="y" default="$(arg y)"/>
+            <arg name="z" default="$(arg z)"/>
+            <arg name="yaw" default="$(arg yaw)"/>
+            <arg name="namespace" default="$(arg namespace)"/>
+        </include>
+
+        <node pkg="tf" type="static_transform_publisher" name="world_leviathan_odom_broadcaster" args="$(arg x) $(arg y) 0 0 0 0 world $(arg namespace)/odom 50" />
+
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find leviathan_description)/launch/Leviathan_Startgate_Divewell_Gazebo.rviz" />
+    </group>
+</launch>
