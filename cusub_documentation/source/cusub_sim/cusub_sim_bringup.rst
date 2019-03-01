@@ -18,9 +18,9 @@ Environment Launchers
 Sub Launchers
 #############
 
-**leviathan_description**: Loads the Leviathan description into the the gazebo environment
+**leviathan_description.launch**: Loads the Leviathan description into the the gazebo environment
 
-**triton description**: Loads the Triton description into the gazebo environment
+**triton_description.launch**: Loads the Triton description into the gazebo environment
 
 .. code-block:: xml
 
