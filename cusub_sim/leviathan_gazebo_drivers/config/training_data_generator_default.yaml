@@ -1,0 +1,20 @@
+# Default training data generator configuration
+
+output_directory: '~/training_data'
+bounding_boxes_topic: '/darknet_ros/bounding_boxes'
+
+classes:
+ - name: 'start_gate_pole'
+   number: 0
+ - name: 'path'
+   number: 1
+ - name: 'dice1'
+   number: 2
+ - name: 'dice2'
+   number: 3
+ - name: 'dice5'
+   number: 4
+ - name: 'dice6'
+   number: 5
+ - name: 'roulette'
+   number: 6
