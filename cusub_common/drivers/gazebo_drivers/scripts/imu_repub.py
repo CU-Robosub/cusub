@@ -10,9 +10,8 @@ class IMURepub(object):
     def __init__(self):
         rospy.init_node('imu_repub', anonymous=True)
 
-        desc_ns = rospy.get_param("namespace/robot_description")
-        self.imu_pub = rospy.Publisher("imu", Imu, queue_size=1)
-        self.imu_sub = rospy.Subscriber(desc_ns + "/imu", Imu, self.imu_callback)
+        self.imu_pub = rospy.Publisher("cusub_common/imu", Imu, queue_size=1)
+        self.imu_sub = rospy.Subscriber("description/imu", Imu, self.imu_callback)
 
     def imu_callback(self, imu):
 

@@ -48,11 +48,9 @@ class DepthSensor(object):
         """Republishes presure as depth pose"""
 
         rospy.init_node('depth_sensor_gazebo', anonymous=True)
-        desc_ns = rospy.get_param("namespace/robot_description")
 
-        rospy.Subscriber(desc_ns + 'pressure', FluidPressure, self.pressure_callback)
+        rospy.Subscriber('description/pressure', FluidPressure, self.pressure_callback)
 
-        robot_name = rospy.get_namespace().split('/')[1]
 
         self.depth_pose = PoseWithCovarianceStamped()
         self.depth_pose.pose.covariance = [0, 0, 0, 0, 0, 0,
@@ -61,10 +59,11 @@ class DepthSensor(object):
                                            0, 0, 0, 0, 0, 0,
                                            0, 0, 0, 0, 0, 0,
                                            0, 0, 0, 0, 0, 0]
-        self.depth_pose.header.frame_id = robot_name + '/depth_frame'
+
+        self.depth_pose.header.frame_id = 'description/depth_frame'
         self.depth_pose.pose.pose.position.z = 0
 
-        depth_pub = rospy.Publisher('depth', PoseWithCovarianceStamped, queue_size=1)
+        depth_pub = rospy.Publisher('cusub_common/depth', PoseWithCovarianceStamped, queue_size=1)
 
         rate = rospy.Rate(30)
 

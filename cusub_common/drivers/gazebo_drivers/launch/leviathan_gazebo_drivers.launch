@@ -17,45 +17,45 @@
   </node>
 
   <node name="caminfo_occam0" pkg="gazebo_drivers" type="CameraInfoPublisher.py">
-    <param name="camera_info_topic" value="occam/image0/camera_info"/>
-    <param name="frameid" value="leviathan/occam0_frame"/>
+    <param name="camera_info_topic" value="cusub_common/occam/image0/camera_info"/>
+    <param name="frameid" value="leviathan/description/occam0_frame"/>
     <rosparam command="load" file="$(find gazebo_drivers)/config/gazebo_occam_params.yaml"/>
   </node>
-  <node name="relay_occam0" pkg="topic_tools" type="relay" args="/leviathan/camera_0/image_raw /leviathan/occam/image0"/>
+  <node name="relay_occam0" pkg="topic_tools" type="relay" args="description/camera_0/image_raw cusub_common/occam/image0"/>
 
   <node name="caminfo_occam1" pkg="gazebo_drivers" type="CameraInfoPublisher.py">
-    <param name="camera_info_topic" value="occam/image1/camera_info"/>
-    <param name="frameid" value="leviathan/occam1_frame"/>
+    <param name="camera_info_topic" value="cusub_common/occam/image1/camera_info"/>
+    <param name="frameid" value="leviathan/description/occam1_frame"/>
     <rosparam command="load" file="$(find gazebo_drivers)/config/gazebo_occam_params.yaml"/>
   </node>
-  <node name="relay_occam1" pkg="topic_tools" type="relay" args="/leviathan/camera_1/image_raw /leviathan/occam/image1"/>
+  <node name="relay_occam1" pkg="topic_tools" type="relay" args="description/camera_1/image_raw cusub_common/occam/image1"/>
 
   <node name="caminfo_occam2" pkg="gazebo_drivers" type="CameraInfoPublisher.py">
-    <param name="camera_info_topic" value="occam/image2/camera_info"/>
-    <param name="frameid" value="leviathan/occam2_frame"/>
+    <param name="camera_info_topic" value="cusub_common/occam/image2/camera_info"/>
+    <param name="frameid" value="leviathan/description/occam2_frame"/>
     <rosparam command="load" file="$(find gazebo_drivers)/config/gazebo_occam_params.yaml"/>
   </node>
-  <node name="relay_occam2" pkg="topic_tools" type="relay" args="/leviathan/camera_2/image_raw /leviathan/occam/image2"/>
+  <node name="relay_occam2" pkg="topic_tools" type="relay" args="description/camera_2/image_raw cusub_common/occam/image2"/>
 
   <node name="caminfo_occam3" pkg="gazebo_drivers" type="CameraInfoPublisher.py">
-    <param name="camera_info_topic" value="occam/image3/camera_info"/>
-    <param name="frameid" value="leviathan/occam3_frame"/>
+    <param name="camera_info_topic" value="cusub_common/occam/image3/camera_info"/>
+    <param name="frameid" value="leviathan/description/occam3_frame"/>
     <rosparam command="load" file="$(find gazebo_drivers)/config/gazebo_occam_params.yaml"/>
   </node>
-  <node name="relay_occam3" pkg="topic_tools" type="relay" args="/leviathan/camera_3/image_raw /leviathan/occam/image3"/>
+  <node name="relay_occam3" pkg="topic_tools" type="relay" args="description/camera_3/image_raw cusub_common/occam/image3"/>
 
   <node name="caminfo_occam4" pkg="gazebo_drivers" type="CameraInfoPublisher.py">
-    <param name="camera_info_topic" value="occam/image4/camera_info"/>
-    <param name="frameid" value="leviathan/occam4_frame"/>
+    <param name="camera_info_topic" value="cusub_common/occam/image4/camera_info"/>
+    <param name="frameid" value="leviathan/description/occam4_frame"/>
     <rosparam command="load" file="$(find gazebo_drivers)/config/gazebo_occam_params.yaml"/>
   </node>
-  <node name="relay_occam4" pkg="topic_tools" type="relay" args="/leviathan/camera_4/image_raw /leviathan/occam/image4"/>
+  <node name="relay_occam4" pkg="topic_tools" type="relay" args="description/camera_4/image_raw cusub_common/occam/image4"/>
 
   <node name="caminfo_downcam" pkg="gazebo_drivers" type="CameraInfoPublisher.py">
-    <param name="camera_info_topic" value="downcam/camera_info"/>
-    <param name="frameid" value="leviathan/downcam_frame"/>
+    <param name="camera_info_topic" value="cusub_common/downcam/camera_info"/>
+    <param name="frameid" value="leviathan/description/downcam_frame"/>
     <rosparam command="load" file="$(find gazebo_drivers)/config/gazebo_downcam_params.yaml"/>
   </node>
-  <node name="relay_downcam" pkg="topic_tools" type="relay" args="/leviathan/camera_5/image_raw /leviathan/downcam"/>
+  <node name="relay_downcam" pkg="topic_tools" type="relay" args="description/camera_5/image_raw cusub_common/downcam"/>
 
 </launch>

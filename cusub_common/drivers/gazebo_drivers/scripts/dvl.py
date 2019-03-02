@@ -27,9 +27,8 @@ class DVLRemap(object):
         """
 
         rospy.init_node('dvl_gazebo', anonymous=True)
-        desc_ns = rospy.get_param("namespace/robot_description")
-        rospy.Subscriber(desc_ns + "/dvl_twist", TwistWithCovarianceStamped, self.twist_callback)
-        self.dvl_pub = rospy.Publisher('dvl', TwistWithCovarianceStamped, queue_size=1)
+        rospy.Subscriber("description/dvl_twist", TwistWithCovarianceStamped, self.twist_callback)
+        self.dvl_pub = rospy.Publisher('cusub_common/dvl', TwistWithCovarianceStamped, queue_size=1)
 
         rospy.spin()
 
