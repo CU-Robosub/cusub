@@ -49,7 +49,7 @@ class JoyTeleop(object):
         """
 
         if(data.buttons[0]):
-            self.dropper_triggered
+            self.dropper_triggered = True
 
         self.strafe_val  = data.axes[self.strafe_axes]
         self.drive_val = data.axes[self.drive_axes]
