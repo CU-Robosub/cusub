@@ -532,7 +532,7 @@ class YOLOFaker(object):
         sub_pose_topic = rospy.get_param('~sub_pose_topic')
 
         # Parameter for smallest width/height allowed for bounding box in pixels
-        self.min_pixel_size = rospy.get_param('~min_pixel_size', 10)
+        self.min_pixel_size = rospy.get_param('~min_pixel_size', 15)
 
         # Shows bounding volume points for debugging
         self.show_points = rospy.get_param('~show_points', False)
