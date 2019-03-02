@@ -9,11 +9,17 @@ tasks:
   search_alg: simple
   dist_behind_gate: 1.0
   failed_repeat: true   # If aborted, repeat the task?
+  object_localizers:
+    start_gate_pole: ['pnp_color', 'midpoint']
  dice:
   prior: [1,1,-1]
   search_alg: simple
   failed_repeat: false
-  
+  object_localizers:
+    dice1: box
+    dice2: box
+    dice5: box
+    dice6: box
 mission_tasks: # Tasks To Do In Order
  - start_gate
- - visit_dice
+ - dice
