@@ -1,7 +1,7 @@
 <launch>
         <arg name="x" default="-7.5"/>
         <arg name="y" default="1"/>
-        <arg name="z" default="-1"/>
+        <arg name="z" default="-2"/>
         <arg name="yaw" default="0"/>
         <arg name="namespace" default="leviathan/description" />
 

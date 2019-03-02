@@ -22,9 +22,9 @@ System Packages
 
 cusub_common: meta-package for organizing software stack
 
-:doc:`cusub_common_bringup <cusub_common_bringup>`:
+:doc:`cusub_common_bringup <cusub_common_bringup>`
 
-:doc:`Waypoint Navigator <waypoint_navigator>`:
+:doc:`Waypoint Navigator <waypoint_navigator>`
 
 Debugging Tools
 ___________________
@@ -42,9 +42,14 @@ qt_console: unknown
 teleop: teleop
 
 Drivers
-_______
+#######
+.. toctree::
+	:maxdepth: 1
+    :hidden:
 
-empty stub for now
+    drivers/gazebo_drivers
+
+:doc:`gazebo_drivers <drivers/gazebo_drivers>`
 
 Motor Controllers
 _________________

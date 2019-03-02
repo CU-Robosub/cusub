@@ -26,17 +26,14 @@ System Packages
 
     cusub_sim_bringup
     leviathan_description
-    triton_description
     robosub_descriptions
     uuv_simulator <https://uuvsimulator.github.io/>
 
 cusub_sim: meta-package for organizing software stack
 
-:doc:`CUSub Simulator Bringup <cusub_sim_bringup>`: contains the launch files to start the gazebo environment
+:doc:`CUSub Simulator Bringup <cusub_sim_bringup>`: contains the launch files to start the gazebo environment.
 
-:doc:`Leviathan Description <leviathan_description>`: all the files containing the Leviathan's model and descriptions for gazebo.
-
-:doc:`Triton Description <triton_description>`: all the files containing the Triton's model and descriptions for gazebo.
+:doc:`Leviathan/Triton Descriptions <leviathan_description>`: all the files containing Leviathan and Triton's models and descriptions for gazebo.
 
 :doc:`Robosub Descriptions <robosub_descriptions>`: contains all of the world assets for the gazebo sim including, TRANSDEC, the divewell, and obstacles.
 

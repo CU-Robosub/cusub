@@ -2,10 +2,12 @@
 cusub_sim_bringup
 *****************
 
-This package hosts the launch files for the simulator elements
+Cusub_sim_bringup contains the launch packages to run the whole sim.
 
 Environment Launchers
 #####################
+
+These launch files start by setting initial poses for all obstacles and subs. Once gazebo is running with the world that is being launched, each object is uploaded to the gazebo model at their argument locations. After the proper launch files for the subs are run, as described below, you can to drive the sub in any environment you want.
 
 **divewell_startgate.launch**: launches the divewell environment with the 2018 startgate.
 
@@ -21,6 +23,8 @@ Sub Launchers
 **leviathan_description.launch**: Loads the Leviathan description into the the gazebo environment
 
 **triton_description.launch**: Loads the Triton description into the gazebo environment
+
+To change starting pose and namespaces, augment these parameters in your launch files or in command line.
 
 .. code-block:: xml
 
