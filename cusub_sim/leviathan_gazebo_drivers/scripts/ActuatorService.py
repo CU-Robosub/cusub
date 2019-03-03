@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 
+from functools import partial
+
+from threading import Thread, Lock
+
 import rospy
 
 from geometry_msgs.msg import Pose, Point, Quaternion
 
 from gazebo_msgs.msg import ModelState
 
-from gazebo_msgs.srv import SpawnModel, SetModelState
+from gazebo_msgs.srv import SpawnModel, SetModelState, DeleteModel
 from actuator.srv import ActivateActuator
 
 """
@@ -17,11 +21,25 @@ class ActuatorService(object):
     # Keep account of how many droppers we have dropped so we dont spawn
     # 2 models with the same name
     current_dropper = 0
-
     current_torpedo = 0
+
+    last_actuator_time = []
+
+    mutex = Lock()
 
     def __init__(self):
         pass
+
+    @staticmethod
+    def despawn_torpedo(_, model_name):
+
+        deleter = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
+        result = deleter(model_name)
+
+        if not result.success:
+            rospy.logerr("Failed to despawn torpedo!")
+            rospy.logerr(result.status_message)
+            return
 
     def fire_torpedo(self, side):
 
@@ -57,6 +75,7 @@ class ActuatorService(object):
         if not result.success:
             rospy.logerr("Failed to spawn torpedo!")
             rospy.logerr(result.status_message)
+            return
 
         # Accelerate Torpedo to kill speed
         model_state = ModelState()
@@ -70,65 +89,85 @@ class ActuatorService(object):
         if not result.success:
             rospy.logerr("Failed to launch torpedo!")
             rospy.logerr(result.status_message)
+            return
+
+        despawn_torpedo_model = partial(self.despawn_torpedo,
+                                        model_name=("torpedo_%d" % (self.current_torpedo)))
+        rospy.Timer(rospy.Duration(15), despawn_torpedo_model, oneshot=True)
 
         self.current_torpedo = self.current_torpedo + 1
 
     def activate_actuator(self, req):
 
+        self.mutex.acquire()
+
         pin = req.actuatorNumber        # 1-6
         time_on = req.activationTime    # ms
 
-        # TODO figure out which pins are actualy the droppers and put this
-        #  information into a specific ENUM stye datatype
-        # TODO only allow # of droppers we would really have with a Service
-        #  call to override if we need to in simulator
-        if pin == 1:
+        now = rospy.get_rostime()
 
-            rospy.loginfo("Simulating droppers by spawning one.")
+        if self.last_actuator_time[pin] < now - rospy.Duration(2.0):
 
-            spawner = rospy.ServiceProxy('/gazebo/spawn_urdf_model', SpawnModel)
-            result = spawner(
+            self.last_actuator_time[pin] = now
 
-                # model_name
-                ("dropper_%d" % (self.current_dropper)),
+            # TODO figure out which pins are actualy the droppers and put this
+            #  information into a specific ENUM stye datatype
+            # TODO only allow # of droppers we would really have with a Service
+            #  call to override if we need to in simulator
+            if pin == 1:
 
-                # Get the dropper URDF from param
-                # model_xml
-                rospy.get_param("~dropperURDF"),
+                rospy.loginfo("Simulating droppers by spawning one.")
 
-                # robo_namespace'
-                ("dropper_%d" % (self.current_dropper)),
+                spawner = rospy.ServiceProxy('/gazebo/spawn_urdf_model', SpawnModel)
+                result = spawner(
 
-                # Spawn dropper just below sub
-                # inital_pose
-                Pose(Point(0.0, 0.0, -0.25), Quaternion(0.0, 0.0, 0.0, 1.0)),
+                    # model_name
+                    ("dropper_%d" % (self.current_dropper)),
 
-                # spawn in baselink so position is relative to sub
-                # reference_frame
-                "leviathan::leviathan/base_link"
+                    # Get the dropper URDF from param
+                    # model_xml
+                    rospy.get_param("~dropperURDF"),
 
-            )
+                    # robo_namespace'
+                    ("dropper_%d" % (self.current_dropper)),
 
-            if not result.success:
-                rospy.logerr("Failed to spawn dropper!")
-                rospy.logerr(result.status_message)
+                    # Spawn dropper just below sub
+                    # inital_pose
+                    Pose(Point(0.0, 0.0, -0.35), Quaternion(1.0, 0.0, 0.0, 0.0)),
 
-            self.current_dropper = self.current_dropper + 1
+                    # spawn in baselink so position is relative to sub
+                    # reference_frame
+                    "leviathan::leviathan/base_link"
 
-        elif pin == 2:
+                )
 
-            self.fire_torpedo('left')
+                if not result.success:
+                    rospy.logerr("Failed to spawn dropper!")
+                    rospy.logerr(result.status_message)
 
-        elif pin == 3:
+                self.current_dropper = self.current_dropper + 1
 
-            self.fire_torpedo('right')
+            elif pin == 2:
 
-        else:
-            rospy.logerr("This actuator is not yet simulated!")
+                self.fire_torpedo('left')
 
+            elif pin == 3:
+
+                self.fire_torpedo('right')
+
+            else:
+                rospy.logerr("This actuator is not yet simulated!")
+
+        self.mutex.release()
         return []
 
     def run(self):
+
+        now = rospy.get_rostime()
+
+        self.last_actuator_time = []
+        for i in range(10):
+            self.last_actuator_time.append(now)
 
         # service to activate actuator
         rospy.Service('activateActuator', ActivateActuator, self.activate_actuator)

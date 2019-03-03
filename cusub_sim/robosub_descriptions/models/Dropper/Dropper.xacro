@@ -8,23 +8,23 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <mass
-        value="1.5" />
+        value="0.00412" />
         <inertia
-          ixx="0.01"
-          ixy="0.01"
-          ixz="0.01"
-          iyy="0.01"
-          iyz="0.01"
-          izz="0.01" />
+          ixx="0.00000004"
+          ixy="0.0"
+          ixz="0.0"
+          iyy="0.00000004"
+          iyz="0.0"
+          izz="0.00000004" />
       </inertial>
     <visual>
       <origin
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01"/>
+        <sphere radius="0.005"/>
         <material name="black">
-          <color rgba="1 0.8 0 1"/>
+          <color rgba="0.2 0.2 0.2 1"/>
         </material>
       </geometry>
     </visual>
@@ -33,7 +33,7 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.01"/>
+        <sphere radius="0.005"/>
       </geometry>
     </collision>
   </link>
@@ -47,12 +47,12 @@
         <fluid_density>1028</fluid_density>
         <flow_velocity_topic>hydrodynamics/current_velocity</flow_velocity_topic>
         <neutrally_buoyant>0</neutrally_buoyant>
-        <volume>0.001</volume>
+        <volume>0.000000524</volume>
 
         <box>
-          <width>0.1</width>
-          <length>0.1</length>
-          <height>0.1</height>
+          <width>0.01</width>
+          <length>0.01</length>
+          <height>0.01</height>
         </box>
 
         <!-- Center of buoyancy -->
@@ -60,7 +60,7 @@
 
         <hydrodynamic_model>
           <type>sphere</type>
-          <radius>0.25</radius>
+          <radius>0.005</radius>
         </hydrodynamic_model>
       </link>
     </plugin>
