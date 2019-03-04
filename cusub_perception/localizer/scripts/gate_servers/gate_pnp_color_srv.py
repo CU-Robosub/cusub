@@ -10,7 +10,7 @@ Localizes the gate via a PNP transform on the tops and bottoms of the gate
 import numpy as np
 import cv2
 import rospy
-from localizer.srv import ClassicalBox2Pose
+from localizer.srv import ClassicalBoxes2Poses
 from geometry_msgs.msg import Pose
 from classical_cv.gate_pnp_color import GatePNPAnalyzer
 from cv_bridge import CvBridge, CvBridgeError
@@ -22,7 +22,7 @@ class ExpWeightedAvg():
         self.beta = (1 - num_poses_to_avg) / ( - num_poses_to_avg)
 #        print "Beta: {}".format(self.beta)
         self.avg_pose = Pose()
-        print self.avg_pose
+#        print self.avg_pose
 
     def get_new_avg_pose(self, new_pose):
         # print "New pose: {}".format(new_pose)
@@ -74,12 +74,15 @@ class GatePNPColorServer():
 
     def __init__(self):
         ns = rospy.get_namespace()
-        self.server = rospy.Service( ns +"localize_start_gate_pole", ClassicalBox2Pose, self.localize)
+        self.server = rospy.Service(ns +"localize_gate_pnp_color", ClassicalBoxes2Poses, self.localize)
         self.occam_camera_matrix.shape = (3,3)
         rospy.loginfo("Gate PNP Color Initialized")
         self.expAvg = ExpWeightedAvg( 5 ) # average over five poses
 
     def localize(self, req):
+
+        if len(req.boxes) < 2: # We need 2 bounding boxes
+            return [Pose()], ['Failed']
 
         bridge = CvBridge()
         try:
@@ -120,28 +123,9 @@ class GatePNPColorServer():
         # TODO move this to the mapper
         # pose = self.expAvg.get_new_avg_pose(pose)
 
-        return pose
+        return [pose], ['start_gate']
 
 if __name__ == "__main__":
-    rospy.init_node("gate_localizer")
+    rospy.init_node("gate_pnp_color")
     server = GatePNPColorServer()
     rospy.spin()
-
-
-"""
-TODO
-Get the plumbing working in terms of making a request to the server
-I can likely fake the data
---> Includes writing the custom msg and what not
---> Write a launch file to launch it
---> Change midpoint method to become a server
---> Change localizer to become localizer_client.py
-PULL REQUEST THAT ISH
---> Try to setup everything a new
---> New branch yamlify
---> Write a yaml file to decide which everything should be launched
-PULL REQUEST THAT ISH
---> Write the actual plumbing for pnp color
---> Test effectiveness on simulated data
-PULL REQUEST THAT ISH
-"""
