@@ -102,6 +102,7 @@ class Localizer():
             for srv in self.server_dict[box.Class]:
                 server_reqs[srv].boxes.append(box)
 
+        classes_found = []
         # Initiate the service calls
         for box in msg.bounding_boxes: # Loop through boxes
             if box.Class == "Found": # if we've already localized it, skip it
@@ -132,6 +133,10 @@ class Localizer():
                         else:
                             for i in range(len(res.poses)):
 #                                rospy.loginfo("New pose found")
+                                if res.classes[i] not in classes_found:
+                                    classes_found.append(res.classes[i])
+                                else: # another server already found this class
+                                    continue
                                 if DEBUG:
                                     rospy.loginfo("Publishing "+res.classes[i]+" pose")
                                 self.publish_pose(res.classes[i], msg.image_header.frame_id, msg.image_header, res.poses[i])
