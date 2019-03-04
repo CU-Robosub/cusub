@@ -105,6 +105,8 @@ class Attack(Objective):
 
         rospy.loginfo("---Attack objective initializing")
 
+        self.robotname = rospy.get_param('~robotname')
+
         # Your bounding boxes, give them to me...  NOW!
         # TODO namespacing
         self.darknetSub = rospy.Subscriber('darknet_ros/bounding_boxes', BoundingBoxes, self.boxes_received, queue_size=1, buff_size=10000000)
@@ -132,9 +134,8 @@ class Attack(Objective):
     def charge_dice(self):
 
         # switch to visual servoing
-        # TODO robot namespace ???
-        self.yawSelect("cusub_common/motor_controllers/cv/yaw/control_effort")
-        self.depthSelect("cusub_common/motor_controllers/cv/depth/control_effort")
+        self.yawSelect("/" + self.robotname + "/cusub_common/motor_controllers/cv/yaw/control_effort")
+        self.depthSelect("/" + self.robotname + "/cusub_common/motor_controllers/cv/depth/control_effort")
 
         # wait a bit to lock on
         rospy.loginfo("--locking on")
@@ -160,9 +161,8 @@ class Attack(Objective):
             rospy.sleep(0.25)
 
         # back to point n shoot control
-        # TODO robot namespace ???
-        self.yawSelect("cusub_common/motor_controllers/pid/yaw/control_effort")
-        self.depthSelect("cusub_common/motor_controllers/pid/depth/control_effort")
+        self.yawSelect("/" + self.robotname + "/cusub_common/motor_controllers/pid/yaw/control_effort")
+        self.depthSelect("/" + self.robotname + "/cusub_common/motor_controllers/pid/depth/control_effort")
 
     def execute(self, userdata):
 

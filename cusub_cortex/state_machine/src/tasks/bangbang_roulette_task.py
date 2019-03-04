@@ -98,6 +98,8 @@ class Attack(Objective):
 
         rospy.loginfo("---Attack objective initializing")
 
+        self.robotname = rospy.get_param('~robotname')
+
         # Your bounding boxes, give them to me...  NOW!
         #TODO namesapcing
         self.darknetSub = rospy.Subscriber('darknet_ros/bounding_boxes', BoundingBoxes, self.boxes_received, queue_size=1, buff_size=10000000)
@@ -121,9 +123,8 @@ class Attack(Objective):
         rospy.loginfo("Executing Attack")
         self.clear_abort()
 
-        # TODO robot namespace ???
-        self.drive_select("cusub_common/motor_controllers/cv/drive/control_effort")
-        self.strafe_select("cusub_common/motor_controllers/cv/strafe/control_effort")
+        self.drive_select("/" + self.robotname + "/cusub_common/motor_controllers/cv/drive/control_effort")
+        self.strafe_select("/" + self.robotname + "/cusub_common/motor_controllers/cv/strafe/control_effort")
 
         rospy.loginfo("--lockon")
         rospy.sleep(5.0)
@@ -146,11 +147,10 @@ class Attack(Objective):
 
         rospy.loginfo("--drop")
 
-        # TODO robot namespace
-        activate_actuator = rospy.ServiceProxy('activateActuator', ActivateActuator)
+        activate_actuator = rospy.ServiceProxy('cusub_common/activateActuator', ActivateActuator)
         activate_actuator(1, 100) # Activate actuator 1 for 100 seconds
 
-        self.drive_select("cusub_common/motor_controllers/pid/drive/control_effort")
-        self.strafe_select("cusub_common/motor_controllers/pid/strafe/control_effort")
+        self.drive_select("/" + self.robotname + "/cusub_common/motor_controllers/pid/drive/control_effort")
+        self.strafe_select("/" + self.robotname + "/cusub_common/motor_controllers/pid/strafe/control_effort")
 
         return "success"
