@@ -44,13 +44,13 @@ def loadStateMachines(task_list):
             visit = True
 
         # load params common to all tasks
-        prior = genPoseMsg(rospy.get_param("/tasks/" + task + "/prior"))
-        search_alg = rospy.get_param("/tasks/" + task + "/search_alg")
+        prior = genPoseMsg(rospy.get_param("tasks/" + task + "/prior"))
+        search_alg = rospy.get_param("tasks/" + task + "/search_alg")
 
         if visit == True:
             task_sm = VisitTask(prior, search_alg)
         elif task == "start_gate":
-            dist_behind_gate = rospy.get_param("/tasks/start_gate/dist_behind_gate")
+            dist_behind_gate = rospy.get_param("tasks/start_gate/dist_behind_gate")
             task_sm = StartGate(prior, search_alg, dist_behind_gate)
         elif task == "bangbang_dice":
             task_sm = BangBangDiceTask(prior, search_alg)
@@ -76,7 +76,7 @@ def main():
     rospy.init_node('smach_top')
 
     # All Objectives depend on the waypoint server so let's wait for it to initalize here
-    wayClient = actionlib.SimpleActionClient('/waypoint', waypointAction)
+    wayClient = actionlib.SimpleActionClient('cusub_common/waypoint', waypointAction)
     rospy.loginfo("Waiting for waypoint server")
     wayClient.wait_for_server()
     rospy.loginfo("---connected to server")
@@ -111,7 +111,7 @@ def main():
                 success_transition = task_list[ index + 1 ]
 
             # find task aborted transition
-            if rospy.get_param('/tasks/'+sm_name+'/failed_repeat'):
+            if rospy.get_param('tasks/'+sm_name+'/failed_repeat'):
                 aborted_transition = sm_name # loop back on this task if aborted
             else:
                 aborted_transition = success_transition # increment
