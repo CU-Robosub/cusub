@@ -20,6 +20,7 @@ class JoyTeleop(object):
     depth_axes = 3
     pitch_axes = 2
     roll_axes = 2
+    gripper_axes = 5
 
     default_depth = 0
 
@@ -29,6 +30,7 @@ class JoyTeleop(object):
     depth_val = 0.0
     pitch_val = 0.0
     roll_val = 0.0
+    gripper_val = 1.0
 
     depth_f64 = None
 
@@ -67,6 +69,7 @@ class JoyTeleop(object):
         self.depth_val = data.axes[self.depth_axes]
         self.pitch_val = data.axes[self.pitch_axes]
         self.roll_val = data.axes[self.roll_axes]
+        self.gripper_val = data.axes[self.gripper_axes]
 
     @staticmethod
     def actuate(num, time):
@@ -118,6 +121,9 @@ class JoyTeleop(object):
 
         pub_depth = rospy.Publisher(namespace + '/local_control/pid/depth/setpoint',
                                     Float64, queue_size=10)
+
+        gripper_outer_pub = rospy.Publisher('/leviathan/outer_controller/command', Float64, queue_size=1)
+        gripper_inner_pub = rospy.Publisher('/leviathan/inner_controller/command', Float64, queue_size=1)
 
         self.strafe_axes = rospy.get_param("~strafe_axes", self.strafe_axes)
         self.drive_axes = rospy.get_param("~drive_axes", self.drive_axes)
@@ -181,6 +187,14 @@ class JoyTeleop(object):
             pub_pitch.publish(pitch_f64)
             roll_f64.data = self.roll_val*math.radians(15.0) # allow 15 deg roll
             pub_roll.publish(roll_f64)
+
+            # 1.0 to -1.0, remap 0.65 to 0.0
+            grip = (self.gripper_val + 1.0) * (0.65 / 2.0)
+
+            outer_f64 = Float64(grip)
+            inner_f64 = Float64(-1*grip)
+            gripper_outer_pub.publish(outer_f64)
+            gripper_inner_pub.publish(inner_f64)
 
             # timer used to run in another thread
             if self.dropper_triggered:

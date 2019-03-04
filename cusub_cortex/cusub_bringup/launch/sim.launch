@@ -9,13 +9,18 @@
     <group if="$(arg leviathan)">
         <include file="$(find pid_controller)/launch/controller_matrix.launch">
             <arg name="namespace" default="leviathan"/>
-            <arg name="setpoint" default="true"/>
+            <arg name="setpoint" default="false"/>
         </include>
         <include file="$(find cusub_common_bringup)/launch/ekf.launch">
             <arg name="robot_name" default="leviathan"/>
         </include>
         <node pkg="tf" type="static_transform_publisher" name="leviathan_depth_broadcaster" args="0 0 0 0 0 0 leviathan/odom leviathan/depth_frame 100"/>
         <include file="$(find leviathan_gazebo_drivers)/launch/leviathan_gazebo_drivers.launch"/>
+
+        <rosparam file="$(find leviathan_description)/config/leviathan_control.yaml" command="load"/>
+        <node name="controller_spawner_lev" pkg="controller_manager" type="spawner" respawn="false"
+            ns="/leviathan" args="leviathan_joint_state_controller outer_controller inner_controller"/>
+
     </group>
 
     <!-- Triton Controls/SensorFusion -->
