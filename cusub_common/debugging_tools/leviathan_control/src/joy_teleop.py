@@ -66,28 +66,28 @@ class JoyTeleop(object):
 
         if setpoint:
 
-            pub_yaw = rospy.Publisher('local_control/pid/yaw/setpoint',
+            pub_yaw = rospy.Publisher('cusub_common/motor_controllers/pid/yaw/setpoint',
                                       Float64, queue_size=10)
-            pub_drive = rospy.Publisher('local_control/pid/drive/setpoint',
+            pub_drive = rospy.Publisher('cusub_common/motor_controllers/pid/drive/setpoint',
                                         Float64, queue_size=10)
-            pub_strafe = rospy.Publisher('local_control/pid/strafe/setpoint',
+            pub_strafe = rospy.Publisher('cusub_common/motor_controllers/pid/strafe/setpoint',
                                          Float64, queue_size=10)
 
         else: 
 
-            pub_yaw = rospy.Publisher('local_control/mux/yaw/control_effort',
+            pub_yaw = rospy.Publisher('cusub_common/motor_controllers/mux/yaw/control_effort',
                                       Float64, queue_size=10)
-            pub_drive = rospy.Publisher('local_control/mux/drive/control_effort',
+            pub_drive = rospy.Publisher('cusub_common/motor_controllers/mux/drive/control_effort',
                                          Float64, queue_size=10)
-            pub_strafe = rospy.Publisher('local_control/mux/strafe/control_effort',
+            pub_strafe = rospy.Publisher('cusub_common/motor_controllers/mux/strafe/control_effort',
                                          Float64, queue_size=10)
 
-        pub_pitch = rospy.Publisher('local_control/pid/pitch/setpoint',
+        pub_pitch = rospy.Publisher('cusub_common/motor_controllers/pid/pitch/setpoint',
                                     Float64, queue_size=10)
-        pub_roll = rospy.Publisher('local_control/pid/roll/setpoint',
+        pub_roll = rospy.Publisher('cusub_common/motor_controllers/pid/roll/setpoint',
                                    Float64, queue_size=10)
 
-        pub_depth = rospy.Publisher('local_control/pid/depth/setpoint',
+        pub_depth = rospy.Publisher('cusub_common/motor_controllers/pid/depth/setpoint',
                                     Float64, queue_size=10)
 
         self.strafe_axes = rospy.get_param("~strafe_axes", self.strafe_axes)
