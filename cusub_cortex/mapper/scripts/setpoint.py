@@ -18,24 +18,24 @@ from sensor_msgs.msg import Imu
 class Setpoint():
 
     def __init__(self):
-        self.yaw_sub = rospy.Subscriber('/local_control/pid/yaw/setpoint', Float64, self.yaw_callback, queue_size=20)
-        self.roll_sub = rospy.Subscriber('/local_control/pid/roll/setpoint', Float64, self.roll_callback, queue_size=20)
-        self.pitch_sub = rospy.Subscriber('/local_control/pid/pitch/setpoint', Float64, self.pitch_callback, queue_size=20)
-        self.depth_sub = rospy.Subscriber('/local_control/pid/depth/setpoint', Float64, self.depth_callback, queue_size=20)
-        self.drive_sub = rospy.Subscriber('/local_control/pid/drive/setpoint', Float64, self.drive_callback, queue_size=20)
-        self.strafe_sub = rospy.Subscriber('/local_control/pid/strafe/setpoint', Float64, self.strafe_callback, queue_size=20)
+        self.yaw_sub = rospy.Subscriber('cusub_common/motor_controllers/pid/yaw/setpoint', Float64, self.yaw_callback, queue_size=20)
+        self.roll_sub = rospy.Subscriber('cusub_common/motor_controllers/pid/roll/setpoint', Float64, self.roll_callback, queue_size=20)
+        self.pitch_sub = rospy.Subscriber('cusub_common/motor_controllers/pid/pitch/setpoint', Float64, self.pitch_callback, queue_size=20)
+        self.depth_sub = rospy.Subscriber('cusub_common/motor_controllers/pid/depth/setpoint', Float64, self.depth_callback, queue_size=20)
+        self.drive_sub = rospy.Subscriber('cusub_common/motor_controllers/pid/drive/setpoint', Float64, self.drive_callback, queue_size=20)
+        self.strafe_sub = rospy.Subscriber('cusub_common/motor_controllers/pid/strafe/setpoint', Float64, self.strafe_callback, queue_size=20)
 
-        self.yaw_setpoint_pub = rospy.Publisher('/local_control/pid/yaw/set',Float64,queue_size=20)
+        self.yaw_setpoint_pub = rospy.Publisher('cusub_common/motor_controllers/pid/yaw/set',Float64,queue_size=20)
         self.yaw_setpoint_pub_data = Float64()
-        self.roll_setpoint_pub = rospy.Publisher('/local_control/pid/roll/set',Float64,queue_size=20)
+        self.roll_setpoint_pub = rospy.Publisher('cusub_common/motor_controllers/pid/roll/set',Float64,queue_size=20)
         self.roll_setpoint_pub_data = Float64()
-        self.pitch_setpoint_pub = rospy.Publisher('/local_control/pid/pitch/set',Float64,queue_size=20)
+        self.pitch_setpoint_pub = rospy.Publisher('cusub_common/motor_controllers/pid/pitch/set',Float64,queue_size=20)
         self.pitch_setpoint_pub_data = Float64()
-        self.depth_setpoint_pub = rospy.Publisher('/local_control/pid/depth/set',Float64,queue_size=20)
+        self.depth_setpoint_pub = rospy.Publisher('cusub_common/motor_controllers/pid/depth/set',Float64,queue_size=20)
         self.depth_setpoint_pub_data = Float64()
-        self.drive_setpoint_pub = rospy.Publisher('/local_control/pid/drive/set',Float64,queue_size=20)
+        self.drive_setpoint_pub = rospy.Publisher('cusub_common/motor_controllers/pid/drive/set',Float64,queue_size=20)
         self.drive_setpoint_pub_data = Float64()
-        self.strafe_setpoint_pub = rospy.Publisher('/local_control/pid/strafe/set',Float64,queue_size=20)
+        self.strafe_setpoint_pub = rospy.Publisher('cusub_common/motor_controllers/pid/strafe/set',Float64,queue_size=20)
         self.strafe_setpoint_pub_data = Float64()
         # Initial Values
         self.yaw_setpoint_pub_data = 0

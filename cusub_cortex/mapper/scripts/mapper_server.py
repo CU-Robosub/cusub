@@ -19,7 +19,7 @@ class Mapper(object):
 
     def __init__(self):
         # create the server
-        self.server = actionlib.SimpleActionServer('/mapper', mapper.msg.mapperAction,
+        self.server = actionlib.SimpleActionServer('cusub_cortex/mapper', mapper.msg.mapperAction,
                                                     execute_cb=self.execute, auto_start=False)
 
         self.server.start()

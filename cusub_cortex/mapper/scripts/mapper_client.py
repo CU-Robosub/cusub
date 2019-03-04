@@ -17,23 +17,23 @@ class Mapper(object):
     def __init__(self, name):
         name = '/mapper'
 
-        self.sub = rospy.Subscriber('/odometry/filtered', Odometry, self.pose_callback, queue_size=1)
+        self.sub = rospy.Subscriber('cusub_common/odometry/filtered', Odometry, self.pose_callback, queue_size=1)
         self.odom = False
-        self.yaw_setpoint_pub = rospy.Publisher('/local_control/pid/yaw/setpoint',Float64,queue_size=20)
+        self.yaw_setpoint_pub = rospy.Publisher('cusub_common/motor_controllers/pid/yaw/setpoint',Float64,queue_size=20)
         self.yaw_setpoint_pub_data = Float64()
-        self.depth_setpoint_pub = rospy.Publisher('/local_control/pid/depth/setpoint',Float64,queue_size=20)
+        self.depth_setpoint_pub = rospy.Publisher('cusub_common/motor_controllers/pid/depth/setpoint',Float64,queue_size=20)
         self.depth_setpoint_pub_data = Float64()
-        self.drive_setpoint_pub = rospy.Publisher('/local_control/pid/drive/setpoint',Float64,queue_size=20)
+        self.drive_setpoint_pub = rospy.Publisher('cusub_common/motor_controllers/pid/drive/setpoint',Float64,queue_size=20)
         self.drive_setpoint_pub_data = Float64()
-        self.strafe_setpoint_pub = rospy.Publisher('/local_control/pid/strafe/setpoint',Float64,queue_size=20)
+        self.strafe_setpoint_pub = rospy.Publisher('cusub_common/motor_controllers/pid/strafe/setpoint',Float64,queue_size=20)
         self.strafe_setpoint_pub_data = Float64()
 
 
 
-        self.yaw_sub = rospy.Subscriber('/yaw_PID/control_effort', Float64, self.yaw_callback)
-        self.depth_sub = rospy.Subscriber('/depth_PID/control_effort', Float64, self.depth_callback)
-        self.drive_sub = rospy.Subscriber('/drive_PID/control_effort', Float64, self.drive_callback)
-        self.strafe_sub = rospy.Subscriber('/strafe_PID/control_effort', Float64, self.strafe_callback)
+        self.yaw_sub = rospy.Subscriber('cusub_common/motor_controllers/pid/yaw/control_effort', Float64, self.yaw_callback)
+        self.depth_sub = rospy.Subscriber('cusub_common/motor_controllers/pid/depth/control_effort', Float64, self.depth_callback)
+        self.drive_sub = rospy.Subscriber('cusub_common/motor_controllers/pid/drive/control_effort', Float64, self.drive_callback)
+        self.strafe_sub = rospy.Subscriber('cusub_common/motor_controllers/pid/strafe/control_effort', Float64, self.strafe_callback)
 
         self.last_yaw = 0
         self.last_depth = 0

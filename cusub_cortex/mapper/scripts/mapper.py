@@ -19,22 +19,22 @@ from pose_filter import filter_poses
 class Mapper():
     def __init__(self):
 
-        self.namespace = rospy.get_param('~namespace')
+        self.namespace = rospy.get_param('~namespace_odom')
 
         # new
         self.pose_sub = rospy.Subscriber('/Global_State/task_poses', Detection, self.pose_received)
 
         # separate topics for each task obstacle
         # dice
-        self.dice1_pub = rospy.Publisher('/Global_State/dice1_pose', PoseStamped, queue_size=10)
-        self.dice2_pub = rospy.Publisher('/Global_State/dice2_pose', PoseStamped, queue_size=10)
-        self.dice5_pub = rospy.Publisher('/Global_State/dice5_pose', PoseStamped, queue_size=10)
-        self.dice6_pub = rospy.Publisher('/Global_State/dice6_pose', PoseStamped, queue_size=10)
+        self.dice1_pub = rospy.Publisher('cusub_cortex/dice1_pose', PoseStamped, queue_size=10)
+        self.dice2_pub = rospy.Publisher('cusub_cortex/dice2_pose', PoseStamped, queue_size=10)
+        self.dice5_pub = rospy.Publisher('cusub_cortex/dice5_pose', PoseStamped, queue_size=10)
+        self.dice6_pub = rospy.Publisher('cusub_cortex/dice6_pose', PoseStamped, queue_size=10)
 
-        self.dice1_unfiltered_pub = rospy.Publisher('/unfiltered/dice1_pose', PoseStamped, queue_size=10)
-        self.dice2_unfiltered_pub = rospy.Publisher('/unfiltered/dice2_pose', PoseStamped, queue_size=10)
-        self.dice5_unfiltered_pub = rospy.Publisher('/unfiltered/dice5_pose', PoseStamped, queue_size=10)
-        self.dice6_unfiltered_pub = rospy.Publisher('/unfiltered/dice6_pose', PoseStamped, queue_size=10)
+        self.dice1_unfiltered_pub = rospy.Publisher('cusub_cortex/unfiltered/dice1_pose', PoseStamped, queue_size=10)
+        self.dice2_unfiltered_pub = rospy.Publisher('cusub_cortex/unfiltered/dice2_pose', PoseStamped, queue_size=10)
+        self.dice5_unfiltered_pub = rospy.Publisher('cusub_cortex/unfiltered/dice5_pose', PoseStamped, queue_size=10)
+        self.dice6_unfiltered_pub = rospy.Publisher('cusub_cortex/unfiltered/dice6_pose', PoseStamped, queue_size=10)
 
         self.dice1_pose = PoseStamped()
         self.dice2_pose = PoseStamped()
@@ -52,9 +52,9 @@ class Mapper():
         self.dice6_found = False
 
         # start gate
-        self.start_gate_pub = rospy.Publisher('/Global_State/start_gate', PoseStamped, queue_size=10)
+        self.start_gate_pub = rospy.Publisher('cusub_cortex//start_gate', PoseStamped, queue_size=10)
 
-        self.start_gate_unfiltered_pub = rospy.Publisher('/unfiltered/start_gate', PoseStamped, queue_size=10)
+        self.start_gate_unfiltered_pub = rospy.Publisher('cusub_cortex/unfiltered/start_gate', PoseStamped, queue_size=10)
 
         self.start_gate_pose = PoseStamped()
 
@@ -127,7 +127,8 @@ class Mapper():
         # occam_pose.header.stamp = now
 
         # Gotta love tf
-        odom_pose = self.listener.transformPose(self.namespace + '/odom', occam_pose)
+        # must be aboslute reference for inter meta-package
+        odom_pose = self.listener.transformPose('/' + self.namespace_odom + '/odom', occam_pose)
         return odom_pose
 
 
