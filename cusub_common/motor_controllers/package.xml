@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>pid_controller</name>
+  <name>motor_controllers</name>
   <version>1.0.0</version>
   <description>Package that contains all code for the controllers</description>
 

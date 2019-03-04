@@ -44,7 +44,7 @@ class PID_Pololu():
                                           1500, 1500, 1500, 1500])
 
         ## Publisher for sending commands to the pololu
-        self.motor_pub = rospy.Publisher('drivers/pololu_control/command',
+        self.motor_pub = rospy.Publisher('cusub_common/motor_controllers/pololu_control/command',
                                          Float64MultiArray, queue_size=1)
 
         rospy.Timer(rospy.Duration(.02), self.motor_publish)
@@ -52,22 +52,22 @@ class PID_Pololu():
         ## The Float array to be sent to the pololu command
         self.cmd_data = Float64MultiArray()
         ## Subscriber for the roll pid topic
-        self.roll_sub = rospy.Subscriber('local_control/pid/roll/control_effort',
+        self.roll_sub = rospy.Subscriber('cusub_common/motor_controllers/pid/roll/control_effort',
                                          Float64, self.roll_callback)
         ## Subscriber for the pitch pid topic
-        self.pitch_sub = rospy.Subscriber('local_control/pid/pitch/control_effort',
+        self.pitch_sub = rospy.Subscriber('cusub_common/motor_controllers/pid/pitch/control_effort',
                                           Float64, self.pitch_callback)
         ## Subscriber for the yaw pid topic
-        self.yaw_sub = rospy.Subscriber('local_control/mux/yaw/control_effort',
+        self.yaw_sub = rospy.Subscriber('cusub_common/motor_controllers/mux/yaw/control_effort',
                                         Float64, self.yaw_callback)
         ## Subscriber for the depth pid topic
-        self.depth_sub = rospy.Subscriber('local_control/mux/depth/control_effort',
+        self.depth_sub = rospy.Subscriber('cusub_common/motor_controllers/mux/depth/control_effort',
                                           Float64, self.depth_callback)
         ## Subscriber for the drive pid topic
-        self.drive_sub = rospy.Subscriber('local_control/mux/drive/control_effort',
+        self.drive_sub = rospy.Subscriber('cusub_common/motor_controllers/mux/drive/control_effort',
                                           Float64, self.drive_callback)
         ## Subscriber for the strafe pid topic
-        self.strafe_sub = rospy.Subscriber('local_control/mux/strafe/control_effort',
+        self.strafe_sub = rospy.Subscriber('cusub_common/motor_controllers/mux/strafe/control_effort',
                                            Float64, self.strafe_callback)
 
 
@@ -76,7 +76,7 @@ class PID_Pololu():
         self.yaw_setpoint_pub_data = Float64()
 
         print "waiting for yaw"
-        msg = rospy.wait_for_message('sensor_fusion/odometry/filtered', Odometry)
+        msg = rospy.wait_for_message('cusub_common/odometry/filtered', Odometry)
 
         orientation =  msg.pose.pose.orientation
         (roll, pitch, yaw) = tf.transformations.euler_from_quaternion([orientation.x,
