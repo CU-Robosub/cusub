@@ -1,7 +1,7 @@
 <launch>
-  <group ns="global_control">
+  <arg name="sub" default="leviathan" />
+  <group ns="$(arg sub)/cusub_cortex">
     <include file="$(find mapper)/launch/mapper.launch"/>
-    <!--  State machine closed for construction-->
-    <include file="$(find state_machine)/launch/state_machine.launch"/>
+    <include file="$(find state_machine)/launch/smach_launch.launch"/>
   </group>
 </launch>

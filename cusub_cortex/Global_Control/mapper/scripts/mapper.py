@@ -20,16 +20,20 @@ class Mapper():
     def __init__(self):
 
         self.namespace = rospy.get_param('~namespace')
-
+        ns = rospy.get_namespace()
+        index = ns[1:].find('/') # find the 2nd '/'
+        sub_name = ns[0:index+2]
+        print(sub_name)
+        
         # new
-        self.pose_sub = rospy.Subscriber('/Global_State/task_poses', Detection, self.pose_received)
+        self.pose_sub = rospy.Subscriber(sub_name + 'cusub_perception/mapper/task_poses', Detection, self.pose_received)
 
         # separate topics for each task obstacle
         # dice
-        self.dice1_pub = rospy.Publisher('/Global_State/dice1_pose', PoseStamped, queue_size=10)
-        self.dice2_pub = rospy.Publisher('/Global_State/dice2_pose', PoseStamped, queue_size=10)
-        self.dice5_pub = rospy.Publisher('/Global_State/dice5_pose', PoseStamped, queue_size=10)
-        self.dice6_pub = rospy.Publisher('/Global_State/dice6_pose', PoseStamped, queue_size=10)
+        self.dice1_pub = rospy.Publisher(ns + 'mapper/dice1_pose', PoseStamped, queue_size=10)
+        self.dice2_pub = rospy.Publisher(ns + 'mapper/dice2_pose', PoseStamped, queue_size=10)
+        self.dice5_pub = rospy.Publisher(ns + 'mapper/dice5_pose', PoseStamped, queue_size=10)
+        self.dice6_pub = rospy.Publisher(ns + 'mapper/dice6_pose', PoseStamped, queue_size=10)
 
         self.dice1_unfiltered_pub = rospy.Publisher('/unfiltered/dice1_pose', PoseStamped, queue_size=10)
         self.dice2_unfiltered_pub = rospy.Publisher('/unfiltered/dice2_pose', PoseStamped, queue_size=10)
@@ -52,7 +56,7 @@ class Mapper():
         self.dice6_found = False
 
         # start gate
-        self.start_gate_pub = rospy.Publisher('/Global_State/start_gate', PoseStamped, queue_size=10)
+        self.start_gate_pub = rospy.Publisher(ns + 'mapper/start_gate', PoseStamped, queue_size=10)
 
         self.start_gate_unfiltered_pub = rospy.Publisher('/unfiltered/start_gate', PoseStamped, queue_size=10)
 
