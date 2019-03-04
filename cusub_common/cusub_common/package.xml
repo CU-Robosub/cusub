@@ -27,8 +27,7 @@
     <run_depend>teleop</run_depend>
 
     <!-- motor control packages -->
-    <run_depend>pid_controller</run_depend>
-    <run_depend>bangbang</run_depend>
+    <run_depend>motor_controllers</run_depend>
 
     <!-- other packages -->
     <run_depend>waypoint_navigator</run_depend>
