@@ -7,7 +7,12 @@ This section will go into the details of the common parts of the CU robosub.
 Running Common
 ##############
 
-this section will include launch details for the meta-package
+In order to run the common packages it is recomend to launch:
+::
+
+    roslaunch cusub_common leviathan_sim.launch
+
+keep in mind that this package must be launched on top of the sim launches. this means that both a gazebo environment and the leviathan description must be launched.
 
 
 System Packages
@@ -18,6 +23,8 @@ System Packages
 
     cusub_common_bringup
     waypoint_navigator
+    debugging_tools
+    motor_controllers
 
 
 cusub_common: meta-package for organizing software stack
@@ -26,20 +33,10 @@ cusub_common: meta-package for organizing software stack
 
 :doc:`Waypoint Navigator <waypoint_navigator>`
 
-Debugging Tools
-___________________
-.. toctree::
-    :hidden:
+:doc:`Debugging tools <debugging_tools>`
 
-    debugging-tools/leviathan_control
+:doc:`Motor controllers <motor_controllers>`
 
-Console: unknown
-
-leviathan_control: teleop?
-
-qt_console: unknown
-
-teleop: teleop
 
 Drivers
 #######
@@ -48,28 +45,38 @@ Drivers
     :hidden:
 
     drivers/gazebo_drivers
+    drivers/actuator
+    drivers/depth_sensor
+    drivers/dvl
+    drivers/occam
+    drivers/pololu_controller
+    drivers/sparton_imu
 
 :doc:`gazebo_drivers <drivers/gazebo_drivers>`
 
-Motor Controllers
-_________________
+:doc:`actuator <drivers/actuator>`
 
-.. toctree::
-    :hidden:
+:doc:`Depth sensor <drivers/depth_sensor>`
 
-    motor-controllers/bangbang
-    motor-controllers/pid_controller
+:doc:`occam <drivers/occam>`
 
-:doc:`bangbang <motor-controllers/bangbang>`:
+:doc:`pololu_controller <drivers/pololu_controller>`
 
-:doc:`pid_controller <motor-controllers/pid_controller>`:
-
+:doc:`sparton imu <drivers/sparton_imu>`
 
 
 ROS Topic Interface
 ###################
 
-Will contain a list of topics typically created by this meta-package, the namespace conventions and basic uses.
+Currently the majority of topics will be placed under this namespace:
+::
+
+    <sub_name>/cusub_common/<topics>
+
+the exceptions being motor_controllers and occam due to their large topic list:
+::
+    <sub_name>/cusub_common/motor_controllers/<topics>
+    <sub_name>/cusub_common/occam/<topics>
 
 Known Issues
 ############

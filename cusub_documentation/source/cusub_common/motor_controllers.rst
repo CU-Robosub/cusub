@@ -1,6 +1,17 @@
-********
+*****************
+motor_controllers
+*****************
+
+top level overview of how the motor controller is built
+
+PID
+___
+description of PID references
+
+
 BangBang
-********
+________
+
 This is a simple Bang Bang controller node.  It will command a preset control effort when the input state is above or below a certain amount of the setpoint.
 
 Publishers
@@ -65,3 +76,9 @@ Parameters
     :Default: -1.0
 
     Control Effort that is output when state is greater than setpoint + (deadzone_size / 2).
+
+
+The Muxer
+_________
+
+information about how the two controllers are muxed
