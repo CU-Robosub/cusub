@@ -102,6 +102,7 @@ class Localizer():
             for srv in self.server_dict[box.Class]:
                 server_reqs[srv].boxes.append(box)
 
+
         classes_found = []
         # Initiate the service calls
         for box in msg.bounding_boxes: # Loop through boxes
@@ -124,7 +125,6 @@ class Localizer():
                         for cls in res.classes:
                             for j in range(len(msg.bounding_boxes)):
                                 if cls in msg.bounding_boxes[j].Class:
-#                                    print("Changing: " + msg.bounding_boxes[j].Class)
                                     msg.bounding_boxes[j].Class = "Found"
                                     server_reqs[srv] = SERVER_SUCCESS
                         if server_reqs[srv] == SERVER_FAILURE:
@@ -132,7 +132,6 @@ class Localizer():
                                 rospy.logwarn("server " + srv + " failed")
                         else:
                             for i in range(len(res.poses)):
-#                                rospy.loginfo("New pose found")
                                 if res.classes[i] not in classes_found:
                                     classes_found.append(res.classes[i])
                                 else: # another server already found this class
