@@ -1,39 +1,38 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro"
-  name="Dropper_robot">
+  name="Torpedo_robot">
   <link
-    name="Dropper/base_link">
+    name="Torpedo/base_link">
     <inertial>
       <origin
         xyz="0 0 0"
         rpy="0 0 0" />
       <mass
-        value="0.00412" />
+        value="0.0444" />
         <inertia
-          ixx="0.00000004"
+          ixx="0.00003"
           ixy="0.0"
           ixz="0.0"
-          iyy="0.00000004"
+          iyy="0.00003"
           iyz="0.0"
-          izz="0.00000004" />
+          izz="0.0" />
       </inertial>
     <visual>
       <origin
-        xyz="0 0 0"
+        xyz="0 0 -0.0629"
         rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.005"/>
-        <material name="black">
-          <color rgba="0.2 0.2 0.2 1"/>
-        </material>
+        <mesh
+          filename="package://robosub_descriptions/models/Torpedo/Torpedo.stl" />
       </geometry>
     </visual>
     <collision>
       <origin
-        xyz="0 0 0"
+        xyz="0 0 -0.0629"
         rpy="0 0 0" />
       <geometry>
-        <sphere radius="0.005"/>
+        <mesh
+          filename="package://robosub_descriptions/models/Torpedo/Torpedo.stl" />
       </geometry>
     </collision>
   </link>
@@ -43,24 +42,37 @@
     <fluid_density>1028.0</fluid_density>
     <flow_velocity_topic>hydrodynamics/current_velocity</flow_velocity_topic>
     <debug>0</debug>
-    <link name="Dropper/base_link">
+    <link name="Torpedo/base_link">
         <fluid_density>1028</fluid_density>
         <flow_velocity_topic>hydrodynamics/current_velocity</flow_velocity_topic>
         <neutrally_buoyant>0</neutrally_buoyant>
-        <volume>0.000000524</volume>
+        <volume>0.00004</volume>
 
         <box>
-          <width>0.01</width>
-          <length>0.01</length>
-          <height>0.01</height>
+          <width>0.025</width>
+          <length>0.117</length>
+          <height>0.025</height>
         </box>
 
         <!-- Center of buoyancy -->
         <center_of_buoyancy>0 0 0</center_of_buoyancy>
-
         <hydrodynamic_model>
-          <type>sphere</type>
-          <radius>0.005</radius>
+
+            <type>fossen</type>
+
+            <added_mass>
+              0    0    0    0     0    0
+              0    0    0    0     0    0
+              0    0    0    0     0    0
+              0    0    0    0     0    0
+              0    0    0    0     0    0
+              0    0    0    0     0    0
+            </added_mass>
+
+            <linear_damping>
+              -0.12 -0.12 -0.02 0 0 0
+            </linear_damping>
+
         </hydrodynamic_model>
       </link>
     </plugin>

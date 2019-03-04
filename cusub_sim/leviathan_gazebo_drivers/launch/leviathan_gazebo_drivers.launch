@@ -10,7 +10,9 @@
 
   <node name="gazebo_actuators" pkg="leviathan_gazebo_drivers" type="ActuatorService.py">
     <param name="dropperURDF"
-           command="$(find xacro)/xacro '$(find robosub_descriptions)/models/Dropper/Dropper.xacro'" />
+           command="$(find xacro)/xacro '$(find robosub_descriptions)/models/Torpedo/Torpedo.xacro'" />
+    <param name="torpedoURDF"
+           command="$(find xacro)/xacro '$(find robosub_descriptions)/models/Torpedo/Torpedo.xacro'" />
   </node>
 
   <node name="depth" pkg="topic_tools" type="relay" args="/depth /drivers/depth_sensor/depth"/>

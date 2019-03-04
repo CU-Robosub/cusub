@@ -43,13 +43,23 @@ class JoyTeleop(object):
     depth_sensitivity = 0.02
 
     dropper_triggered = False
+    left_torpedo_triggered = False
+    right_torpedo_triggered = False
+
+    dropper_avail = True
+    left_torpedo_avail = True
+    right_torpedo_avail = True
 
     def joystick_state(self, data):
         """Gets joystick data to figure out what to have the sub do
         """
 
-        if(data.buttons[0]):
-            self.dropper_triggered
+        if data.buttons[0] and self.dropper_avail:
+            self.dropper_triggered = True
+        if data.buttons[4] and self.left_torpedo_avail:
+            self.left_torpedo_triggered = True
+        if data.buttons[5] and self.right_torpedo_avail:
+            self.right_torpedo_triggered = True
 
         self.strafe_val  = data.axes[self.strafe_axes]
         self.drive_val = data.axes[self.drive_axes]
@@ -57,6 +67,23 @@ class JoyTeleop(object):
         self.depth_val = data.axes[self.depth_axes]
         self.pitch_val = data.axes[self.pitch_axes]
         self.roll_val = data.axes[self.roll_axes]
+
+    @staticmethod
+    def actuate(num, time):
+        activate_actuator = rospy.ServiceProxy('activateActuator', ActivateActuator)
+        activate_actuator(num, time)
+
+    def actuate_dropper(self, _):
+        self.actuate(1, 100)
+        self.dropper_avail = True
+
+    def actuate_left_torpedo(self, _):
+        self.actuate(2, 100)
+        self.left_torpedo_avail = True
+
+    def actuate_right_torpedo(self, _):
+        self.actuate(3, 100)
+        self.right_torpedo_avail = True
 
     def joy_teleop(self):
 
@@ -155,10 +182,19 @@ class JoyTeleop(object):
             roll_f64.data = self.roll_val*math.radians(15.0) # allow 15 deg roll
             pub_roll.publish(roll_f64)
 
-            if(self.dropper_triggered):
-                activate_actuator = rospy.ServiceProxy('/activateActuator', ActivateActuator)
-                activate_actuator(1, 100) # Activate actuator 1 for 100 seconds
+            # timer used to run in another thread
+            if self.dropper_triggered:
                 self.dropper_triggered = False
+                self.dropper_avail = False
+                rospy.Timer(rospy.Duration(0.1), self.actuate_dropper, oneshot=True)
+            if self.left_torpedo_triggered:
+                self.left_torpedo_triggered = False
+                self.left_torpedo_avail = False
+                rospy.Timer(rospy.Duration(0.1), self.actuate_left_torpedo, oneshot=True)
+            if self.right_torpedo_triggered:
+                self.right_torpedo_triggered = False
+                self.right_torpedo_avail = False
+                rospy.Timer(rospy.Duration(0.1), self.actuate_right_torpedo, oneshot=True)
 
             rate.sleep()
 
