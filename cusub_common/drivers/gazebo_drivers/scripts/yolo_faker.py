@@ -429,6 +429,12 @@ class YOLOFaker(object):
 
         for obj_class in obj.classes:
 
+            # check that we are not beyond viewing distance
+            self.listener.waitForTransform(camera.frame, obj.frame_id, time, rospy.Duration(1))
+            (obj_trans, obj_rot) = self.listener.lookupTransform(camera.frame, obj.frame_id, time)
+            if np.linalg.norm(obj_trans) > rospy.get_param('~visibility', 14.0):
+                continue
+
             new_pts = []
             for point in obj_class.points:
 
@@ -449,7 +455,6 @@ class YOLOFaker(object):
                 pose.orientation = orientation
                 obj_pose_stamped.pose = pose
 
-                self.listener.waitForTransform(camera.frame, obj.frame_id, time, rospy.Duration(1))
                 new_pt = self.listener.transformPose(camera.frame, obj_pose_stamped)
                 new_pt = [-1*new_pt.pose.position.y, new_pt.pose.position.z, new_pt.pose.position.x]
                 new_pts.append(new_pt)
@@ -472,6 +477,8 @@ class YOLOFaker(object):
                    and bounding_box[3] - bounding_box[2] > self.min_pixel_size:
                     detections.append((bounding_box, obj_class.color,
                                        obj_class.name, image_pts[0]))
+
+            # TODO Find bounding boxes and if overlap is to great remove the further bounding box
 
         return detections
 
@@ -532,7 +539,7 @@ class YOLOFaker(object):
         sub_pose_topic = rospy.get_param('~sub_pose_topic')
 
         # Parameter for smallest width/height allowed for bounding box in pixels
-        self.min_pixel_size = rospy.get_param('~min_pixel_size', 10)
+        self.min_pixel_size = rospy.get_param('~min_pixel_size', 15)
 
         # Shows bounding volume points for debugging
         self.show_points = rospy.get_param('~show_points', False)

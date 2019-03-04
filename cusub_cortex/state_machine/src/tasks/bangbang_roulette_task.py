@@ -107,8 +107,13 @@ class Attack(Objective):
         self.cv_strafe_state_pub = rospy.Publisher('/leviathan/local_control/cv/strafe/state', Float64, queue_size=1)
         self.cv_strafe_setpoint_pub = rospy.Publisher('/leviathan/local_control/cv/strafe/setpoint', Float64, queue_size=1)
 
-        self.drive_select = rospy.ServiceProxy('/leviathan/drive_mux/select', MuxSelect)
-        self.strafe_select = rospy.ServiceProxy('/leviathan/strafe_mux/select', MuxSelect)
+<<<<<<< HEAD
+        self.drive_select = rospy.ServiceProxy('/drive_mux/select', MuxSelect)
+        self.strafe_select = rospy.ServiceProxy('/strafe_mux/select', MuxSelect)
+=======
+        self.drive_select = rospy.ServiceProxy('/leviathan_drive_mux/select', MuxSelect)
+        self.strafe_select = rospy.ServiceProxy('/leviathan_strafe_mux/select', MuxSelect)
+>>>>>>> 234fa89
 
         self.depth_pub = rospy.Publisher('/leviathan/local_control/pid/depth/setpoint', Float64, queue_size=1)
         rospy.Subscriber("/leviathan/local_control/pid/depth/state", Float64, self.depth_state_callback)
@@ -130,7 +135,9 @@ class Attack(Objective):
         self.decend = True
         depth = Float64()
         for i in xrange(40):
+
             rospy.loginfo(self.current_depth)
+
             depth.data = self.current_depth - 0.8
             self.depth_pub.publish(depth)
             if not self.decend or self.current_depth <= -3.75:

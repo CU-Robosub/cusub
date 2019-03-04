@@ -52,6 +52,11 @@
           <near>0.02</near>
           <far>300</far>
         </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.008</stddev>
+        </noise>
         <distortion>
           <k1>-0.360085</k1>
           <k2>0.115116</k2>
