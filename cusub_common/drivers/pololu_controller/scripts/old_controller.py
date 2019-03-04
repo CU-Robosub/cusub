@@ -26,17 +26,17 @@ import serial
 
 class Controller():
     def __init__(self):
-        f = rospy.get_param("/pololu_controller/sub_yaml/")
-        paramlist=rosparam.load_file(f,default_namespace="motors")
+        f = rospy.get_param("pololu_controller/sub_yaml/")
+        paramlist = rosparam.load_file(f,default_namespace="motors")
         for params, ns in paramlist:
             rosparam.upload_params(ns,params)
-        port = rospy.get_param("/pololu_controller/port_name/")
-        baud = rospy.get_param("/pololu_controller/baud_rate/")
+        port = rospy.get_param("pololu_controller/port_name/")
+        baud = rospy.get_param("pololu_controller/baud_rate/")
         self.port = serial.Serial(port, baud, timeout=0.5)
         self.port.flush()
 
         self.kill_all()
-        self.sub = rospy.Subscriber('/drivers/pololu_control/command', Float64MultiArray, self.command_callback, queue_size=40)
+        self.sub = rospy.Subscriber('motor_controllers/pololu_control/command', Float64MultiArray, self.command_callback, queue_size=40)
 
     def command_callback(self,msg):
 	# order: [front, frontright, frontleft, backright, backleft, back, left, right]
@@ -96,7 +96,6 @@ def main():
 
     rospy.spin()
     m.kill_all()
-
 
 if __name__ == "__main__":
     main()
