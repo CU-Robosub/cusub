@@ -1,0 +1,6 @@
+<launch>
+    <node name="mapper" pkg="mapper" type="mapper.py" output="screen">
+        <param name="namespace_odom" value="leviathan/description"/>
+    </node>
+
+</launch>

@@ -85,7 +85,7 @@ if __name__ == '__main__':
     rospy.init_node('SpartonDigitalCompassIMU')
     #Pos_pub  = rospy.Publisher('/imu/HeadingTrue', PoseWithCovariance, queue_size="1")
     #PosD_pub = rospy.Publisher('/imu/HeadingTrue_degree', PoseWithCovarience, queue_size="1")
-    Imu_pub = rospy.Publisher('/imu/data', Imu, queue_size="1")
+    Imu_pub = rospy.:('imu', Imu, queue_size="1")
     #SpartonPose = PoseWithCovarience()
     #SpartonPose2D=PoseWithCovarience()
     #SpartonPose2D_D=SpartonPose2D

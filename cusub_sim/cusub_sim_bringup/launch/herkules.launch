@@ -1,0 +1,6 @@
+<launch>
+
+  <!-- Start the a underwater world simulation scenario -->
+  <include file="$(find uuv_gazebo_worlds)/launch/herkules_ship_wreck.launch"/>
+
+</launch>

@@ -4,7 +4,7 @@ import contextlib
 import rospy
 import math
 import time
-# from pololu_controller.msg import MotorCommand
+# from pololu_controller.rst.msg import MotorCommand
 from std_msgs.msg import Float64MultiArray
 import sys, signal
 
