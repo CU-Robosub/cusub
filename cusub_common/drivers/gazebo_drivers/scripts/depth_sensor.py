@@ -31,6 +31,7 @@ class DepthSensor(object):
     def pressure_callback(self, data):
         """Gets current pressure from gazebo"""
 
+        print "got pressure"
         self.depth_pose.header.stamp = rospy.Time.now()
         self.depth_pose.header.seq += 1
 
@@ -52,6 +53,7 @@ class DepthSensor(object):
         rospy.Subscriber('description/pressure', FluidPressure, self.pressure_callback)
 
 
+
         self.depth_pose = PoseWithCovarianceStamped()
         self.depth_pose.pose.covariance = [0, 0, 0, 0, 0, 0,
                                            0, 0, 0, 0, 0, 0,
@@ -68,6 +70,7 @@ class DepthSensor(object):
         rate = rospy.Rate(30)
 
         while not rospy.is_shutdown():
+            print "test"
 
             depth_pub.publish(self.depth_pose)
 

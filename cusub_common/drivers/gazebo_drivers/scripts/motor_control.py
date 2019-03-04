@@ -43,7 +43,7 @@ class MotorControl(object):
 
         rospy.init_node('gazebo_motor_control', anonymous=True)
 
-        rospy.Subscriber('drivers/pololu_control/command',
+        rospy.Subscriber('cusub_common/motor_controllers/pololu_control/command',
                          Float64MultiArray, self.motor_command_callback)
 
         pub_thrust = []
