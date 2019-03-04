@@ -1,6 +1,6 @@
 <launch>
 
-    <arg name="namespace" default="leviathan"/> <!-- Which sub are we controlling -->
+    <arg name="namespace" default="leviathan/cusub_common"/> <!-- Which sub are we controlling -->
 
     <group ns="$(arg namespace)">
 
