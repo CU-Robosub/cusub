@@ -1,3 +1,0 @@
-<launch>
-	<rosparam command="load" file="$(find config)/mission_config.yaml" />
-</launch>

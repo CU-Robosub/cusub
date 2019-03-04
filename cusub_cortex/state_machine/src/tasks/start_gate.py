@@ -37,7 +37,7 @@ class StartGate(Task):
         self.attack = Attack(distBehind)
 
     def initMapperSubs(self):
-        rospy.Subscriber('/Global_State/start_gate', PoseStamped, self.start_gate_pose_cb)
+        rospy.Subscriber('cusub_cortex/start_gate', PoseStamped, self.start_gate_pose_cb)
 
     def linkObjectives(self):
         with self: # we are a StateMachine
@@ -139,7 +139,8 @@ if __name__ == "__main__":
     ps.position.y = 1
     ps.position.z = 1
     sg = StartGate(ps, 'simple', 1.0)
-    sis = smach_ros.IntrospectionServer('fuckuluke', sg.sm, '/fuck')
+    #TODO namespace
+    sis = smach_ros.IntrospectionServer('sis', sg.sm, '/sis')
     sis.start()
     sg.execute(0)
     sis.stop()

@@ -99,24 +99,20 @@ class Attack(Objective):
         rospy.loginfo("---Attack objective initializing")
 
         # Your bounding boxes, give them to me...  NOW!
-        self.darknetSub = rospy.Subscriber('/darknet_ros/bounding_boxes', BoundingBoxes, self.boxes_received, queue_size=1, buff_size=10000000)
+        #TODO namesapcing
+        self.darknetSub = rospy.Subscriber('darknet_ros/bounding_boxes', BoundingBoxes, self.boxes_received, queue_size=1, buff_size=10000000)
 
-        self.cv_drive_state_pub = rospy.Publisher('/leviathan/local_control/cv/drive/state', Float64, queue_size=1)
-        self.cv_drive_setpoint_pub = rospy.Publisher('/leviathan/local_control/cv/drive/setpoint', Float64, queue_size=1)
+        self.cv_drive_state_pub = rospy.Publisher('cusub_common/motor_controllers/cv/drive/state', Float64, queue_size=1)
+        self.cv_drive_setpoint_pub = rospy.Publisher('cusub_common/motor_controllers/cv/drive/setpoint', Float64, queue_size=1)
 
-        self.cv_strafe_state_pub = rospy.Publisher('/leviathan/local_control/cv/strafe/state', Float64, queue_size=1)
-        self.cv_strafe_setpoint_pub = rospy.Publisher('/leviathan/local_control/cv/strafe/setpoint', Float64, queue_size=1)
+        self.cv_strafe_state_pub = rospy.Publisher('cusub_common/motor_controllers/cv/strafe/state', Float64, queue_size=1)
+        self.cv_strafe_setpoint_pub = rospy.Publisher('cusub_common/motor_controllers/cv/strafe/setpoint', Float64, queue_size=1)
 
-<<<<<<< HEAD
-        self.drive_select = rospy.ServiceProxy('/drive_mux/select', MuxSelect)
-        self.strafe_select = rospy.ServiceProxy('/strafe_mux/select', MuxSelect)
-=======
-        self.drive_select = rospy.ServiceProxy('/leviathan_drive_mux/select', MuxSelect)
-        self.strafe_select = rospy.ServiceProxy('/leviathan_strafe_mux/select', MuxSelect)
->>>>>>> 234fa89
+        self.drive_select = rospy.ServiceProxy('cusub_common/motor_controllers/drive_mux/select', MuxSelect)
+        self.strafe_select = rospy.ServiceProxy('cusub_common/motor_controllers/strafe_mux/select', MuxSelect)
 
-        self.depth_pub = rospy.Publisher('/leviathan/local_control/pid/depth/setpoint', Float64, queue_size=1)
-        rospy.Subscriber("/leviathan/local_control/pid/depth/state", Float64, self.depth_state_callback)
+        self.depth_pub = rospy.Publisher('cusub_common/motor_controllers/pid/depth/setpoint', Float64, queue_size=1)
+        rospy.Subscriber("cusub_common/motor_controllers/pid/depth/state", Float64, self.depth_state_callback)
 
         super(Attack, self).__init__(self.outcomes, "Attack")
 
@@ -125,8 +121,9 @@ class Attack(Objective):
         rospy.loginfo("Executing Attack")
         self.clear_abort()
 
-        self.drive_select("/leviathan/local_control/cv/drive/control_effort")
-        self.strafe_select("/leviathan/local_control/cv/strafe/control_effort")
+        # TODO robot namespace ???
+        self.drive_select("cusub_common/motor_controllers/cv/drive/control_effort")
+        self.strafe_select("cusub_common/motor_controllers/cv/strafe/control_effort")
 
         rospy.loginfo("--lockon")
         rospy.sleep(5.0)
@@ -148,10 +145,12 @@ class Attack(Objective):
             rospy.sleep(0.25)
 
         rospy.loginfo("--drop")
-        activate_actuator = rospy.ServiceProxy('/activateActuator', ActivateActuator)
+
+        # TODO robot namespace
+        activate_actuator = rospy.ServiceProxy('activateActuator', ActivateActuator)
         activate_actuator(1, 100) # Activate actuator 1 for 100 seconds
 
-        self.drive_select("/leviathan/local_control/pid/drive/control_effort")
-        self.strafe_select("/leviathan/local_control/pid/strafe/control_effort")
+        self.drive_select("cusub_common/motor_controllers/pid/drive/control_effort")
+        self.strafe_select("cusub_common/motor_controllers/pid/strafe/control_effort")
 
         return "success"

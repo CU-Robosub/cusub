@@ -2,6 +2,9 @@
   <group ns="leviathan">
 
     <include file="$(find mapper)/launch/mapper.launch"/>
+
+    <include file="$(find waypoint_navigator)/launch/waypoint_navigator.launch"/>
+
     <!--  State machine closed for construction-->
     <include file="$(find state_machine)/launch/state_machine.launch"/>
 
