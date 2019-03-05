@@ -27,7 +27,7 @@
   <arg name="mode" default="default"/>
 
   <!-- Vehicle's namespace -->
-  <arg name="namespace" default="triton"/>
+  <arg name="namespace" default="triton/description"/>
 
   <arg name="world_frame" default="world"/>
 
@@ -56,8 +56,8 @@
   </group>
 
   <!-- Publish state and tf for in relation to the world frame -->
-  <include file="$(find uuv_descriptions)/launch/message_to_tf.launch">
+  <!--<include file="$(find uuv_descriptions)/launch/message_to_tf.launch">
     	<arg name="namespace" value="$(arg namespace)"/>
-  </include>
+  </include>-->
 
 </launch>

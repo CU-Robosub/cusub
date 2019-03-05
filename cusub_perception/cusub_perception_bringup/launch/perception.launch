@@ -1,4 +1,6 @@
 <launch>
-  <include file="$(find darknet_cv)/launch/darknet_ros.launch"/>
-  <include file="$(find localizer)/launch/localizer.launch"/>
+  <group ns="leviathan">
+    <include file="$(find darknet_cv)/launch/darknet_ros.launch"/>
+    <include file="$(find localizer)/launch/localizer.launch"/>
+  </group>
 </launch>

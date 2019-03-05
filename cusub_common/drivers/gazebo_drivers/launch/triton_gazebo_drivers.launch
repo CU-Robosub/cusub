@@ -1,0 +1,15 @@
+<launch>
+
+  <node name="triton_gazebo_depth" pkg="gazebo_drivers" type="depth_sensor.py">
+    <param name="namespace" value="triton"/>
+  </node>
+
+  <node name="triton_gazebo_thrust_odom" pkg="gazebo_drivers" type="thrust_odom.py">
+    <param name="namespace" value="triton"/>
+  </node>
+
+  <node name="triton_gazebo_motor_control" pkg="gazebo_drivers" type="motor_control.py">
+    <param name="namespace" value="triton"/>
+  </node>
+
+</launch>

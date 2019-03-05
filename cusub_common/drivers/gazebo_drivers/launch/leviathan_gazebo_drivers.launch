@@ -1,0 +1,61 @@
+<launch>
+
+  <node name="gazebo_depth" pkg="gazebo_drivers" type="depth_sensor.py">
+    <param name="namespace" value="leviathan"/>
+  </node>
+
+  <node name="gazebo_dvl" pkg="gazebo_drivers" type="dvl.py"/>
+
+  <node name="gazebo_leviathan_motor_control" pkg="gazebo_drivers" type="motor_control.py"/>
+
+  <node name="imu_repub" pkg="gazebo_drivers" type="imu_repub.py"/>
+
+
+  <node name="gazebo_actuators" pkg="gazebo_drivers" type="ActuatorService.py">
+    <param name="dropperURDF"
+           command="$(find xacro)/xacro '$(find robosub_descriptions)/models/Dropper/Dropper.xacro'" />
+  </node>
+
+  <node name="caminfo_occam0" pkg="gazebo_drivers" type="CameraInfoPublisher.py">
+    <param name="camera_info_topic" value="cusub_common/occam/image0/camera_info"/>
+    <param name="frameid" value="leviathan/description/occam0_frame"/>
+    <rosparam command="load" file="$(find gazebo_drivers)/config/gazebo_occam_params.yaml"/>
+  </node>
+  <node name="relay_occam0" pkg="topic_tools" type="relay" args="description/camera_0/image_raw cusub_common/occam/image0"/>
+
+  <node name="caminfo_occam1" pkg="gazebo_drivers" type="CameraInfoPublisher.py">
+    <param name="camera_info_topic" value="cusub_common/occam/image1/camera_info"/>
+    <param name="frameid" value="leviathan/description/occam1_frame"/>
+    <rosparam command="load" file="$(find gazebo_drivers)/config/gazebo_occam_params.yaml"/>
+  </node>
+  <node name="relay_occam1" pkg="topic_tools" type="relay" args="description/camera_1/image_raw cusub_common/occam/image1"/>
+
+  <node name="caminfo_occam2" pkg="gazebo_drivers" type="CameraInfoPublisher.py">
+    <param name="camera_info_topic" value="cusub_common/occam/image2/camera_info"/>
+    <param name="frameid" value="leviathan/description/occam2_frame"/>
+    <rosparam command="load" file="$(find gazebo_drivers)/config/gazebo_occam_params.yaml"/>
+  </node>
+  <node name="relay_occam2" pkg="topic_tools" type="relay" args="description/camera_2/image_raw cusub_common/occam/image2"/>
+
+  <node name="caminfo_occam3" pkg="gazebo_drivers" type="CameraInfoPublisher.py">
+    <param name="camera_info_topic" value="cusub_common/occam/image3/camera_info"/>
+    <param name="frameid" value="leviathan/description/occam3_frame"/>
+    <rosparam command="load" file="$(find gazebo_drivers)/config/gazebo_occam_params.yaml"/>
+  </node>
+  <node name="relay_occam3" pkg="topic_tools" type="relay" args="description/camera_3/image_raw cusub_common/occam/image3"/>
+
+  <node name="caminfo_occam4" pkg="gazebo_drivers" type="CameraInfoPublisher.py">
+    <param name="camera_info_topic" value="cusub_common/occam/image4/camera_info"/>
+    <param name="frameid" value="leviathan/description/occam4_frame"/>
+    <rosparam command="load" file="$(find gazebo_drivers)/config/gazebo_occam_params.yaml"/>
+  </node>
+  <node name="relay_occam4" pkg="topic_tools" type="relay" args="description/camera_4/image_raw cusub_common/occam/image4"/>
+
+  <node name="caminfo_downcam" pkg="gazebo_drivers" type="CameraInfoPublisher.py">
+    <param name="camera_info_topic" value="cusub_common/downcam/camera_info"/>
+    <param name="frameid" value="leviathan/description/downcam_frame"/>
+    <rosparam command="load" file="$(find gazebo_drivers)/config/gazebo_downcam_params.yaml"/>
+  </node>
+  <node name="relay_downcam" pkg="topic_tools" type="relay" args="description/camera_5/image_raw cusub_common/downcam"/>
+
+</launch>

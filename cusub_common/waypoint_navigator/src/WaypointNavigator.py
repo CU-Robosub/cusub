@@ -125,20 +125,19 @@ class WaypointNavigator(object):
 
     def run(self):
 
-        self.namespace = rospy.get_param("~namespace")
 
         # setpoints to control sub motion
-        self.depth_pub = rospy.Publisher(self.namespace + "/local_control/pid/depth/setpoint", Float64, queue_size=10)
-        self.drive_pub = rospy.Publisher(self.namespace + "/local_control/pid/drive/setpoint", Float64, queue_size=10)
-        self.strafe_pub = rospy.Publisher(self.namespace + "/local_control/pid/strafe/setpoint", Float64, queue_size=10)
-        self.yaw_pub = rospy.Publisher(self.namespace + "/local_control/pid/yaw/setpoint", Float64, queue_size=10)
+        self.depth_pub = rospy.Publisher("motor_controllers/pid/depth/setpoint", Float64, queue_size=10)
+        self.drive_pub = rospy.Publisher("motor_controllers/pid/drive/setpoint", Float64, queue_size=10)
+        self.strafe_pub = rospy.Publisher("motor_controllers/pid/strafe/setpoint", Float64, queue_size=10)
+        self.yaw_pub = rospy.Publisher("motor_controllers/pid/yaw/setpoint", Float64, queue_size=10)
 
         # get current accumulated strafe and drive to use for adjustments
-        self.drive_state_sub = rospy.Subscriber(self.namespace + "/local_control/pid/drive/state", Float64, self.driveStateCallback)
-        self.strafe_state_sub = rospy.Subscriber(self.namespace + "/local_control/pid/strafe/state", Float64, self.strafeStateCallback)
+        self.drive_state_sub = rospy.Subscriber("motor_controllers/pid/drive/state", Float64, self.driveStateCallback)
+        self.strafe_state_sub = rospy.Subscriber("motor_controllers/pid/strafe/state", Float64, self.strafeStateCallback)
 
         # get current sub position to figure out how to get where we want
-        self.pose_sub = rospy.Subscriber(self.namespace + "/sensor_fusion/odometry/filtered", Odometry, self.odometryCallback)
+        self.pose_sub = rospy.Subscriber("odometry/filtered", Odometry, self.odometryCallback)
 
         # service to add waypoints to drive to
         s = rospy.Service('addWaypoint', AddWaypoint, self.addWaypoint)

@@ -49,14 +49,6 @@
   <!-- Start the a underwater world simulation scenario -->
   <include file="$(find robosub_descriptions)/launch/TRANSDEC.launch"/>
 
-  <!-- Add the Leviathan vehicle to the simulation (namespace: rexrov) -->
-  <include file="$(find leviathan_description)/launch/upload.launch">
-      <arg name="x" default="4.3"/>
-      <arg name="y" default="27.3"/>
-      <arg name="z" default="-1"/>
-      <arg name="yaw" default="90"/>
-  </include>
-
   <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="StartGate"/>
       <arg name="x" default="$(arg SG_x)"/>
@@ -209,10 +201,4 @@
                   orientation: [1.57, 0, 0]
         </rosparam>
   </node>
-
-  <!-- tie the world frame to odom -->
-  <node pkg="tf" type="static_transform_publisher" name="world_odom_broadcaster" args="4.3 27.3 -1 0 0 0 world odom 50" />
-
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find leviathan_description)/launch/Leviathan_Startgate_Divewell_Gazebo.rviz" />
-
 </launch>

@@ -7,7 +7,12 @@ This section will go into the details of the common parts of the CU robosub.
 Running Common
 ##############
 
-this section will include launch details for the meta-package
+In order to run the common packages it is recomend to launch:
+::
+
+    roslaunch cusub_common leviathan_sim.launch
+
+keep in mind that this package must be launched on top of the sim launches. this means that both a gazebo environment and the leviathan description must be launched.
 
 
 System Packages
@@ -18,53 +23,60 @@ System Packages
 
     cusub_common_bringup
     waypoint_navigator
+    debugging_tools
+    motor_controllers
 
 
 cusub_common: meta-package for organizing software stack
 
-:doc:`cusub_common_bringup <cusub_common_bringup>`:
+:doc:`cusub_common_bringup <cusub_common_bringup>`
 
-:doc:`Waypoint Navigator <waypoint_navigator>`:
+:doc:`Waypoint Navigator <waypoint_navigator>`
 
-Debugging Tools
-___________________
-.. toctree::
-    :hidden:
+:doc:`Debugging tools <debugging_tools>`
 
-    debugging-tools/leviathan_control
+:doc:`Motor controllers <motor_controllers>`
 
-Console: unknown
-
-leviathan_control: teleop?
-
-qt_console: unknown
-
-teleop: teleop
 
 Drivers
-_______
-
-empty stub for now
-
-Motor Controllers
-_________________
-
+#######
 .. toctree::
+	:maxdepth: 1
     :hidden:
 
-    motor-controllers/bangbang
-    motor-controllers/pid_controller
+    drivers/gazebo_drivers
+    drivers/actuator
+    drivers/depth_sensor
+    drivers/dvl
+    drivers/occam
+    drivers/pololu_controller
+    drivers/sparton_imu
 
-:doc:`bangbang <motor-controllers/bangbang>`:
+:doc:`gazebo_drivers <drivers/gazebo_drivers>`
 
-:doc:`pid_controller <motor-controllers/pid_controller>`:
+:doc:`actuator <drivers/actuator>`
 
+:doc:`Depth sensor <drivers/depth_sensor>`
+
+:doc:`occam <drivers/occam>`
+
+:doc:`pololu_controller <drivers/pololu_controller>`
+
+:doc:`sparton imu <drivers/sparton_imu>`
 
 
 ROS Topic Interface
 ###################
 
-Will contain a list of topics typically created by this meta-package, the namespace conventions and basic uses.
+Currently the majority of topics will be placed under this namespace:
+::
+
+    <sub_name>/cusub_common/<topics>
+
+the exceptions being motor_controllers and occam due to their large topic list:
+::
+    <sub_name>/cusub_common/motor_controllers/<topics>
+    <sub_name>/cusub_common/occam/<topics>
 
 Known Issues
 ############
