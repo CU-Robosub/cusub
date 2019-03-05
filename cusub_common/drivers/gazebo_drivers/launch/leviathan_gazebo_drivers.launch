@@ -11,9 +11,12 @@
   <node name="imu_repub" pkg="gazebo_drivers" type="imu_repub.py"/>
 
 
-  <node name="gazebo_actuators" pkg="gazebo_drivers" type="ActuatorService.py">
+  <node name="gazebo_actuators" pkg="gazebo_drivers" type="ActuatorService.py" ns="cusub_common">
+    <param name="robotname" value="leviathan"/>
+    <param name="torpedoURDF"
+           command="$(find xacro)/xacro '$(find robosub_descriptions)/models/Torpedo/Torpedo.xacro'" />
     <param name="dropperURDF"
-           command="$(find xacro)/xacro '$(find robosub_descriptions)/models/Dropper/Dropper.xacro'" />
+           command="$(find xacro)/xacro '$(find robosub_descriptions)/models/Torpedo/Torpedo.xacro'" />
   </node>
 
   <node name="caminfo_occam0" pkg="gazebo_drivers" type="CameraInfoPublisher.py">

@@ -1,6 +1,12 @@
 <launch>
   <group ns="leviathan">
-    <include file="$(find darknet_cv)/launch/darknet_ros.launch"/>
+
+    <arg name="fakeyolo" default="false"/> 
+
+    <include file="$(find gazebo_drivers)/launch/fakeyolo.launch" if="$(arg fakeyolo)"/>
+    <include file="$(find darknet_cv)/launch/darknet_ros.launch" unless="$(arg fakeyolo)"/>
+
     <include file="$(find localizer)/launch/localizer.launch"/>
+
   </group>
 </launch>

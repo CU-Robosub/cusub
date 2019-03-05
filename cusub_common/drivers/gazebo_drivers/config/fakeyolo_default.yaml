@@ -1,23 +1,23 @@
 # Default fake yolo launch for leviathan
 # generates bounding boxes similar to yolo for testing without GPU grunt, or before network is trained
 
-bounding_boxes_topic: '/darknet_ros/bounding_boxes'
-sub_pose_topic: '/leviathan/pose_gt'
+bounding_boxes_topic: 'darknet_ros/bounding_boxes'
+sub_pose_topic: 'description/pose_gt'
 
 # Cameras to run fake yolo on
 cameras:
   occam0:
     frame: 'leviathan_gt/occam0_frame'
-    image_topic: '/leviathan/occam/image0'
+    image_topic: 'cusub_common/occam/image0'
     debug_image_enabled: True
-    debug_image_topic: '/leviathan/occam/image0_debug'
-    camera_info_topic: '/leviathan/occam/image0/camera_info'
+    debug_image_topic: 'cusub_common/occam/image0_debug'
+    camera_info_topic: 'cusub_common/occam/image0/camera_info'
   downcam:
     frame: 'leviathan_gt/downcam_frame'
-    image_topic: '/leviathan/downcam'
+    image_topic: 'cusub_common/downcam'
     debug_image_enabled: True
-    debug_image_topic: '/leviathan/downcam_debug'
-    camera_info_topic: '/leviathan/downcam/camera_info'
+    debug_image_topic: 'cusub_common/downcam_debug'
+    camera_info_topic: 'cusub_common/downcam/camera_info'
 
 # Objects to run fake yolo on
 # You can have multiple classes per object with different point offsets, like the 2 start gate poles

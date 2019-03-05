@@ -25,7 +25,7 @@ class Task(smach.StateMachine):
     __metaclass__ = ABCMeta
 
     def __init__(self, outcomes):
-        rospy.Subscriber('/kill_sm', Empty, self.kill_sm)
+        rospy.Subscriber('kill_sm', Empty, self.kill_sm)
         super(Task, self).__init__(outcomes=outcomes)
 
     @abstractmethod
@@ -74,9 +74,9 @@ class Objective(smach.State):
     def __init__(self, outcomes, objtv_name):
         assert type(objtv_name) == str
         self.name = objtv_name
-        rospy.Subscriber('/sensor_fusion/odometry/filtered', Odometry, self.sub_pose_cb)
+        rospy.Subscriber('cusub_common/odometry/filtered', Odometry, self.sub_pose_cb)
         self._abort_requested = False
-        self.wayClient = actionlib.SimpleActionClient('/waypoint', waypointAction)
+        self.wayClient = actionlib.SimpleActionClient('cusub_common/waypoint', waypointAction)
 
         # initialize the pose
         pose = Pose()
