@@ -68,7 +68,7 @@ class ActuatorService(object):
 
             # spawn in baselink so position is relative to sub
             # reference_frame
-            "leviathan::leviathan/base_link"
+            self.robotname + "/description::" + self.robotname + "/description/base_link"
 
         )
 
@@ -137,7 +137,7 @@ class ActuatorService(object):
 
                     # spawn in baselink so position is relative to sub
                     # reference_frame
-                    "leviathan::leviathan/base_link"
+                    self.robotname + "/description::" + self.robotname + "/description/base_link"
 
                 )
 
@@ -162,6 +162,8 @@ class ActuatorService(object):
         return []
 
     def run(self):
+
+        self.robotname = rospy.get_param('~robotname')
 
         now = rospy.get_rostime()
 

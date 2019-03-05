@@ -1,0 +1,12 @@
+<launch>
+
+    <arg name="config_filename" default="mission_config.yaml"/>
+
+    <!-- Include the mission config parameters -->
+    <rosparam command="load" file="$(find state_machine)/config/$(arg config_filename)"/>
+    
+    <node name="state_machine_node" pkg="state_machine" type="smach_top.py">
+        <param name="robotname" value="leviathan"/>
+    </node>
+
+</launch>

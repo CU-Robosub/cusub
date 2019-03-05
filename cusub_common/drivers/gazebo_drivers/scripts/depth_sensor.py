@@ -62,7 +62,7 @@ class DepthSensor(object):
                                            0, 0, 0, 0, 0, 0,
                                            0, 0, 0, 0, 0, 0]
 
-        self.depth_pose.header.frame_id = 'description/depth_frame'
+        self.depth_pose.header.frame_id = rospy.get_param('~namespace') + '/description/depth_frame'
         self.depth_pose.pose.pose.position.z = 0
 
         depth_pub = rospy.Publisher('cusub_common/depth', PoseWithCovarianceStamped, queue_size=1)

@@ -132,7 +132,7 @@ class Mapper():
 
         # Gotta love tf
         # must be aboslute reference for inter meta-package
-        odom_pose = self.listener.transformPose('/' + self.namespace_odom + '/odom', occam_pose)
+        odom_pose = self.listener.transformPose('/' + self.namespace + '/odom', occam_pose)
         return odom_pose
 
 

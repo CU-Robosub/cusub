@@ -105,34 +105,37 @@ class Attack(Objective):
 
         rospy.loginfo("---Attack objective initializing")
 
+        self.robotname = rospy.get_param('~robotname')
+
         # Your bounding boxes, give them to me...  NOW!
-        self.darknetSub = rospy.Subscriber('/darknet_ros/bounding_boxes', BoundingBoxes, self.boxes_received, queue_size=1, buff_size=10000000)
+        # TODO namespacing
+        self.darknetSub = rospy.Subscriber('darknet_ros/bounding_boxes', BoundingBoxes, self.boxes_received, queue_size=1, buff_size=10000000)
 
-        self.diceStatePub = rospy.Publisher('/leviathan/local_control/cv/yaw/state', Float64, queue_size=1)
-        self.diceSetpointPub = rospy.Publisher('/leviathan/local_control/cv/yaw/setpoint', Float64, queue_size=1)
+        self.diceStatePub = rospy.Publisher('cusub_common/motor_controllers/cv/yaw/state', Float64, queue_size=1)
+        self.diceSetpointPub = rospy.Publisher('cusub_common/motor_controllers/cv/yaw/setpoint', Float64, queue_size=1)
 
-        self.diceDepthStatePub = rospy.Publisher('/leviathan/local_control/cv/depth/state', Float64, queue_size=1)
-        self.diceDepthSetpointPub = rospy.Publisher('/leviathan/local_control/cv/depth/setpoint', Float64, queue_size=1)
+        self.diceDepthStatePub = rospy.Publisher('cusub_common/motor_controllers/cv/depth/state', Float64, queue_size=1)
+        self.diceDepthSetpointPub = rospy.Publisher('cusub_common/motor_controllers/cv/depth/setpoint', Float64, queue_size=1)
 
-        self.driveStateSub = rospy.Subscriber("/leviathan/local_control/pid/drive/state", Float64, self.driveStateCallback)
-        self.drivePub = rospy.Publisher('/leviathan/local_control/pid/drive/setpoint', Float64, queue_size=1)
+        self.driveStateSub = rospy.Subscriber("cusub_common/motor_controllers/pid/drive/state", Float64, self.driveStateCallback)
+        self.drivePub = rospy.Publisher('cusub_common/motor_controllers/pid/drive/setpoint', Float64, queue_size=1)
 
-        self.yawStateSub = rospy.Subscriber("/leviathan/local_control/pid/yaw/state", Float64, self.yawStateCallback)
+        self.yawStateSub = rospy.Subscriber("cusub_common/motor_controllers/pid/yaw/state", Float64, self.yawStateCallback)
 
-        self.depthStateSub = rospy.Subscriber("/leviathan/local_control/pid/depth/state", Float64, self.depthStateCallback)
+        self.depthStateSub = rospy.Subscriber("cusub_common/motor_controllers/pid/depth/state", Float64, self.depthStateCallback)
 
-        self.imuSub = rospy.Subscriber("/leviathan/imu", Imu, self.imuCallback)
+        self.imuSub = rospy.Subscriber("cusub_common/imu", Imu, self.imuCallback)
 
-        self.yawSelect = rospy.ServiceProxy('/leviathan_yaw_mux/select', MuxSelect)
-        self.depthSelect = rospy.ServiceProxy('/leviathan_depth_mux/select', MuxSelect)
+        self.yawSelect = rospy.ServiceProxy('cusub_common/motor_controllers/yaw_mux/select', MuxSelect)
+        self.depthSelect = rospy.ServiceProxy('cusub_common/motor_controllers/depth_mux/select', MuxSelect)
 
         super(Attack, self).__init__(self.outcomes, "Attack")
 
     def charge_dice(self):
 
         # switch to visual servoing
-        self.yawSelect("/leviathan/local_control/cv/yaw/control_effort")
-        self.depthSelect("/leviathan/local_control/cv/depth/control_effort")
+        self.yawSelect("/" + self.robotname + "/cusub_common/motor_controllers/cv/yaw/control_effort")
+        self.depthSelect("/" + self.robotname + "/cusub_common/motor_controllers/cv/depth/control_effort")
 
         # wait a bit to lock on
         rospy.loginfo("--locking on")
@@ -158,8 +161,8 @@ class Attack(Objective):
             rospy.sleep(0.25)
 
         # back to point n shoot control
-        self.yawSelect("/leviathan/local_control/pid/yaw/control_effort")
-        self.depthSelect("/leviathan/local_control/pid/depth/control_effort")
+        self.yawSelect("/" + self.robotname + "/cusub_common/motor_controllers/pid/yaw/control_effort")
+        self.depthSelect("/" + self.robotname + "/cusub_common/motor_controllers/pid/depth/control_effort")
 
     def execute(self, userdata):
 
