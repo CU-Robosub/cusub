@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <launch>
+  <!-- Console launch prefix -->
+  <remap from="/darknet_ros/bounding_boxes" to="/leviathan/cusub_perception/darknet_ros/bounding_boxes" />
+  <arg name="launch_prefix" default=""/>
 
   <arg name="detect_sleep_time" default="0.0"/>
 

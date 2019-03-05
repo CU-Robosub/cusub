@@ -1,16 +1,7 @@
 <launch>
-  <group ns="leviathan">
-
-    <arg name="config_filename" default="mission_config.yaml"/>
-
+  <arg name="sub" default="leviathan" />
+  <group ns="$(arg sub)/cusub_cortex">
     <include file="$(find mapper)/launch/mapper.launch"/>
-
-    <include file="$(find waypoint_navigator)/launch/waypoint_navigator.launch"/>
-
-    <!--  State machine closed for construction-->
-    <include file="$(find state_machine)/launch/state_machine.launch">
-      <arg name="config_filename" value="$(arg config_filename)"/>
-    </include>
-
+    <include file="$(find state_machine)/launch/smach_launch.launch"/>
   </group>
 </launch>

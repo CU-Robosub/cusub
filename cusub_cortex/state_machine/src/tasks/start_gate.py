@@ -37,7 +37,7 @@ class StartGate(Task):
         self.attack = Attack(distBehind)
 
     def initMapperSubs(self):
-        rospy.Subscriber('cusub_cortex/start_gate', PoseStamped, self.start_gate_pose_cb)
+        rospy.Subscriber('mapper/start_gate', PoseStamped, self.start_gate_pose_cb)
 
     def linkObjectives(self):
         with self: # we are a StateMachine

@@ -17,7 +17,7 @@ import actionlib
 from tasks.start_gate import StartGate
 from tasks.visit_task import VisitTask
 from tasks.bangbang_dice_task import BangBangDiceTask
-from tasks.bangbang_roulette_task import BangBangRouletteTask
+# from tasks.bangbang_roulette_task import BangBangRouletteTask
 
 def genPoseMsg(list_xyz):
     pose = Pose()
