@@ -1,0 +1,51 @@
+    def create_server_dict(self):
+        """
+        Find all servers that we may use and load them into our server dict
+        """
+        self.server_dict = {}
+        tasks_param = rospy.search_param('mission_tasks')
+        tasks_to_do = rospy.get_param(tasks_param)
+        print(tasks_to_do)
+        param_list = rospy.get_param_names()
+        for task in tasks_to_do:
+
+            # Search the parameter server for our object's localizers
+            search_str = task + '/object_localizers'
+            obj_params = [x for x in param_list if search_str in x]
+            
+            # Add classes to the dictionary
+            for op in obj_params:
+                index = op.rfind('/') # trim off the end of the param that holds the class
+                servers = rospy.get_param(op)
+                if type(servers) != list: # Make the servers a list
+                    servers = [servers]
+                    
+                self.server_dict[op[index+1:]] = servers
+        print(self.server_dict)
+                
+                
+    # main callback
+    def boxes_received(self,msg):
+        """
+        Initialize all server reqs
+        """
+        # Initialize the server reqs
+        server_reqs = {}
+        for cls in self.server_dict.keys():
+            for srv_name in self.server_dict[cls]:
+                if srv_name not in server_reqs.keys():
+                    server_reqs[srv_name] = ClassicalBoxes2Poses()
+                    server_reqs[srv_name].image = msg.image
+                    server_reqs[srv_name].boxes = []
+        print(server_reqs.keys())
+
+        # Populate the server_reqs
+        for box in msg.bounding_boxes:
+            """ Need to ignore boxes with points near edge of camera frame.  Could be partial detections with out of frame components. """
+            if(box.xmin < 60 \
+            or box.ymin < 60 \
+            or box.xmax > msg.image.width - 60 \
+            or box.ymax > msg.image.height - 60):
+                continue
+
+            for 

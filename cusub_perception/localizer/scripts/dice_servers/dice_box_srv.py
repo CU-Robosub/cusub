@@ -11,6 +11,7 @@ from localizer.srv import ClassicalBoxes2Poses
 from geometry_msgs.msg import Pose
 import numpy as np
 from pdb import set_trace
+import cv2
 
 class DiceBoxServer():
 
@@ -39,7 +40,8 @@ class DiceBoxServer():
     
     def __init__(self):
         ns = rospy.get_namespace()
-        self.server = rospy.Service(ns+"localize_dice_box", ClassicalBoxes2Poses, self.localize)
+        self.server = rospy.Service(ns+"cusub_perception/localize_dice_box", ClassicalBoxes2Poses, self.localize)
+        print(self.dice_truth_points)
         rospy.loginfo("Dice Box Initialized")
     def localize(self, req):
         poses = []
@@ -50,16 +52,20 @@ class DiceBoxServer():
             bot_right_pixel = (box.xmax, box.ymax)
             top_right_pixel = (box.xmax, box.ymin)
             pt_arr = np.array([bot_left_pixel, top_left_pixel, bot_right_pixel, top_right_pixel], dtype=np.float32)
+            print(pt_arr)
             # Call PnP
             retval, rvec, tvec = cv2.solvePnP(self.dice_truth_points, pt_arr, self.occam_camera_matrix, self.occam_distortion_coefs)
 
-            # PnP uses different coord system, do quick conversion
+            # # PnP uses different coord system, do quick conversion
             pose = Pose()
-            pose.position.x = tvec[2]
-            pose.position.y = -1*tvec[0]
-            pose.position.z = -1*tvec[1]
+            # pose.position.x = tvec[2]
+            # pose.position.y = -1*tvec[0]
+            # pose.position.z = -1*tvec[1]
+            # pose = Pose()
             poses.append(pose)
+            print(pose)
             classes.append(box.Class)
+            rospy.loginfo(box.Class + " : " + str(pose))
         return poses, classes
             
             

@@ -21,13 +21,13 @@ from pdb import set_trace
 SERVER_SUCCESS = 1
 SERVER_FAILURE = 0
 
-DEBUG=False
+DEBUG=True
 
 class Localizer():
     def __init__(self):
         self.darknet_sub = rospy.Subscriber('darknet_ros/bounding_boxes', BoundingBoxes,self.boxes_received, queue_size=1, buff_size=10000000)
         ns = rospy.get_namespace()
-        self.pose_pub = rospy.Publisher( ns + 'mapper/task_poses', Detection, queue_size=1)
+        self.pose_pub = rospy.Publisher( ns + 'cusub_perception/mapper/task_poses', Detection, queue_size=1)
         self.create_server_dict()
         rospy.loginfo("Localizer Client Initialized")
 
@@ -61,7 +61,7 @@ class Localizer():
 
         for task_srvs in self.server_dict.keys():
                 for srv in self.server_dict[task_srvs]:
-                    rospy.wait_for_service('localize_' + srv, 2.0)
+                    rospy.wait_for_service('cusub_perception/localize_' + srv, 2.0)
 
     def check_box_capability(self, boxes):
         """
@@ -84,6 +84,12 @@ class Localizer():
         -> Feature: if items use the same server, make a service request with all of the boxes at once
         -> Feature: Have support for backup localizing servers
         """
+        if DEBUG:
+            class_list = []
+            for box in msg.bounding_boxes:
+                class_list.append(box.Class)
+            rospy.loginfo("Received: " + str(class_list))
+        
         msg.bounding_boxes = self.check_box_capability(msg.bounding_boxes)
         # Initialize all possible server requests
         server_reqs = {}
@@ -119,8 +125,8 @@ class Localizer():
                 else: # Make the request
                     try:
                         req = server_reqs[srv]
-                        rospy.wait_for_service('localize_' + srv)
-                        handler = rospy.ServiceProxy('localize_' + srv, req)
+                        rospy.wait_for_service('cusub_perception/localize_' + srv)
+                        handler = rospy.ServiceProxy('cusub_perception/localize_' + srv, req)
                         res = handler(req.image, req.boxes)
                         
                         # Mark the localized boxes as found so we don't try to localize them again
@@ -156,7 +162,7 @@ class Localizer():
         self.pose_pub.publish(detection)
 
 def test():
-    rospy.init_node('localizer_client')
+    rospy.init_node('cusub_perception/localizer_client')
     l = Localizer()
 
     # Fake data

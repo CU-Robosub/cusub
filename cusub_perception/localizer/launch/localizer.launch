@@ -2,11 +2,10 @@
 
 <launch>
   <!-- Console launch prefix -->
-  
   <arg name="config_filename" default="mission_config.yaml"/>
   <arg name="launch_prefix" default=""/>
   
-<group ns="leviathan/cusub_perception">    
+<group ns="leviathan">    
     
   <rosparam command="load" file="$(find ros_indigosdk)/launch/camera.yaml"/>
     
