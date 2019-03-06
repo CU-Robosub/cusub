@@ -39,6 +39,8 @@ class Localizer():
         tasks_param = rospy.search_param('mission_tasks')
         tasks_to_do = rospy.get_param(tasks_param)
         param_list = rospy.get_param_names()
+        rospy.loginfo("Loading Params for Active Mission Tasks: " + str(tasks_to_do))
+        rospy.sleep(0.1) # allow above line to print
         for task in tasks_to_do:
 
             # Search the parameter server for our object's localizers
@@ -56,6 +58,7 @@ class Localizer():
         
     def test_server_conn(self):
         req = ClassicalBoxes2Poses()
+
         for task_srvs in self.server_dict.keys():
                 for srv in self.server_dict[task_srvs]:
                     rospy.wait_for_service('localize_' + srv, 2.0)
@@ -188,7 +191,6 @@ def test():
 def main():
     rospy.init_node('localizer_client')
     l = Localizer()
-    l.create_server_dict()
     try:
         rospy.spin()
     except rospy.ROSInterruptException:
