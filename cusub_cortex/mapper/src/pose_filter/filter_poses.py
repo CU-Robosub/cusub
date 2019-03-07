@@ -71,7 +71,7 @@ class DicePoseFilter(Filter):
 
     def send_pose(self, pose):
         index = self.num_poses%self.window_length
-        self.pose_window[index] = [pose]
+        self.pose_window[index] = pose
         self.num_poses += 1
 
         average_pose = self.average_poses(self.pose_window, index)
