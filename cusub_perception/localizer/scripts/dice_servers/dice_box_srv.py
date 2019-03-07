@@ -41,6 +41,7 @@ class DiceBoxServer():
     def __init__(self):
         ns = rospy.get_namespace()
         self.server = rospy.Service(ns+"cusub_perception/localize_dice_box", ClassicalBoxes2Poses, self.localize)
+        self.occam_camera_matrix.shape = (3,3)
         print(self.dice_truth_points)
         rospy.loginfo("Dice Box Initialized")
     def localize(self, req):
@@ -58,10 +59,9 @@ class DiceBoxServer():
 
             # # PnP uses different coord system, do quick conversion
             pose = Pose()
-            # pose.position.x = tvec[2]
-            # pose.position.y = -1*tvec[0]
-            # pose.position.z = -1*tvec[1]
-            # pose = Pose()
+            pose.position.x = tvec[2]
+            pose.position.y = -1*tvec[0]
+            pose.position.z = -1*tvec[1]
             poses.append(pose)
             print(pose)
             classes.append(box.Class)

@@ -4,9 +4,7 @@
   <!-- Console launch prefix -->
   <arg name="config_filename" default="mission_config.yaml"/>
   <arg name="launch_prefix" default=""/>
-  
-<group ns="leviathan">    
-    
+      
   <rosparam command="load" file="$(find ros_indigosdk)/launch/camera.yaml"/>
     
 
@@ -18,5 +16,5 @@
   <node name="gate_pnp_color" pkg="localizer" type="gate_pnp_color_srv.py" output="screen" />
   <node name="gate_midpoint" pkg="localizer" type="gate_midpoint_srv.py" output="screen" />
   <node name="dice_box" pkg="localizer" type="dice_box_srv.py" output="screen" />
-</group>
+
 </launch>
