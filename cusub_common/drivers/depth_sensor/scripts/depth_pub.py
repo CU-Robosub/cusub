@@ -23,7 +23,7 @@ class Depth_Sensor():
                                               0, 0, 0, 0, 0, 0,
                                               0, 0, 0, 0, 0, 0,
                                               0, 0, 0, 0, 0, 0]
-        self.pub_Pose_data.header.frame_id = "depth_frame"
+        self.pub_Pose_data.header.frame_id = "leviathan/description/depth_frame"
         self.ser = serial.Serial(
             '/dev/serial/by-id/usb-Adafruit_Industries_Trinket_M0-if00', '115200')
 
@@ -46,7 +46,7 @@ class Depth_Sensor():
             #kswitch, adepth = a.split(",",1)
 
             pressure_mbar = float(a[1:])
-            depth_m = (pressure_mbar-797.11)*100/(1030*9.8)
+            depth_m = -1*(pressure_mbar-797.11)*100/(1030*9.8)
 
             #kswitch = int(kswitch)
 

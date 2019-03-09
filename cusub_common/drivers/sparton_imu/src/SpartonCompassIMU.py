@@ -85,7 +85,7 @@ if __name__ == '__main__':
     rospy.init_node('SpartonDigitalCompassIMU')
     #Pos_pub  = rospy.Publisher('/imu/HeadingTrue', PoseWithCovariance, queue_size="1")
     #PosD_pub = rospy.Publisher('/imu/HeadingTrue_degree', PoseWithCovarience, queue_size="1")
-    Imu_pub = rospy.:('imu', Imu, queue_size="1")
+    Imu_pub = rospy.Publisher('imu', Imu, queue_size="1")
     #SpartonPose = PoseWithCovarience()
     #SpartonPose2D=PoseWithCovarience()
     #SpartonPose2D_D=SpartonPose2D
@@ -118,7 +118,7 @@ if __name__ == '__main__':
     checksum_error_counter=0
 
     imu_data = Imu()
-    imu_data = Imu(header=rospy.Header(frame_id="SpartonCompassIMU"))
+    imu_data = Imu(header=rospy.Header(frame_id="leviathan/description/imu_link"))
 
     #TODO find a right way to convert imu acceleration/angularvel./orientation accuracy to covariance
     imu_data.orientation_covariance = [1e-6, 0, 0,
