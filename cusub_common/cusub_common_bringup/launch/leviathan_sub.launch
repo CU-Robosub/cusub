@@ -1,6 +1,14 @@
 <launch>
     <group ns="leviathan">
 
+        <param name="robot_description"
+               command="$(find xacro)/xacro.py '$(find leviathan_description)/robots/default.xacro' namespace:=leviathan/description" />
+
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen">
+            <param name="robot_description" value="/leviathan/robot_description" />
+            <param name="publish_frequency" value="5" />
+        </node>
+
         <node name="leviathan_ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true" ns="cusub_common">
             <rosparam command="load" file="$(find cusub_common_bringup)/config/leviathan_ekf.yaml" />
         </node>
@@ -10,9 +18,9 @@
         <include file="$(find dvl)/launch/dvl.launch"/>
         <include file="$(find pololu_controller)/launch/pololu_sub.launch"/>
         <include file="$(find sparton_imu)/launch/AHRS-8.launch"/>
-	<include file="$(find ros_indigosdk)/launch/occam_onecam.launch"/>
+        <include file="$(find ros_indigosdk)/launch/occam_onecam.launch"/>
 
-	<node pkg="tf" type="static_transform_publisher" name="leviathan_depth_broadcaster" args="0 0 0 0 0 0 leviathan/description/odom leviathan/description/depth_frame 100"/>
+	      <node pkg="tf" type="static_transform_publisher" name="leviathan_depth_broadcaster" args="0 0 0 0 0 0 leviathan/description/odom leviathan/description/depth_frame 100"/>
 
     </group>
 </launch>

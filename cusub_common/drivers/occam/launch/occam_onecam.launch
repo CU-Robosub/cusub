@@ -11,7 +11,7 @@
   <node name="camera_set_servers" pkg="ros_indigosdk" type="camera_set_server.py"/>
 
   <node name="occam" pkg="ros_indigosdk" type="ros_indigosdk_node" output="screen">
-    <param name="frame_id" value="leviathan/occam"/>
+    <param name="frame_id" value="leviathan/description/occam"/>
   </node>
 
 </launch>
