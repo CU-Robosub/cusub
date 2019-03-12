@@ -1,7 +1,7 @@
 <launch>
 	<arg name="marker_size" default="100" />
 	<arg name="max_new_marker_error" default="0.02" />
-	<arg name="max_track_error" default="0.4" />
+	<arg name="max_track_error" default="0.04" />
 
 	<arg name="robot_name" default="leviathan" />
 
@@ -17,7 +17,7 @@
 		<param name="marker_size"           type="double" value="$(arg marker_size)" />
 		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
 		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
-		<param name="output_frame"          type="string" value="$(arg robot_name)/description/occam0_frame_optical" />
+		<param name="output_frame"          type="string" value="$(arg robot_name)/description/occam1_frame_optical" />
 		<remap from="camera_image"  to="/$(arg robot_name)/cusub_common/occam/image1" />
 		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/occam/image1/camera_info" />
 	</node>
@@ -25,7 +25,7 @@
 		<param name="marker_size"           type="double" value="$(arg marker_size)" />
 		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
 		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
-		<param name="output_frame"          type="string" value="$(arg robot_name)/description/occam0_frame_optical" />
+		<param name="output_frame"          type="string" value="$(arg robot_name)/description/occam2_frame_optical" />
 		<remap from="camera_image"  to="/$(arg robot_name)/cusub_common/occam/image2" />
 		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/occam/image2/camera_info" />
 	</node>
@@ -33,7 +33,7 @@
 		<param name="marker_size"           type="double" value="$(arg marker_size)" />
 		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
 		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
-		<param name="output_frame"          type="string" value="$(arg robot_name)/description/occam0_frame_optical" />
+		<param name="output_frame"          type="string" value="$(arg robot_name)/description/occam3_frame_optical" />
 		<remap from="camera_image"  to="/$(arg robot_name)/cusub_common/occam/image3" />
 		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/occam/image3/camera_info" />
 	</node>
@@ -41,7 +41,7 @@
 		<param name="marker_size"           type="double" value="$(arg marker_size)" />
 		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
 		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
-		<param name="output_frame"          type="string" value="$(arg robot_name)/description/occam0_frame_optical" />
+		<param name="output_frame"          type="string" value="$(arg robot_name)/description/occam4_frame_optical" />
 		<remap from="camera_image"  to="/$(arg robot_name)/cusub_common/occam/image4" />
 		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/occam/image4/camera_info" />
 	</node>

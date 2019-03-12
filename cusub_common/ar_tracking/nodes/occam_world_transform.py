@@ -1,7 +1,10 @@
 #!/usr/bin/env python
+
 import rospy
 
 import tf
+
+import math
 
 from ar_track_alvar_msgs.msg import AlvarMarkers
 from geometry_msgs.msg import PoseWithCovarianceStamped, TwistWithCovarianceStamped
@@ -16,13 +19,25 @@ class ARTrack(object):
 
         for marker in msg.markers:
 
+            # reject false hits
+            if marker.id > 16:
+                continue
+
             # Get the pose of the marker
             occam_pose = marker.pose
             occam_pose.header.frame_id = marker.header.frame_id
             occam_pose.header.stamp = marker.header.stamp
 
+            # Get the distance to the tag to estimate covariance
+            pos = occam_pose.pose.position
+            dist = math.sqrt(pos.x**2 + pos.y**2 + pos.z**2)
+
+            # Far things have a lot off error skip them
+            if dist > 10.0:
+                continue
+
             # Transform to baselink
-            world_occam_pose = self.listener.transformPose("leviathan/description/base_link", occam_pose)
+            occam_pose = self.listener.transformPose("leviathan/description/base_link", occam_pose)
 
             # Invert the pose so we have it from the perspective of the marker
             trans = [occam_pose.pose.position.x, occam_pose.pose.position.y, occam_pose.pose.position.z]
@@ -47,11 +62,14 @@ class ARTrack(object):
             # Transfrom the pose into worldspace
             world_baselink_pose = self.listener.transformPose("world", occam_pose)
 
+            # Estimate covariance
+            lin_cov = dist / 10.0
+
             # Feed pose to EKF
             world_baselink_pose_wc = PoseWithCovarianceStamped()
-            world_baselink_pose_wc.pose.covariance = [1.0, 0, 0, 0, 0, 0,
-                                                      0, 1.0, 0, 0, 0, 0,
-                                                      0, 0, 1.0, 0, 0, 0,
+            world_baselink_pose_wc.pose.covariance = [lin_cov, 0, 0, 0, 0, 0,
+                                                      0, lin_cov, 0, 0, 0, 0,
+                                                      0, 0, lin_cov, 0, 0, 0,
                                                       0, 0, 0, 0.1, 0, 0,
                                                       0, 0, 0, 0, 0.1, 0,
                                                       0, 0, 0, 0, 0, 0.1]
@@ -60,15 +78,6 @@ class ARTrack(object):
             world_baselink_pose_wc.pose.pose = world_baselink_pose.pose
 
             self.ar_pub.publish(world_baselink_pose_wc)
-
-            """
-            # Broadcast the sub position
-            tvec = (world_occam_pose.pose.position.x, world_occam_pose.pose.position.y, world_occam_pose.pose.position.z)
-            rvec = (world_occam_pose.pose.orientation.x, world_occam_pose.pose.orientation.y,
-                    world_occam_pose.pose.orientation.z, world_occam_pose.pose.orientation.w)
-            self.br.sendTransform(tvec, rvec, occam_pose.header.stamp,
-                                        "leviathan_gt_marker/base_link", "world")
-            """
 
     def depth_callback(self, data):
         self.depth_pub.publish(data)
