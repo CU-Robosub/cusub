@@ -1,0 +1,63 @@
+<launch>
+	<arg name="marker_size" default="100" />
+	<arg name="max_new_marker_error" default="0.02" />
+	<arg name="max_track_error" default="0.4" />
+
+	<arg name="robot_name" default="leviathan" />
+
+	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen" ns="o0">
+		<param name="marker_size"           type="double" value="$(arg marker_size)" />
+		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
+		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
+		<param name="output_frame"          type="string" value="$(arg robot_name)/description/occam0_frame_optical" />
+		<remap from="camera_image"  to="/$(arg robot_name)/cusub_common/occam/image0" />
+		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/occam/image0/camera_info" />
+	</node>
+	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen" ns="o1">
+		<param name="marker_size"           type="double" value="$(arg marker_size)" />
+		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
+		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
+		<param name="output_frame"          type="string" value="$(arg robot_name)/description/occam0_frame_optical" />
+		<remap from="camera_image"  to="/$(arg robot_name)/cusub_common/occam/image1" />
+		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/occam/image1/camera_info" />
+	</node>
+	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen" ns="o2">
+		<param name="marker_size"           type="double" value="$(arg marker_size)" />
+		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
+		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
+		<param name="output_frame"          type="string" value="$(arg robot_name)/description/occam0_frame_optical" />
+		<remap from="camera_image"  to="/$(arg robot_name)/cusub_common/occam/image2" />
+		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/occam/image2/camera_info" />
+	</node>
+	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen" ns="o3">
+		<param name="marker_size"           type="double" value="$(arg marker_size)" />
+		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
+		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
+		<param name="output_frame"          type="string" value="$(arg robot_name)/description/occam0_frame_optical" />
+		<remap from="camera_image"  to="/$(arg robot_name)/cusub_common/occam/image3" />
+		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/occam/image3/camera_info" />
+	</node>
+	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen" ns="o4">
+		<param name="marker_size"           type="double" value="$(arg marker_size)" />
+		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
+		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
+		<param name="output_frame"          type="string" value="$(arg robot_name)/description/occam0_frame_optical" />
+		<remap from="camera_image"  to="/$(arg robot_name)/cusub_common/occam/image4" />
+		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/occam/image4/camera_info" />
+	</node>
+
+	<node name="static_ar_tag_0_world" pkg="tf" type="static_transform_publisher" args=" 0    5.9 -2  3.14 0 -1.57 world ar_tag_0_gt 100"/>
+	<node name="static_ar_tag_1_world" pkg="tf" type="static_transform_publisher" args=" 8.9  0   -2  1.57 0 -1.57 world ar_tag_1_gt 100"/>
+	<node name="static_ar_tag_2_world" pkg="tf" type="static_transform_publisher" args=" 0   -5.9 -2  0.0  0 -1.57 world ar_tag_2_gt 100"/>
+	<node name="static_ar_tag_3_world" pkg="tf" type="static_transform_publisher" args="-8.9  0   -2 -1.57 0 -1.57 world ar_tag_3_gt 100"/>
+
+	<node name="static_ar_odom_world" pkg="tf" type="static_transform_publisher" args=" 0 0 0 0 0 0 world leviathan_ar/odom 100"/>
+
+	<node name="leviathan_ar_ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true" ns="cusub_common">
+		<rosparam command="load" file="$(find cusub_common_bringup)/config/leviathan_ar_ekf.yaml" />
+		<remap from="odometry/filtered"  to="odometry/filtered_ar" />
+	</node>
+
+	<node name="occam_tf_broadcaster" pkg="ar_tracking" type="occam_world_transform.py" respawn="false" output="screen"/>
+
+</launch>
