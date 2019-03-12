@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+<sdf version="1.6">
+<model name="magic_leds_0">
+  <static>true</static>
+    <link name="link">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://magic_leds_0/magic_leds_0.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>
