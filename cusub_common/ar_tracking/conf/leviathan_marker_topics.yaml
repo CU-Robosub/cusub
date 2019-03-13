@@ -1,0 +1,6 @@
+marker_topics:
+  - cusub_common/occam/alvar0/ar_pose_marker
+  - cusub_common/occam/alvar1/ar_pose_marker
+  - cusub_common/occam/alvar2/ar_pose_marker
+  - cusub_common/occam/alvar3/ar_pose_marker
+  - cusub_common/occam/alvar4/ar_pose_marker

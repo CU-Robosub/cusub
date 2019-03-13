@@ -32,8 +32,11 @@ class DepthSensor(object):
         """Gets current pressure from gazebo"""
 
         print "got pressure"
-        self.depth_pose.header.stamp = rospy.Time.now()
-        self.depth_pose.header.seq += 1
+        self.depth_odom_pose.header.stamp = rospy.Time.now()
+        self.depth_odom_pose.header.seq += 1
+
+        self.depth_map_pose.header.stamp = rospy.Time.now()
+        self.depth_map_pose.header.seq += 1
 
         # 103.2 = 8.748m
 
@@ -43,7 +46,8 @@ class DepthSensor(object):
         depth = round(depth / self.resolution_m) * self.resolution_m
 
         # -1 Z up
-        self.depth_pose.pose.pose.position.z = -1.0*depth
+        self.depth_odom_pose.pose.pose.position.z = -1.0*depth
+        self.depth_map_pose.pose.pose.position.z = -1.0*depth
 
     def depth_sensor(self):
         """Republishes presure as depth pose"""
@@ -52,27 +56,38 @@ class DepthSensor(object):
 
         rospy.Subscriber('description/pressure', FluidPressure, self.pressure_callback)
 
+        self.depth_odom_pose = PoseWithCovarianceStamped()
+        self.depth_odom_pose.pose.covariance = [0, 0, 0, 0, 0, 0,
+                                                0, 0, 0, 0, 0, 0,
+                                                0, 0, 0.01, 0, 0, 0,
+                                                0, 0, 0, 0, 0, 0,
+                                                0, 0, 0, 0, 0, 0,
+                                                0, 0, 0, 0, 0, 0]
 
+        self.depth_odom_pose.header.frame_id = rospy.get_param('~namespace') + '/description/depth_odom_frame'
+        self.depth_odom_pose.pose.pose.position.z = 0
 
-        self.depth_pose = PoseWithCovarianceStamped()
-        self.depth_pose.pose.covariance = [0, 0, 0, 0, 0, 0,
-                                           0, 0, 0, 0, 0, 0,
-                                           0, 0, 0.01, 0, 0, 0,
-                                           0, 0, 0, 0, 0, 0,
-                                           0, 0, 0, 0, 0, 0,
-                                           0, 0, 0, 0, 0, 0]
+        self.depth_map_pose = PoseWithCovarianceStamped()
+        self.depth_map_pose.pose.covariance = [0, 0, 0, 0, 0, 0,
+                                               0, 0, 0, 0, 0, 0,
+                                               0, 0, 0.01, 0, 0, 0,
+                                               0, 0, 0, 0, 0, 0,
+                                               0, 0, 0, 0, 0, 0,
+                                               0, 0, 0, 0, 0, 0]
 
-        self.depth_pose.header.frame_id = rospy.get_param('~namespace') + '/description/depth_frame'
-        self.depth_pose.pose.pose.position.z = 0
+        self.depth_map_pose.header.frame_id = rospy.get_param('~namespace') + '/description/depth_map_frame'
+        self.depth_map_pose.pose.pose.position.z = 0
 
-        depth_pub = rospy.Publisher('cusub_common/depth', PoseWithCovarianceStamped, queue_size=1)
+        depth_odom_pub = rospy.Publisher('cusub_common/depth_odom', PoseWithCovarianceStamped, queue_size=1)
+        depth_map_pub = rospy.Publisher('cusub_common/depth_map', PoseWithCovarianceStamped, queue_size=1)
 
         rate = rospy.Rate(30)
 
         while not rospy.is_shutdown():
             print "test"
 
-            depth_pub.publish(self.depth_pose)
+            depth_odom_pub.publish(self.depth_odom_pose)
+            depth_map_pub.publish(self.depth_map_pose)
 
             rate.sleep()
 

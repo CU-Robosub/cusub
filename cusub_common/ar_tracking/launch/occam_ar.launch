@@ -5,7 +5,8 @@
 
 	<arg name="robot_name" default="leviathan" />
 
-	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen" ns="o0">
+	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect"
+	      respawn="false" output="screen" ns="cusub_common/occam/alvar0">
 		<param name="marker_size"           type="double" value="$(arg marker_size)" />
 		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
 		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
@@ -13,7 +14,8 @@
 		<remap from="camera_image"  to="/$(arg robot_name)/cusub_common/occam/image0" />
 		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/occam/image0/camera_info" />
 	</node>
-	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen" ns="o1">
+	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect"
+	      respawn="false" output="screen" ns="cusub_common/occam/alvar1">
 		<param name="marker_size"           type="double" value="$(arg marker_size)" />
 		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
 		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
@@ -21,7 +23,8 @@
 		<remap from="camera_image"  to="/$(arg robot_name)/cusub_common/occam/image1" />
 		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/occam/image1/camera_info" />
 	</node>
-	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen" ns="o2">
+	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect"
+	      respawn="false" output="screen" ns="cusub_common/occam/alvar2">
 		<param name="marker_size"           type="double" value="$(arg marker_size)" />
 		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
 		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
@@ -29,7 +32,8 @@
 		<remap from="camera_image"  to="/$(arg robot_name)/cusub_common/occam/image2" />
 		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/occam/image2/camera_info" />
 	</node>
-	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen" ns="o3">
+	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect"
+	      respawn="false" output="screen" ns="cusub_common/occam/alvar3">
 		<param name="marker_size"           type="double" value="$(arg marker_size)" />
 		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
 		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
@@ -37,7 +41,8 @@
 		<remap from="camera_image"  to="/$(arg robot_name)/cusub_common/occam/image3" />
 		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/occam/image3/camera_info" />
 	</node>
-	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen" ns="o4">
+	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect"
+	      respawn="false" output="screen" ns="cusub_common/occam/alvar4">
 		<param name="marker_size"           type="double" value="$(arg marker_size)" />
 		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
 		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
@@ -46,11 +51,17 @@
 		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/occam/image4/camera_info" />
 	</node>
 
-	<node name="static_ar_tag_0_world" pkg="tf" type="static_transform_publisher" args=" 0    5.9 -2  3.14 0 -1.57 leviathan/description/map ar_tag_0_gt 100"/>
-	<node name="static_ar_tag_1_world" pkg="tf" type="static_transform_publisher" args=" 8.9  0   -2  1.57 0 -1.57 leviathan/description/map ar_tag_1_gt 100"/>
-	<node name="static_ar_tag_2_world" pkg="tf" type="static_transform_publisher" args=" 0   -5.9 -2  0.0  0 -1.57 leviathan/description/map ar_tag_2_gt 100"/>
-	<node name="static_ar_tag_3_world" pkg="tf" type="static_transform_publisher" args="-8.9  0   -2 -1.57 0 -1.57 leviathan/description/map ar_tag_3_gt 100"/>
+	<node name="static_ar_tag_0_world" pkg="tf" type="static_transform_publisher"
+	      args=" 0    5.9 -2  3.14 0 -1.57 leviathan/description/map leviathan/map/ar_tag_0_gt 100"/>
+	<node name="static_ar_tag_1_world" pkg="tf" type="static_transform_publisher"
+	      args=" 8.9  0   -2  1.57 0 -1.57 leviathan/description/map leviathan/map/ar_tag_1_gt 100"/>
+	<node name="static_ar_tag_2_world" pkg="tf" type="static_transform_publisher"
+	      args=" 0   -5.9 -2  0.0  0 -1.57 leviathan/description/map leviathan/map/ar_tag_2_gt 100"/>
+	<node name="static_ar_tag_3_world" pkg="tf" type="static_transform_publisher"
+	      args="-8.9  0   -2 -1.57 0 -1.57 leviathan/description/map leviathan/map/ar_tag_3_gt 100"/>
 
-	<node name="map_pose_broadcaster" pkg="ar_tracking" type="pose_to_map.py" respawn="false" output="screen"/>
-
+	<node name="ar_pose_broadcaster" pkg="ar_tracking" type="alvar_to_camera_pose.py" respawn="false" output="screen">
+		<rosparam command="load" file="$(find ar_tracking)/conf/leviathan_marker_topics.yaml"/>
+	</node>
+	
 </launch>
