@@ -46,10 +46,10 @@
 		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/occam/image4/camera_info" />
 	</node>
 
-	<node name="static_ar_tag_0_world" pkg="tf" type="static_transform_publisher" args=" 0    5.9 -2  3.14 0 -1.57 world ar_tag_0_gt 100"/>
-	<node name="static_ar_tag_1_world" pkg="tf" type="static_transform_publisher" args=" 8.9  0   -2  1.57 0 -1.57 world ar_tag_1_gt 100"/>
-	<node name="static_ar_tag_2_world" pkg="tf" type="static_transform_publisher" args=" 0   -5.9 -2  0.0  0 -1.57 world ar_tag_2_gt 100"/>
-	<node name="static_ar_tag_3_world" pkg="tf" type="static_transform_publisher" args="-8.9  0   -2 -1.57 0 -1.57 world ar_tag_3_gt 100"/>
+	<node name="static_ar_tag_0_world" pkg="tf" type="static_transform_publisher" args=" 0    5.9 -2  3.14 0 -1.57 leviathan/description/map ar_tag_0_gt 100"/>
+	<node name="static_ar_tag_1_world" pkg="tf" type="static_transform_publisher" args=" 8.9  0   -2  1.57 0 -1.57 leviathan/description/map ar_tag_1_gt 100"/>
+	<node name="static_ar_tag_2_world" pkg="tf" type="static_transform_publisher" args=" 0   -5.9 -2  0.0  0 -1.57 leviathan/description/map ar_tag_2_gt 100"/>
+	<node name="static_ar_tag_3_world" pkg="tf" type="static_transform_publisher" args="-8.9  0   -2 -1.57 0 -1.57 leviathan/description/map ar_tag_3_gt 100"/>
 
 	<node name="static_ar_odom_world" pkg="tf" type="static_transform_publisher" args=" 0 0 0 0 0 0 world leviathan_ar/odom 100"/>
 

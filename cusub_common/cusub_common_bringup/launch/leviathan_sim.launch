@@ -5,7 +5,7 @@
                 <rosparam command="load" file="$(find cusub_common_bringup)/config/leviathan_ekf.yaml" />
             </node>
 
-            <node pkg="tf" type="static_transform_publisher" name="leviathan_depth_broadcaster" args="0 0 0 0 0 0 leviathan/description/odom leviathan/description/depth_frame 100"/>
+            <node pkg="tf" type="static_transform_publisher" name="leviathan_depth_broadcaster" args="0 0 0 0 0 0 leviathan/description/map leviathan/description/depth_frame 100"/>
 
             <include file="$(find gazebo_drivers)/launch/leviathan_gazebo_drivers.launch"/>
 

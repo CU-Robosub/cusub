@@ -60,7 +60,7 @@ class ARTrack(object):
             occam_pose.header.frame_id = "ar_tag_" + str(marker.id) + "_gt"
 
             # Transfrom the pose into worldspace
-            world_baselink_pose = self.listener.transformPose("world", occam_pose)
+            world_baselink_pose = self.listener.transformPose("leviathan/description/map", occam_pose)
 
             # Estimate covariance
             lin_cov = dist / 10.0
@@ -79,17 +79,6 @@ class ARTrack(object):
 
             self.ar_pub.publish(world_baselink_pose_wc)
 
-    def depth_callback(self, data):
-        self.depth_pub.publish(data)
-
-    def dvl_callback(self, data):
-        data.header.frame_id = "leviathan_ar/base_link"
-        self.dvl_pub.publish(data)
-
-    def imu_callback(self, data):
-        data.header.frame_id = "leviathan_ar/base_link"
-        self.imu_pub.publish(data)
-
     def run(self):
 
         rospy.init_node("occam_world_transform")
@@ -98,14 +87,6 @@ class ARTrack(object):
         self.br = tf.TransformBroadcaster()
 
         self.ar_pub = rospy.Publisher("cusub_common/ar/pose", PoseWithCovarianceStamped, queue_size=1)
-
-        rospy.Subscriber("cusub_common/depth", PoseWithCovarianceStamped, self.depth_callback)
-        rospy.Subscriber("cusub_common/dvl", TwistWithCovarianceStamped, self.dvl_callback)
-        rospy.Subscriber("cusub_common/imu", Imu, self.imu_callback)
-
-        self.depth_pub = rospy.Publisher("cusub_common/ar/depth", PoseWithCovarianceStamped, queue_size=1)
-        self.dvl_pub = rospy.Publisher("cusub_common/ar/dvl", TwistWithCovarianceStamped, queue_size=1)
-        self.imu_pub = rospy.Publisher("cusub_common/ar/imu", Imu, queue_size=1)
 
         rospy.Subscriber("o0/ar_pose_marker", AlvarMarkers, self.handle_ar_pos)
         rospy.Subscriber("o1/ar_pose_marker", AlvarMarkers, self.handle_ar_pos)
