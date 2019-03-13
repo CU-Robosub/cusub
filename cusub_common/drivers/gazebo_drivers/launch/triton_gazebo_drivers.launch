@@ -3,13 +3,13 @@
   <node name="triton_gazebo_depth" pkg="gazebo_drivers" type="depth_sensor.py">
     <param name="namespace" value="triton"/>
   </node>
+  <node name="triton_gazebo_thrust_odom" pkg="gazebo_drivers" type="thrust_odom.py" />
+  <node name="triton_gazebo_motor_control" pkg="gazebo_drivers" type="motor_control.py" />
+  <node name="imu_repub" pkg="gazebo_drivers" type="imu_repub.py"/>
 
-  <node name="triton_gazebo_thrust_odom" pkg="gazebo_drivers" type="thrust_odom.py">
-    <param name="namespace" value="triton"/>
-  </node>
-
-  <node name="triton_gazebo_motor_control" pkg="gazebo_drivers" type="motor_control.py">
-    <param name="namespace" value="triton"/>
-  </node>
+  <node name="relay_cam" pkg="topic_tools" type="relay"
+        args="description/camera_0/image_raw cusub_common/cam/image"/>
+  <node name="relay_cam_info" pkg="topic_tools" type="relay"
+        args="description/camera_0/camera_info cusub_common/cam/camera_info"/>
 
 </launch>

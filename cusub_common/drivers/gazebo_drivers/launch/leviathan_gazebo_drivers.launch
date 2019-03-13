@@ -10,7 +10,6 @@
 
   <node name="imu_repub" pkg="gazebo_drivers" type="imu_repub.py"/>
 
-
   <node name="gazebo_actuators" pkg="gazebo_drivers" type="ActuatorService.py" ns="cusub_common">
     <param name="robotname" value="leviathan"/>
     <param name="torpedoURDF"
