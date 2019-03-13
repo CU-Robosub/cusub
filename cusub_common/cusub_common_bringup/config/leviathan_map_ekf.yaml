@@ -157,7 +157,7 @@ pose0_queue_size: 5
 pose0_rejection_threshold: 1
 # pose0_nodelay: false
 
-pose1: "ar/pose"
+pose1: "map_pose"
 pose1_config: [true,  true, false,
                false, false, false,
                false, false, false,

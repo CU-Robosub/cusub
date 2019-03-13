@@ -1,14 +1,19 @@
 <launch>
-        <group ns="leviathan">
+    <group ns="leviathan">
 
-            <node name="leviathan_ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true" ns="cusub_common">
-                <rosparam command="load" file="$(find cusub_common_bringup)/config/leviathan_ekf.yaml" />
-            </node>
+        <node name="leviathan_map_ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true" ns="cusub_common">
+            <rosparam command="load" file="$(find cusub_common_bringup)/config/leviathan_map_ekf.yaml" />
+            <remap from="odometry/filtered"  to="odometry/filtered_map" />
+        </node>
 
-            <node pkg="tf" type="static_transform_publisher" name="leviathan_depth_broadcaster" args="0 0 0 0 0 0 leviathan/description/map leviathan/description/depth_frame 100"/>
+        <node name="leviathan_ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true" ns="cusub_common">
+            <rosparam command="load" file="$(find cusub_common_bringup)/config/leviathan_ekf.yaml" />
+        </node>
 
-            <include file="$(find gazebo_drivers)/launch/leviathan_gazebo_drivers.launch"/>
+        <node pkg="tf" type="static_transform_publisher" name="leviathan_depth_broadcaster" args="0 0 0 0 0 0 leviathan/description/map leviathan/description/depth_frame 100"/>
 
-            <include file="$(find motor_controllers)/launch/controller_matrix.launch"/>
-        </group>
+        <include file="$(find gazebo_drivers)/launch/leviathan_gazebo_drivers.launch"/>
+
+        <include file="$(find motor_controllers)/launch/controller_matrix.launch"/>
+    </group>
 </launch>

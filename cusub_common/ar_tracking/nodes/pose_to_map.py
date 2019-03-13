@@ -1,21 +1,29 @@
 #!/usr/bin/env python
-
-import rospy
-
-import tf
+"""
+Module facilitates pose estimation in map frame for localization
+"""
 
 import math
 
-from ar_track_alvar_msgs.msg import AlvarMarkers
-from geometry_msgs.msg import PoseWithCovarianceStamped, TwistWithCovarianceStamped
-from sensor_msgs.msg import Imu
+import rospy
+import tf
 
-class ARTrack(object):
+from geometry_msgs.msg import PoseWithCovarianceStamped
+
+from ar_track_alvar_msgs.msg import AlvarMarkers
+
+class PoseToMap(object):
+    """Converts poses into sub pose estimates in the map frame
+    for localization
+    """
 
     def __init__(self):
         pass
 
-    def handle_ar_pos(self, msg):
+    def pose_callback(self, msg):
+        """Takes in the pose and inverts it so we have the robot pose
+        in the map frame for localization
+        """
 
         for marker in msg.markers:
 
@@ -60,7 +68,8 @@ class ARTrack(object):
             occam_pose.header.frame_id = "ar_tag_" + str(marker.id) + "_gt"
 
             # Transfrom the pose into worldspace
-            world_baselink_pose = self.listener.transformPose("leviathan/description/map", occam_pose)
+            # [1:] removes leading /
+            world_baselink_pose = self.listener.transformPose(rospy.get_namespace()[1:] + "description/map", occam_pose)
 
             # Estimate covariance
             lin_cov = dist / 10.0
@@ -77,25 +86,24 @@ class ARTrack(object):
             world_baselink_pose_wc.header = world_baselink_pose.header
             world_baselink_pose_wc.pose.pose = world_baselink_pose.pose
 
-            self.ar_pub.publish(world_baselink_pose_wc)
+            self.map_pose_pub.publish(world_baselink_pose_wc)
 
     def run(self):
 
         rospy.init_node("occam_world_transform")
 
         self.listener = tf.TransformListener()
-        self.br = tf.TransformBroadcaster()
 
-        self.ar_pub = rospy.Publisher("cusub_common/ar/pose", PoseWithCovarianceStamped, queue_size=1)
+        self.map_pose_pub = rospy.Publisher("cusub_common/map_pose", PoseWithCovarianceStamped, queue_size=1)
 
-        rospy.Subscriber("o0/ar_pose_marker", AlvarMarkers, self.handle_ar_pos)
-        rospy.Subscriber("o1/ar_pose_marker", AlvarMarkers, self.handle_ar_pos)
-        rospy.Subscriber("o2/ar_pose_marker", AlvarMarkers, self.handle_ar_pos)
-        rospy.Subscriber("o3/ar_pose_marker", AlvarMarkers, self.handle_ar_pos)
-        rospy.Subscriber("o4/ar_pose_marker", AlvarMarkers, self.handle_ar_pos)
+        rospy.Subscriber("o0/ar_pose_marker", AlvarMarkers, self.pose_callback)
+        rospy.Subscriber("o1/ar_pose_marker", AlvarMarkers, self.pose_callback)
+        rospy.Subscriber("o2/ar_pose_marker", AlvarMarkers, self.pose_callback)
+        rospy.Subscriber("o3/ar_pose_marker", AlvarMarkers, self.pose_callback)
+        rospy.Subscriber("o4/ar_pose_marker", AlvarMarkers, self.pose_callback)
 
         rospy.spin()
 
 if __name__ == "__main__":
-    ARTRACKER = ARTrack()
-    ARTRACKER.run()
+    PTM = PoseToMap()
+    PTM.run()
