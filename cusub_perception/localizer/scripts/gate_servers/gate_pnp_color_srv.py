@@ -10,6 +10,7 @@ Localizes the gate via a PNP transform on the tops and bottoms of the gate
 import numpy as np
 import cv2
 import rospy
+import tf
 from localizer.srv import ClassicalBoxes2Poses
 from geometry_msgs.msg import Pose
 from classical_cv.gate_pnp_color import GatePNPAnalyzer
@@ -113,12 +114,42 @@ class GatePNPColorServer():
 
         pt_arr = np.array([bot_pixel_l, top_pixel_l, bot_pixel_r, top_pixel_r], dtype=np.float32)
 
-        retval, rvec, tvec = cv2.solvePnP(self.pole_truth_points, pt_arr, self.occam_camera_matrix, self.occam_distortion_coefs)
+        #pt_arr = np.ascontiguousarray(pt_arr[:,:2]).reshape((4,1,2))
+
+        _, rvec, tvec = cv2.solvePnP(self.pole_truth_points, pt_arr, self.occam_camera_matrix, self.occam_distortion_coefs, flags=cv2.SOLVEPNP_ITERATIVE)
+
+        print(rvec)
+
+        """
+        points = cv2.projectPoints(self.pole_truth_points, rvec, tvec, self.occam_camera_matrix, self.occam_distortion_coefs)
+        for pt in pt_arr:
+            cv2.circle(img, (pt[0], pt[1]), 3, (255,0,0), 2)
+        for pt in points[0]:
+            cv2.circle(img, (pt[0][0], pt[0][1]), 3, (0,0,255), 2)
+        cv2.imshow("debug", img)
+        cv2.waitKey(0)
+        """
+
+        # Convert to 3x3 Rotation Matrix
+        rmat, _ = cv2.Rodrigues(rvec)
+
+        # Convert to 4x4 Rotation Matrix
+        rmat = np.hstack((rmat, np.array([[0],[0],[0]])))
+        rmat = np.vstack((rmat, np.array([0,0,0,1])))
+
+        # Convert to Quaternion
+        rquat = tf.transformations.quaternion_from_matrix(rmat)
 
         pose = Pose()
-        pose.position.x = tvec[2]
-        pose.position.y = -1*tvec[0]
-        pose.position.z = -1*tvec[1]
+
+        pose.position.x = tvec[0]
+        pose.position.y = tvec[1]
+        pose.position.z = tvec[2]
+
+        pose.orientation.x = rquat[0]
+        pose.orientation.y = rquat[1]
+        pose.orientation.z = rquat[2]
+        pose.orientation.w = rquat[3]
 
         # TODO move this to the mapper
         # pose = self.expAvg.get_new_avg_pose(pose)
