@@ -75,7 +75,7 @@ class GatePNPColorServer():
 
     def __init__(self):
         ns = rospy.get_namespace()
-        self.server = rospy.Service(ns +"localize_gate_pnp_color", ClassicalBoxes2Poses, self.localize)
+        self.server = rospy.Service(ns +"cusub_perception/localize_gate_pnp_color", ClassicalBoxes2Poses, self.localize)
         self.occam_camera_matrix.shape = (3,3)
         rospy.loginfo("Gate PNP Color Initialized")
         self.expAvg = ExpWeightedAvg( 5 ) # average over five poses

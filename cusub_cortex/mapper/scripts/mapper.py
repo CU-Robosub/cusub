@@ -19,7 +19,7 @@ from pose_filter import filter_poses
 class Mapper():
     def __init__(self):
 
-        self.namespace = rospy.get_param('~namespace')
+        self.namespace = rospy.get_param('~namespace_odom')
         ns = rospy.get_namespace()
         index = ns[1:].find('/') # find the 2nd '/'
         sub_name = ns[0:index+2]

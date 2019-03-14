@@ -20,7 +20,7 @@ class GateMidpointServer():
 
     def __init__(self):
         ns = rospy.get_namespace()
-        self.server = rospy.Service(ns+"localize_gate_midpoint", ClassicalBoxes2Poses, self.localize)
+        self.server = rospy.Service(ns+"cusub_perception/localize_gate_midpoint", ClassicalBoxes2Poses, self.localize)
         rospy.loginfo("Gate Midpoint Initialized")
 
     def _orderBoxesLeft2Right(self, box1, box2):
