@@ -18,6 +18,11 @@
 
         <include file="$(find gazebo_drivers)/launch/triton_gazebo_drivers.launch"/>
 
-        <include file="$(find motor_controllers)/launch/controller_matrix.launch"/>
+        <include file="$(find motor_controllers)/launch/controller_matrix.launch">
+            <arg name="pid_type" default="sim"/>
+        </include>
+
+        <include file="$(find waypoint_navigator)/launch/waypoint_navigator.launch"/>
+
     </group>
 </launch>

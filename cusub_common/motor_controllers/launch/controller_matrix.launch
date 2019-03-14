@@ -1,6 +1,7 @@
 <launch>
 
 	<arg name="setpoint" default="true" />
+	<arg name="pid_type" default="real" />
 
 	<node name="pose_pid" pkg="motor_controllers" type="Pose_PID.py" output="screen"/>
 	<node name="pid_pololu" pkg="motor_controllers" type="PID_Pololu_matrix.py" output="screen"/>
@@ -9,14 +10,8 @@
 		<remap from="mux" to="depth_mux"/>
 		<param name="initial_topic " value="pid/depth/control_effort" />
 	</node>
-	<node name="depth_pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers" >
-		<param name="node_name" value="depth_pid" />
-		<param name="topic_from_controller" value="pid/depth/control_effort" />
-		<param name="topic_from_plant" value="pid/depth/state" />
-		<param name="setpoint_topic" value="pid/depth/setpoint" />
-		<param name="Kp" value="-100.0" />
-		<param name="Ki" value="0.0" />
-		<param name="Kd" value="-50.0" />
+	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/depth" >
+		<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_depth.yaml" />
 		<param name="rate" value="25" />
 		<param name="upper_limit" value="100" />
 		<param name="lower_limit" value="-100" />
@@ -36,14 +31,8 @@
 
 	<group if="$(arg setpoint)">
 
-		<node name="pitch_pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers" >
-			<param name="node_name" value="pitch_pid" />
-			<param name="topic_from_controller" value="pid/pitch/control_effort" />
-			<param name="topic_from_plant" value="pid/pitch/state" />
-			<param name="setpoint_topic" value="pid/pitch/setpoint" />
-			<param name="Kp" value="20.0" />
-			<param name="Ki" value="0.0" />
-			<param name="Kd" value="0.0" />
+		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/pitch" >
+			<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_pitch.yaml" />
 			<param name="rate" value="25" />
 			<param name="upper_limit" value="100" />
 			<param name="lower_limit" value="-100" />
@@ -52,14 +41,8 @@
 			<param name="max_loop_frequency" value="25.0" />
 			<param name="min_loop_frequency" value="25.0" />
 		</node>
-		<node name="roll_pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers" >
-			<param name="node_name" value="roll_pid" />
-			<param name="topic_from_controller" value="pid/roll/control_effort" />
-			<param name="topic_from_plant" value="pid/roll/state" />
-			<param name="setpoint_topic" value="pid/roll/setpoint" />
-			<param name="Kp" value="20.0" />
-			<param name="Ki" value="0.0" />
-			<param name="Kd" value="0.0" />
+		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/roll" >
+			<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_roll.yaml" />
 			<param name="rate" value="25" />
 			<param name="upper_limit" value="100" />
 			<param name="lower_limit" value="-100" />
@@ -72,14 +55,8 @@
 			<remap from="mux" to="yaw_mux"/>
 			<param name="initial_topic " value="pid/yaw/control_effort" />
 		</node>
-		<node name="yaw_pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers" >
-			<param name="node_name" value="yaw_pid" />
-			<param name="topic_from_controller" value="pid/yaw/control_effort" />
-			<param name="topic_from_plant" value="pid/yaw/state" />
-			<param name="setpoint_topic" value="pid/yaw/setpoint" />
-			<param name="Kp" value="500.0" />
-			<param name="Ki" value="250.0" />
-			<param name="Kd" value="0.0" />
+		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/yaw" >
+			<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_yaw.yaml" />
 			<param name="rate" value="25" />
 			<param name="upper_limit" value="100" />
 			<param name="lower_limit" value="-100" />
@@ -101,14 +78,8 @@
 			<remap from="mux" to="drive_mux"/>
 			<param name="initial_topic " value="pid/drive/control_effort" />
 		</node>
-		<node name="drive_pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers">
-			<param name="node_name" value="drive_pid" />
-			<param name="topic_from_controller" value="pid/drive/control_effort" />
-			<param name="topic_from_plant" value="pid/drive/state" />
-			<param name="setpoint_topic" value="pid/drive/setpoint" />
-			<param name="Kp" value="30.0" />
-			<param name="Ki" value="0.0" />
-			<param name="Kd" value="0.0" />
+		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/drive">
+			<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_drive.yaml" />
 			<param name="rate" value="25" />
 			<param name="upper_limit" value="100" />
 			<param name="lower_limit" value="-100" />
@@ -129,14 +100,8 @@
 			<remap from="mux" to="strafe_mux"/>
 			<param name="initial_topic " value="pid/strafe/control_effort" />
 		</node>
-		<node name="strafe_pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers">
-			<param name="node_name" value="strafe_pid" />
-			<param name="topic_from_controller" value="pid/strafe/control_effort" />
-			<param name="topic_from_plant" value="pid/strafe/state" />
-			<param name="setpoint_topic" value="pid/strafe/setpoint" />
-			<param name="Kp" value="50.0" />
-			<param name="Ki" value="0.0" />
-			<param name="Kd" value="0.0" />
+		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/strafe">
+			<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_strafe.yaml" />
 			<param name="rate" value="25" />
 			<param name="upper_limit" value="100" />
 			<param name="lower_limit" value="-100" />
