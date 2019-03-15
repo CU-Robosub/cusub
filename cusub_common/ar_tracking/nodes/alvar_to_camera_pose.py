@@ -8,7 +8,7 @@ import tf
 
 from ar_track_alvar_msgs.msg import AlvarMarkers
 
-from ar_tracking.msg import CameraObjectPose
+from localizer.msg import CameraObjectPose
 
 class AlvarToCameraPose(object):
     """Converts poses into sub pose estimates in the map frame

@@ -12,7 +12,7 @@ import tf.transformations as transform
 
 from geometry_msgs.msg import PoseWithCovarianceStamped
 
-from ar_tracking.msg import CameraObjectPose
+from localizer.msg import CameraObjectPose
 
 class CameraPoseToMap(object):
     """Converts poses into sub pose estimates in the map frame
