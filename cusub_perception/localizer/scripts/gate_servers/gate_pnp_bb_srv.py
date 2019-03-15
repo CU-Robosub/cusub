@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-from __future__ import division
 """
-Classical CV Server for StarGate
+Classical CV Server for StartGate
 Localizes the gate via a PNP transform on the tops and bottoms of the gate
-- Uses color characteristics to find the tops and bottoms of the poles
+- Assumes our camera is horizontal
 - Generates a pose by relating the image points to what we know of the true structure in 3D space (pnp transformation)
 """
 
@@ -13,10 +12,9 @@ import rospy
 import tf
 from localizer.srv import ClassicalBoxes2Poses
 from geometry_msgs.msg import Pose
-from classical_cv.gate_pnp_color import GatePNPAnalyzer
 from cv_bridge import CvBridge, CvBridgeError
 
-class GatePNPColorServer():
+class GatePNPBoundingBoxServer():
 
     # pole_points indices on the gate are ordered as follows:
     # The center is illustrated by the 'X'
@@ -35,22 +33,16 @@ class GatePNPColorServer():
     occam_distortion_coefs = np.array([-0.360085, 0.115116, 0.007768, 0.004616, 0.000000])
 
     def __init__(self):
-        ns = rospy.get_namespace()
-        self.server = rospy.Service(ns +"cusub_perception/localize_gate_pnp_color", ClassicalBoxes2Poses, self.localize)
+
+        self.server = rospy.Service("cusub_perception/localize_gate_pnp_bb", ClassicalBoxes2Poses, self.localize)
         self.occam_camera_matrix.shape = (3,3)
-        rospy.loginfo("Gate PNP Color Initialized")
+
+        rospy.loginfo("Gate PNP Bounding Box Initialized")
 
     def localize(self, req):
 
         if len(req.boxes) < 2: # We need 2 bounding boxes
             return [Pose()], ['Failed']
-
-        bridge = CvBridge()
-        try:
-            img = bridge.imgmsg_to_cv2(req.image, desired_encoding="passthrough")
-        except CvBridgeError as e:
-            print(e)
-            return
 
         box1 = req.boxes[0]
         box2 = req.boxes[1]
@@ -61,20 +53,10 @@ class GatePNPColorServer():
             left = box2
             right = box1
 
-        gate_analyzer = GatePNPAnalyzer(img, "bgr")
-
-        top_pixel_l, bot_pixel_l = gate_analyzer.localize_leg(left.xmin, \
-                                                              left.ymin, \
-                                                              left.xmax, \
-                                                              left.ymax)
-        top_pixel_r, bot_pixel_r = gate_analyzer.localize_leg(right.xmin, \
-                                                              right.ymin, \
-                                                              right.xmax, \
-                                                              right.ymax)
-
-        # Make sure we didn't miss pole ends
-        if abs(top_pixel_l[1] - bot_pixel_l[1]) < 10 or abs(top_pixel_r[1] == bot_pixel_r[1]) < 10:
-            return [Pose()], ['Failed']
+        top_pixel_l = ((left.xmin + left.xmax) / 2.0, left.ymax)
+        bot_pixel_l = ((left.xmin + left.xmax) / 2.0, left.ymin)
+        top_pixel_r = ((right.xmin + right.xmax) / 2.0, right.ymax)
+        bot_pixel_r = ((right.xmin + right.xmax) / 2.0, right.ymin)
 
         pt_arr = np.array([bot_pixel_l, top_pixel_l, bot_pixel_r, top_pixel_r], dtype=np.float32)
         pt_arr = np.ascontiguousarray(pt_arr[:,:2]).reshape((4,1,2))
@@ -105,6 +87,6 @@ class GatePNPColorServer():
         return [pose], ['start_gate']
 
 if __name__ == "__main__":
-    rospy.init_node("gate_pnp_color")
-    server = GatePNPColorServer()
+    rospy.init_node("gate_pnp_bounding_box")
+    server = GatePNPBoundingBoxServer()
     rospy.spin()
