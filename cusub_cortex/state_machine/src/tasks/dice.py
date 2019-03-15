@@ -53,7 +53,7 @@ class Approach(Objective):
         rospy.loginfo("Executing Approach")
         # We should have a pose of the 5 dice by now
 
-    def getPath(self, goal_pt, obstacle_list):
+    def getPath(self, goal_pt, obstacle_list, sub_pt):
         """
         Returns a list of points to go to, to reach the desired goal point
         Uses a surrounding box as helper points along its way to the approach point
@@ -80,6 +80,7 @@ class Approach(Objective):
         y = goal_pt.y
         z = goal_pt.z
         points_around_goal = self.getCirclePoints(x,y, radius=1)
+        
 #        print(points_around_goal)
         dists=np.zeros((len(points_around_goal),1))
         for obs in obstacle_list:
@@ -98,6 +99,9 @@ class Approach(Objective):
         approach_pt = points_around_goal[np.argmax(dists)]
         x_app = approach_pt[0]
         y_app = approach_pt[1]
+
+        print("Goal Pt: " + str((x,y)))
+        print("App Pt: " + str((x_app, y_app)))
 
         # goal_pt and obstacle list
         xdata = [i.x for i in obstacle_list]; xdata = [x] + xdata; xdata.append(x_app)
@@ -125,14 +129,25 @@ class Approach(Objective):
         y_pos = sq + y
         y_neg = neg_sq + y
 
-        xdata = list(x_points) + list(x_points)
-        ydata = list(y_pos) + list(y_neg)
-        # zdata = list(np.zeros((len(ydata),1)))
-        # cdata = np.zeros((len(ydata)))
+        x_points += x
+
+        xdata = list(x_points) + list(x_points) + [x]
+        ydata = list(y_pos) + list(y_neg) + [y]
+        # comment below
+        # zdata = list(np.zeros(len(ydata)))
+        # cdata = [0.0 for i in ydata]; cdata[len(ydata)-1] = 10
+        # print(xdata)
+        # print(len(xdata))
+        # print(ydata)
+        # print(len(ydata))
+        # print(zdata)
+        # print(len(zdata))
+        # print(cdata)
+        # print(len(cdata))
 
         # fig=plt.figure()
         # ax = fig.add_subplot(111, projection='3d')
-        # ax.scatter3D(xdata, ydata, zdata, cdata, c=cdata)
+        # ax.scatter3D(xdata, ydata, zdata, c=np.array(cdata))
         # plt.show()
         return zip(xdata,ydata)
         
@@ -210,7 +225,7 @@ def test():
         p.position = pts[4]
         a.curPose = p
         
-        a.getPath(pts[0], pts[1:4])
+        a.getPath(pts[0], pts[1:4], pts[4])
         
     return
     # for i in range(10):
