@@ -17,6 +17,7 @@ import actionlib
 from tasks.start_gate import StartGate
 from tasks.visit_task import VisitTask
 from tasks.bangbang_dice_task import BangBangDiceTask
+from tasks.naive_visual_servo_objective import NaiveVisualServoTask
 # from tasks.bangbang_roulette_task import BangBangRouletteTask
 
 def genPoseMsg(list_xyz):
@@ -56,6 +57,8 @@ def loadStateMachines(task_list):
             task_sm = BangBangDiceTask(prior, search_alg)
         elif task == "bangbang_roulette":
             task_sm = BangBangRouletteTask(prior, search_alg)
+        elif task == "naive_visual_servo_objective":
+            task_sm = NaiveVisualServoTask(prior)
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 
