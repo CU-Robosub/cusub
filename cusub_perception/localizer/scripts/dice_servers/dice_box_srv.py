@@ -59,10 +59,12 @@ class DiceBoxServer():
 
             # # PnP uses different coord system, do quick conversion
             pose = Pose()
-            pose.position.x = tvec[2]
-            pose.position.y = -1*tvec[0]
-            pose.position.z = -1*tvec[1]
+            pose.position.x = tvec[0] * 1.15 # dice appear 15% further in bounding box
+            pose.position.y = tvec[1] * 1.15
+            pose.position.z = tvec[2] * 1.15
+
             poses.append(pose)
+
             print(pose)
             classes.append(box.Class)
             rospy.loginfo(box.Class + " : " + str(pose))

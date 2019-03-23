@@ -26,10 +26,13 @@ class WaypointNavigator(object):
         self.waypoint_yaw = 0
 
     def addWaypoint(self, req):
+
         rospy.loginfo(req.waypoint)
+
         self.waypointlist.append(req.waypoint)
         if(self.waypoint is None):
             self.waypoint = self.waypointlist[0]
+
         return []
 
     def advanceWaypoint(self):

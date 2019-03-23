@@ -26,8 +26,7 @@ DEBUG=True
 class Localizer():
     def __init__(self):
         self.darknet_sub = rospy.Subscriber('darknet_ros/bounding_boxes', BoundingBoxes,self.boxes_received, queue_size=1, buff_size=10000000)
-        ns = rospy.get_namespace()
-        self.pose_pub = rospy.Publisher( ns + 'cusub_perception/mapper/task_poses', Detection, queue_size=1)
+        self.pose_pub = rospy.Publisher('cusub_perception/mapper/task_poses', Detection, queue_size=1)
         self.create_server_dict()
         rospy.loginfo("Localizer Client Initialized")
 
@@ -61,7 +60,7 @@ class Localizer():
 
         for task_srvs in self.server_dict.keys():
                 for srv in self.server_dict[task_srvs]:
-                    rospy.wait_for_service('cusub_perception/localize_' + srv, 2.0)
+                    rospy.wait_for_service('cusub_perception/localize_' + srv, 10.0)
 
     def check_box_capability(self, boxes):
         """

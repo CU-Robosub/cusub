@@ -145,7 +145,7 @@ initial_state: [0.0,  0.0,  0.0,
 
 
 
-pose0: "depth"
+pose0: "depth_odom"
 pose0_config: [false,  false, true,
                false, false, false,
                false, false, false,

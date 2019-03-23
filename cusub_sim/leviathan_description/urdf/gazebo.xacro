@@ -46,7 +46,7 @@
             0 0 0 0 0 0.4006
           </added_mass>
           <linear_damping>
-            -8.25 -15 -24.0 -18.75 -33.75 -3.75
+            -2 -8 -8 -8 -8 -4
           </linear_damping>
           <quadratic_damping>
             0 0 0 0 0 0

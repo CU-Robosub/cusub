@@ -1,0 +1,31 @@
+<launch>
+	<arg name="marker_size" default="100" />
+	<arg name="max_new_marker_error" default="0.02" />
+	<arg name="max_track_error" default="0.04" />
+
+	<arg name="robot_name" default="triton" />
+
+	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect"
+	      respawn="false" output="screen" ns="cusub_common/cam/alvar">
+		<param name="marker_size"           type="double" value="$(arg marker_size)" />
+		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
+		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
+		<param name="output_frame"          type="string" value="$(arg robot_name)/description/ocam0_frame_optical" />
+		<remap from="camera_image"  to="/$(arg robot_name)/cusub_common/cam/image" />
+		<remap from="camera_info"   to="/$(arg robot_name)/cusub_common/cam/camera_info" />
+	</node>
+
+	<node name="static_ar_tag_0_world" pkg="tf" type="static_transform_publisher"
+	      args=" 0    5.9 -2  3.14 0 -1.57 triton/description/map triton/map/ar_tag_0_gt 100"/>
+	<node name="static_ar_tag_1_world" pkg="tf" type="static_transform_publisher"
+	      args=" 8.9  0   -2  1.57 0 -1.57 triton/description/map triton/map/ar_tag_1_gt 100"/>
+	<node name="static_ar_tag_2_world" pkg="tf" type="static_transform_publisher"
+	      args=" 0   -5.9 -2  0.0  0 -1.57 triton/description/map triton/map/ar_tag_2_gt 100"/>
+	<node name="static_ar_tag_3_world" pkg="tf" type="static_transform_publisher"
+	      args="-8.9  0   -2 -1.57 0 -1.57 triton/description/map triton/map/ar_tag_3_gt 100"/>
+
+	<node name="ar_pose_broadcaster" pkg="ar_tracking" type="alvar_to_camera_pose.py" respawn="false" output="screen">
+		<rosparam command="load" file="$(find ar_tracking)/conf/triton_marker_topics.yaml"/>
+	</node>
+	
+</launch>

@@ -1,0 +1,28 @@
+<launch>
+    <group ns="triton">
+
+        <node name="map_ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true" ns="cusub_common">
+            <rosparam command="load" file="$(find cusub_common_bringup)/config/triton_map_ekf.yaml" />
+            <remap from="odometry/filtered"  to="odometry/filtered_map" />
+        </node>
+
+        <node name="odom_ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true" ns="cusub_common">
+            <rosparam command="load" file="$(find cusub_common_bringup)/config/triton_odom_ekf.yaml" />
+        </node>
+
+        <node pkg="tf" type="static_transform_publisher" name="triton_depth_odom_broadcaster"
+              args="0 0 0 0 0 0 triton/description/odom triton/description/depth_odom_frame 100"/>
+
+        <node pkg="tf" type="static_transform_publisher" name="triton_depth_map_broadcaster"
+              args="0 0 0 0 0 0 triton/description/map triton/description/depth_map_frame 100"/>
+
+        <include file="$(find gazebo_drivers)/launch/triton_gazebo_drivers.launch"/>
+
+        <include file="$(find motor_controllers)/launch/controller_matrix.launch">
+            <arg name="pid_type" default="sim"/>
+        </include>
+
+        <include file="$(find waypoint_navigator)/launch/waypoint_navigator.launch"/>
+
+    </group>
+</launch>

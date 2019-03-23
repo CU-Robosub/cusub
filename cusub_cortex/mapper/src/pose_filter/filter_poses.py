@@ -39,6 +39,7 @@ class Filter(object):
         pose.pose.position.y = yavg
         pose.pose.position.z = zavg
 
+        pose.pose.orientation = filtered_poses[0].pose.orientation
 
         return pose
 

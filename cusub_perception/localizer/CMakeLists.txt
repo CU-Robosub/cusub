@@ -53,6 +53,7 @@ catkin_python_setup()
 add_message_files(
   FILES
   Detection.msg
+  CameraObjectPose.msg
 )
 
 ## Generate services in the 'srv' folder

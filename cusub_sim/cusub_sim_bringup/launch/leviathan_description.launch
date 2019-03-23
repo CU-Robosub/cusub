@@ -13,7 +13,7 @@
             <arg name="namespace" default="$(arg namespace)"/>
         </include>
 
-        <node pkg="tf" type="static_transform_publisher" name="world_leviathan_odom_broadcaster" args="$(arg x) $(arg y) 0 0 0 0 world $(arg namespace)/odom 50" />
+        <node pkg="tf" type="static_transform_publisher" name="world_leviathan_odom_broadcaster" args="0 0 0 0 0 0 world $(arg namespace)/map 50" />
 
         <node name="rviz" pkg="rviz" type="rviz" args="-d $(find leviathan_description)/launch/Leviathan_Startgate_Divewell_Gazebo.rviz" />
 </launch>

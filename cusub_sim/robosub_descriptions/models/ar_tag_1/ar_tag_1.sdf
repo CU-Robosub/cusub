@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+<sdf version="1.6">
+<model name="ar_tag_1">
+  <static>true</static>
+    <link name="link">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://ar_tag_1/ar_tag_1.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>
