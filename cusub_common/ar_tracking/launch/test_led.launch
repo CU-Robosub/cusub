@@ -1,0 +1,11 @@
+<launch>
+
+    <arg name="namespace" default="leviathan" />
+
+   	<node name="led0_estimator" pkg="ar_tracking" type="magic_led_pose_estimator.py"
+	      respawn="false" output="screen" ns="cusub_common/occam/magic_led0">
+		<remap from="cam_pose"  to="/$(arg namespace)/cusub_common/cam_pose" />
+		<remap from="camera_image"  to="/image_raw" />
+	</node>
+
+</launch>
