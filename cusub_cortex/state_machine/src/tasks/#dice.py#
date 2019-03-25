@@ -154,7 +154,7 @@ class Approach(Objective):
         Have this return a graph of connected points
         Can easily access just the points with list(G.nodes)
 
-        I think there's a better way to do this...
+        I think there's a better way to do this... use polar coords and convert to x,y,z
         """
         x_points = np.linspace(-radius,radius,num=num_points_side, endpoint=True)
         sq = np.sqrt( np.power(radius,2) - np.power(x_points, 2) )
