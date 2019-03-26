@@ -23,49 +23,56 @@ def graphGetPath(target_pt, start_pt, path_pts):
     G.add_nodes_from(path_pts)
     closest_pt = graphFindClosestPt(target_pt, path_pts + [start_pt])
     G.add_edge(target_pt, closest_pt)
-    plt.subplot(111)
-    nx.draw(G, with_labels=True, font_weight="bold")
-    plt.show()
+    # plt.subplot(111)
+    # nx.draw(G, with_labels=True, font_weight="bold")
+    # plt.show()
     
     G = graphConnectPts(G, path_pts)
     closest_pt = graphFindClosestPt(start_pt, path_pts)
     G.add_edge(start_pt, closest_pt)
-    plt.subplot(111)
-    nx.draw(G, with_labels=True, font_weight="bold")
-    plt.show()
-    
-    print(nx.shortest_path(G, start_pt, target_pt))
+    path = nx.shortest_path(G, start_pt, target_pt)
+    # print(path)
+    # plt.subplot(111)
+    # nx.draw(G, with_labels=True, font_weight="bold")
+    # plt.show()
+    return path
 
 def graphConnectPts(graph, path_pts):
-    for i in range(len(path_pts)):
-        
-        minPt = None
-        minDist = np.Inf
-        minPt2 = None
-        minDist2 = np.Inf
-
-        vec1 = np.array([path_pts[i].x,path_pts[i].y], dtype=np.float32)
-        for j in range(i, len(path_pts)):
-            if i == j:
-                continue
-            vec2 = np.array([path_pts[j].x, path_pts[j].y], dtype=np.float32)
-            diff = vec1 - vec2
-            dist = np.linalg.norm(diff)
-            if dist < minDist:
-                minPt2 = minPt
-                minDist2 = minDist
-                minPt = path_pts[j]
-                minDist = dist
-            elif dist < minDist2:
-                minPt2 = path_pts[j]
-                minDist2 = dist
-        num_neighbors = len(list(graph.neighbors(path_pts[i])))
-        if num_neighbors == 0:
-            graph.add_edge(path_pts[i], minPt)
-            graph.add_edge(path_pts[i], minPt2)
-        elif num_neighbors == 1:
-            graph.add_edge(path_pts[i], minPt)
+    for i in range(1,len(path_pts)):
+        graph.add_edge(path_pts[i-1], path_pts[i])
+    last_index = len(path_pts) - 1
+    graph.add_edge(path_pts[0], path_pts[last_index])
     return graph
+    
+    # for i in range(len(path_pts)):
+        
+    #     minPt = None
+    #     minDist = np.Inf
+    #     minPt2 = None
+    #     minDist2 = np.Inf
+
+    #     vec1 = np.array([path_pts[i].x,path_pts[i].y], dtype=np.float32)
+    #     for j in range(i, len(path_pts)):
+    #         if i == j:
+    #             continue
+    #         vec2 = np.array([path_pts[j].x, path_pts[j].y], dtype=np.float32)
+    #         diff = vec1 - vec2
+    #         dist = np.linalg.norm(diff)
+    #         if dist < minDist:
+    #             minPt2 = minPt
+    #             minDist2 = minDist
+    #             minPt = path_pts[j]
+    #             minDist = dist
+    #         elif dist < minDist2:
+    #             minPt2 = path_pts[j]
+    #             minDist2 = dist
+    #     num_neighbors = len(list(graph.neighbors(path_pts[i])))
+    #     if num_neighbors == 0:
+    #         graph.add_edge(path_pts[i], minPt)
+    #         graph.add_edge(path_pts[i], minPt2)
+    #     elif num_neighbors == 1:
+    #         graph.add_edge(path_pts[i], minPt)
+    # return graph
 
 def graphFindClosestPt(target_pt, other_pts):
     vec1 = np.array([target_pt.x, target_pt.y], dtype=np.float32)
