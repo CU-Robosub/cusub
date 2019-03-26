@@ -55,7 +55,7 @@ class Approach(Objective):
         rospy.loginfo("Executing Approach")
         # We should have a pose of the 5 dice by now
 
-    def getPath(self, goal_pt, obstacle_list, sub_pt):
+    def getPath(self, goal_pt, dice_list, sub_pt):
         """
         Returns a list of points to go to, to reach the desired goal point
         Uses a surrounding box as helper points along its way to the approach point
@@ -76,18 +76,18 @@ class Approach(Objective):
         # Approach point will be in direction with highest distance
         # Path plan w/ square method
         assert isinstance(goal_pt, Point)
-        assert isinstance(obstacle_list, list)
+        assert isinstance(dice_list, list)
 
         x = goal_pt.x
         y = goal_pt.y
         z = goal_pt.z
         points_around_goal = self.getCirclePoints(x,y, radius=1)
-        
-#        print(points_around_goal)
+
+        # Find the takeoff point
         dists=np.zeros((len(points_around_goal),1))
-        for obs in obstacle_list:
-            vec2 = np.array([obs.x,obs.y], dtype=np.float32)
-            print(vec2)
+        for die in dice_list:
+            vec2 = np.array([die.x,die.y], dtype=np.float32)
+            # print(vec2)
             for i in range(len(points_around_goal)):
                 new_list = [points_around_goal[i].x, points_around_goal[i].y]
                 vec1 = np.array(new_list, dtype=np.float32)
@@ -105,15 +105,16 @@ class Approach(Objective):
         print("Goal Pt: " + str((x,y)))
         print("Takeoff Pt: " + str((x_takeoff, y_takeoff)))
 
-        centroid = self.getCentroid(obstacle_list + [goal_pt])
-        horizon_pts = self.getCirclePoints(centroid.x, centroid.y, 2, 11)
+        centroid = self.getCentroid(dice_list + [goal_pt])
+        horizon_pts = self.getCirclePoints(centroid.x, centroid.y, 2, 20)
         graphGetPath(takeoff_pt, Point(), horizon_pts)
+        return
 
-        # goal_pt and obstacle list
-        xdata = [i.x for i in obstacle_list]; xdata = [x] + xdata; xdata.append(x_takeoff); xdata.append(centroid.x); xdata += [i.x for i in horizon_pts]
-        ydata = [i.y for i in obstacle_list]; ydata = [y] + ydata; ydata.append(y_takeoff); ydata.append(centroid.y); ydata += [i.y for i in horizon_pts]
-        zdata = [-5 for i in obstacle_list]; zdata = [-5] + zdata; zdata.append(-5); zdata.append(-5); zdata += [-5 for i in horizon_pts]
-        cdata = [0 for i in obstacle_list]; cdata = [1] + cdata; cdata.append(0.5); cdata.append(0.2); cdata += [0.7 for i in horizon_pts]
+        # goal_pt and dice list
+        xdata = [i.x for i in dice_list]; xdata = [x] + xdata; xdata.append(x_takeoff); xdata.append(centroid.x); xdata += [i.x for i in horizon_pts]
+        ydata = [i.y for i in dice_list]; ydata = [y] + ydata; ydata.append(y_takeoff); ydata.append(centroid.y); ydata += [i.y for i in horizon_pts]
+        zdata = [-5 for i in dice_list]; zdata = [-5] + zdata; zdata.append(-5); zdata.append(-5); zdata += [-5 for i in horizon_pts]
+        cdata = [0 for i in dice_list]; cdata = [1] + cdata; cdata.append(0.5); cdata.append(0.2); cdata += [0.7 for i in horizon_pts]
         # print(xdata)
         # print(ydata)
         # print(zdata)
@@ -147,48 +148,27 @@ class Approach(Objective):
         I think there's a better way to do this... use polar coords and convert to x,y,z
         """
         angles = np.linspace(0, 2*np.pi, num=num_points, endpoint=False)
-        x_coords = radius * np.cos(angles)
-        y_coords = radius * np.sin(angles)
-        print(angles)
-        print(zip(list(x_coords), list(y_coords)))
-        return
-    
-        # x_points = np.linspace(-radius,radius,num=num_points_side, endpoint=True)
-        # sq = np.sqrt( np.power(radius,2) - np.power(x_points, 2) )
-        # neg_sq = - sq
-        # y_pos = sq + y
-        # y_neg = neg_sq + y
+        x_coords = radius * np.cos(angles) + x
+        y_coords = radius * np.sin(angles) + y
 
-        # x_points += x
-
-        xdata = list(x_points) + list(x_points) + [x]
-        ydata = list(y_pos) + list(y_neg) + [y]
-        # comment below
+        pts = []
+        for j in range(len(x_coords)):
+            new_pt = Point()
+            new_pt.x = x_coords[j]
+            new_pt.y = y_coords[j]
+            pts.append(new_pt)
+        
+        # xdata = list(x_coords) + [x]
+        # ydata = list(y_coords) + [y]
         # zdata = list(np.zeros(len(ydata)))
         # cdata = [0.0 for i in ydata]; cdata[len(ydata)-1] = 10
-        # print(xdata)
-        # print(len(xdata))
-        # print(ydata)
-        # print(len(ydata))
-        # print(zdata)
-        # print(len(zdata))
-        # print(cdata)
-        # print(len(cdata))
-
         # fig=plt.figure()
         # ax = fig.add_subplot(111, projection='3d')
         # ax.scatter3D(xdata, ydata, zdata, c=np.array(cdata))
         # plt.show()
 
         # Turn the data into points
-        pts = []
-        for j in range(len(xdata)):
-            new_pt = Point()
-            new_pt.x = xdata[j]
-            new_pt.y = ydata[j]
-            pts.append(new_pt)
         return pts
-#        return zip(xdata,ydata)
         
 def main():
     rospy.init_node("dice_node")
@@ -198,16 +178,19 @@ def main():
 
 def genTestPoints(minDist, maxDist):
     """
-    Returns a list of 5 points, first is goal point, next 3 other dice points, 5th point the starting position of the sub
+    Returns a list of 5 points
+    Index0: goal point
+    Indices1-3: dice points
+    Index4: starting position of the sub
+
     All dice are minDist away and no more than maxDist apart
-    Hardcoded between -100 and 100
     """
+
+    # Should be some point randomly -100 through 100
     goal_pt = Point()    
     goal_pt.x = ( random.random() - 0.5) * 200
     goal_pt.y = ( random.random() - 0.5) * 200
     goal_vec = np.array([goal_pt.x, goal_pt.y], dtype=np.float32)
-    print(goal_pt)
-    
     
     dice = []
     while len(dice) < 3:
@@ -256,12 +239,10 @@ def test():
     """
     rospy.init_node("dice_node")
     a = Approach()
-    a.getCirclePoints(0,0,1,20)
-    return
-
+    
     for i in range(1):
-        pts = genTestPoints(0.5,1)
-#        print(pts)
+        pts = genTestPoints(0.5,1) # min dist & max dist
+        # print(pts)
         
         p = Pose()
         p.position = pts[4]
