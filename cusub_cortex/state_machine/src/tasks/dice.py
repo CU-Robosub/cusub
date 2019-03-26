@@ -124,16 +124,6 @@ class Approach(Objective):
         ax.scatter3D(xdata, ydata, zdata, c=np.array(cdata))
         plt.show()
 
-        # TODO generate another circle around the dice centroid
-        
-        
-#        horizon_pts = self.getCirclePoints()
-        
-        # Find the closest point along that circle to us -> starting pt
-        # Find the closest point along that circle to the approach pt -> takeoff point
-
-        # Return: starting pt, path, approach, take off
-
 
     def getCentroid(self, pts):
         x_sum = 0
@@ -147,22 +137,29 @@ class Approach(Objective):
         return avg_pt
         
         
-    def getCirclePoints(self, x, y, radius=1, num_points_side=21):
+    def getCirclePoints(self, x, y, radius=1, num_points=20):
         """
         Return a circle of points around an x,y
         Recommend num_points you'd like between -radius and radius + 1
         Have this return a graph of connected points
         Can easily access just the points with list(G.nodes)
 
-        I think there's a better way to do this...
+        I think there's a better way to do this... use polar coords and convert to x,y,z
         """
-        x_points = np.linspace(-radius,radius,num=num_points_side, endpoint=True)
-        sq = np.sqrt( np.power(radius,2) - np.power(x_points, 2) )
-        neg_sq = - sq
-        y_pos = sq + y
-        y_neg = neg_sq + y
+        angles = np.linspace(0, 2*np.pi, num=num_points, endpoint=False)
+        x_coords = radius * np.cos(angles)
+        y_coords = radius * np.sin(angles)
+        print(angles)
+        print(zip(list(x_coords), list(y_coords)))
+        return
+    
+        # x_points = np.linspace(-radius,radius,num=num_points_side, endpoint=True)
+        # sq = np.sqrt( np.power(radius,2) - np.power(x_points, 2) )
+        # neg_sq = - sq
+        # y_pos = sq + y
+        # y_neg = neg_sq + y
 
-        x_points += x
+        # x_points += x
 
         xdata = list(x_points) + list(x_points) + [x]
         ydata = list(y_pos) + list(y_neg) + [y]
@@ -259,6 +256,9 @@ def test():
     """
     rospy.init_node("dice_node")
     a = Approach()
+    a.getCirclePoints(0,0,1,20)
+    return
+
     for i in range(1):
         pts = genTestPoints(0.5,1)
 #        print(pts)
@@ -284,7 +284,8 @@ def test():
     p3 = Point(); p3.x = -1; p3.y = 1;
     p_list = [p1,p2,p3]
     a.getPath(gp, p_list)
-    
+
+                      
 if __name__ == "__main__":
     try:
         test()
