@@ -3,14 +3,25 @@
 import rospy
 from std_msgs.msg import Float64
 
-class bangbang():
+from dynamic_reconfigure.server import Server
+from motor_controllers.cfg import BangBangConfig
+
+class BangBang(object):
 
     def __init__(self):
         pass
 
+    def reconfigureCallback(self, config, _):
+
+        self.deadZoneSize = config['deadzone_size']
+        self.leftBangEffort = config['left_bang_effort']
+        self.rightBangEffort = config['right_bang_effort']
+
+        return config
+
     def stateCallback(self, state):
 
-        self.state = state.data;
+        self.state = state.data
 
         effort = Float64()
         effort.data = 0.0
@@ -43,14 +54,16 @@ class bangbang():
 
         self.controlEffortPub = rospy.Publisher(self.controlEffortTopic, Float64, queue_size=1)
 
+        Server(BangBangConfig, self.reconfigureCallback)
+
         # TODO timer incase we dont get state for a while
 
         rospy.spin()
 
 if __name__ == "__main__":
     rospy.init_node('bangbang', anonymous=True)
-    a = bangbang()
+    BANG = BangBang()
     try:
-        a.run()
+        BANG.run()
     except rospy.ROSInterruptException:
-      rospy.logerr("bangbang has died!");
+        rospy.logerr("bangbang has died!")
