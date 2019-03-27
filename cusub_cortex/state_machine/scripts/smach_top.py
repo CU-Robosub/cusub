@@ -3,7 +3,6 @@
 """
 This is the top level state machine.
 Inside of it will be all of the sub state machines (one for each task)
-
 """
 
 import rospy
@@ -13,7 +12,7 @@ from geometry_msgs.msg import Pose, Point
 from std_msgs.msg import Empty
 from waypoint_navigator.msg import waypointAction, waypointGoal
 import actionlib
-
+from tasks.dice import Dice
 from tasks.start_gate import StartGate
 from tasks.visit_task import VisitTask
 from tasks.bangbang_dice_task import BangBangDiceTask
@@ -52,6 +51,8 @@ def loadStateMachines(task_list):
         elif task == "start_gate":
             dist_behind_gate = rospy.get_param("tasks/start_gate/dist_behind_gate")
             task_sm = StartGate(prior, search_alg, dist_behind_gate)
+        elif task == "dice":
+            task_sm = Dice(prior, search_alg)
         elif task == "bangbang_dice":
             task_sm = BangBangDiceTask(prior, search_alg)
         elif task == "bangbang_roulette":

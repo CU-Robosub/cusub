@@ -1,15 +1,15 @@
-#!/usr/bin/env python
-
+#!/usr/bin/python2
+from __future__ import division
 """
 Dice, Attempts to hit the 5 and 6 Dice
 Objectives:
 1) Search
-2) Approach 5
-3) Visual Servo 5
+---
+Loop for all targets
+2) Approach the first target in strafe mode
+3) Visual Servo
 4) Backup
-5) Approach 6
-6) Visual Servo 6
-7) Backup
+
 """
 from __future__ import division
 from tasks.task import Task, Objective
@@ -33,29 +33,78 @@ class Dice(Task):
 
     def __init__(self, prior, searchAlg):
         super(Dice, self).__init__(self.outcomes) # become a state machine first
-        self.initObjectives()
-        self.initMapperSubs()
+        self.initObjectives(prior, searchAlg)
         self.linkObjectives()
-    def initObjectives(self):
-        pass
-    def initMapperSubs(self):
-        pass
+        
+    def initObjectives(self, prior, searchAlg):
+        self.targets = rospy.get_param('tasks/dice/targets')
+        if not self.targets:
+            raise Exception("No targets given to Dice.")
+        self.search = Search(searchAlg, prior)
+        self.approaches = []
+        self.attacks = []
+        for t in self.targets:
+            self.approaches.append(Approach(t))
+            self.attacks.append(Attack(t))
+            
     def linkObjectives(self):
-        pass
-
+        with self:
+            name_first_app = "Approach_" + self.targets[0]
+            smach.StateMachine.add("Search", self.search, transitions={'aborted':name_first_app, 'success':'Search'})
+            for i in range(len(self.targets)):
+                name_app = "Approach_" + self.targets[i]
+                name_att = "Attack_" + self.targets[i]
+                smach.StateMachine.add(name_app, self.approaches[i], transitions={"success":name_att, "aborted":"task_aborted", "replan":name_app})
+                
+                if i+1 != len(self.targets): # we have more targets to go
+                    name_app_next = "Approach_" +self.targets[i+1]
+                    smach.StateMachine.add(name_att, self.attacks[i], transitions={"success":name_app_next, "aborted":"task_aborted"})
+                else: # final attack
+                    smach.StateMachine.add(name_att,self.attacks[i], transitions={"success":"task_success", "aborted":"task_aborted"})
+            
 class Approach(Objective):
-    outcomes = ['success','aborted']
+    # Needs all poses
+    outcomes = ['success','aborted', 'replan']
     curPose = None
+    objects = {}
     
-    def __init__(self):
-        rospy.loginfo("---Approach objective initializing")
+    def __init__(self, target):
+        rospy.loginfo("---Approach objective initializing for " + target)
         super(Approach, self).__init__(self.outcomes, "Approach")
+        obj_list = rospy.get_param('tasks/dice/object_localizers')
+        for obj in obj_list:
+            self.objects[obj] = None
+            rospy.Subscriber('mapper/'+obj, PoseStamped, self.callback)
+        self.target = target
+
+    def callback(self, msg):
+        topic = msg._connection_header['topic']
+        obj = topic.split('/')
+        print(obj)
+        self.objects[obj] = msg.pose
         
     def execute(self, userdata):
-        rospy.loginfo("Executing Approach")
-        # We should have a pose of the 5 dice by now
+        rospy.loginfo("---Executing Approach for " + self.target)
+        return "success"
 
-    def getPath(self, goal_pt, dice_list, sub_pt):
+        target = userdata['target']
+        dice_list = [die.position for key,die in self.objects.iteritems()]
+        # dice_list = [value.position for key,value in self.objects.items()] # Python3        
+        path = self.getApproachPath(self.objects[target].position, dice_list)
+        
+        p = Pose()
+        p.position = path.pop(0)
+        self.goToPose(p, useYaw=True)
+        
+        for goal in path:
+            p = Pose()
+            p.position = goal
+            if self.goToPose(p, useYaw=False):
+                return "aborted"
+            
+        return "success"
+
+    def getApproachPath(self, goal_pt, dice_list):
         """
         Returns a list of points to go to, to reach the desired goal point
         Uses a surrounding box as helper points along its way to the approach point
@@ -71,10 +120,8 @@ class Approach(Objective):
         X D X
         X X X
         """
-        # Select 9 points around the dice we're interested in,
         # Get distances of all of the points to all of the other dice
         # Approach point will be in direction with highest distance
-        # Path plan w/ square method
         assert isinstance(goal_pt, Point)
         assert isinstance(dice_list, list)
 
@@ -107,24 +154,34 @@ class Approach(Objective):
 
         centroid = self.getCentroid(dice_list + [goal_pt])
         horizon_pts = self.getCirclePoints(centroid.x, centroid.y, 2, 20)
-        graphGetPath(takeoff_pt, Point(), horizon_pts)
-        return
+        path = graphGetPath(takeoff_pt, self.curPose.position, horizon_pts)
 
         # goal_pt and dice list
-        xdata = [i.x for i in dice_list]; xdata = [x] + xdata; xdata.append(x_takeoff); xdata.append(centroid.x); xdata += [i.x for i in horizon_pts]
-        ydata = [i.y for i in dice_list]; ydata = [y] + ydata; ydata.append(y_takeoff); ydata.append(centroid.y); ydata += [i.y for i in horizon_pts]
-        zdata = [-5 for i in dice_list]; zdata = [-5] + zdata; zdata.append(-5); zdata.append(-5); zdata += [-5 for i in horizon_pts]
-        cdata = [0 for i in dice_list]; cdata = [1] + cdata; cdata.append(0.5); cdata.append(0.2); cdata += [0.7 for i in horizon_pts]
+        # xdata = [i.x for i in dice_list]; xdata = [x] + xdata;  xdata += [i.x for i in path]; 
+        # ydata = [i.y for i in dice_list]; ydata = [y] + ydata;  ydata += [i.y for i in path]; 
+        # zdata = [-5 for i in dice_list]; zdata = [-5] + zdata;  zdata += [-5 for i in path]; 
+        # cdata = [0 for i in dice_list]; cdata = [1] + cdata;  cdata += [0.7 for i in path];
+        
+        # xdata.append(centroid.x)
+        # ydata.append(centroid.y);
+        # zdata.append(-5);
+        # cdata.append(0.5);
+        # xdata.append(self.curPose.position.x)
+        # ydata.append(self.curPose.position.y)
+        # zdata.append(-5)
+        # cdata.append(2)
         # print(xdata)
         # print(ydata)
         # print(zdata)
         # print(cdata)
         
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.scatter3D(xdata, ydata, zdata, c=np.array(cdata))
-        plt.show()
+        # fig = plt.figure()
+        # ax = fig.add_subplot(111, projection='3d')
+        # # ax.scatter3D(xdata, ydata, zdata, c=np.array(cdata))
+        # ax.scatter(xdata, ydata, c=np.array(cdata))
+        # plt.show()
 
+        return path
 
     def getCentroid(self, pts):
         x_sum = 0
@@ -157,6 +214,7 @@ class Approach(Objective):
             new_pt.x = x_coords[j]
             new_pt.y = y_coords[j]
             pts.append(new_pt)
+                
         
         # xdata = list(x_coords) + [x]
         # ydata = list(y_coords) + [y]
@@ -169,12 +227,23 @@ class Approach(Objective):
 
         # Turn the data into points
         return pts
+
+
+class Attack(Objective):
+    outcomes = ['success','aborted']
+    def __init__(self, target):
+        rospy.loginfo("---Attack Objective Initializing for " + target)
+        super(Attack, self).__init__(self.outcomes, "Attack")
+        self.target = target
+        
+    def execute(self, userdata):
+        rospy.loginfo("---Executing Attack for " + self.target)
+        return "success"
         
 def main():
     rospy.init_node("dice_node")
     d = Dice()
     rospy.spin()
-
 
 def genTestPoints(minDist, maxDist):
     """
@@ -248,7 +317,7 @@ def test():
         p.position = pts[4]
         a.curPose = p
         
-        a.getPath(pts[0], pts[1:4], pts[4])
+        a.getApproachPath(pts[0], pts[1:4])
         
     return
     # for i in range(10):
@@ -264,11 +333,12 @@ def test():
     p2 = Point(); p2.x = -1; p2.y = -1;
     p3 = Point(); p3.x = -1; p3.y = 1;
     p_list = [p1,p2,p3]
-    a.getPath(gp, p_list)
+    a.getApproachPath(gp, p_list)
 
                       
 if __name__ == "__main__":
     try:
-        test()
+        main()
+        # test()
     except rospy.ROSException:
         pass
