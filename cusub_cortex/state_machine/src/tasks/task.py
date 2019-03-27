@@ -38,15 +38,6 @@ class Task(smach.StateMachine):
         pass
 
     @abstractmethod
-    def initMapperSubs(self):
-        """
-        Subscribe to all objects from the mapper
-        You'll have to make your own callbacks in the task
-        If an objective needs a pose from the mapper make sure to pass that pose to the objective (ie if the attack objective needs to know the mapper's startgate output, then in the startgate callback of the class we must pass that value to Attack (possibly changing it by accessing the objective's value:  self.attack.start_gate_pose = msg)
-        """
-        pass
-
-    @abstractmethod
     def linkObjectives(self):
         """
         Link the objectives (initialized in initObjectives() to the state machine with the proper state transitions

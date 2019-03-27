@@ -31,10 +31,12 @@ def graphGetPath(target_pt, start_pt, path_pts):
     closest_pt = graphFindClosestPt(start_pt, path_pts)
     G.add_edge(start_pt, closest_pt)
     path = nx.shortest_path(G, start_pt, target_pt)
+    
     # print(path)
     # plt.subplot(111)
     # nx.draw(G, with_labels=True, font_weight="bold")
     # plt.show()
+    path.pop(0) # remove the sub's position as part of the path    
     return path
 
 def graphConnectPts(graph, path_pts):
