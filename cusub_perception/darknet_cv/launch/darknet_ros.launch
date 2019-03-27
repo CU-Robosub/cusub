@@ -13,10 +13,11 @@
 
   <!-- Load parameters -->
   <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/ros.yaml"/>
+  <!-- <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/robosub1CustomModel.yaml"/> -->
   <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/yolov3-tiny.yaml"/>
 
   <!-- Start darknet and ros wrapper -->
-  <node pkg="darknet_ros" type="darknet_ros" name="darknet_ros">
+  <node pkg="darknet_ros" type="darknet_ros" name="darknet_ros" output="screen">
     <param name="yolo_model/threshold/value"          value="0.1" />
     <param name="weights_path"          value="$(arg yolo_weights_path)" />
     <param name="config_path"           value="$(arg yolo_config_path)" />

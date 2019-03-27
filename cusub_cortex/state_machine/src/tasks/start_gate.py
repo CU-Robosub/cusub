@@ -53,8 +53,8 @@ class StartGate(Task):
         self.attack.start_gate_pose = msg.pose
 
         # check if Search is the current state and if so abort it
-        if not self.search.abort_requested():
-            self.search.request_abort() # we've found our pose, so stop searching
+        # if not self.search.abort_requested():
+            # self.search.request_abort() # we've found our pose, so stop searching
 
 class Attack(Objective):
     """
