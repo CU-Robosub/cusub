@@ -31,20 +31,25 @@ class Dice(Task):
 
     outcomes = ['task_success','task_aborted']
 
-    def __init__(self, prior, searchAlg):
+    def __init__(self):
         super(Dice, self).__init__(self.outcomes) # become a state machine first
-        self.initObjectives(prior, searchAlg)
+        self.initObjectives()
         self.linkObjectives()
         
-    def initObjectives(self, prior, searchAlg):
+    def initObjectives(self):
         self.targets = rospy.get_param('tasks/dice/targets')
+        search_alg = rospy.get_param('tasks/dice/search_alg')
+        prior = self.priorList2Pose(rospy.get_param('tasks/dice/prior'))
+        replan_thresh = float(rospy.get_param('tasks/dice/replan_threshold'))
+        orbital_radius = float(rospy.get_param('tasks/dice/orbital_radius'))
+        
         if not self.targets:
             raise Exception("No targets given to Dice.")
-        self.search = Search(searchAlg, prior)
+        self.search = Search(search_alg, prior, 'cusub_cortex/mapper_out/'+self.targets[0])
         self.approaches = []
         self.attacks = []
         for t in self.targets:
-            self.approaches.append(Approach(t))
+            self.approaches.append(Approach(t, replan_thresh, orbital_radius))
             self.attacks.append(Attack(t))
             
     def linkObjectives(self):
@@ -66,41 +71,88 @@ class Approach(Objective):
     # Needs all poses
     outcomes = ['success','aborted', 'replan']
     curPose = None
-    objects = {}
+    object_poses = {}
     
-    def __init__(self, target):
-        rospy.loginfo("---Approach objective initializing for " + target)
-        super(Approach, self).__init__(self.outcomes, "Approach")
-        obj_list = rospy.get_param('tasks/dice/object_localizers')
-        for obj in obj_list:
-            self.objects[obj] = None
-            rospy.Subscriber('mapper/'+obj, PoseStamped, self.callback)
+    def __init__(self, target, replan_threshold, orbital_radius):
+        
+        rospy.loginfo("---Approach " + target +" objective initializing")
+        super(Approach, self).__init__(self.outcomes, "Approach_" + target)
         self.target = target
+        self.replan_thresh = replan_threshold
+        self.orbital_radius = orbital_radius
+        self._replan_requested = False
+        
+        rospy.Subscriber('cusub_cortex/mapper_out/dice1', PoseStamped, self.callback)
+        rospy.Subscriber('cusub_cortex/mapper_out/dice2', PoseStamped, self.callback)
+        rospy.Subscriber('cusub_cortex/mapper_out/dice5', PoseStamped, self.callback)
+        rospy.Subscriber('cusub_cortex/mapper_out/dice6', PoseStamped, self.callback)
+        
+    def clear_replan(self):
+        self._replan_requested = False
+        self.clear_abort()
+        
+    def request_replan(self):
+        self._replan_requested = True
+        self.request_abort()
+        
+    def replan_requested(self):
+        return self._replan_requested
 
     def callback(self, msg):
         topic = msg._connection_header['topic']
-        obj = topic.split('/')
-        print(obj)
-        self.objects[obj] = msg.pose
+        obj_name = topic.split('/')[-1]
+        # rospy.logfatal(topic)
+        # rospy.logfatal(obj_name)
+
+        if obj_name not in self.object_poses.keys():
+            self.object_poses[obj_name] = msg
+            if self.started:
+                self.request_replan()
+            return
+        prev_pose = self.object_poses[obj_name]
+        self.object_poses[obj_name] = msg    
+        if self.getDistance(prev_pose.pose.position, msg.pose.position) > self.replan_thresh:
+            if self.started:
+                self.request_replan()
         
     def execute(self, userdata):
+        self.started = True
         rospy.loginfo("---Executing Approach for " + self.target)
-        return "success"
+        if self.replan_requested():
+            self.clear_replan()
 
-        target = userdata['target']
-        dice_list = [die.position for key,die in self.objects.iteritems()]
-        # dice_list = [value.position for key,value in self.objects.items()] # Python3        
-        path = self.getApproachPath(self.objects[target].position, dice_list)
+        if self.target not in self.object_poses.keys(): # We haven't received the object's pose yet, NOTE passing the search objective just means we have the first target's pose, possibly not subsequent targets
+            rospy.logwarn("Haven't received: " + self.target + "'s pose. Aborting")
+            return "aborted"
+
+        dice_list = [die.pose.position for key,die in self.object_poses.iteritems()]
+        # dice_list = [value.position for key,value in self.object_poses.items()] # Python3        
+        path = self.getApproachPath(self.object_poses[self.target].pose.position, dice_list)
         
         p = Pose()
         p.position = path.pop(0)
-        self.goToPose(p, useYaw=True)
+        rospy.loginfo("Going to Pose:"); rospy.loginfo(p)
+        
+        status = self.goToPose(p, useYaw=True)
+        if status:
+            if self.replan_requested():
+                self.clear_replan()
+                return "replan"
+            else:
+                return "aborted"
+        else:
+            rospy.loginfo("Reached Takeoff pt")
         
         for goal in path:
             p = Pose()
             p.position = goal
-            if self.goToPose(p, useYaw=False):
-                return "aborted"
+            status = self.goToPose(p, useYaw=False)
+            if status:
+                if self.replan_requested():
+                    self.clear_replan()
+                    return "replan"
+                else:
+                    return "aborted"
             
         return "success"
 
@@ -128,7 +180,7 @@ class Approach(Objective):
         x = goal_pt.x
         y = goal_pt.y
         z = goal_pt.z
-        points_around_goal = self.getCirclePoints(x,y, radius=1)
+        points_around_goal = self.getCirclePoints(x,y,z, radius=1)
 
         # Find the takeoff point
         dists=np.zeros((len(points_around_goal),1))
@@ -153,7 +205,7 @@ class Approach(Objective):
         print("Takeoff Pt: " + str((x_takeoff, y_takeoff)))
 
         centroid = self.getCentroid(dice_list + [goal_pt])
-        horizon_pts = self.getCirclePoints(centroid.x, centroid.y, 2, 20)
+        horizon_pts = self.getCirclePoints(centroid.x, centroid.y, z, self.orbital_radius, 6)
         path = graphGetPath(takeoff_pt, self.curPose.position, horizon_pts)
 
         # goal_pt and dice list
@@ -195,9 +247,9 @@ class Approach(Objective):
         return avg_pt
         
         
-    def getCirclePoints(self, x, y, radius=1, num_points=20):
+    def getCirclePoints(self, x, y, z, radius=1, num_points=20):
         """
-        Return a circle of points around an x,y
+        Return a circle of points around an x,y at depth z
         Recommend num_points you'd like between -radius and radius + 1
         Have this return a graph of connected points
         Can easily access just the points with list(G.nodes)
@@ -213,6 +265,7 @@ class Approach(Objective):
             new_pt = Point()
             new_pt.x = x_coords[j]
             new_pt.y = y_coords[j]
+            new_pt.z = z
             pts.append(new_pt)
                 
         
@@ -232,7 +285,7 @@ class Approach(Objective):
 class Attack(Objective):
     outcomes = ['success','aborted']
     def __init__(self, target):
-        rospy.loginfo("---Attack Objective Initializing for " + target)
+        rospy.loginfo("---Attack " + target + " objective Initializing")
         super(Attack, self).__init__(self.outcomes, "Attack")
         self.target = target
         

@@ -52,7 +52,7 @@ def loadStateMachines(task_list):
             dist_behind_gate = rospy.get_param("tasks/start_gate/dist_behind_gate")
             task_sm = StartGate(prior, search_alg, dist_behind_gate)
         elif task == "dice":
-            task_sm = Dice(prior, search_alg)
+            task_sm = Dice()
         elif task == "bangbang_dice":
             task_sm = BangBangDiceTask(prior, search_alg)
         elif task == "bangbang_roulette":

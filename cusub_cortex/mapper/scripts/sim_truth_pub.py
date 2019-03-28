@@ -17,7 +17,7 @@ PUBLISHER_INDEX = 1
 
 class SimTruthPub:
     def __init__(self):
-        rospy.loginfo("Initializing Sim Truth Publisher")
+        rospy.loginfo("Sim Truth Publisher Initializing")
         objects = rospy.get_param('sim_pub/objects_to_publish')
         self.pub = rospy.Publisher('cusub_cortex/mapper_in/task_poses', Detection, queue_size=10)
         

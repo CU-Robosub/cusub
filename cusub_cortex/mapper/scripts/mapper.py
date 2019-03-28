@@ -19,6 +19,7 @@ from localizer.msg import Detection
 class Mapper():
     def __init__(self):
 
+        rospy.loginfo("Mapper Initializing")
         self.namespace = rospy.get_param('~namespace_odom')
         
         self.listener = tf.TransformListener(interpolate=True, cache_time=rospy.Duration(1)) #, cache_time=rospy.Duration(1))       
