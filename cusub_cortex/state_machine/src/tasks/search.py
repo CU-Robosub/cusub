@@ -14,6 +14,7 @@ import smach
 from geometry_msgs.msg import Point, PoseStamped, Pose
 import rospy
 from tasks.task import Objective
+from geometry_msgs.msg import PoseStamped
 
 POSE_INDEX = 0
 WAIT_INDEX = 1
@@ -21,12 +22,18 @@ WAIT_INDEX = 1
 class Search(Objective):
     """ Search state that implements an indicated search algorithm """
     outcomes = ['success','aborted']
-    def __init__(self, searchAlg, priorPose):
+    def __init__(self, searchAlg, priorPose, searchTopic):
         rospy.loginfo("---Search objective initializing")
         assert type(priorPose) == Pose
         self._loadSearchAlg(searchAlg)
         self.prior = priorPose
-        super(Search, self).__init__(self.outcomes, "Search") 
+        rospy.Subscriber(searchTopic, PoseStamped, self.exit_callback)
+        
+        super(Search, self).__init__(self.outcomes, "Search")
+        
+    def exit_callback(self, msg): # Abort on the first publishing
+        if not self.abort_requested():
+            self.request_abort()
         
     def _loadSearchAlg(self, searchAlg):
         
@@ -43,10 +50,10 @@ class Search(Objective):
             raise(Exception("Unrecognized search algorithm"))
         
     def execute(self, ueserdata):
+        rospy.loginfo("---Executing Search")        
         if self.abort_requested():
             return "aborted"
         
-        rospy.loginfo("Executing Search")
         path = self.search.get_path(self.curPose, self.prior)
         for pose_and_wait in path: # path includes both a pose to reach and the waiting time
             pose = pose_and_wait[POSE_INDEX]

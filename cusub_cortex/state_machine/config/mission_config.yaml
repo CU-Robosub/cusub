@@ -15,7 +15,9 @@ tasks:
   prior: [1,1,-2.3]
   search_alg: simple
   failed_repeat: false
-  targets: ['dice5', 'dice6']
+  targets: ['dice5', 'dice2']
+  replan_threshold: 1.0
+  orbital_radius: 3.0
   object_localizers:
     dice1: dice_box
     dice2: dice_box
