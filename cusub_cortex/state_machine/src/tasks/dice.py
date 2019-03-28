@@ -17,7 +17,7 @@ from tasks.search import Search
 import rospy
 import smach
 import smach_ros
-from geometry_msgs.msg import PoseStamped, Pose, Point
+from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 from pylab import * # validation of travel equations
 from pdb import set_trace
 
@@ -26,6 +26,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 from tasks.graph import graphGetPath
+import tf
+
+APPROACH_TIMEOUT = 3
 
 class Dice(Task):
 
@@ -92,6 +95,7 @@ class Approach(Objective):
         self.clear_abort()
         
     def request_replan(self):
+        rospy.loginfo("---replanning")
         self._replan_requested = True
         self.request_abort()
         
@@ -101,8 +105,6 @@ class Approach(Objective):
     def callback(self, msg):
         topic = msg._connection_header['topic']
         obj_name = topic.split('/')[-1]
-        # rospy.logfatal(topic)
-        # rospy.logfatal(obj_name)
 
         if obj_name not in self.object_poses.keys():
             self.object_poses[obj_name] = msg
@@ -116,44 +118,47 @@ class Approach(Objective):
                 self.request_replan()
         
     def execute(self, userdata):
-        self.started = True
         rospy.loginfo("---Executing Approach for " + self.target)
         if self.replan_requested():
             self.clear_replan()
+
+        rospy.wait_for_message("cusub_cortex/mapper_out/" + self.target, PoseStamped, APPROACH_TIMEOUT)
 
         if self.target not in self.object_poses.keys(): # We haven't received the object's pose yet, NOTE passing the search objective just means we have the first target's pose, possibly not subsequent targets
             rospy.logwarn("Haven't received: " + self.target + "'s pose. Aborting")
             return "aborted"
 
+        self.started = True
         dice_list = [die.pose.position for key,die in self.object_poses.iteritems()]
         # dice_list = [value.position for key,value in self.object_poses.items()] # Python3        
         path = self.getApproachPath(self.object_poses[self.target].pose.position, dice_list)
         
-        p = Pose()
-        p.position = path.pop(0)
-        rospy.loginfo("Going to Pose:"); rospy.loginfo(p)
+        pose = path.pop(0)
         
-        status = self.goToPose(p, useYaw=True)
+        status = self.goToPose(pose, useYaw=True)
         if status:
             if self.replan_requested():
                 self.clear_replan()
                 return "replan"
             else:
                 return "aborted"
-        else:
-            rospy.loginfo("Reached Takeoff pt")
         
         for goal in path:
-            p = Pose()
-            p.position = goal
-            status = self.goToPose(p, useYaw=False)
+            status = self.goToPose(goal, useYaw=False)
             if status:
                 if self.replan_requested():
                     self.clear_replan()
                     return "replan"
                 else:
                     return "aborted"
-            
+
+        # Face the dice
+        # goal_pose = Pose()        
+        # quat = self.getFacingQuaternion(self.curPose.position, self.object_poses[self.target].pose.position)
+        # goal_pose.orientation = quat
+        # goal_pose.position = self.curPose.position
+        # self.goToPose(goal_pose, useYaw=True)
+        rospy.sleep(2)
         return "success"
 
     def getApproachPath(self, goal_pt, dice_list):
@@ -201,12 +206,13 @@ class Approach(Objective):
         takeoff_pt = points_around_goal[np.argmax(dists)]
         x_takeoff = takeoff_pt.x
         y_takeoff = takeoff_pt.y
-        print("Goal Pt: " + str((x,y)))
-        print("Takeoff Pt: " + str((x_takeoff, y_takeoff)))
+        # print("Goal Pt: " + str((x,y)))
+        # print("Takeoff Pt: " + str((x_takeoff, y_takeoff)))
 
         centroid = self.getCentroid(dice_list + [goal_pt])
         horizon_pts = self.getCirclePoints(centroid.x, centroid.y, z, self.orbital_radius, 6)
-        path = graphGetPath(takeoff_pt, self.curPose.position, horizon_pts)
+        path_pts = graphGetPath(takeoff_pt, self.curPose.position, horizon_pts)
+        path_poses = self.points2Poses(goal_pt, path_pts)
 
         # goal_pt and dice list
         # xdata = [i.x for i in dice_list]; xdata = [x] + xdata;  xdata += [i.x for i in path]; 
@@ -233,8 +239,32 @@ class Approach(Objective):
         # ax.scatter(xdata, ydata, c=np.array(cdata))
         # plt.show()
 
-        return path
+        return path_poses
 
+    def points2Poses(self, target_pt, pt_list):
+        pose_list = []
+        next_quat = self.getFacingQuaternion(target_pt, pt_list[0])
+        for pt in pt_list:
+            pose = Pose()
+            pose.position = pt
+            pose.orientation = next_quat
+            next_quat = self.getFacingQuaternion(target_pt, pt)
+            pose_list.append(pose)
+        return pose_list
+
+    def getFacingQuaternion(self, target_pt, current_pt):
+        roll, pitch = 0,0            
+        x_diff = target_pt.x - current_pt.x
+        y_diff = target_pt.y - current_pt.y
+        yaw = np.arctan2(y_diff, x_diff)
+        quat_list = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
+        quat = Quaternion()
+        quat.x = quat_list[0]
+        quat.y = quat_list[1]
+        quat.z = quat_list[2]
+        quat.w = quat_list[3]        
+        return quat
+    
     def getCentroid(self, pts):
         x_sum = 0
         y_sum = 0
@@ -251,10 +281,6 @@ class Approach(Objective):
         """
         Return a circle of points around an x,y at depth z
         Recommend num_points you'd like between -radius and radius + 1
-        Have this return a graph of connected points
-        Can easily access just the points with list(G.nodes)
-
-        I think there's a better way to do this... use polar coords and convert to x,y,z
         """
         angles = np.linspace(0, 2*np.pi, num=num_points, endpoint=False)
         x_coords = radius * np.cos(angles) + x
