@@ -42,6 +42,11 @@ class SimTruthPub:
         det.pose = PoseStamped()
         det.pose.pose = odom_msg.pose.pose
         det.pose.header = odom_msg.header
+        return self.correctPoses(det)
+    
+    def correctPoses(self, det):
+        if "dice" in det.class_id:
+            det.pose.pose.position.z -= 0.5
         return det
 
 def main():
