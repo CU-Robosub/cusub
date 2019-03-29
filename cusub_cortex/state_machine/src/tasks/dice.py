@@ -18,15 +18,17 @@ import rospy
 import smach
 import smach_ros
 from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
+from std_msgs.msg import Float64
 from pylab import * # validation of travel equations
 from pdb import set_trace
-
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import matplotlib.pyplot as plt
 import random
 from tasks.graph import graphGetPath
+from tasks.naive_servo import NaiveVisualServoTool
 import tf
+from sensor_msgs.msg import Imu
 
 APPROACH_TIMEOUT = 3
 
@@ -43,16 +45,14 @@ class Dice(Task):
         self.targets = rospy.get_param('tasks/dice/targets')
         search_alg = rospy.get_param('tasks/dice/search_alg')
         prior = self.priorList2Pose(rospy.get_param('tasks/dice/prior'))
-        replan_thresh = float(rospy.get_param('tasks/dice/replan_threshold'))
-        orbital_radius = float(rospy.get_param('tasks/dice/orbital_radius'))
-        
         if not self.targets:
             raise Exception("No targets given to Dice.")
+        
         self.search = Search(search_alg, prior, 'cusub_cortex/mapper_out/'+self.targets[0])
         self.approaches = []
         self.attacks = []
         for t in self.targets:
-            self.approaches.append(Approach(t, replan_thresh, orbital_radius))
+            self.approaches.append(Approach(t))
             self.attacks.append(Attack(t))
             
     def linkObjectives(self):
@@ -76,19 +76,25 @@ class Approach(Objective):
     curPose = None
     object_poses = {}
     
-    def __init__(self, target, replan_threshold, orbital_radius):
+    def __init__(self, target):
         
         rospy.loginfo("---Approach " + target +" objective initializing")
         super(Approach, self).__init__(self.outcomes, "Approach_" + target)
+        self.load_rosparams()
         self.target = target
-        self.replan_thresh = replan_threshold
-        self.orbital_radius = orbital_radius
         self._replan_requested = False
         
         rospy.Subscriber('cusub_cortex/mapper_out/dice1', PoseStamped, self.callback)
         rospy.Subscriber('cusub_cortex/mapper_out/dice2', PoseStamped, self.callback)
         rospy.Subscriber('cusub_cortex/mapper_out/dice5', PoseStamped, self.callback)
         rospy.Subscriber('cusub_cortex/mapper_out/dice6', PoseStamped, self.callback)
+
+    def load_rosparams(self):
+        self.replan_thresh = float(rospy.get_param('tasks/dice/replan_threshold'))
+        self.orbital_radius = float(rospy.get_param('tasks/dice/orbital_radius'))
+        self.approach_radius = float(rospy.get_param('tasks/dice/approach_radius'))
+        assert(self.orbital_radius > self.approach_radius)
+        
         
     def clear_replan(self):
         self._replan_requested = False
@@ -158,6 +164,7 @@ class Approach(Objective):
         # goal_pose.orientation = quat
         # goal_pose.position = self.curPose.position
         # self.goToPose(goal_pose, useYaw=True)
+        # TODO we may need to add a some sort of depth preparation before visual servoing
         rospy.sleep(2)
         return "success"
 
@@ -185,7 +192,7 @@ class Approach(Objective):
         x = goal_pt.x
         y = goal_pt.y
         z = goal_pt.z
-        points_around_goal = self.getCirclePoints(x,y,z, radius=1)
+        points_around_goal = self.getCirclePoints(x,y,z, radius=self.approach_radius)
 
         # Find the takeoff point
         dists=np.zeros((len(points_around_goal),1))
@@ -310,20 +317,95 @@ class Approach(Objective):
 
 class Attack(Objective):
     outcomes = ['success','aborted']
+    
     def __init__(self, target):
-        rospy.loginfo("---Attack " + target + " objective Initializing")
+        rospy.loginfo("---Attack " + target + " Initializing")
         super(Attack, self).__init__(self.outcomes, "Attack")
+        param_dict = self.load_rosparams() # TODO put all configs into the load rosparams method
+        self.active = False
         self.target = target
+        self.servo_tool = NaiveVisualServoTool(self.target, self.handle_servoing, lockon_time=param_dict['lockon_time'])
+        rospy.Subscriber('cusub_common/motor_controllers/pid/drive/state', Float64, self.drive_callback)
+        self.drive_pub = rospy.Publisher('cusub_common/motor_controllers/pid/drive/setpoint', Float64, queue_size=1)
+        rospy.Subscriber("cusub_common/imu", Imu, self.imu_callback)
+        self.spike = False
+
+    def load_rosparams(self):
+        param_dict = {} # for things we don't need to store permanently
+        self.x_accel_spike_thresh = float(rospy.get_param('tasks/dice/accel_x_spike_thresh', '-0.15'))
+        self.carrot_dist = float(rospy.get_param('tasks/dice/carrot_dist'))
+        self.backup_dist = float(rospy.get_param('tasks/dice/backup_dist'))
+        param_dict['lockon_time'] = float(rospy.get_param('tasks/dice/lockon_time', '5.0'))
+        return param_dict
+
+    def drive_callback(self, msg):
+        self.current_drive = msg.data
+        
+    def handle_servoing(self, image, box):
+        # rospy.loginfo("Entering handling function")
+        drive_msg = Float64()
+        if self.spike:
+            rospy.loginfo("Spike!")
+            drive_msg.data = self.current_drive # stop
+            self.drive_pub.publish(drive_msg)
+            return 0
+        else:
+            drive_msg.data = self.current_drive + self.carrot_dist
+            self.drive_pub.publish(drive_msg)
+            return 1
+            
+    def imu_callback(self, msg):
+        if msg.linear_acceleration.x < self.x_accel_spike_thresh and self.active:
+            self.spike = True
+
+    def get_pose_behind(self, current_pose, dist_behind):
+
+        x = current_pose.position.x
+        y = current_pose.position.y
+        z = current_pose.position.z
+        
+        quat = current_pose.orientation
+        roll, pitch, yaw = tf.transformations.euler_from_quaternion((quat.x, quat.y, quat.z, quat.w))
+        backwards_yaw = yaw + np.pi
+        
+        new_x = dist_behind * np.cos(backwards_yaw) + x
+        new_y = dist_behind * np.sin(backwards_yaw) + y
+
+        new_pose = Pose()
+        new_pose.position.x = new_x
+        new_pose.position.y = new_y
+        new_pose.position.z = z
+        new_pose.orientation = quat
+        return new_pose
+        
+    def backup(self):
+        rospy.loginfo("---backing up")
+
+        new_pose = self.get_pose_behind(self.curPose, self.backup_dist)
+        # rospy.loginfo("Going from pose:")
+        # rospy.loginfo(self.curPose)
+        # rospy.loginfo("To pose:")
+        # rospy.loginfo(new_pose)
+        self.goToPose(new_pose, useYaw=False)
+    
+        # msg = Float64()
+        # msg.data = self.current_drive - self.backup_dist
+        # self.drive_pub.publish(msg)
+
+        # while abs(self.current_drive - msg.data) > 0.5 and not rospy.is_shutdown():
+        #     rospy.sleep(0.25)
         
     def execute(self, userdata):
+        
+    
+        self.active = True
         rospy.loginfo("---Executing Attack for " + self.target)
+        
+        self.servo_tool.run()
+
+        self.backup()
         return "success"
         
-def main():
-    rospy.init_node("dice_node")
-    d = Dice()
-    rospy.spin()
-
 def genTestPoints(minDist, maxDist):
     """
     Returns a list of 5 points
@@ -417,7 +499,6 @@ def test():
                       
 if __name__ == "__main__":
     try:
-        main()
-        # test()
+        test()
     except rospy.ROSException:
         pass
