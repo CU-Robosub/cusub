@@ -152,7 +152,7 @@ class Mapper(object):
         
         self.namespace = rospy.get_param('~namespace_odom')
         
-        self.listener = tf.TransformListener(interpolate=True)
+        self.listener = tf.TransformListener()
         # ns = rospy.get_namespace()
         # index = ns[1:].find('/') # find the 2nd '/'
         # sub_name = ns[0:index+2]
@@ -255,7 +255,7 @@ class Mapper(object):
 
     def transform_occam_to_map(self, occam_pose):
         try:
-            rospy.sleep(0.1)
+            self.listener.waitForTransform('/'+ self.namespace + '/map', occam_pose.header.frame_id, occam_pose.header.stamp, rospy.Duration(0.2))
             pose = self.listener.transformPose('/' + self.namespace + '/map', occam_pose)
         except (tf.ExtrapolationException, tf.ConnectivityException, tf.LookupException) as e:
             rospy.logwarn(e)
@@ -264,9 +264,7 @@ class Mapper(object):
 
     def transform_occam_to_odom(self, occam_pose):
         try:
-            # self.listener.waitForTransform(occam_pose.header.frame_id, '/'+ self.namespace + '/odom', occam_pose.header.stamp, rospy.Duration(2.0))
-            # self.listener.waitForTransform('/'+ self.namespace + '/odom', occam_pose.header.frame_id, occam_pose.header.stamp, rospy.Duration(2.0))
-            rospy.sleep(0.1)
+            self.listener.waitForTransform('/'+ self.namespace + '/odom', occam_pose.header.frame_id, occam_pose.header.stamp, rospy.Duration(0.2))
             pose = self.listener.transformPose('/' + self.namespace + '/odom', occam_pose)
         except (tf.ExtrapolationException, tf.ConnectivityException, tf.LookupException) as e:
             rospy.logwarn(e)

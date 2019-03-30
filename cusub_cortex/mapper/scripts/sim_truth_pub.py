@@ -19,8 +19,8 @@ class SimTruthPub:
     def __init__(self):
         rospy.loginfo("Sim Truth Publisher Initializing")
         objects = rospy.get_param('sim_pub/objects_to_publish')
-        self.pub = rospy.Publisher('cusub_cortex/mapper_in/task_poses', Detection, queue_size=10)
-        
+        self.pub = rospy.Publisher('cusub_cortex/mapper_in/task_poses', Detection, queue_size=1)
+
         self.objs = {}        
         for obj_name in objects:
             obj_topic = rospy.get_param('sim_pub/' + obj_name)
