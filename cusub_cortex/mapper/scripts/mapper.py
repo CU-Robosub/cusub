@@ -204,7 +204,6 @@ class Mapper(object):
 
         # tranforms
         self.listener = tf.TransformListener()
-
         #TODO: this should be dynamic, and corresponding transform from occam to odom should happen
         self.dice1_unfiltered_pose.header.frame_id = 'occam0_frame'
         self.dice2_unfiltered_pose.header.frame_id = 'occam0_frame'
