@@ -95,6 +95,8 @@ class Objective(smach.State):
             return "aborted"
 
         wpGoal = waypointGoal()
+        wpGoal.goal_pose.header.frame_id = rospy.get_namespace() + 'description/odom'
+        rospy.loginfo(wpGoal.goal_pose.header.frame_id)
         wpGoal.goal_pose.pose.position = targetPose.position
         orientation_list = [ targetPose.orientation.x, \
                              targetPose.orientation.y, \

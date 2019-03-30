@@ -1,4 +1,12 @@
 <launch>
+
+    <arg name="truth_data" default="false" />
+
+<group if="$(arg truth_data)" >
+    <rosparam command="load" file="$(find mapper)/config/sim_truth.yaml" />
+    <node name="sim_truth_pub" pkg="mapper" type="sim_truth_pub.py" output="screen" />
+</group>
+
     <node name="mapper" pkg="mapper" type="mapper.py" output="screen">
         <param name="namespace_odom" value="leviathan/description"/>
     </node>
