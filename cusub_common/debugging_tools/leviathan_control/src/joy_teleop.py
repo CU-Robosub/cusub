@@ -50,6 +50,9 @@ class JoyTeleop(object):
     left_torpedo_avail = True
     right_torpedo_avail = True
 
+    current_drive_updated = False
+    current_strafe_updated = False
+
     def joystick_state(self, data):
         """Gets joystick data to figure out what to have the sub do
         """
@@ -67,6 +70,16 @@ class JoyTeleop(object):
         self.depth_val = data.axes[self.depth_axes]
         self.pitch_val = data.axes[self.pitch_axes]
         self.roll_val = data.axes[self.roll_axes]
+
+    def driveStateCallback(self, data):
+        if not self.current_drive_updated:
+            self.drive_f64.data = data.data
+            self.current_drive_updated = True
+
+    def strafeStateCallback(self, data):
+        if not self.current_strafe_updated:
+            self.strafe_f64.data = data.data
+            self.current_strafe_updated = True
 
     @staticmethod
     def actuate(num, time):
@@ -91,6 +104,11 @@ class JoyTeleop(object):
 
         setpoint = rospy.get_param('~setpoint', True)
 
+        self.drive_f64 = Float64()
+        self.drive_f64.data = 0.0
+        self.strafe_f64 = Float64()
+        self.strafe_f64.data = 0.0
+
         if setpoint:
 
             pub_yaw = rospy.Publisher('motor_controllers/pid/yaw/setpoint',
@@ -99,6 +117,12 @@ class JoyTeleop(object):
                                         Float64, queue_size=10)
             pub_strafe = rospy.Publisher('motor_controllers/pid/strafe/setpoint',
                                          Float64, queue_size=10)
+
+            # get current accumulated strafe and drive to use for adjustments
+            rospy.Subscriber("motor_controllers/pid/drive/state",
+                             Float64, self.driveStateCallback)
+            rospy.Subscriber("motor_controllers/pid/strafe/state",
+                             Float64, self.strafeStateCallback)
 
         else: 
 
@@ -129,10 +153,6 @@ class JoyTeleop(object):
         depth_f64 = Float64()
         depth_f64.data = self.default_depth
 
-        drive_f64 = Float64()
-        drive_f64.data = 0.0
-        strafe_f64 = Float64()
-        strafe_f64.data = 0.0
         yaw_f64 = Float64()
         yaw_f64.data = 0.0
 
@@ -152,11 +172,11 @@ class JoyTeleop(object):
                 yaw_f64.data = yaw_f64.data + self.yaw_val * self.yaw_sensitivity
                 pub_yaw.publish(yaw_f64)
 
-                drive_f64.data = drive_f64.data + self.drive_val * self.drive_sensitivity
-                pub_drive.publish(drive_f64)
+                self.drive_f64.data = self.drive_f64.data + self.drive_val * self.drive_sensitivity
+                pub_drive.publish(self.drive_f64)
 
-                strafe_f64.data = strafe_f64.data - self.strafe_val * self.strafe_sensitivity
-                pub_strafe.publish(strafe_f64)
+                self.strafe_f64.data = self.strafe_f64.data - self.strafe_val * self.strafe_sensitivity
+                pub_strafe.publish(self.strafe_f64)
 
             else:
 
@@ -164,21 +184,21 @@ class JoyTeleop(object):
                 yaw_f64.data = self.yaw_val * self.thruster_power * self.twist_effort
                 pub_yaw.publish(yaw_f64)
 
-                drive_f64 = Float64()
-                drive_f64.data = self.drive_val * self.thruster_power
-                pub_drive.publish(drive_f64)
+                self.drive_f64 = Float64()
+                self.drive_f64.data = self.drive_val * self.thruster_power
+                pub_drive.publish(self.drive_f64)
 
-                strafe_f64 = Float64()
-                strafe_f64.data = -1 * self.strafe_val * self.thruster_power
-                pub_strafe.publish(strafe_f64)
+                self.strafe_f64 = Float64()
+                self.strafe_f64.data = -1 * self.strafe_val * self.thruster_power
+                pub_strafe.publish(self.strafe_f64)
 
             depth_f64.data = depth_f64.data + self.depth_val * self.depth_sensitivity
             pub_depth.publish(depth_f64)
 
-            pitch_f64.data = self.pitch_val*math.radians(15.0) # allow 15 deg pitch
-            pub_pitch.publish(pitch_f64)
-            roll_f64.data = self.roll_val*math.radians(15.0) # allow 15 deg roll
-            pub_roll.publish(roll_f64)
+            #pitch_f64.data = self.pitch_val*math.radians(15.0) # allow 15 deg pitch
+            #pub_pitch.publish(pitch_f64)
+            #roll_f64.data = self.roll_val*math.radians(15.0) # allow 15 deg roll
+            #pub_roll.publish(roll_f64)
 
             # timer used to run in another thread
             if self.dropper_triggered:

@@ -12,17 +12,19 @@ tasks:
   object_localizers:
     start_gate_pole: ['gate_pnp_color', 'gate_pnp_bb', 'gate_midpoint']
  dice:
-  prior: [1,1,-2.3]
+  prior: [3,0,-2.3]
   search_alg: simple
   failed_repeat: false
   targets: ['dice5', 'dice6']
-  replan_threshold: 1.0
+  replan_threshold: 5.0
   approach_radius: 1.0
   orbital_radius: 2.0
   lockon_time: 5.0
   carrot_dist: 2.0
   backup_dist: 2.0
-  x_accel_spike_thresh: -0.15
+  accel_spike_thresh: 2.5
+  accel_axis: 'y'
+  attack_timeout: 5
   object_localizers:
     dice1: dice_box
     dice2: dice_box

@@ -67,10 +67,10 @@ def DVL():
 		0,0,0,0,0,0]
 
 		data_vel.header.stamp = rospy.Time.now()
-		data_vel.header.frame_id = "base_dvl"
-		data_vel.twist.twist.linear.x = -1*vx;
-		data_vel.twist.twist.linear.y = vy;
-		data_vel.twist.twist.linear.z = vz;
+		data_vel.header.frame_id = "leviathan/description/dvl_link"
+		data_vel.twist.twist.linear.x = -1*vx
+		data_vel.twist.twist.linear.y = vy
+		data_vel.twist.twist.linear.z = -1*vz
 
 		#data_depth.header.stamp = rospy.Time.now()
 		#data_depth.header.frame_id = "/drivers/dvl/depth"

@@ -330,7 +330,6 @@ class Attack(Objective):
         rospy.Subscriber("cusub_common/imu", Imu, self.imu_callback)
         self.spike = False
         timeout = float(rospy.get_param("tasks/dice/attack_timeout"))
-        self.timer = rospy.Timer(rospy.Duration.from_sec(timeout),self.timeout_callback)
 
     def load_rosparams(self):
         param_dict = {} # for things we don't need to store permanently
@@ -343,7 +342,7 @@ class Attack(Objective):
     
     def timeout_callback(self, msg):
         self.timer.shutdown()
-        rospy.loginfo("---Attack " + target+ " timed out. Triggering spike")
+        rospy.loginfo("---Attack " + self.target + " timed out. Triggering spike")
         self.spike = True
 
     def drive_callback(self, msg):
@@ -420,6 +419,8 @@ class Attack(Objective):
         self.active = True
         rospy.loginfo("---Executing Attack for " + self.target)
         
+        self.timer = rospy.Timer(rospy.Duration.from_sec(timeout),self.timeout_callback)
+
         self.servo_tool.run()
 
         self.backup()
