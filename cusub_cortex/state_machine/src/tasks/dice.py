@@ -329,14 +329,22 @@ class Attack(Objective):
         self.drive_pub = rospy.Publisher('cusub_common/motor_controllers/pid/drive/setpoint', Float64, queue_size=1)
         rospy.Subscriber("cusub_common/imu", Imu, self.imu_callback)
         self.spike = False
+        timeout = float(rospy.get_param("tasks/dice/attack_timeout"))
+        self.timer = rospy.Timer(rospy.Duration.from_sec(timeout),self.timeout_callback)
 
     def load_rosparams(self):
         param_dict = {} # for things we don't need to store permanently
-        self.x_accel_spike_thresh = float(rospy.get_param('tasks/dice/accel_x_spike_thresh', '-0.15'))
+        self.accel_spike_thresh = float(rospy.get_param('tasks/dice/accel_spike_thresh', '-0.15'))
+        self.accel_axis = rospy.get_param('tasks/dice/accel_axis')
         self.carrot_dist = float(rospy.get_param('tasks/dice/carrot_dist'))
         self.backup_dist = float(rospy.get_param('tasks/dice/backup_dist'))
         param_dict['lockon_time'] = float(rospy.get_param('tasks/dice/lockon_time', '5.0'))
         return param_dict
+    
+    def timeout_callback(self, msg):
+        self.timer.shutdown()
+        rospy.loginfo("---Attack " + target+ " timed out. Triggering spike")
+        self.spike = True
 
     def drive_callback(self, msg):
         self.current_drive = msg.data
@@ -355,7 +363,18 @@ class Attack(Objective):
             return 1
             
     def imu_callback(self, msg):
-        if msg.linear_acceleration.x < self.x_accel_spike_thresh and self.active:
+        accel = msg.linear_acceleration.x # default to x
+        
+        if self.accel_axis == 'x':
+            accel = msg.linear_acceleration.x
+        elif self.accel_axis == 'y':
+            accel = msg.linear_acceleration.y
+        elif self.accel_axis == 'z':
+            accel = msg.linear_acceleration.z
+        else:
+            rospy.logwarn("unrecognized acceleration axis in imu callback")
+        
+        if accel < self.accel_spike_thresh and self.active:
             self.spike = True
 
     def get_pose_behind(self, current_pose, dist_behind):
