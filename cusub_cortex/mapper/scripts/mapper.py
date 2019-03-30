@@ -152,7 +152,7 @@ class Mapper(object):
         
         self.namespace = rospy.get_param('~namespace_odom')
         
-        self.listener = tf.TransformListener(interpolate=True, cache_time=rospy.Duration(2))
+        self.listener = tf.TransformListener(interpolate=True)
         # ns = rospy.get_namespace()
         # index = ns[1:].find('/') # find the 2nd '/'
         # sub_name = ns[0:index+2]
@@ -218,9 +218,9 @@ class Mapper(object):
         # self.listener.waitForTransform(rospy.get_namespace() + 'description/map',
         #                                rospy.get_namespace() + 'description/base_link',
         #                                detection.pose.header.stamp, rospy.Duration(1))
-        map_pose = self.transform_occam_to_map(detection.pose)
-        if map_pose is not None:
-            self.map.update_landmark(detection.class_id, map_pose)
+        # map_pose = self.transform_occam_to_map(detection.pose)
+        # if map_pose is not None:
+        #     self.map.update_landmark(detection.class_id, map_pose)
         
 #        map_pose = self.listener.transformPose(rospy.get_namespace() + 'description/map', detection.pose)
         
@@ -255,6 +255,7 @@ class Mapper(object):
 
     def transform_occam_to_map(self, occam_pose):
         try:
+            rospy.sleep(0.1)
             pose = self.listener.transformPose('/' + self.namespace + '/map', occam_pose)
         except (tf.ExtrapolationException, tf.ConnectivityException, tf.LookupException) as e:
             rospy.logwarn(e)
@@ -263,8 +264,9 @@ class Mapper(object):
 
     def transform_occam_to_odom(self, occam_pose):
         try:
-#            self.listener.waitForTransform(occam_pose.header.frame_id, '/'+ self.namespace + '/odom', occam_pose.header.stamp, rospy.Duration(2.0))
-#            self.listener.waitForTransform('/'+ self.namespace + '/odom', occam_pose.header.frame_id, occam_pose.header.stamp, rospy.Duration(4.0))
+            # self.listener.waitForTransform(occam_pose.header.frame_id, '/'+ self.namespace + '/odom', occam_pose.header.stamp, rospy.Duration(2.0))
+            # self.listener.waitForTransform('/'+ self.namespace + '/odom', occam_pose.header.frame_id, occam_pose.header.stamp, rospy.Duration(2.0))
+            rospy.sleep(0.1)
             pose = self.listener.transformPose('/' + self.namespace + '/odom', occam_pose)
         except (tf.ExtrapolationException, tf.ConnectivityException, tf.LookupException) as e:
             rospy.logwarn(e)
