@@ -206,7 +206,7 @@ class Approach(Objective):
                 vec1 = np.array(new_list, dtype=np.float32)
                 diff = vec1 - vec2
                 dist = np.linalg.norm(diff)
-                if dist <= 1: # heavily weight smaller distances
+                if dist <= self.approach_radius: # heavily weight smaller distances
                     dist -= 20
                 dists[i] += dist
         # print(dists)
@@ -342,10 +342,16 @@ class Attack(Objective):
         param_dict['lockon_time'] = float(rospy.get_param('tasks/dice/lockon_time', '5.0'))
         return param_dict
     
+    def complete_servoing(self):
+        self.spike = True
+        self.active = False
+        self.servo_tool.active = False
+        self.timer.shutdown()
+
     def timeout_callback(self, msg):
         self.timer.shutdown()
         rospy.loginfo("---Attack " + self.target + " timed out. Triggering spike")
-        self.spike = True
+        self.complete_servoing()
 
     def drive_callback(self, msg):
         self.current_drive = msg.data
@@ -365,7 +371,7 @@ class Attack(Objective):
             
     def imu_callback(self, msg):
         accel = msg.linear_acceleration.x # default to x
-        
+
         if self.accel_axis == 'x':
             accel = msg.linear_acceleration.x
         elif self.accel_axis == 'y':
@@ -376,7 +382,7 @@ class Attack(Objective):
             rospy.logwarn("unrecognized acceleration axis in imu callback")
         
         if accel < self.accel_spike_thresh and self.active:
-            self.spike = True
+            self.complete_servoing()
 
     def get_pose_behind(self, current_pose, dist_behind):
 
