@@ -2,6 +2,6 @@
   <arg name="sub" default="leviathan" />
   <group ns="$(arg sub)/cusub_cortex">
     <include file="$(find mapper)/launch/mapper.launch"/>
-    <include file="$(find state_machine)/launch/smach_launch.launch"/>
+    <include file="$(find state_machine)/launch/state_machine.launch"/>
   </group>
 </launch>

@@ -30,5 +30,6 @@ tasks:
     dice2: dice_box
     dice5: dice_box
     dice6: dice_box
+
 mission_tasks: # Tasks To Do In Order
  - dice
