@@ -16,15 +16,15 @@ tasks:
   search_alg: simple
   failed_repeat: false
   targets: ['dice5', 'dice6']
-  replan_threshold: 5.0
+  replan_threshold: 1.0
   approach_radius: 1.0
   orbital_radius: 2.0
   lockon_time: 5.0
   carrot_dist: 2.0
   backup_dist: 2.0
-  accel_spike_thresh: 2.5
-  accel_axis: 'y'
-  attack_timeout: 5
+  accel_spike_thresh: -0.15
+  accel_axis: 'x'
+  attack_timeout: 30
   object_localizers:
     dice1: dice_box
     dice2: dice_box

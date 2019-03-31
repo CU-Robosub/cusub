@@ -141,6 +141,7 @@ class Approach(Objective):
         
         pose = path.pop(0)
         
+        rospy.loginfo(pose)
         status = self.goToPose(pose, useYaw=True)
         if status:
             if self.replan_requested():
@@ -150,6 +151,7 @@ class Approach(Objective):
                 return "aborted"
         
         for goal in path:
+            rospy.loginfo(goal)
             status = self.goToPose(goal, useYaw=False)
             if status:
                 if self.replan_requested():
@@ -260,7 +262,7 @@ class Approach(Objective):
         return pose_list
 
     def getFacingQuaternion(self, target_pt, current_pt):
-        roll, pitch = 0,0            
+        roll, pitch = 0, 0
         x_diff = target_pt.x - current_pt.x
         y_diff = target_pt.y - current_pt.y
         yaw = np.arctan2(y_diff, x_diff)
@@ -329,7 +331,7 @@ class Attack(Objective):
         self.drive_pub = rospy.Publisher('cusub_common/motor_controllers/pid/drive/setpoint', Float64, queue_size=1)
         rospy.Subscriber("cusub_common/imu", Imu, self.imu_callback)
         self.spike = False
-        timeout = float(rospy.get_param("tasks/dice/attack_timeout"))
+        self.timeout = float(rospy.get_param("tasks/dice/attack_timeout"))
 
     def load_rosparams(self):
         param_dict = {} # for things we don't need to store permanently
@@ -419,7 +421,7 @@ class Attack(Objective):
         self.active = True
         rospy.loginfo("---Executing Attack for " + self.target)
         
-        self.timer = rospy.Timer(rospy.Duration.from_sec(timeout),self.timeout_callback)
+        self.timer = rospy.Timer(rospy.Duration.from_sec(self.timeout), self.timeout_callback)
 
         self.servo_tool.run()
 

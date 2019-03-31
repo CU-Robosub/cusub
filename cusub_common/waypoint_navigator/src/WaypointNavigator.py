@@ -37,7 +37,7 @@ class WaypointNavigator(object):
 
         return []
 
-    def advanceWaypoint(self):
+    def advance_waypoint(self):
         rospy.loginfo("Waypoint Reached!")
         if(len(self.waypointlist) > 0):
             self.waypoint = self.waypointlist[0]
@@ -62,7 +62,7 @@ class WaypointNavigator(object):
 
             # finish manuver if we reach the waypoint
             if(dist < REACHED_THRESHOLD):
-                self.advanceWaypoint()
+                self.advance_waypoint()
             else:
                 rospy.loginfo("distance: " + str(dist))
 
