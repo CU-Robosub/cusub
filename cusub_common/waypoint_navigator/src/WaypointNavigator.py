@@ -14,6 +14,8 @@ from nav_msgs.msg import Odometry
 YAW_MODE = 1
 STRAFE_MODE = 2
 
+REACHED_THRESHOLD = 1.0
+
 class WaypointNavigator(object):
 
     def __init__(self):
@@ -35,7 +37,7 @@ class WaypointNavigator(object):
 
         return []
 
-    def advanceWaypoint(self):
+    def advance_waypoint(self):
         rospy.loginfo("Waypoint Reached!")
         if(len(self.waypointlist) > 0):
             self.waypoint = self.waypointlist[0]
@@ -59,8 +61,10 @@ class WaypointNavigator(object):
             dist = math.sqrt(dx**2 + dy**2 + dz**2)
 
             # finish manuver if we reach the waypoint
-            if(dist < 1.0):
-                self.advanceWaypoint()
+            if(dist < REACHED_THRESHOLD):
+                self.advance_waypoint()
+            else:
+                rospy.loginfo("distance: " + str(dist))
 
             if self.movement_mode == YAW_MODE:
 

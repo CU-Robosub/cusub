@@ -4,11 +4,27 @@
 # Search Algorithms: simple
 
 tasks:
- naive_visual_servo_objective:
-  prior: [0,0,0]
+ start_gate:
+  prior: [8,-1,-1.5]
   search_alg: simple
-
+  dist_behind_gate: 1.0
+  failed_repeat: true
+  object_localizers:
+    start_gate_pole: ['gate_pnp_color', 'gate_pnp_bb', 'gate_midpoint']
+ dice:
+  prior: [3,0,-2.3]
+  search_alg: simple
   failed_repeat: false
+  targets: ['dice5', 'dice6']
+  replan_threshold: 1.0
+  approach_radius: 1.0
+  orbital_radius: 2.0
+  lockon_time: 5.0
+  carrot_dist: 2.0
+  backup_dist: 2.0
+  accel_spike_thresh: -0.15
+  accel_axis: 'x'
+  attack_timeout: 30
   object_localizers:
     dice1: dice_box
     dice2: dice_box
@@ -16,4 +32,4 @@ tasks:
     dice6: dice_box
 
 mission_tasks: # Tasks To Do In Order
- - naive_visual_servo_objective
+ - dice

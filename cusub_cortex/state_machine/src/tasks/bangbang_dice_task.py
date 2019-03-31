@@ -111,20 +111,19 @@ class Attack(Objective):
         # TODO namespacing
         self.darknetSub = rospy.Subscriber('darknet_ros/bounding_boxes', BoundingBoxes, self.boxes_received, queue_size=1, buff_size=10000000)
 
-        self.diceStatePub = rospy.Publisher('cusub_common/motor_controllers/cv/yaw/state', Float64, queue_size=1)
+        # Okay this is what we'll use, interesting what's the cv?
+        self.diceStatePub = rospy.Publisher('cusub_common/motor_controllers/cv/yaw/state', Float64, queue_size=1) 
         self.diceSetpointPub = rospy.Publisher('cusub_common/motor_controllers/cv/yaw/setpoint', Float64, queue_size=1)
 
+        # Depth and drive control those, just hold them in place, huh cv again here?
         self.diceDepthStatePub = rospy.Publisher('cusub_common/motor_controllers/cv/depth/state', Float64, queue_size=1)
         self.diceDepthSetpointPub = rospy.Publisher('cusub_common/motor_controllers/cv/depth/setpoint', Float64, queue_size=1)
-
         self.driveStateSub = rospy.Subscriber("cusub_common/motor_controllers/pid/drive/state", Float64, self.driveStateCallback)
         self.drivePub = rospy.Publisher('cusub_common/motor_controllers/pid/drive/setpoint', Float64, queue_size=1)
+        self.imuSub = rospy.Subscriber("cusub_common/imu", Imu, self.imuCallback)        
 
         self.yawStateSub = rospy.Subscriber("cusub_common/motor_controllers/pid/yaw/state", Float64, self.yawStateCallback)
-
         self.depthStateSub = rospy.Subscriber("cusub_common/motor_controllers/pid/depth/state", Float64, self.depthStateCallback)
-
-        self.imuSub = rospy.Subscriber("cusub_common/imu", Imu, self.imuCallback)
 
         self.yawSelect = rospy.ServiceProxy('cusub_common/motor_controllers/yaw_mux/select', MuxSelect)
         self.depthSelect = rospy.ServiceProxy('cusub_common/motor_controllers/depth_mux/select', MuxSelect)

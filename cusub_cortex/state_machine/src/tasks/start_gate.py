@@ -21,40 +21,21 @@ class StartGate(Task):
 
     outcomes = ['task_success','task_aborted']
 
-    def __init__(self, gatePosePrior, searchAlg, distBehindGate):
-        assert type(searchAlg) == str
-        assert type(gatePosePrior) == Pose
-
+    def __init__(self):
         super(StartGate, self).__init__(self.outcomes) # become a state machine first
-
-        self.gatePose = gatePosePrior
-        self.initObjectives(gatePosePrior, searchAlg, distBehindGate)
-        self.initMapperSubs()
+        self.initObjectives()
         self.linkObjectives()
 
-    def initObjectives(self, gatePriorPose, searchAlg, distBehind):
-        self.search = Search(searchAlg, gatePriorPose)
-        self.attack = Attack(distBehind)
-
-    def initMapperSubs(self):
-        rospy.Subscriber('mapper/start_gate', PoseStamped, self.start_gate_pose_cb)
+    def initObjectives(self):
+        prior = self.priorList2Pose(rospy.get_param('tasks/start_gate/prior'))
+        search_alg = rospy.get_param("tasks/start_gate/search_alg")
+        self.search = Search(search_alg, prior, "cusub_cortex/mapper_out/start_gate")
+        self.attack = Attack()
 
     def linkObjectives(self):
         with self: # we are a StateMachine
-
-            # NOTE we should be aborted before we reach the pose, aborting means we've found what we're looking for before we finished our path
             smach.StateMachine.add('Search', self.search, transitions={'aborted':'Attack', 'success':'Search'})
-
-
             smach.StateMachine.add('Attack', self.attack, transitions={'success':'task_success', 'aborted':'Attack'})
-
-    def start_gate_pose_cb(self, msg):
-        self.gatePose = msg.pose
-        self.attack.start_gate_pose = msg.pose
-
-        # check if Search is the current state and if so abort it
-        if not self.search.abort_requested():
-            self.search.request_abort() # we've found our pose, so stop searching
 
 class Attack(Objective):
     """
@@ -62,36 +43,26 @@ class Attack(Objective):
     """
 
     replanThreshold = 1.0 # if the change in startgate pose is greater than this value, we should replan our path there
-    _start_gate_pose = None
     outcomes=['success','aborted']
 
-    def __init__(self, distBehindGate):
+    def __init__(self):
         rospy.loginfo("---Attack objective initializing")
-        self.distBehind = distBehindGate
-        self.first_pose_received = False
         super(Attack, self).__init__(self.outcomes, "Attack")
+        self.distBehind = float(rospy.get_param('tasks/start_gate/dist_behind_gate', 1.0))
+        self.first_pose_received = False
+        self.start_gate_pose = None
+        rospy.Subscriber("cusub_cortex/mapper_out/start_gate", PoseStamped, self.start_gate_callback)
 
-    @property
-    def start_gate_pose(self):
-        """
-        Properties allow us to determine when start_gate_pose variable has been changed (See start_gate_pose setter )
-        """
-        return self._start_gate_pose
-
-    @start_gate_pose.setter
-    def start_gate_pose(self, new_pose):
-        """"
-        We just got a new pose for the startgate, only update it if it's different enough and if so request an abort on the start gate to replan
-        """
+    def start_gate_callback(self, msg):
         # Set the first pose, note this case is different b/c we won't abort the Attack Objective
-        if self._start_gate_pose == None:
-            self._start_gate_pose = new_pose
+        if self.start_gate_pose == None:
+            self.start_gate_pose = msg
             return
         
-        changeInPose = self.getDistance(self._start_gate_pose.position, new_pose.position)
+        changeInPose = self.getDistance(self.start_gate_pose.position, msg.position)
         
         if changeInPose > self.replanThreshold:
-            self._start_gate_pose = new_pose
+            self.start_gate_pose = new_pose
             self.request_abort() # this will loop us back to execute
 
     def execute(self, userdata):

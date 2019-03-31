@@ -12,7 +12,7 @@ Ie for a class "start_gate_pole" the service would be /localize_start_gate_pole
 
 import rospy
 from darknet_ros_msgs.msg import BoundingBox, BoundingBoxes
-from geometry_msgs.msg import PoseArray, Pose
+from geometry_msgs.msg import PoseArray, Pose, PoseStamped
 from sensor_msgs.msg import Image
 from localizer.msg import Detection
 from localizer.srv import ClassicalBoxes2Poses
@@ -153,10 +153,16 @@ class Localizer():
     def publish_pose(self, object_type, camera_frame, image_header, pose):
 
         detection = Detection()
+        detection.class_id = object_type
+        detection.pose = PoseStamped()
+        detection.pose.header = image_header
+        detection.pose.pose = pose
+        """
         detection.location = pose
         detection.object_type = object_type
         detection.camera_frame = camera_frame
         detection.image_header = image_header
+        """
 
         self.pose_pub.publish(detection)
 

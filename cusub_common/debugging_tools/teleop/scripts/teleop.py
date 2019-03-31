@@ -30,7 +30,7 @@ def signal_handler(singnal, frame):
 class Motor_Controller():
     def __init__(self):
         #ONE Publisher for sending commands to the pololu
-        self.motor_pub = rospy.Publisher('drivers/pololu_control/command', Float64MultiArray, queue_size=1)
+        self.motor_pub = rospy.Publisher('pololu_control/command', Float64MultiArray, queue_size=1)
         self.motor_cmd = Float64MultiArray()
         # self.motor_cmd.speed = 0
         # self.motor_cmd.acceleration = 0

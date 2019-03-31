@@ -7,6 +7,8 @@ the global frame.
 Eventually, this may be replaced by mapper_server in order to use actionlib
 
 NOTE: the unfiltered poses are left in for visual debugging purposes
+
+There must be a cleaner way to do this than all of these if statements...
 """
 
 import rospy
@@ -16,7 +18,6 @@ from geometry_msgs.msg import Pose, PoseStamped
 from visualization_msgs.msg import Marker, MarkerArray
 
 from localizer.msg import Detection
-
 from pose_filter import filter_poses
 
 class ExpWeightedAvg():
@@ -25,14 +26,9 @@ class ExpWeightedAvg():
 
     def __init__(self, num_poses_to_avg):
         self.beta = (1 - num_poses_to_avg) / ( - num_poses_to_avg)
-#        print "Beta: {}".format(self.beta)
         self.avg_pose = Pose()
-#        print self.avg_pose
 
     def get_new_avg_pose(self, new_pose):
-        # print "New pose: {}".format(new_pose)
-        # print "Avg pose: {}".format(self.avg_pose)
-        # print "Iter: {}".format(self.num_poses)
         self.num_poses += 1
         if self.num_poses == 1:
             self.avg_pose = new_pose
@@ -44,11 +40,6 @@ class ExpWeightedAvg():
         new_x_avg = (self.beta * x_avg) + (1-self.beta) * (new_pose.position.x)
         new_y_avg = (self.beta * y_avg) + (1-self.beta) * (new_pose.position.y)
         new_z_avg = (self.beta * z_avg) + (1-self.beta) * (new_pose.position.z)
-
-#        print self.beta ** self.num_poses
-        # new_x_avg_corrected = new_x_avg / (1 - self.beta ** self.num_poses )
-        # new_y_avg_corrected = new_y_avg / (1 - self.beta ** self.num_poses )
-        # new_z_avg_corrected = new_z_avg / (1 - self.beta ** self.num_poses )
 
         pose = Pose()
         pose.position.x = new_x_avg
@@ -115,9 +106,8 @@ class MapLandmark(object):
         return False
 
 class Map(object):
-
     landmarks = {}
-
+    
     def __init__(self):
         self.map_markers_pub = rospy.Publisher('cusub_cortex/mapper/map_markers', MarkerArray, queue_size=10)
 
@@ -159,13 +149,23 @@ class Mapper(object):
         self.map.add_landmark(dice5_landmark)
         self.map.add_landmark(dice6_landmark)
         self.map.add_landmark(start_gate_landmark)
+        
+        self.namespace = rospy.get_param('~namespace_odom')
+        
+        self.listener = tf.TransformListener()
+        # ns = rospy.get_namespace()
+        # index = ns[1:].find('/') # find the 2nd '/'
+        # sub_name = ns[0:index+2]
+        # print(sub_name)
+        
+        rospy.Subscriber('cusub_cortex/mapper_in/task_poses', Detection, self.pose_received)
 
         # separate topics for each task obstacle
         # dice
-        self.dice1_pub = rospy.Publisher('cusub_cortex/mapper/dice1_pose', PoseStamped, queue_size=10)
-        self.dice2_pub = rospy.Publisher('cusub_cortex/mapper/dice2_pose', PoseStamped, queue_size=10)
-        self.dice5_pub = rospy.Publisher('cusub_cortex/mapper/dice5_pose', PoseStamped, queue_size=10)
-        self.dice6_pub = rospy.Publisher('cusub_cortex/mapper/dice6_pose', PoseStamped, queue_size=10)
+        self.dice1_pub = rospy.Publisher('cusub_cortex/mapper_out/dice1', PoseStamped, queue_size=10)
+        self.dice2_pub = rospy.Publisher('cusub_cortex/mapper_out/dice2', PoseStamped, queue_size=10)
+        self.dice5_pub = rospy.Publisher('cusub_cortex/mapper_out/dice5', PoseStamped, queue_size=10)
+        self.dice6_pub = rospy.Publisher('cusub_cortex/mapper_out/dice6', PoseStamped, queue_size=10)
 
         self.dice1_unfiltered_pub = rospy.Publisher('cusub_cortex/unfiltered/dice1_pose', PoseStamped, queue_size=10)
         self.dice2_unfiltered_pub = rospy.Publisher('cusub_cortex/unfiltered/dice2_pose', PoseStamped, queue_size=10)
@@ -188,7 +188,7 @@ class Mapper(object):
         self.dice6_found = False
 
         # start gate
-        self.start_gate_pub = rospy.Publisher('cusub_cortex/mapper/start_gate', PoseStamped, queue_size=10)
+        self.start_gate_pub = rospy.Publisher('cusub_cortex/mapper_out/start_gate', PoseStamped, queue_size=10)
 
         self.start_gate_unfiltered_pub = rospy.Publisher('cusub_cortex/unfiltered/start_gate', PoseStamped, queue_size=10)
 
@@ -204,58 +204,72 @@ class Mapper(object):
 
         # tranforms
         self.listener = tf.TransformListener()
+        #TODO: this should be dynamic, and corresponding transform from occam to odom should happen
+        self.dice1_unfiltered_pose.header.frame_id = 'occam0_frame'
+        self.dice2_unfiltered_pose.header.frame_id = 'occam0_frame'
+        self.dice5_unfiltered_pose.header.frame_id = 'occam0_frame'
+        self.dice6_unfiltered_pose.header.frame_id = 'occam0_frame'
+
+        self.start_gate_unfiltered_pose.header.frame_id = 'occam0_frame'
+        rospy.loginfo("Mapper Initialized")
 
     def pose_received(self, detection):
-        pose = PoseStamped()
-        pose.pose = detection.location
-        pose.header.stamp = detection.image_header.stamp
-        pose.header.frame_id = detection.camera_frame
-
-        obj = detection.object_type
-
-        self.listener.waitForTransform(self.robot_name + '/description/map',
-                                       self.robot_name + '/description/base_link',
-                                       pose.header.stamp, rospy.Duration(1))
-        map_pose = self.listener.transformPose(self.robot_name + '/description/map', pose)
-        self.map.update_landmark(obj, map_pose)
-
-        transformed_pose = self.transform_occam_to_odom(pose)
-
-        if obj == 'dice1':
+        
+        # self.listener.waitForTransform(rospy.get_namespace() + 'description/map',
+        #                                rospy.get_namespace() + 'description/base_link',
+        #                                detection.pose.header.stamp, rospy.Duration(1))
+        # map_pose = self.transform_occam_to_map(detection.pose)
+        # if map_pose is not None:
+        #     self.map.update_landmark(detection.class_id, map_pose)
+        
+#        map_pose = self.listener.transformPose(rospy.get_namespace() + 'description/map', detection.pose)
+        
+        transformed_pose = self.transform_occam_to_odom(detection.pose)
+        
+        if transformed_pose == None:
+            pass
+        elif detection.class_id == 'dice1':
             self.dice1_unfiltered_pose = transformed_pose
-            self.dice1_pose = self.dice_filter.send_pose(transformed_pose)
+            self.dice1_pose = transformed_pose
             self.dice1_found = True
 
-        elif obj == 'dice2':
+        elif detection.class_id == 'dice2':
             self.dice2_unfiltered_pose = transformed_pose
-            self.dice2_pose = self.dice_filter.send_pose(transformed_pose)
+            self.dice2_pose = transformed_pose
             self.dice2_found = True
 
-        elif obj == 'dice5':
+        elif detection.class_id == 'dice5':
             self.dice5_unfiltered_pose = transformed_pose
-            self.dice5_pose = self.dice_filter.send_pose(transformed_pose)
+            self.dice5_pose = transformed_pose
             self.dice5_found = True
 
-        elif obj == 'dice6':
+        elif detection.class_id == 'dice6':
             self.dice6_unfiltered_pose = transformed_pose
-            self.dice6_pose = self.dice_filter.send_pose(transformed_pose)
+            self.dice6_pose = transformed_pose 
             self.dice6_found = True
 
-        elif obj == 'start_gate':
+        elif detection.class_id == 'start_gate':
             self.start_gate_unfiltered_pose = transformed_pose
-            self.start_gate_pose = self.gate_filter.send_pose(transformed_pose)
+            self.start_gate_pose = transformed_pose 
             self.start_gate_found = True
 
+    def transform_occam_to_map(self, occam_pose):
+        try:
+            self.listener.waitForTransform('/'+ self.namespace + '/map', occam_pose.header.frame_id, occam_pose.header.stamp, rospy.Duration(0.2))
+            pose = self.listener.transformPose('/' + self.namespace + '/map', occam_pose)
+        except (tf.ExtrapolationException, tf.ConnectivityException, tf.LookupException) as e:
+            rospy.logwarn(e)
+            pose = None
+        return pose
 
-
-    # occam_pose is PoseStamped with frame id being the occam frame it came from
-    # i.e. occam0_frame, occam1_frame, occam4_frame
     def transform_occam_to_odom(self, occam_pose):
-
-        # self.listener.waitForTransform('odom', 'base_link', rospy.get_rostime(), rospy.Duration(1))
-        odom_pose = self.listener.transformPose(self.robot_name + '/description/odom', occam_pose)
-        return odom_pose
-
+        try:
+            self.listener.waitForTransform('/'+ self.namespace + '/odom', occam_pose.header.frame_id, occam_pose.header.stamp, rospy.Duration(0.2))
+            pose = self.listener.transformPose('/' + self.namespace + '/odom', occam_pose)
+        except (tf.ExtrapolationException, tf.ConnectivityException, tf.LookupException) as e:
+            rospy.logwarn(e)
+            pose = None
+        return pose
 
     def publish_poses(self):
 
@@ -278,7 +292,6 @@ class Mapper(object):
             if self.dice6_found:
                 self.dice6_pub.publish(self.dice6_pose)
                 self.dice6_unfiltered_pub.publish(self.dice6_unfiltered_pose)
-
 
             if self.start_gate_found:
                 self.start_gate_pub.publish(self.start_gate_pose)

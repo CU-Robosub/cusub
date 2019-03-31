@@ -25,7 +25,7 @@ class WaypointServer(WaypointNavigator):
 
     def advance_waypoint(self):
         """Called when waypoint reached"""
-        rospy.loginfo("Waypoint Reached!")
+        rospy.loginfo("Waypoint Reached!!!")
         self.waypoint = None
 
     def get_waypoint_in_odom(self, pose):

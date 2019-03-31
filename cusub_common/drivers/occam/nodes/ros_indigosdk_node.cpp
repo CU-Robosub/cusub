@@ -150,7 +150,7 @@ class ImagePublisher : public Publisher {
 
       // Create frame id depending on camera number
       char camera_idx = req_name.at(req_name.length() - 1);
-      frame_id = _frame_id + camera_idx + "_frame";
+      frame_id = _frame_id + camera_idx + "_frame_optical";
 
     }
 

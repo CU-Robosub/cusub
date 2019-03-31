@@ -38,15 +38,6 @@ class Task(smach.StateMachine):
         pass
 
     @abstractmethod
-    def initMapperSubs(self):
-        """
-        Subscribe to all objects from the mapper
-        You'll have to make your own callbacks in the task
-        If an objective needs a pose from the mapper make sure to pass that pose to the objective (ie if the attack objective needs to know the mapper's startgate output, then in the startgate callback of the class we must pass that value to Attack (possibly changing it by accessing the objective's value:  self.attack.start_gate_pose = msg)
-        """
-        pass
-
-    @abstractmethod
     def linkObjectives(self):
         """
         Link the objectives (initialized in initObjectives() to the state machine with the proper state transitions
@@ -59,7 +50,12 @@ class Task(smach.StateMachine):
         print cs
         self.sm._states[cs].request_abort()
 
-
+    def priorList2Pose(self,list_xyz):
+        pose = Pose()
+        pose.position.x = list_xyz[0]
+        pose.position.y = list_xyz[1]
+        pose.position.z = list_xyz[2]
+        return pose
 """
 Objectives are subtasks within a task
 They have:
@@ -77,6 +73,7 @@ class Objective(smach.State):
         rospy.Subscriber('cusub_common/odometry/filtered', Odometry, self.sub_pose_cb)
         self._abort_requested = False
         self.wayClient = actionlib.SimpleActionClient('cusub_common/waypoint', waypointAction)
+        self.started = False
 
         # initialize the pose
         pose = Pose()
@@ -104,7 +101,10 @@ class Objective(smach.State):
             return "aborted"
 
         wpGoal = waypointGoal()
+        wpGoal.goal_pose.header.frame_id = 'leviathan/description/odom'
+        rospy.loginfo(wpGoal.goal_pose.header.frame_id)
         wpGoal.goal_pose.pose.position = targetPose.position
+        wpGoal.goal_pose.pose.orientation = targetPose.orientation
         orientation_list = [ targetPose.orientation.x, \
                              targetPose.orientation.y, \
                              targetPose.orientation.z, \
@@ -137,15 +137,12 @@ class Objective(smach.State):
         #     print("---wayClientResult: {}".format(res))
         #     print(type(res))
 
-        return 0
+        return False
 
     def sub_pose_cb(self, msg):
         self.curPose = msg.pose.pose # store the pose part of the odom msg
 
     def getDistance(self, point1, point2):
-        assert type(point1) == Point
-        assert type(point2) == Point
-
         dx = point2.x - point1.x
         dy = point2.y - point1.y
         dz = point2.z - point1.z
@@ -162,24 +159,3 @@ class Objective(smach.State):
         self._abort_requested = True
     def clear_abort(self):
         self._abort_requested = False
-
-
-    def waitUntilReach(self, targetPose):
-        """
-        We actually shouldn't need this if the waypointNav gives a succeedepd response
-        """
-        assert type(targetPose) == Pose
-
-        dist = self.pointReachedThreshold + 1 # initialize to arbitrarily larger
-
-        while(dist > self.pointReachedThreshold and not self.preempt_requested()): # wait until we've reached the point
-
-            curPosition = self.curPose.position
-            targetPosiiton = targetPose.position
-
-            dx = targetPosition.x - curPosition.x
-            dy = targetPosition.y - curPosition.y
-            dz = targetPosition.z - curPosition.z
-
-            xy_dist = math.sqrt(dx**2 + dy**2)
-            dist = math.sqrt(dx**2 + dy**2 + dz**2)

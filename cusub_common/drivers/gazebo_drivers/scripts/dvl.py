@@ -18,8 +18,9 @@ class DVLRemap(object):
         """Gets simulated gazebo DVL data and transforms it to match
         what the dvl in the sub outputs
         """
-        print "test"
+
         data.twist.twist.linear.z = -1*data.twist.twist.linear.z
+
         self.dvl_pub.publish(data)
 
     def run(self):
