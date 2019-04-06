@@ -102,7 +102,6 @@ class Objective(smach.State):
 
         wpGoal = waypointGoal()
         wpGoal.goal_pose.header.frame_id = 'leviathan/description/odom'
-        rospy.loginfo(wpGoal.goal_pose.header.frame_id)
         wpGoal.goal_pose.pose.position = targetPose.position
         wpGoal.goal_pose.pose.orientation = targetPose.orientation
         orientation_list = [ targetPose.orientation.x, \

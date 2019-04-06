@@ -26,7 +26,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 from tasks.graph import graphGetPath
-from tasks.naive_servo import NaiveVisualServoTool
+from tasks.naive_servo import NaiveVisualServoTool, ServoAxisConfig
 import tf
 from sensor_msgs.msg import Imu
 
@@ -141,7 +141,6 @@ class Approach(Objective):
         
         pose = path.pop(0)
         
-        rospy.loginfo(pose)
         status = self.goToPose(pose, useYaw=True)
         if status:
             if self.replan_requested():
@@ -151,7 +150,6 @@ class Approach(Objective):
                 return "aborted"
         
         for goal in path:
-            rospy.loginfo(goal)
             status = self.goToPose(goal, useYaw=False)
             if status:
                 if self.replan_requested():
@@ -326,7 +324,8 @@ class Attack(Objective):
         param_dict = self.load_rosparams() # TODO put all configs into the load rosparams method
         self.active = False
         self.target = target
-        self.servo_tool = NaiveVisualServoTool(self.target, self.handle_servoing, lockon_time=param_dict['lockon_time'])
+        sac = ServoAxisConfig('yaw', 'occam0', 376, False, 100)
+        self.servo_tool = NaiveVisualServoTool(self.target, self.handle_servoing, sac, lockon_time=param_dict['lockon_time'])
         rospy.Subscriber('cusub_common/motor_controllers/pid/drive/state', Float64, self.drive_callback)
         self.drive_pub = rospy.Publisher('cusub_common/motor_controllers/pid/drive/setpoint', Float64, queue_size=1)
         rospy.Subscriber("cusub_common/imu", Imu, self.imu_callback)
@@ -357,17 +356,15 @@ class Attack(Objective):
         self.current_drive = msg.data
         
     def handle_servoing(self, image, box):
-        # rospy.loginfo("Entering handling function")
         drive_msg = Float64()
         if self.spike:
             rospy.loginfo("Spike!")
             drive_msg.data = self.current_drive # stop
             self.drive_pub.publish(drive_msg)
-            return 0
+            self.servo_tool.deactivate()
         else:
             drive_msg.data = self.current_drive + self.carrot_dist
             self.drive_pub.publish(drive_msg)
-            return 1
             
     def imu_callback(self, msg):
         accel = msg.linear_acceleration.x # default to x
@@ -422,7 +419,6 @@ class Attack(Objective):
         #     rospy.sleep(0.25)
         
     def execute(self, userdata):
-        
     
         self.active = True
         rospy.loginfo("---Executing Attack for " + self.target)
