@@ -17,6 +17,7 @@ tasks:
   failed_repeat: false
   targets: ['dice5', 'dice6']
   replan_threshold: 1.0
+  approach_method: 'optimal' # optimal, twopoint, direct
   approach_radius: 1.0
   orbital_radius: 2.0
   lockon_time: 5.0

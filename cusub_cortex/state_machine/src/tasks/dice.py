@@ -221,7 +221,7 @@ class Approach(Objective):
 
         x = goal_pt.x
         y = goal_pt.y
-        z = goal_pt.z
+        z = goal_pt.z + 0.6
         points_around_goal = self.getCirclePoints(x,y,z, radius=self.approach_radius)
 
         # Find the takeoff point
