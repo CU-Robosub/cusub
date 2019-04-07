@@ -25,7 +25,7 @@ class ExpWeightedAvg():
     num_poses = 0
 
     def __init__(self, num_poses_to_avg):
-        self.beta = (1 - num_poses_to_avg) / ( - num_poses_to_avg)
+        self.beta = (1.0 - float(num_poses_to_avg)) / ( - float(num_poses_to_avg))
         self.avg_pose = Pose()
 
     def get_new_avg_pose(self, new_pose):
@@ -202,6 +202,9 @@ class Mapper(object):
         self.gate_filter = filter_poses.GatePoseFilter()
         self.dice_filter = filter_poses.DicePoseFilter()
 
+        self.dice5_filter = ExpWeightedAvg(20)
+        self.dice6_filter = ExpWeightedAvg(20)
+
         # tranforms
         self.listener = tf.TransformListener()
         #TODO: this should be dynamic, and corresponding transform from occam to odom should happen
@@ -240,12 +243,18 @@ class Mapper(object):
 
         elif detection.class_id == 'dice5':
             self.dice5_unfiltered_pose = transformed_pose
-            self.dice5_pose = transformed_pose
+            new_pose = PoseStamped()
+            new_pose.pose = self.dice5_filter.get_new_avg_pose(transformed_pose.pose)
+            new_pose.header = transformed_pose.header
+            self.dice5_pose = new_pose
             self.dice5_found = True
 
         elif detection.class_id == 'dice6':
             self.dice6_unfiltered_pose = transformed_pose
-            self.dice6_pose = transformed_pose 
+            new_pose = PoseStamped()
+            new_pose.pose = self.dice6_filter.get_new_avg_pose(transformed_pose.pose)
+            new_pose.header = transformed_pose.header
+            self.dice6_pose = new_pose
             self.dice6_found = True
 
         elif detection.class_id == 'start_gate':

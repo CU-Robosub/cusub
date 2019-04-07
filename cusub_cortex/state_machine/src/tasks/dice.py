@@ -69,7 +69,7 @@ class Dice(Task):
                     smach.StateMachine.add(name_att, self.attacks[i], transitions={"success":name_app_next, "aborted":"task_aborted"})
                 else: # final attack
                     smach.StateMachine.add(name_att,self.attacks[i], transitions={"success":"task_success", "aborted":"task_aborted"})
-            
+
 class Approach(Objective):
     # Needs all poses
     outcomes = ['success','aborted', 'replan']
@@ -137,8 +137,13 @@ class Approach(Objective):
         self.started = True
         dice_list = [die.pose.position for key,die in self.object_poses.iteritems()]
         # dice_list = [value.position for key,value in self.object_poses.items()] # Python3        
-        path = self.getApproachPath(self.object_poses[self.target].pose.position, dice_list)
-        
+
+        approach_method = rospy.get_param('tasks/dice/approach_method')
+        if(approach_method == 'direct'):
+            path = self.getDirectApproachPath(self.object_poses[self.target].pose.position, dice_list)
+        elif(approach_method == 'optimal'):
+            path = self.getApproachPath(self.object_poses[self.target].pose.position, dice_list)
+
         pose = path.pop(0)
         
         rospy.loginfo(pose)
@@ -169,6 +174,31 @@ class Approach(Objective):
         # TODO we may need to add a some sort of depth preparation before visual servoing
         rospy.sleep(2)
         return "success"
+
+    def getDirectApproachPath(self, goal_pt, dice_list):
+
+        takeoff_pose = Pose()
+
+        # Find the x, y position that is 2 meters from the dice along the line between us and the dice
+        dx = self.curPose.position.x - goal_pt.x
+        dy = self.curPose.position.y - goal_pt.y
+        k = dx / dy
+        new_x = self.approach_radius * math.sqrt(1.0 / (k**2 + 1))
+        new_y = new_x / k
+        if(dx < 0.0):
+            new_x *= -1
+        if(dy < 0.0):
+            new_y *= -1
+        takeoff_pose.position.x = new_x + goal_pt.x
+        takeoff_pose.position.y = new_y + goal_pt.y
+
+        # Match the dice z
+        takeoff_pose.position.z = goal_pt.z + 0.6
+
+        # Face the dice
+        takeoff_pose.orientation = self.getFacingQuaternion(goal_pt, takeoff_pose.position)
+
+        return [takeoff_pose]
 
     def getApproachPath(self, goal_pt, dice_list):
         """

@@ -63,6 +63,7 @@
     </include>
 
     <!-- AR Tags for localization -->
+    <!--
     <include>
       <uri>model://ar_tag_0</uri>
       <pose>0 5.9 -2 -1.57 0 3.14</pose>
@@ -87,6 +88,7 @@
       <uri>model://magic_leds_0</uri>
       <pose>0 0 -3.9 0 0 0</pose>
     </include>
+    -->
 
     <plugin name="underwater_current_plugin" filename="libuuv_underwater_current_ros_plugin.so">
       <namespace>hydrodynamics</namespace>
