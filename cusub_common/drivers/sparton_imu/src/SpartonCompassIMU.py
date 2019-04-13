@@ -255,26 +255,10 @@ if __name__ == '__main__':
 
                                 D_Compass_declination = rospy.get_param('/declination', 0)* (math.pi/180.0)
 
-                                #add 90 degree and -declination , ROS= angle_ENU +90 degree - declination
-                                angle_ROS=(angle_ENU[0],angle_ENU[1],angle_ENU[2]+math.pi/2.- D_Compass_declination);     #print angle_ROS
-                                q_ROS=quaternion_from_euler(angle_ROS[0],angle_ROS[1],angle_ROS[2], axes='sxyz');         #print q_ROS
+                                angle_ROS=(angle_ENU[0],angle_ENU[1],angle_ENU[2] - D_Compass_declination)
+                                q_ROS=quaternion_from_euler(angle_ROS[0],angle_ROS[1],angle_ROS[2], axes='sxyz')
+                                (imu_data.orientation.x, imu_data.orientation.y, imu_data.orientation.z, imu_data.orientation.w)=q_ROS
 
-                                #(r, p, y) = euler_from_quaternion([imu_data.orientation.x, imu_data.orientation.y, imu_data.orientation.z, imu_data.orientation.w])
-                                #print (r,p,y)
-                                # Heading = 90 degree + Yaw - Magnetic declination.
-                                #yaw_ros= math.pi/2. +y- D_Compass_declination
-                                #print (yaw_ros)
-                                #q = quaternion_from_euler(ai, aj, ak, axes='sxyz') ,ai, aj, ak : Euler's roll, pitch and yaw angles
-
-                                if D_Compass_UseEastAsZero :
-
-                                    #(imu_data.orientation.x, imu_data.orientation.y, imu_data.orientation.z, imu_data.orientation.w)=quaternion_from_euler(r, p, yaw_ros, axes='sxyz')
-                                    (imu_data.orientation.x, imu_data.orientation.y, imu_data.orientation.z, imu_data.orientation.w)=q_ROS
-                                    #print (imu_data.orientation.x, imu_data.orientation.y, imu_data.orientation.z, imu_data.orientation.w)
-                                    #print imu_data.orientation
-                                else:
-                                    # if not use East As Zero, just use compass's origional data
-                                    pass
                                 # again note NED to ENU converstion
                                 imu_data.angular_velocity.x = Gy
                                 imu_data.angular_velocity.y = Gx

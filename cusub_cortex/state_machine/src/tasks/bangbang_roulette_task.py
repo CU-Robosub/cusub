@@ -30,7 +30,7 @@ class BangBangRouletteTask(Task):
         self.linkObjectives()
 
     def initObjectives(self, prior, searchAlg):
-        self.search = Search(searchAlg, prior)
+        #self.search = Search(searchAlg, prior)
         self.attack = Attack()
 
     def initMapperSubs(self):
@@ -41,7 +41,7 @@ class BangBangRouletteTask(Task):
 
     def linkObjectives(self):
         with self:
-            smach.StateMachine.add('Search', self.search, transitions={'aborted':'task_aborted', 'success':'Attack'})
+            #smach.StateMachine.add('Search', self.search, transitions={'aborted':'task_aborted', 'success':'Attack'})
 
             smach.StateMachine.add('Attack', self.attack, transitions={'success':'task_success', 'aborted':'Attack'})
 
@@ -72,20 +72,25 @@ class Attack(Objective):
 
             if theOneTrueBox is not None:
 
-                if theOneTrueBox.xmax - theOneTrueBox.xmin > 300:
+                width = theOneTrueBox.xmax - theOneTrueBox.xmin
+                print(width)
+                if width > 900:
                     self.decend = False
+
+                # W 1280
+                # H 960
 
                 xCenter = Float64()
                 xCenter.data = (theOneTrueBox.xmin + theOneTrueBox.xmax) / 2.0
-                self.cv_strafe_state_pub.publish(xCenter)
+                self.cv_drive_state_pub.publish(xCenter)
 
                 xTarget = Float64()
                 xTarget.data = 640
                 self.cv_strafe_setpoint_pub.publish(xTarget)
 
                 yCenter = Float64()
-                yCenter.data = (theOneTrueBox.ymin + theOneTrueBox.ymax) / 2.0
-                self.cv_drive_state_pub.publish(yCenter)
+                yCenter.data = 960 - ((theOneTrueBox.ymin + theOneTrueBox.ymax) / 2.0)
+                self.cv_strafe_state_pub.publish(yCenter)
 
                 yTarget = Float64()
                 yTarget.data = 480
@@ -132,11 +137,11 @@ class Attack(Objective):
         # Decend
         self.decend = True
         depth = Float64()
-        for i in xrange(40):
+        for i in xrange(160):
 
             rospy.loginfo(self.current_depth)
 
-            depth.data = self.current_depth - 0.8
+            depth.data = self.current_depth - 0.025
             self.depth_pub.publish(depth)
             if not self.decend or self.current_depth <= -3.75:
                 depth.data = self.current_depth
@@ -147,8 +152,8 @@ class Attack(Objective):
 
         rospy.loginfo("--drop")
 
-        activate_actuator = rospy.ServiceProxy('cusub_common/activateActuator', ActivateActuator)
-        activate_actuator(1, 100) # Activate actuator 1 for 100 seconds
+        # activate_actuator = rospy.ServiceProxy('cusub_common/activateActuator', ActivateActuator)
+        # activate_actuator(1, 100) # Activate actuator 1 for 100 seconds
 
         self.drive_select("/" + self.robotname + "/cusub_common/motor_controllers/pid/drive/control_effort")
         self.strafe_select("/" + self.robotname + "/cusub_common/motor_controllers/pid/strafe/control_effort")

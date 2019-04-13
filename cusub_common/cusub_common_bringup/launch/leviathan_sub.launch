@@ -29,7 +29,11 @@
         <include file="$(find dvl)/launch/dvl.launch"/>
         <include file="$(find pololu_controller)/launch/pololu_sub.launch"/>
         <include file="$(find sparton_imu)/launch/AHRS-8.launch"/>
-        <include file="$(find ros_indigosdk)/launch/occam_onecam.launch"/>
+
+        <group ns="cusub_common">
+            <include file="$(find ros_indigosdk)/launch/occam_onecam.launch"/>
+            <include file="$(find pointgrey_camera_driver)/launch/camera.launch"/>
+        </group>
 
     </group>
 </launch>
