@@ -1,0 +1,14 @@
+<launch>
+	<arg name="marker_size" default="20.32" />
+	<arg name="max_new_marker_error" default="0.08" />
+	<arg name="max_track_error" default="0.02" />
+
+	<arg name="cam_image_topic" default="/occam/image0" />
+	<arg name="cam_info_topic" default="/occam/image3/camera_info" />
+
+	<arg name="output_frame" default="/occam" />
+	<arg name="bundle_files" default="$(find ar_tracking)/bundles/tags1234.xml" />
+
+	<node name="ar_track_alvar" pkg="ar_track_alvar" type="findMarkerBundlesNoKinect" respawn="false" output="screen" args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error) $(arg cam_image_topic) $(arg cam_info_topic) $(arg output_frame) $(arg bundle_files)" />
+</launch>
+
