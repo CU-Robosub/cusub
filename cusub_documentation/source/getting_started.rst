@@ -41,7 +41,7 @@ Library Dependencies
 In order to build the sim package the protobuf C compiler is required
 ::
 
-    sudo apt-get install protobuf-compiler #Ubuntu
+    sudo apt install protobuf-compiler protobuf-c-compiler
 
 
 Building the system

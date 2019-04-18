@@ -2,6 +2,7 @@
 
 <launch>
   <!-- Console launch prefix -->
+  <remap from="/darknet_ros/bounding_boxes" to="/leviathan/cusub_perception/darknet_ros/bounding_boxes" />
   <arg name="launch_prefix" default=""/>
 
   <arg name="detect_sleep_time" default="0.0"/>
@@ -15,12 +16,12 @@
   <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/yolov3-tiny.yaml"/>
 
   <!-- Start darknet and ros wrapper -->
-  <node pkg="darknet_ros" type="darknet_ros" name="darknet_ros" output="screen" launch-prefix="$(arg launch_prefix)">
-    <param name="yolo_model/threshold/value"          value="0.1" />
+  <node pkg="darknet_ros" type="darknet_ros" name="darknet_ros">
+    <param name="yolo_model/threshold/value"          value="0.3" />
     <param name="weights_path"          value="$(arg yolo_weights_path)" />
     <param name="config_path"           value="$(arg yolo_config_path)" />
     <param name="detect_sleep_time"     value="$(arg detect_sleep_time)" />
-    <remap from="/camera/rgb/image_raw"       to="/occam/image0"/>
+    <remap from="/camera/rgb/image_raw"       to="cusub_common/occam/image0"/>
   </node>
 
   <!-- <node pkg="darknet_cv" type="camera_multiplexer.py" name="occam2dark" output="screen" /> -->

@@ -8,6 +8,7 @@ import telnetlib
 import rospy
 from geometry_msgs.msg import TwistWithCovarianceStamped
 from std_msgs.msg import Float64MultiArray
+
 HOST = "10.0.0.3"					#need to make this a static IP address
 tn = telnetlib.Telnet(HOST, "9000")
 def signal_handler(signal, frame):
@@ -23,8 +24,8 @@ def signal_handler(signal, frame):
 
 def DVL():
 
-	pub_vel = rospy.Publisher('/drivers/dvl/vel',TwistWithCovarianceStamped, queue_size=100)
-	pub_depth = rospy.Publisher('/drivers/dvl/depth', Float64MultiArray, queue_size=100)
+	pub_vel = rospy.Publisher('dvl',TwistWithCovarianceStamped, queue_size=100)
+	pub_depth = rospy.Publisher('dvl/depth', Float64MultiArray, queue_size=100)
 
 	rospy.init_node('DVL', anonymous=True)
 	rate = rospy.Rate(20) #1 Hz
@@ -66,11 +67,10 @@ def DVL():
 		0,0,0,0,0,0]
 
 		data_vel.header.stamp = rospy.Time.now()
-		data_vel.header.frame_id = "base_dvl"
-		data_vel.twist.twist.linear.x = -1*vx;
-		data_vel.twist.twist.linear.y = vy;
-		data_vel.twist.twist.linear.z = vz;
-
+		data_vel.header.frame_id = "leviathan/description/dvl_link"
+		data_vel.twist.twist.linear.x = -1*vx
+		data_vel.twist.twist.linear.y = vy
+		data_vel.twist.twist.linear.z = -1*vz
 
 		#data_depth.header.stamp = rospy.Time.now()
 		#data_depth.header.frame_id = "/drivers/dvl/depth"
@@ -84,8 +84,6 @@ def DVL():
 
 		rate.sleep()
 		signal.signal(signal.SIGINT, signal_handler)
-
-
 
 if __name__ == '__main__':
 	try:

@@ -1,8 +1,3 @@
 <launch>
-
-    <arg name="namespace" default="leviathan" />
-  
-    <node name="waypoint" pkg="waypoint_navigator" type="WaypointActionServer.py" output="screen">
-      <param name="namespace" value="/$(arg namespace)" />
-    </node>
+    <node name="waypoint" pkg="waypoint_navigator" type="WaypointActionServer.py" ns="cusub_common"/>
 </launch>

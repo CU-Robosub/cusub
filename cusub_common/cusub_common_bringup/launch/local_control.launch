@@ -1,5 +1,0 @@
-<launch>
-  <group ns="local_control">
-    <include file="$(find pid_controller)/launch/controller_matrix.launch"/>
-  </group>
-</launch>

@@ -8,7 +8,7 @@ Adjust the y position of the gate by taking the difference between the middle of
 import rospy
 from sensor_msgs.msg import Image
 from darknet_ros_msgs.msg import BoundingBox, BoundingBoxes
-from localizer.srv import ClassicalBox2Pose
+from localizer.srv import ClassicalBoxes2Poses
 from geometry_msgs.msg import Pose
 
 from pdb import set_trace
@@ -20,7 +20,7 @@ class GateMidpointServer():
 
     def __init__(self):
         ns = rospy.get_namespace()
-        self.server = rospy.Service(ns + "localize_start_gate_pole", ClassicalBox2Pose, self.localize)
+        self.server = rospy.Service(ns+"cusub_perception/localize_gate_midpoint", ClassicalBoxes2Poses, self.localize)
         rospy.loginfo("Gate Midpoint Initialized")
 
     def _orderBoxesLeft2Right(self, box1, box2):
@@ -38,11 +38,13 @@ class GateMidpointServer():
         """
         This function just finds how shifted to the right or left in front of the gate is, and says it's 5m ahead. Through this carrot in front of the sub technique we can center on the gate and go through it.
         """
+#        return [Pose()], ['start_gate']
+        if len(req.boxes) < 2: # We need 2 bounding boxes
+            return [Pose()], ['Failed']
+        
         # calculate image dims
         bounding_boxes = req.boxes
         image_dims = (req.image.height, req.image.width)
-
-
         
         x_pos = METERS_AHEAD # always send the sub 6m ahead, carrot out in front
         # rest of this function is moving the carrot side to side
@@ -69,10 +71,10 @@ class GateMidpointServer():
         pose.position.y = y_pos
         pose.position.z = z_pos
         
-        return pose
+        return [pose], ['start_gate']
 
 def main():
-    rospy.init_node('gate_localizer')
+    rospy.init_node('gate_midpoint')
     server = GateMidpointServer()
     rospy.spin()
 

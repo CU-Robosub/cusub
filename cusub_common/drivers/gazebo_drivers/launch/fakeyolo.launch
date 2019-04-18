@@ -1,0 +1,18 @@
+<!-- Launches YOLO faker which generates bounding boxes similar to yolo from ground truth when you cant use yolo for some reason -->
+<launch>
+
+    <!-- Config holds camera and object parameters for generating bounding boxes -->
+    <arg name="config_filename" default="fakeyolo_default.yaml"/>
+
+    <!-- For debugging config object points it can render bounding volume points -->
+    <arg name="show_points" default="false"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="occam0_gt_broadcaster" args="0.055 0 0.22 0 0 0 leviathan_gt/base_link leviathan_gt/occam0_frame 50" />
+    <node pkg="tf" type="static_transform_publisher" name="downcam_gt_broadcaster" args="0.0 0 -0.1 0 1.57 0 leviathan_gt/base_link leviathan_gt/downcam_frame 50" />
+
+    <node name="fakeyolo" pkg="gazebo_drivers" type="yolo_faker.py">
+	    <rosparam command="load" file="$(find gazebo_drivers)/config/$(arg config_filename)"/>
+        <param name="~show_points" value="$(arg show_points)"/>
+    </node>
+
+</launch>

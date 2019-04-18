@@ -1,29 +1,71 @@
 #! /usr/bin/env python
+"""Waypoint Navigation"""
 
 import rospy
 import actionlib
 
-from WaypointNavigator import WaypointNavigator
+import tf
+from tf.transformations import euler_from_quaternion
 
 from waypoint_navigator.msg import waypointAction, waypointResult
 
+from WaypointNavigator import WaypointNavigator
+
 class WaypointServer(WaypointNavigator):
+    """Waypoint Navigation"""
+
+    listener = None
+    """Transform listener"""
+
+    server = None
+    """Waypoint action client server"""
 
     def __init__(self):
         super(WaypointServer, self).__init__()
 
-    def advanceWaypoint(self):
-        rospy.loginfo("Waypoint Reached!")
+    def advance_waypoint(self):
+        """Called when waypoint reached"""
+        rospy.loginfo("Waypoint Reached!!!")
         self.waypoint = None
+
+    def get_waypoint_in_odom(self, pose):
+        """Transforms waypoint into the odom frame for navigation"""
+
+        odom_frame = rospy.get_namespace().split("/")[1] \
+                     + "/description/odom"
+
+        pose.header.stamp = rospy.get_rostime()
+
+        self.listener.waitForTransform(pose.header.frame_id, odom_frame,
+                                       rospy.get_rostime(), rospy.Duration(0.5))
+        map_pose = self.listener.transformPose(odom_frame, pose)
+
+        orientation_list = [map_pose.pose.orientation.x, \
+                            map_pose.pose.orientation.y, \
+                            map_pose.pose.orientation.z, \
+                            map_pose.pose.orientation.w]
+        _, _, yaw = euler_from_quaternion(orientation_list)
+
+        return map_pose.pose.position, yaw
 
     # called everytime a new goal is sent
     def execute(self, goal):
-#        rospy.loginfo("Preempt Status: " + str(self.server.__dict__))
-        self.waypoint = goal.goal_pose.pose.position
+        """Gets a waypoint goal and navigates to it"""
+
+        # rospy.loginfo("Preempt Status: " + str(self.server.__dict__))
+
+        self.waypoint, self.waypoint_yaw = self.get_waypoint_in_odom(goal.goal_pose)
         self.movement_mode = goal.movement_mode
-        self.waypoint_yaw = goal.target_yaw
+
         rospy.loginfo(self.waypoint)
-        while(self.waypoint is not None):
+
+        while self.waypoint is not None:
+
+            # Periodicaly update the waypoint in the
+            #  map frame incase our odom point is
+            #  out of date
+            self.waypoint, self.waypoint_yaw = self.get_waypoint_in_odom(goal.goal_pose)
+
             if self.server.is_preempt_requested():
 
                 rospy.loginfo("Preempt Received!")
@@ -35,6 +77,7 @@ class WaypointServer(WaypointNavigator):
                 return
 
             else:
+
                 rospy.sleep(0.1)
 
         result = waypointResult()
@@ -46,12 +89,14 @@ class WaypointServer(WaypointNavigator):
         self.server = actionlib.SimpleActionServer('waypoint', waypointAction, self.execute, False)
         self.server.start()
 
+        self.listener = tf.TransformListener()
+
         super(WaypointServer, self).run()
 
 if __name__ == '__main__':
-    rospy.init_node('WaypointActionServer')
-    ws = WaypointServer()
+    rospy.init_node('waypoint_action_server')
+    WAYPOINT_SERVER = WaypointServer()
     try:
-        ws.run()
+        WAYPOINT_SERVER.run()
     except rospy.ROSInterruptException:
         rospy.loginfo("WaypointActionServer Crashed")

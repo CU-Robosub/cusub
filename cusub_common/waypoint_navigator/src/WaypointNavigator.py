@@ -14,6 +14,8 @@ from nav_msgs.msg import Odometry
 YAW_MODE = 1
 STRAFE_MODE = 2
 
+REACHED_THRESHOLD = 1.0
+
 class WaypointNavigator(object):
 
     def __init__(self):
@@ -26,13 +28,16 @@ class WaypointNavigator(object):
         self.waypoint_yaw = 0
 
     def addWaypoint(self, req):
+
         rospy.loginfo(req.waypoint)
+
         self.waypointlist.append(req.waypoint)
         if(self.waypoint is None):
             self.waypoint = self.waypointlist[0]
+
         return []
 
-    def advanceWaypoint(self):
+    def advance_waypoint(self):
         rospy.loginfo("Waypoint Reached!")
         if(len(self.waypointlist) > 0):
             self.waypoint = self.waypointlist[0]
@@ -56,8 +61,10 @@ class WaypointNavigator(object):
             dist = math.sqrt(dx**2 + dy**2 + dz**2)
 
             # finish manuver if we reach the waypoint
-            if(dist < 1.0):
-                self.advanceWaypoint()
+            if(dist < REACHED_THRESHOLD):
+                self.advance_waypoint()
+            else:
+                rospy.loginfo("distance: " + str(dist))
 
             if self.movement_mode == YAW_MODE:
 
@@ -125,20 +132,19 @@ class WaypointNavigator(object):
 
     def run(self):
 
-        self.namespace = rospy.get_param("~namespace")
 
         # setpoints to control sub motion
-        self.depth_pub = rospy.Publisher(self.namespace + "/local_control/pid/depth/setpoint", Float64, queue_size=10)
-        self.drive_pub = rospy.Publisher(self.namespace + "/local_control/pid/drive/setpoint", Float64, queue_size=10)
-        self.strafe_pub = rospy.Publisher(self.namespace + "/local_control/pid/strafe/setpoint", Float64, queue_size=10)
-        self.yaw_pub = rospy.Publisher(self.namespace + "/local_control/pid/yaw/setpoint", Float64, queue_size=10)
+        self.depth_pub = rospy.Publisher("motor_controllers/pid/depth/setpoint", Float64, queue_size=10)
+        self.drive_pub = rospy.Publisher("motor_controllers/pid/drive/setpoint", Float64, queue_size=10)
+        self.strafe_pub = rospy.Publisher("motor_controllers/pid/strafe/setpoint", Float64, queue_size=10)
+        self.yaw_pub = rospy.Publisher("motor_controllers/pid/yaw/setpoint", Float64, queue_size=10)
 
         # get current accumulated strafe and drive to use for adjustments
-        self.drive_state_sub = rospy.Subscriber(self.namespace + "/local_control/pid/drive/state", Float64, self.driveStateCallback)
-        self.strafe_state_sub = rospy.Subscriber(self.namespace + "/local_control/pid/strafe/state", Float64, self.strafeStateCallback)
+        self.drive_state_sub = rospy.Subscriber("motor_controllers/pid/drive/state", Float64, self.driveStateCallback)
+        self.strafe_state_sub = rospy.Subscriber("motor_controllers/pid/strafe/state", Float64, self.strafeStateCallback)
 
         # get current sub position to figure out how to get where we want
-        self.pose_sub = rospy.Subscriber(self.namespace + "/sensor_fusion/odometry/filtered", Odometry, self.odometryCallback)
+        self.pose_sub = rospy.Subscriber("odometry/filtered", Odometry, self.odometryCallback)
 
         # service to add waypoints to drive to
         s = rospy.Service('addWaypoint', AddWaypoint, self.addWaypoint)

@@ -1,0 +1,122 @@
+<launch>
+
+	<arg name="setpoint" default="true" />
+	<arg name="pid_type" default="real" />
+
+	<node name="pose_pid" pkg="motor_controllers" type="Pose_PID.py" output="screen"/>
+	<node name="pid_pololu" pkg="motor_controllers" type="PID_Pololu_matrix.py" output="screen"/>
+
+	<node pkg="topic_tools" type="mux" name="depth_mux" ns="cusub_common/motor_controllers" args="mux/depth/control_effort pid/depth/control_effort cv/depth/control_effort">
+		<remap from="mux" to="depth_mux"/>
+		<param name="initial_topic " value="pid/depth/control_effort" />
+	</node>
+	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/depth" >
+		<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_depth.yaml" />
+		<param name="rate" value="25" />
+		<param name="upper_limit" value="100" />
+		<param name="lower_limit" value="-100" />
+		<param name="diagnostic_period" value="0.25" />
+		<param name="max_loop_frequency" value="25.0" />
+		<param name="min_loop_frequency" value="25.0" />
+	</node>
+	<node name="depth_cv" pkg="motor_controllers" type="bangbang.py" ns="cusub_common/motor_controllers">
+		<param name="setpoint_topic" value="cv/depth/setpoint" />
+		<param name="state_topic" value="cv/depth/state" />
+		<param name="control_effort_topic" value="cv/depth/control_effort" />
+		<param name="deadzone_size" value="0" />
+		<param name="left_bang_effort" value="65" />
+		<param name="right_bang_effort" value="75" />
+	</node>
+
+	<group if="$(arg setpoint)">
+
+		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/pitch" >
+			<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_pitch.yaml" />
+			<param name="rate" value="25" />
+			<param name="upper_limit" value="100" />
+			<param name="lower_limit" value="-100" />
+			<param name="diagnostic_period" value="0.25" />
+			<param name="max_loop_frequency" value="25.0" />
+			<param name="min_loop_frequency" value="25.0" />
+		</node>
+		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/roll" >
+			<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_roll.yaml" />
+			<param name="rate" value="25" />
+			<param name="upper_limit" value="100" />
+			<param name="lower_limit" value="-100" />
+			<param name="windup_limit" value=".001" />
+			<param name="diagnostic_period" value="0.25" />
+			<param name="max_loop_frequency" value="25.0" />
+			<param name="min_loop_frequency" value="25.0" />
+		</node>
+		<node pkg="topic_tools" type="mux" name="yaw_mux" ns="cusub_common/motor_controllers" args="mux/yaw/control_effort pid/yaw/control_effort cv/yaw/control_effort">
+			<remap from="mux" to="yaw_mux"/>
+			<param name="initial_topic " value="pid/yaw/control_effort" />
+		</node>
+		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/yaw" >
+			<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_yaw.yaml" />
+			<param name="rate" value="25" />
+			<param name="upper_limit" value="100" />
+			<param name="lower_limit" value="-100" />
+			<param name="windup_limit" value=".001" />
+			<param name="diagnostic_period" value="0.25" />
+			<param name="max_loop_frequency" value="25.0" />
+			<param name="min_loop_frequency" value="25.0" />
+			<param name="angle_error" value="true" />
+		</node>
+		<node name="yaw_cv" pkg="motor_controllers" type="bangbang.py" ns="cusub_common/motor_controllers">
+			<param name="setpoint_topic" value="cv/yaw/setpoint" />
+			<param name="state_topic" value="cv/yaw/state" />
+			<param name="control_effort_topic" value="cv/yaw/control_effort" />
+			<param name="deadzone_size" value="30" />
+			<param name="left_bang_effort" value="40" />
+			<param name="right_bang_effort" value="-40" />
+		</node>
+		<node pkg="topic_tools" type="mux" name="drive_mux" ns="cusub_common/motor_controllers" args="mux/drive/control_effort pid/drive/control_effort cv/drive/control_effort">
+			<remap from="mux" to="drive_mux"/>
+			<param name="initial_topic " value="pid/drive/control_effort" />
+		</node>
+		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/drive">
+			<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_drive.yaml" />
+			<param name="rate" value="25" />
+			<param name="upper_limit" value="100" />
+			<param name="lower_limit" value="-100" />
+			<param name="windup_limit" value=".001" />
+			<param name="diagnostic_period" value="0.25" />
+			<param name="max_loop_frequency" value="25.0" />
+			<param name="min_loop_frequency" value="25.0" />
+		</node>
+		<node name="drive_cv" pkg="motor_controllers" type="bangbang.py" ns="cusub_common/motor_controllers">
+			<param name="setpoint_topic" value="cv/drive/setpoint" />
+			<param name="state_topic" value="cv/drive/state" />
+			<param name="control_effort_topic" value="cv/drive/control_effort" />
+			<param name="deadzone_size" value="30" />
+			<param name="left_bang_effort" value="60" />
+			<param name="right_bang_effort" value="-60" />
+		</node>
+		<node pkg="topic_tools" type="mux" name="strafe_mux" ns="cusub_common/motor_controllers" args="mux/strafe/control_effort pid/strafe/control_effort cv/strafe/control_effort">
+			<remap from="mux" to="strafe_mux"/>
+			<param name="initial_topic " value="pid/strafe/control_effort" />
+		</node>
+		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/strafe">
+			<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_strafe.yaml" />
+			<param name="rate" value="25" />
+			<param name="upper_limit" value="100" />
+			<param name="lower_limit" value="-100" />
+			<param name="windup_limit" value=".001" />
+			<param name="diagnostic_period" value="0.25" />
+			<param name="max_loop_frequency" value="25.0" />
+			<param name="min_loop_frequency" value="25.0" />
+		</node>
+		<node name="strafe_cv" pkg="motor_controllers" type="bangbang.py" ns="cusub_common/motor_controllers">
+			<param name="setpoint_topic" value="cv/strafe/setpoint" />
+			<param name="state_topic" value="cv/strafe/state" />
+			<param name="control_effort_topic" value="cv/strafe/control_effort" />
+			<param name="deadzone_size" value="30" />
+			<param name="left_bang_effort" value="-100" />
+			<param name="right_bang_effort" value="100" />
+		</node>
+
+	</group>
+
+</launch>

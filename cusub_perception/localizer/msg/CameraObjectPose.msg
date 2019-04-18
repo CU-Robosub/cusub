@@ -1,0 +1,2 @@
+geometry_msgs/PoseStamped object_pose
+string object_frame_id

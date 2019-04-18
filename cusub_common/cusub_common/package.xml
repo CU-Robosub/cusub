@@ -18,6 +18,7 @@
     <run_depend>pni_trax_imu</run_depend>
     <run_depend>pololu_controller</run_depend>
     <run_depend>sparton_imu</run_depend>
+    <run_depend>gazebo_drivers</run_depend>
 
     <!-- debugging packages -->
     <run_depend>console</run_depend>
@@ -25,9 +26,8 @@
     <run_depend>qt_console</run_depend>
     <run_depend>teleop</run_depend>
 
-    <!-- local controll packages -->
-    <run_depend>pid_controller</run_depend>
-    <run_depend>bangbang</run_depend>
+    <!-- motor control packages -->
+    <run_depend>motor_controllers</run_depend>
 
     <!-- other packages -->
     <run_depend>waypoint_navigator</run_depend>

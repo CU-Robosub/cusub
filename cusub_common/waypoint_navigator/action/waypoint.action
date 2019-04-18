@@ -1,10 +1,18 @@
 # Define the goal
+
+int32 YAW_MODE=1
+int32 STRAFE_MODE=2
+
 int32 movement_mode
 float64 target_yaw
 geometry_msgs/PoseStamped goal_pose
+
 ---
+
 # Define the end result
 bool complete
+
 ---
+
 # Define a feedback message that can be incrementally sent
 nav_msgs/Odometry subs_pose

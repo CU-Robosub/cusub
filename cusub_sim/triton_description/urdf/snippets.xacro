@@ -7,8 +7,20 @@
 
   <xacro:macro name="ocam_camera_macro" params="robot_namespace camera_id frame *axis *origin">
 
+  <joint name="${robot_namespace}/camera_${camera_id}_optical_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera
+        image won't be aligned properly with the frame it is supposedly
+        originating from -->
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    <parent link="${robot_namespace}/${frame}"/>
+    <child link="${robot_namespace}/${frame}_optical"/>
+  </joint>
+
+  <link name="${robot_namespace}/${frame}_optical">
+  </link>
+
   <!--camera_link-->
-  <link name="${robot_namespace}/camera_${camera_id}">
+  <link name="${robot_namespace}/${frame}">
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
@@ -28,14 +40,14 @@
     </visual>
   </link>
 
-  <joint name="${robot_namespace}/camera_${camera_id}_joint" type="fixed">
+  <joint name="${robot_namespace}/${frame}_joint" type="fixed">
     <xacro:insert_block name="axis" />
     <xacro:insert_block name="origin" />
     <parent link="${namespace}/base_link"/>
-    <child link="${robot_namespace}/camera_${camera_id}"/>
+    <child link="${robot_namespace}/${frame}"/>
   </joint>
 
-  <gazebo reference="${robot_namespace}/camera_${camera_id}">
+  <gazebo reference="${robot_namespace}/${frame}">
     <sensor type="camera" name="rgb_camera">
       <update_rate>30.0</update_rate>
       <camera name="rgb_camera">
@@ -65,7 +77,7 @@
         <cameraName>camera_${camera_id}</cameraName>
         <imageTopicName>image_raw</imageTopicName>
         <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-        <frameName>${frame}</frameName>
+        <frameName>${frame}_optical</frameName>
         <distortionK1>0</distortionK1>
         <distortionK2>0</distortionK2>
         <distortionK3>0</distortionK3>

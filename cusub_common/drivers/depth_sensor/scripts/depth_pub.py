@@ -14,16 +14,30 @@ class Depth_Sensor():
     def __init__(self):
         self.zero_sub = rospy.Subscriber(
             "zero_command", Empty, self.zero_command, queue_size=1)
-        self.pub_Pose = rospy.Publisher(
-            'depth', PoseWithCovarianceStamped, queue_size=1)
-        self.pub_Pose_data = PoseWithCovarianceStamped()
-        self.pub_Pose_data.pose.covariance = [0, 0, 0, 0, 0, 0,
+
+        self.pub_odom = rospy.Publisher(
+            'depth_odom', PoseWithCovarianceStamped, queue_size=1)
+        self.pub_map = rospy.Publisher(
+            'depth_map', PoseWithCovarianceStamped, queue_size=1)
+
+        self.pub_odom_data = PoseWithCovarianceStamped()
+        self.pub_odom_data.pose.covariance = [0, 0, 0, 0, 0, 0,
                                               0, 0, 0, 0, 0, 0,
                                               0, 0, 0.01, 0, 0, 0,
                                               0, 0, 0, 0, 0, 0,
                                               0, 0, 0, 0, 0, 0,
                                               0, 0, 0, 0, 0, 0]
-        self.pub_Pose_data.header.frame_id = "depth_frame"
+        self.pub_odom_data.header.frame_id = "leviathan/description/depth_odom_frame"
+
+        self.pub_map_data = PoseWithCovarianceStamped()
+        self.pub_map_data.pose.covariance = [0, 0, 0, 0, 0, 0,
+                                              0, 0, 0, 0, 0, 0,
+                                              0, 0, 0.01, 0, 0, 0,
+                                              0, 0, 0, 0, 0, 0,
+                                              0, 0, 0, 0, 0, 0,
+                                              0, 0, 0, 0, 0, 0]
+        self.pub_map_data.header.frame_id = "leviathan/description/depth_map_frame"
+
         self.ser = serial.Serial(
             '/dev/serial/by-id/usb-Adafruit_Industries_Trinket_M0-if00', '115200')
 
@@ -46,7 +60,7 @@ class Depth_Sensor():
             #kswitch, adepth = a.split(",",1)
 
             pressure_mbar = float(a[1:])
-            depth_m = (pressure_mbar-797.11)*100/(1030*9.8)
+            depth_m = -1*(pressure_mbar-797.11)*100/(1030*9.8)
 
             #kswitch = int(kswitch)
 
@@ -61,10 +75,17 @@ class Depth_Sensor():
 	      killed.data = False
             """
             # publish
-            self.pub_Pose_data.header.stamp = rospy.Time.now()
-            self.pub_Pose_data.header.seq += 1
-            self.pub_Pose_data.pose.pose.position.z = depth_m
-            self.pub_Pose.publish(self.pub_Pose_data)
+            self.pub_odom_data.header.stamp = rospy.Time.now()
+            self.pub_odom_data.header.seq += 1
+            self.pub_odom_data.pose.pose.position.z = depth_m
+
+            self.pub_map_data.header.stamp = rospy.Time.now()
+            self.pub_map_data.header.seq += 1
+            self.pub_map_data.pose.pose.position.z = depth_m
+
+            self.pub_odom.publish(self.pub_odom_data)
+            self.pub_map.publish(self.pub_map_data)
+
             # self.kill_pub.publish(killed)
         except Exception as e:
             print e

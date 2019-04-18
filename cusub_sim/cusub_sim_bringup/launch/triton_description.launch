@@ -1,0 +1,20 @@
+<launch>
+
+    <arg name="x_pos" default="-7.5"/>
+    <arg name="y_pos" default="-1"/>
+    <arg name="z_pos" default="-1"/>
+    <arg name="yaw_orient" default="0"/>
+    <arg name="namespace" default="triton/description" />
+
+
+    <include file="$(find triton_description)/launch/upload.launch">
+        <arg name="x" default="$(arg x_pos)"/>
+        <arg name="y" default="$(arg y_pos)"/>
+        <arg name="z" default="$(arg z_pos)"/>
+        <arg name="yaw" default="$(arg yaw_orient)"/>
+        <arg name="namespace" default="$(arg namespace)"/>
+    </include>
+
+    <node pkg="tf" type="static_transform_publisher" name="world_triton_odom_broadcaster" args="0 0 0 0 0 0 world $(arg namespace)/map 50" />
+
+</launch>

@@ -60,6 +60,15 @@
         </material>
       </visual>
 
+      <collision name="north">
+        <pose>9 0 -2 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>.1 12 4</size>
+          </box>
+        </geometry>
+      </collision>
+
       <visual name="south">
         <cast_shadows>false</cast_shadows>
         <pose>-9 0 -2 0 0 0</pose>
@@ -75,6 +84,15 @@
           </script>
         </material>
       </visual>
+
+      <collision name="south">
+        <pose>-9 0 -2 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>.1 12 4</size>
+          </box>
+        </geometry>
+      </collision>
 
       <visual name="east">
         <cast_shadows>false</cast_shadows>
@@ -92,6 +110,15 @@
         </material>
       </visual>
 
+      <collision name="east">
+        <pose>0 -6 -2 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>18 .1 4</size>
+          </box>
+        </geometry>
+      </collision>
+
       <visual name="west">
         <cast_shadows>false</cast_shadows>
         <pose>0 6 -2 0 0 0</pose>
@@ -107,6 +134,16 @@
           </script>
         </material>
       </visual>
+
+      <collision name="west">
+        <pose>0 6 -2 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>18 .1 4</size>
+          </box>
+        </geometry>
+      </collision>
+
     </link>
   </model>
 </sdf>

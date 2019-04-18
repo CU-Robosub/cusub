@@ -1,9 +1,0 @@
-<launch>
-
-    <arg name="config_filename" default="training_data_generator_default.yaml"/>
-
-    <node name="training_data_generator" pkg="leviathan_gazebo_drivers" type="training_data_generator.py">
-	    <rosparam command="load" file="$(find leviathan_gazebo_drivers)/config/$(arg config_filename)"/>
-    </node>
-
-</launch>
