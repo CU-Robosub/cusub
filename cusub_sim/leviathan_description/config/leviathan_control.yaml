@@ -1,16 +1,15 @@
-leviathan:
-  # Publish all joint states -----------------------------------
-  leviathan_joint_state_controller:
-    type: joint_state_controller/JointStateController
-    publish_rate: 50
+# Publish all joint states -----------------------------------
+leviathan_joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 50
 
-  # Position Controllers ---------------------------------------
-  outer_controller:
-    type: position_controllers/JointPositionController
-    joint: leviathan/gripper/outer_joint
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+# Position Controllers ---------------------------------------
+outer_controller:
+  type: position_controllers/JointPositionController
+  joint: leviathan/description/gripper/outer_joint
+  pid: {p: 100.0, i: 0.01, d: 10.0}
 
-  inner_controller:
-    type: position_controllers/JointPositionController
-    joint: leviathan/gripper/inner_joint
-    pid: {p: 100.0, i: 0.01, d: 10.0}
+inner_controller:
+  type: position_controllers/JointPositionController
+  joint: leviathan/description/gripper/inner_joint
+  pid: {p: 100.0, i: 0.01, d: 10.0}

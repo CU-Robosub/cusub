@@ -144,8 +144,8 @@ class JoyTeleop(object):
         pub_depth = rospy.Publisher('motor_controllers/pid/depth/setpoint',
                                     Float64, queue_size=10)
 
-        gripper_outer_pub = rospy.Publisher('/leviathan/outer_controller/command', Float64, queue_size=1)
-        gripper_inner_pub = rospy.Publisher('/leviathan/inner_controller/command', Float64, queue_size=1)
+        gripper_outer_pub = rospy.Publisher('/leviathan/description/outer_controller/command', Float64, queue_size=1)
+        gripper_inner_pub = rospy.Publisher('/leviathan/description/inner_controller/command', Float64, queue_size=1)
 
         self.strafe_axes = rospy.get_param("~strafe_axes", self.strafe_axes)
         self.drive_axes = rospy.get_param("~drive_axes", self.drive_axes)

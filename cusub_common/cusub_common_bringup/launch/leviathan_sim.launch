@@ -24,5 +24,11 @@
 
         <include file="$(find waypoint_navigator)/launch/waypoint_navigator.launch"/>
 
+        <group ns="description">
+            <rosparam file="$(find leviathan_description)/config/leviathan_control.yaml" command="load"/>
+            <node name="controller_spawner_lev" pkg="controller_manager" type="spawner" respawn="false"
+                args="leviathan_joint_state_controller outer_controller inner_controller"/>
+        </group>
+
     </group>
 </launch>
