@@ -45,7 +45,7 @@ class RouletteWatershedServer():
     def localize(self, req):
 
         img = self.bridge.imgmsg_to_cv2(req.image, "passthrough")
-        debug_img = img.copy()
+        #debug_img = img.copy()
 
         # Fill Background
         markers = np.ones((req.image.height, req.image.width), dtype=np.int32)
@@ -54,6 +54,9 @@ class RouletteWatershedServer():
         poses = []
         classes = []
         for box in req.boxes:
+
+            if box.Class != "roulette":
+                continue
 
             box_margin = 20
 
@@ -75,6 +78,9 @@ class RouletteWatershedServer():
             #cv2.rectangle(debug_img, (m_xmin, m_ymin), (m_xmax, m_ymax), (0,0,255), 3)
 
             marker_count += 1
+
+        if marker_count == 2: # noting found
+            return None, None
 
         cv2.watershed(img, markers)
 
@@ -149,9 +155,7 @@ class RouletteWatershedServer():
         cv2.circle(debug_img, marker_right, 5, (0,0,255), -1)
         cv2.circle(debug_img, marker_bottom, 5, (0,0,255), -1)
         cv2.circle(debug_img, marker_top, 5, (0,0,255), -1)
-        """
 
-        """
         cv2.imshow('image', debug_img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
