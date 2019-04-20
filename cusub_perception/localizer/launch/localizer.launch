@@ -18,4 +18,6 @@
   <node name="gate_midpoint" pkg="localizer" type="gate_midpoint_srv.py" output="screen" />
   <node name="dice_box" pkg="localizer" type="dice_box_srv.py" output="screen" />
 
+  <node name="roulette_watershed" pkg="localizer" type="roulette_watershed_srv.py" output="screen" />
+
 </launch>

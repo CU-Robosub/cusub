@@ -172,6 +172,8 @@ class Mapper(object):
         self.dice5_unfiltered_pub = rospy.Publisher('cusub_cortex/unfiltered/dice5_pose', PoseStamped, queue_size=10)
         self.dice6_unfiltered_pub = rospy.Publisher('cusub_cortex/unfiltered/dice6_pose', PoseStamped, queue_size=10)
 
+        self.roulette_unfiltered_pub = rospy.Publisher('cusub_cortex/unfiltered/roulette', PoseStamped, queue_size=10)
+
         self.dice1_pose = PoseStamped()
         self.dice2_pose = PoseStamped()
         self.dice5_pose = PoseStamped()
@@ -186,6 +188,8 @@ class Mapper(object):
         self.dice2_found = False
         self.dice5_found = False
         self.dice6_found = False
+
+        self.roulette_found = False
 
         # start gate
         self.start_gate_pub = rospy.Publisher('cusub_cortex/mapper_out/start_gate', PoseStamped, queue_size=10)
@@ -262,6 +266,10 @@ class Mapper(object):
             self.start_gate_pose = transformed_pose 
             self.start_gate_found = True
 
+        elif detection.class_id == 'roulette':
+            self.roulette_unfiltered_pose = transformed_pose
+            self.roulette_found = True
+
     def transform_occam_to_map(self, occam_pose):
         try:
             self.listener.waitForTransform('/'+ self.namespace + '/map', occam_pose.header.frame_id, occam_pose.header.stamp, rospy.Duration(0.2))
@@ -305,6 +313,9 @@ class Mapper(object):
             if self.start_gate_found:
                 self.start_gate_pub.publish(self.start_gate_pose)
                 self.start_gate_unfiltered_pub.publish(self.start_gate_unfiltered_pose)
+
+            if self.roulette_found:
+                self.roulette_unfiltered_pub.publish(self.roulette_unfiltered_pose)
 
             self.map.publish_mapped()
 
