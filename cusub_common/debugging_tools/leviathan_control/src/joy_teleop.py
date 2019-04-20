@@ -20,6 +20,7 @@ class JoyTeleop(object):
     depth_axes = 3
     pitch_axes = 2
     roll_axes = 2
+    gripper_axes = 5
 
     default_depth = 0
 
@@ -29,6 +30,7 @@ class JoyTeleop(object):
     depth_val = 0.0
     pitch_val = 0.0
     roll_val = 0.0
+    gripper_val = 1.0
 
     depth_f64 = None
 
@@ -40,7 +42,7 @@ class JoyTeleop(object):
     yaw_sensitivity = 0.02
     drive_sensitivity = 0.02
     strafe_sensitivity = 0.02
-    depth_sensitivity = 0.02
+    depth_sensitivity = 0.01
 
     dropper_triggered = False
     left_torpedo_triggered = False
@@ -70,6 +72,7 @@ class JoyTeleop(object):
         self.depth_val = data.axes[self.depth_axes]
         self.pitch_val = data.axes[self.pitch_axes]
         self.roll_val = data.axes[self.roll_axes]
+        self.gripper_val = data.axes[self.gripper_axes]
 
     def driveStateCallback(self, data):
         if not self.current_drive_updated:
@@ -141,6 +144,9 @@ class JoyTeleop(object):
         pub_depth = rospy.Publisher('motor_controllers/pid/depth/setpoint',
                                     Float64, queue_size=10)
 
+        gripper_outer_pub = rospy.Publisher('/leviathan/description/outer_controller/command', Float64, queue_size=1)
+        gripper_inner_pub = rospy.Publisher('/leviathan/description/inner_controller/command', Float64, queue_size=1)
+
         self.strafe_axes = rospy.get_param("~strafe_axes", self.strafe_axes)
         self.drive_axes = rospy.get_param("~drive_axes", self.drive_axes)
         self.yaw_axes = rospy.get_param("~yaw_axes", self.yaw_axes)
@@ -199,6 +205,14 @@ class JoyTeleop(object):
             pub_pitch.publish(pitch_f64)
             #roll_f64.data = self.roll_val*math.radians(15.0) # allow 15 deg roll
             #pub_roll.publish(roll_f64)
+
+            # 1.0 to -1.0, remap 0.65 to 0.0
+            grip = self.gripper_val * 100.0
+
+            outer_f64 = Float64(grip)
+            inner_f64 = Float64(grip)
+            gripper_outer_pub.publish(outer_f64)
+            gripper_inner_pub.publish(inner_f64)
 
             # timer used to run in another thread
             if self.dropper_triggered:

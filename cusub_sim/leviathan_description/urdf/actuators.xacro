@@ -57,4 +57,217 @@
     <origin xyz="-0.453136 -0.007874 -0.060706" rpy="0 0 -1.5707963" />
     </xacro:thruster_macro>
 
+  <link
+    name="${namespace}/gripper_link">
+    <inertial>
+      <origin
+        xyz="-3.05026979665671E-05 2.29258765859729E-10 0.129332205902841"
+        rpy="0 0 0" />
+      <mass
+        value="0.001" />
+      <inertia
+        ixx="1.0E-5"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="1.0E-5"
+        iyz="0.0"
+        izz="1.0E-5" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://leviathan_description/meshes/gripper_link.stl" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.1 0.1 0.1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://leviathan_description/meshes/gripper_link.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="${namespace}/gripper/inner_link">
+    <inertial>
+      <origin
+        xyz="-2.49994954249532E-05 -0.00573643081918815 0.0251275882803392"
+        rpy="0 0 0" />
+      <mass
+        value="0.001" />
+      <inertia
+        ixx="1.0E-5"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="1.0E-5"
+        iyz="0.0"
+        izz="1.0E-5" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://leviathan_description/meshes/inner_link.stl" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.1 0.1 0.1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://leviathan_description/meshes/inner_link.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="${namespace}/gripper/inner_joint"
+    type="revolute">
+    <origin
+      xyz="0 -0.2080920000001 0.02"
+      rpy="1.64478052298944 0 0" />
+    <parent
+      link="${namespace}/gripper_link" />
+    <child
+      link="${namespace}/gripper/inner_link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-0.65"
+      upper="0.0"
+      effort="1"
+      velocity="1" />
+  </joint>
+  <link
+    name="${namespace}/gripper/outer_link">
+    <inertial>
+      <origin
+        xyz="-2.49973932494377E-05 0.00722026359518433 0.0253433707612258"
+        rpy="0 0 0" />
+      <mass
+        value="0.001" />
+      <inertia
+        ixx="1.0E-5"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="1.0E-5"
+        iyz="0.0"
+        izz="1.0E-5" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://leviathan_description/meshes/outer_link.stl" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.1 0.1 0.1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://leviathan_description/meshes/outer_link.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="${namespace}/gripper/outer_joint"
+    type="revolute">
+    <origin
+      xyz="0 -0.2080920000001 -0.02"
+      rpy="1.49548129533638 0 0" />
+    <parent
+      link="${namespace}/gripper_link" />
+    <child
+      link="${namespace}/gripper/outer_link" />
+    <axis
+      xyz="1 0 0" />    
+    <limit
+      lower="0.0"
+      upper="0.65"
+      effort="1"
+      velocity="1" />
+  </joint>
+
+  <transmission name="${namespace}/gripper/outer_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${namespace}/gripper/outer_joint">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${namespace}/gripper/outer_servo">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+  </transmission>
+
+  <transmission name="${namespace}/gripper/inner_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${namespace}/gripper/inner_joint">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${namespace}/gripper/inner_servo">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+  </transmission>
+
+  <gazebo reference="${namespace}/gripper_link">
+      <material>Gazebo/DarkGray</material>
+  </gazebo>
+  <gazebo reference="${namespace}/gripper/outer_link">
+      <material>Gazebo/DarkGray</material>
+  </gazebo>
+  <gazebo reference="${namespace}/gripper/inner_link">
+      <material>Gazebo/DarkGray</material>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>${namespace}</robotNamespace>
+      <legacyModeNS>true</legacyModeNS>
+    </plugin>
+  </gazebo>
+
+  <joint
+    name="${namespace}/gripper_joint"
+    type="fixed">
+    <origin
+      xyz="0.30 -0.14 -0.18"
+      rpy="0 1.57 1.57" />
+    <parent
+      link="${namespace}/base_link" />
+    <child
+      link="${namespace}/gripper_link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      effort="0"
+      velocity="0" />
+  </joint>
+
 </robot>
