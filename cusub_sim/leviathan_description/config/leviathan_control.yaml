@@ -5,11 +5,11 @@ leviathan_joint_state_controller:
 
 # Position Controllers ---------------------------------------
 outer_controller:
-  type: position_controllers/JointPositionController
+  type: effort_controllers/JointEffortController
   joint: leviathan/description/gripper/outer_joint
   pid: {p: 100.0, i: 0.01, d: 10.0}
 
 inner_controller:
-  type: position_controllers/JointPositionController
+  type: effort_controllers/JointEffortController
   joint: leviathan/description/gripper/inner_joint
   pid: {p: 100.0, i: 0.01, d: 10.0}

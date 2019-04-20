@@ -97,6 +97,18 @@
 
   <xacro:macro name="downcam_camera_macro" params="robot_namespace camera_id frame *axis *origin">
 
+  <joint name="${robot_namespace}/camera_${camera_id}_optical_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera
+        image won't be aligned properly with the frame it is supposedly
+        originating from -->
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    <parent link="${robot_namespace}/${frame}"/>
+    <child link="${robot_namespace}/${frame}_optical"/>
+  </joint>
+
+  <link name="${robot_namespace}/${frame}_optical">
+  </link>
+
   <!--camera_link-->
   <link name="${robot_namespace}/${frame}">
     <collision>
@@ -154,7 +166,7 @@
         <cameraName>camera_${camera_id}</cameraName>
         <imageTopicName>image_raw</imageTopicName>
         <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-        <frameName>${frame}</frameName>
+        <frameName>${frame}_optical</frameName>
         <distortionK1>0</distortionK1>
         <distortionK2>0</distortionK2>
         <distortionK3>0</distortionK3>

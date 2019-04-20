@@ -71,7 +71,7 @@ class PID_Pololu():
                                            Float64, self.strafe_callback)
 
 
-        self.yaw_setpoint_pub = rospy.Publisher('local_control/pid/yaw/setpoint',
+        self.yaw_setpoint_pub = rospy.Publisher('cusub_common/motor_controllers/pid/yaw/setpoint',
                                                 Float64,queue_size=1)
         self.yaw_setpoint_pub_data = Float64()
 

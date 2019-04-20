@@ -42,7 +42,7 @@ class JoyTeleop(object):
     yaw_sensitivity = 0.02
     drive_sensitivity = 0.02
     strafe_sensitivity = 0.02
-    depth_sensitivity = 0.02
+    depth_sensitivity = 0.01
 
     dropper_triggered = False
     left_torpedo_triggered = False
@@ -207,10 +207,10 @@ class JoyTeleop(object):
             #pub_roll.publish(roll_f64)
 
             # 1.0 to -1.0, remap 0.65 to 0.0
-            grip = (self.gripper_val + 1.0) * (0.65 / 2.0)
+            grip = self.gripper_val * 100.0
 
             outer_f64 = Float64(grip)
-            inner_f64 = Float64(-1*grip)
+            inner_f64 = Float64(grip)
             gripper_outer_pub.publish(outer_f64)
             gripper_inner_pub.publish(inner_f64)
 

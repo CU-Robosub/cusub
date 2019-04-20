@@ -64,14 +64,14 @@
         xyz="-3.05026979665671E-05 2.29258765859729E-10 0.129332205902841"
         rpy="0 0 0" />
       <mass
-        value="0.0685200444942305" />
+        value="0.001" />
       <inertia
-        ixx="5.09046218363978E-05"
-        ixy="2.90940254882255E-15"
-        ixz="1.40373996687203E-07"
-        iyy="5.09050089301083E-05"
-        iyz="-1.05505321507431E-12"
-        izz="3.87093710476453E-10" />
+        ixx="1.0E-5"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="1.0E-5"
+        iyz="0.0"
+        izz="1.0E-5" />
     </inertial>
     <visual>
       <origin
@@ -104,14 +104,14 @@
         xyz="-2.49994954249532E-05 -0.00573643081918815 0.0251275882803392"
         rpy="0 0 0" />
       <mass
-        value="0.0120633523009251" />
+        value="0.001" />
       <inertia
-        ixx="0"
-        ixy="0"
-        ixz="0"
-        iyy="0"
-        iyz="0"
-        izz="0" />
+        ixx="1.0E-5"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="1.0E-5"
+        iyz="0.0"
+        izz="1.0E-5" />
     </inertial>
     <visual>
       <origin
@@ -155,65 +155,6 @@
       effort="1"
       velocity="1" />
   </joint>
-  <!--
-  <link
-    name="${namespace}/gripper/pusher_link">
-    <inertial>
-      <origin
-        xyz="0.00011715199114278 1.32787251606671E-15 0.0375874379080091"
-        rpy="0 0 0" />
-      <mass
-        value="0.00592950115592324" />
-      <inertia
-        ixx="0"
-        ixy="0"
-        ixz="0"
-        iyy="0"
-        iyz="0"
-        izz="0" />
-    </inertial>
-    <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://leviathan_description/meshes/pusher_link.stl" />
-      </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://leviathan_description/meshes/pusher_link.stl" />
-      </geometry>
-    </collision>
-  </link>
-  <joint
-    name="${namespace}/gripper/pusher_joint"
-    type="prismatic">
-    <origin
-      xyz="0 -0.144109728787135 0"
-      rpy="1.5707963267949 0 0" />
-    <parent
-      link="${namespace}/gripper_link" />
-    <child
-      link="${namespace}/gripper/pusher_link" />
-    <axis
-      xyz="0 0 1" />
-    <limit
-      lower="0.0"
-      upper="0.02"
-      effort="1"
-      velocity="1" />
-  </joint>-->
   <link
     name="${namespace}/gripper/outer_link">
     <inertial>
@@ -221,14 +162,14 @@
         xyz="-2.49973932494377E-05 0.00722026359518433 0.0253433707612258"
         rpy="0 0 0" />
       <mass
-        value="0.0145505838335253" />
+        value="0.001" />
       <inertia
-        ixx="0"
-        ixy="0"
-        ixz="0"
-        iyy="0"
-        iyz="0"
-        izz="0" />
+        ixx="1.0E-5"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="1.0E-5"
+        iyz="0.0"
+        izz="1.0E-5" />
     </inertial>
     <visual>
       <origin
@@ -276,10 +217,10 @@
   <transmission name="${namespace}/gripper/outer_transmission">
     <type>transmission_interface/SimpleTransmission</type>
       <joint name="${namespace}/gripper/outer_joint">
-        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       </joint>
       <actuator name="${namespace}/gripper/outer_servo">
-        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
         <mechanicalReduction>1</mechanicalReduction>
       </actuator>
   </transmission>
@@ -287,10 +228,10 @@
   <transmission name="${namespace}/gripper/inner_transmission">
     <type>transmission_interface/SimpleTransmission</type>
       <joint name="${namespace}/gripper/inner_joint">
-        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       </joint>
       <actuator name="${namespace}/gripper/inner_servo">
-        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
         <mechanicalReduction>1</mechanicalReduction>
       </actuator>
   </transmission>
