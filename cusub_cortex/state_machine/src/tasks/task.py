@@ -91,7 +91,7 @@ class Objective(smach.State):
         Returns 0 if successfully reached the point
         Returns 1 if aborted
         """
-        assert type(targetPose) == Pose or type(targetPose) == type(None)
+        assert type(targetPose) == Pose or type(targetPose) == PoseStamped or type(targetPose) == type(None)
 
         # Wait where we currently are until being aborted
         if type(targetPose) == type(None):
@@ -101,15 +101,15 @@ class Objective(smach.State):
             return "aborted"
 
         wpGoal = waypointGoal()
-        wpGoal.goal_pose.header.frame_id = 'leviathan/description/odom'
-        wpGoal.goal_pose.pose.position = targetPose.position
-        wpGoal.goal_pose.pose.orientation = targetPose.orientation
-        orientation_list = [ targetPose.orientation.x, \
-                             targetPose.orientation.y, \
-                             targetPose.orientation.z, \
-                             targetPose.orientation.w ]
-        (roll, pitch, targetYaw) = euler_from_quaternion(orientation_list)
-        wpGoal.target_yaw = targetYaw
+        if type(targetPose) == PoseStamped:
+            wpGoal.goal_pose.pose.position = targetPose.pose.position
+            wpGoal.goal_pose.pose.orientation = targetPose.pose.orientation
+            wpGoal.goal_pose.header.frame_id = targetPose.header.frame_id
+        else:
+            wpGoal.goal_pose.pose.position = targetPose.position
+            wpGoal.goal_pose.pose.orientation = targetPose.orientation
+            wpGoal.goal_pose.header.frame_id = 'leviathan/description/odom'
+
         if useYaw:
             wpGoal.movement_mode = YAW_MODE
         else:

@@ -58,7 +58,10 @@ class Search(Objective):
         for pose_and_wait in path: # path includes both a pose to reach and the waiting time
             pose = pose_and_wait[POSE_INDEX]
             wait_secs = pose_and_wait[WAIT_INDEX]
-            if self.goToPose(pose):
+            pose_stamped = PoseStamped()
+            pose_stamped.header.frame_id = 'leviathan/description/map'
+            pose_stamped.pose = pose
+            if self.goToPose(pose_stamped):
                 rospy.loginfo("---"+self.name+" aborted")
                 return "aborted"
             rospy.sleep(wait_secs) # wait at our destination this many seconds

@@ -12,6 +12,8 @@ from geometry_msgs.msg import Pose
 
 from cv_bridge import CvBridge, CvBridgeError
 
+import tf
+
 import numpy as np
 import cv2
 
@@ -64,7 +66,7 @@ class RouletteWatershedServer():
 
         return pt_arr
 
-    def points_by_max_minima(self, markers, debug_img):
+    def points_by_max_minima(self, image, markers, debug_img):
         """
         This function returns the points for the roulette outline
         by looking at left right top bottom maximums
@@ -101,9 +103,9 @@ class RouletteWatershedServer():
             cv2.circle(debug_img, pt_arr_2[2], 5, (0,0,255), -1)
             cv2.circle(debug_img, pt_arr_2[3], 5, (0,0,255), -1)
 
-        return pt_arr
+        return pt_arr, False
 
-    def get_points_by_contour(self, markers, debug_img):
+    def get_points_by_contour(self, image, markers, debug_img):
         """
         This functino returns points of the roulette by
         taking the contour and finding the polygon approximation
@@ -115,13 +117,89 @@ class RouletteWatershedServer():
         epsilon = 0.1*cv2.arcLength(contours[2],True)
         approx = cv2.approxPolyDP(contours[2], epsilon, True)
 
+        if len(approx) != 4:
+            # Fail
+            return None, None
+
         pt_arr = self.order_points(approx)
 
+        # divide polygon in 2 longitudinaly
+        # find midpoints 2-3 1-4
+        midpt_23 = (pt_arr[1] + pt_arr[2]) / 2.0
+        midpt_14 = (pt_arr[0] + pt_arr[3]) / 2.0
+
+        contour_top = np.array([pt_arr[1], midpt_23, midpt_14, pt_arr[0]]).reshape((-1,1,2)).astype(np.int32)
+        contour_bot = np.array([pt_arr[2], midpt_23, midpt_14, pt_arr[3]]).reshape((-1,1,2)).astype(np.int32)
+
+        # create mask of 1 half of roulette
+        shape = image.shape
+        shape = (shape[0], shape[1], 1)
+
+        mask = np.zeros(shape, np.uint8)
+        cv2.drawContours(mask, [contour_bot], -1, (255), -1)
+
+        green_low = 40
+        green_high = 75
+
+        red_low = 170
+        red_high = 10
+
+        NOT_SURE = 0
+        IS_RED = 1
+        IS_GREEN = 2
+
+        color_bot = NOT_SURE
+        color_top = NOT_SURE
+
+        # find color
+        color = cv2.mean(image, mask=mask)
+        color = np.array([[[color[0], color[1], color[2]]]], dtype=np.uint8)
+        hsv = cv2.cvtColor(color, cv2.COLOR_BGR2HSV)
+        hue = hsv[0][0][0]
+        print('bot_hue', hue)
+
+        if hue > green_low and hue < green_high:
+            color_bot = IS_GREEN
+        elif hue > red_low or hue < red_high:
+            color_bot = IS_RED
+
+        mask = np.zeros(shape, np.uint8)
+        cv2.drawContours(mask, [contour_top], -1, (255), -1)
+
+        color = cv2.mean(image, mask=mask)
+        color = np.array([[[color[0], color[1], color[2]]]], dtype=np.uint8)
+        hsv = cv2.cvtColor(color, cv2.COLOR_BGR2HSV)
+        hue = hsv[0][0][0]
+        print('top_hue', hue)
+
+        if hue > green_low and hue < green_high:
+            color_top = IS_GREEN
+        elif hue > red_low or hue < red_high:
+            color_top = IS_RED
+
+        if color_top == IS_GREEN and color_bot == IS_RED:
+            do_rotate = False
+        elif color_top == IS_RED and color_bot == IS_GREEN:
+            do_rotate = True
+        else:
+            # We dont know color!
+            return None
+
         if debug_img is not None:
+
+            # Show contours
             #cv2.drawContours(debug_img, contours, -1, (0,255,0), 3)
+
+            # show approx polygon
             cv2.polylines(debug_img,[approx],True,(0,255,255))
 
-        return pt_arr
+            # show midpoints
+            midpt_14_t = map(tuple, midpt_14)[0]
+            midpt_23_t = map(tuple, midpt_23)[0]
+            cv2.circle(debug_img, midpt_14_t, 5, (0,0,255), -1)
+            cv2.circle(debug_img, midpt_23_t, 5, (0,0,255), -1)
+
+        return pt_arr, do_rotate
 
     def localize(self, req):
 
@@ -169,9 +247,9 @@ class RouletteWatershedServer():
         cv2.watershed(img, markers)
 
         if self.method == self.METHOD_MAXMIN:
-            pt_arr = self.points_by_max_minima(markers, debug_img)
+            pt_arr, do_rotate = self.points_by_max_minima(img, markers, debug_img)
         elif self.method == self.METHOD_CONTOUR:
-            pt_arr = self.get_points_by_contour(markers, debug_img)
+            pt_arr, do_rotate = self.get_points_by_contour(img, markers, debug_img)
         else:
             # Fail
             return None, None
@@ -180,17 +258,57 @@ class RouletteWatershedServer():
             # Fail
             return None, None
 
-        if len(pt_arr) != 4:
-            # Fail
-            return None, None
+        _, rvec, tvec = cv2.solvePnP(self.roulette_truth_points, pt_arr, self.downcam_camera_matrix, self.downcam_distortion_coefs)
 
-        retval, rvec, tvec = cv2.solvePnP(self.roulette_truth_points, pt_arr, self.downcam_camera_matrix, self.downcam_distortion_coefs)
+        # Convert to 3x3 Rotation Matrix
+        rmat, _ = cv2.Rodrigues(rvec)
 
-        # # PnP uses different coord system, do quick conversion
+        # Convert to 4x4 Rotation Matrix
+        rmat = np.hstack((rmat, np.array([[0],[0],[0]])))
+        rmat = np.vstack((rmat, np.array([0,0,0,1])))
+
+        # Convert to Quaternion
+        rquat = tf.transformations.quaternion_from_matrix(rmat)
+
+        # Flip rotation
+
+        if do_rotate:
+
+            # Quat to axis angle
+            axis = np.array([0.0, 0.0, 0.0])
+            angle = 2 * np.arccos(rquat[3])
+            if (1 - (rquat[3] * rquat[3]) < 0.000001):
+                axis[0] = rquat[0]
+                axis[1] = rquat[1]
+                axis[2] = rquat[2]
+            else:
+                s = np.sqrt(1 - (rquat[3] * rquat[3]))
+                axis[0] = rquat[0] / s
+                axis[1] = rquat[1] / s
+                axis[2] = rquat[2] / s
+
+            # rotate angle 180
+            angle += 3.1415
+
+            # axis to quat
+            half_angle = angle / 2.0
+            s = np.sin(half_angle)
+
+            rquat[0] = axis[0] * s
+            rquat[1] = axis[1] * s
+            rquat[2] = axis[2] * s
+            rquat[3] = np.cos(half_angle)
+
         pose = Pose()
-        pose.position.x = tvec[0]
+
+        pose.position.x = tvec[0]   
         pose.position.y = tvec[1]
         pose.position.z = tvec[2]
+
+        pose.orientation.x = rquat[0]
+        pose.orientation.y = rquat[1]
+        pose.orientation.z = rquat[2]
+        pose.orientation.w = rquat[3]
 
         poses.append(pose)
 
@@ -230,6 +348,7 @@ class PsudoRequest():
 
 def test1():
     server = RouletteWatershedServer()
+    server.debug = True
 
     bridge = CvBridge()
     cv_image = cv2.imread('test.jpg', 3)

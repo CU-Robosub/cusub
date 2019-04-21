@@ -174,10 +174,14 @@ class Mapper(object):
 
         self.roulette_unfiltered_pub = rospy.Publisher('cusub_cortex/unfiltered/roulette', PoseStamped, queue_size=10)
 
+        self.roulette_pub = rospy.Publisher('cusub_cortex/mapper_out/roulette', PoseStamped, queue_size=10)
+
         self.dice1_pose = PoseStamped()
         self.dice2_pose = PoseStamped()
         self.dice5_pose = PoseStamped()
         self.dice6_pose = PoseStamped()
+
+        self.roulette_pose = PoseStamped()
 
         self.dice1_unfiltered_pose = PoseStamped()
         self.dice2_unfiltered_pose = PoseStamped()
@@ -208,6 +212,8 @@ class Mapper(object):
 
         self.dice5_filter = ExpWeightedAvg(20)
         self.dice6_filter = ExpWeightedAvg(20)
+
+        self.roulette_filter = ExpWeightedAvg(5)
 
         # tranforms
         self.listener = tf.TransformListener()
@@ -268,6 +274,10 @@ class Mapper(object):
 
         elif detection.class_id == 'roulette':
             self.roulette_unfiltered_pose = transformed_pose
+            new_pose = PoseStamped()
+            new_pose.pose = self.roulette_filter.get_new_avg_pose(transformed_pose.pose)
+            new_pose.header = transformed_pose.header
+            self.roulette_pose = new_pose
             self.roulette_found = True
 
     def transform_occam_to_map(self, occam_pose):
@@ -315,6 +325,7 @@ class Mapper(object):
                 self.start_gate_unfiltered_pub.publish(self.start_gate_unfiltered_pose)
 
             if self.roulette_found:
+                self.roulette_pub.publish(self.roulette_pose)
                 self.roulette_unfiltered_pub.publish(self.roulette_unfiltered_pose)
 
             self.map.publish_mapped()
