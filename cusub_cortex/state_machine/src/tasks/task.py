@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
 This class serves as the meta class for all tasks and objectives
+The best way to write a new task is to learn by example from a simple task, such as start gate
 """
 
 import smach
@@ -29,18 +30,16 @@ class Task(smach.StateMachine):
         super(Task, self).__init__(outcomes=outcomes)
 
     @abstractmethod
-    def initObjectives(self, searchAlg):
+    def initObjectives(self):
         """
         Initialize all objectives
-        params:
-        searchAlg : str, see search.py for examples
         """
         pass
 
     @abstractmethod
     def linkObjectives(self):
         """
-        Link the objectives (initialized in initObjectives() to the state machine with the proper state transitions
+        Link the objectives to the state machine
         """
         pass
 
@@ -51,6 +50,7 @@ class Task(smach.StateMachine):
         self.sm._states[cs].request_abort()
 
     def priorList2Pose(self,list_xyz):
+        """ Turn a pose list from the configuration file into a Pose message """
         pose = Pose()
         pose.position.x = list_xyz[0]
         pose.position.y = list_xyz[1]
@@ -68,10 +68,19 @@ class Objective(smach.State):
     pointReachedThreshold = 1.0
 
     def __init__(self, outcomes, objtv_name):
-        assert type(objtv_name) == str
+        """ Objective initialization method
+        
+        Parameters
+        ---------
+        outcomes : list of strs
+             strings of objective outcomes
+        objtv_name : str
+             name of the objective
+        """
         self.name = objtv_name
         rospy.Subscriber('cusub_common/odometry/filtered', Odometry, self.sub_pose_cb)
         self._abort_requested = False
+        self._replan_requested = False
         self.wayClient = actionlib.SimpleActionClient('cusub_common/waypoint', waypointAction)
         self.started = False
 
@@ -85,16 +94,24 @@ class Objective(smach.State):
         super(Objective, self).__init__(outcomes=outcomes)
 
     def goToPose(self, targetPose, useYaw=True):
+        """ Traverse to the targetPose given
+        
+        Parameters
+        ----------
+        targetPose : Pose
+             The pose to navigate to
+             If None, the sub will stop where it currently is and wait to be aborted
+        useYaw : bool
+             true : the waypoint navigtator will use yaw mode to navigate to the target pose
+             false : use strafe-drive mode to the target pose 
+        
+        Returns
+        -------
+        bool : success/aborted
+             1 aborted
+             0 success, waypoint reached
         """
-        Go to the point specified and block on success feedback from the waypoint client
-        NOTE: if None is passed in for the targetPose, then the sub will wait where it currently is until being aborted
-        Returns 0 if successfully reached the point
-        Returns 1 if aborted
-        """
-        assert type(targetPose) == Pose or type(targetPose) == PoseStamped or type(targetPose) == type(None)
-
-        # Wait where we currently are until being aborted
-        if type(targetPose) == type(None):
+        if type(targetPose) == type(None):  # Wait where we currently are until being aborted
             rospy.logwarn("Objective has instructed Sub to wait where it is until being aborted")
             while not self.abort_requested():
                 rospy.sleep(0.5)
@@ -131,17 +148,13 @@ class Objective(smach.State):
             rospy.sleep(0.25)
 
         rospy.loginfo("---reached pose")
-
-        # if res != None:
-        #     print("---wayClientResult: {}".format(res))
-        #     print(type(res))
-
         return False
 
     def sub_pose_cb(self, msg):
         self.curPose = msg.pose.pose # store the pose part of the odom msg
 
     def getDistance(self, point1, point2):
+        """ Get distance between 2 points """
         dx = point2.x - point1.x
         dy = point2.y - point1.y
         dz = point2.z - point1.z
@@ -152,9 +165,16 @@ class Objective(smach.State):
 
     def abort_requested(self):
         return self._abort_requested
-
     def request_abort(self):
         rospy.loginfo("---requesting abort of " + self.name + " objective")
         self._abort_requested = True
     def clear_abort(self):
         self._abort_requested = False
+
+    def replan_requested(self):
+        return self._abort_requested
+    def request_replan(self):
+        rospy.loginfo("---requesting replan of " + self.name + " objective")
+        self._replan_requested = True
+    def clear_replan(self):
+        self._replan_requested = False

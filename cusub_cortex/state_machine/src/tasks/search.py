@@ -22,17 +22,35 @@ WAIT_INDEX = 1
 class Search(Objective):
     """ Search state that implements an indicated search algorithm """
     outcomes = ['success','aborted']
-    def __init__(self, searchAlg, priorPose, searchTopic):
+    def __init__(self, searchAlg, priorPose, searchTopic, numQuitPoses=5):
+        """
+        Search objective initialization function
+        
+        Parameters
+        ---------
+        searchAlg : str
+             Search algorithm to navigate to the prior
+             'simple' is the only currently supported
+        priorPose : Pose
+             Prior pose of the task
+        searchTopic : str
+             Topic name to listen for task poses
+        numQuitPoses : int
+             Number of poses to receive before aborting and transitioning
+        """
+        
         rospy.loginfo("---Search objective initializing")
-        assert type(priorPose) == Pose
         self._loadSearchAlg(searchAlg)
         self.prior = priorPose
         rospy.Subscriber(searchTopic, PoseStamped, self.exit_callback)
+        self.numQuitPoses = numQuitPoses
+        self.numPosesReceived = 0
         
         super(Search, self).__init__(self.outcomes, "Search")
         
     def exit_callback(self, msg): # Abort on the first publishing
-        if not self.abort_requested():
+        self.numPosesReceived += 1
+        if not self.abort_requested() and self.numPosesReceived > self.numQuitPoses:
             self.request_abort()
         
     def _loadSearchAlg(self, searchAlg):
