@@ -1,0 +1,125 @@
+<?xml version='1.0'?>
+<sdf version="1.6">
+<model name="vampire_stake">
+
+    <pose>0 0 1.5 0 0 0</pose>
+
+    <link name="base_link">
+      <inertial>
+        <origin
+          xyz="0.0 0.0 0.0"
+          rpy="0 0 0" />
+        <mass
+          value="1.0" />
+        <inertia
+          ixx="1.0E-5"
+          ixy="0.0"
+          ixz="0.0"
+          iyy="1.0E-5"
+          iyz="0.0"
+          izz="1.0E-5" />
+      </inertial>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://vampire_stake/vampire_board.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://vampire_stake/vampire_board.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="lever_link">
+      <inertial>
+        <origin
+          xyz="0.0 0.0 0.0"
+          rpy="0 0 0" />
+        <mass
+          value="1.0" />
+        <inertia
+          ixx="1.0E-5"
+          ixy="0.0"
+          ixz="0.0"
+          iyy="1.0E-5"
+          iyz="0.0"
+          izz="1.0E-5" />
+      </inertial>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://vampire_stake/vampire_lever.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://vampire_stake/vampire_lever.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="lever_joint" type="prismatic">
+        <pose>0 0 0 0 0 0</pose>
+        <child>lever_link</child>
+        <parent>base_link</parent>
+        <axis>
+            <limit>
+                <lower>-0.05</lower>
+                <upper>0.45</upper>
+            </limit>
+            <dynamics>
+              <damping>0.1</damping>
+              <friction>0.2</friction>
+            </dynamics>
+            <xyz>1 0 0</xyz>
+        </axis>
+    </joint>
+
+    <link name="magic_base_link">
+      <inertial>
+        <origin
+          xyz="0.0 1.0 -2.0"
+          rpy="0 0 0" />
+        <mass
+          value="10.0" />
+        <inertia
+          ixx="1.0E-5"
+          ixy="0.0"
+          ixz="0.0"
+          iyy="1.0E-5"
+          iyz="0.0"
+          izz="1.0E-5" />
+      </inertial>
+      <visual name="visual">
+        <pose>0.3 0 -1.5 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.0 1.0 0.1</size>
+          </box>
+        </geometry>
+      </visual>
+      <collision name="collision">
+        <pose>0.3 0 -1.5 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.0 1.0 0.1</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="magic_base_joint" type="fixed">
+        <child>base_link</child>
+        <parent>magic_base_link</parent>
+    </joint>
+
+  </model>
+</sdf>
