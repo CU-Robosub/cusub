@@ -31,6 +31,12 @@ tasks:
     dice2: dice_box
     dice5: dice_box
     dice6: dice_box
+ dropper:
+  prior: [-7,-4.5,-1]
+  search_alg: simple
+  failed_repeat: false
+  object_localizers:
+    roulette: roulette_watershed
 
 mission_tasks: # Tasks To Do In Order
- - dice
+ - dropper
