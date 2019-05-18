@@ -47,7 +47,6 @@
 			<param name="rate" value="25" />
 			<param name="upper_limit" value="100" />
 			<param name="lower_limit" value="-100" />
-			<param name="windup_limit" value=".001" />
 			<param name="diagnostic_period" value="0.25" />
 			<param name="max_loop_frequency" value="25.0" />
 			<param name="min_loop_frequency" value="25.0" />
@@ -61,7 +60,6 @@
 			<param name="rate" value="25" />
 			<param name="upper_limit" value="100" />
 			<param name="lower_limit" value="-100" />
-			<param name="windup_limit" value=".001" />
 			<param name="diagnostic_period" value="0.25" />
 			<param name="max_loop_frequency" value="25.0" />
 			<param name="min_loop_frequency" value="25.0" />
@@ -84,7 +82,6 @@
 			<param name="rate" value="25" />
 			<param name="upper_limit" value="100" />
 			<param name="lower_limit" value="-100" />
-			<param name="windup_limit" value=".001" />
 			<param name="diagnostic_period" value="0.25" />
 			<param name="max_loop_frequency" value="25.0" />
 			<param name="min_loop_frequency" value="25.0" />
@@ -106,7 +103,6 @@
 			<param name="rate" value="25" />
 			<param name="upper_limit" value="100" />
 			<param name="lower_limit" value="-100" />
-			<param name="windup_limit" value=".001" />
 			<param name="diagnostic_period" value="0.25" />
 			<param name="max_loop_frequency" value="25.0" />
 			<param name="min_loop_frequency" value="25.0" />
