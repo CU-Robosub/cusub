@@ -1,6 +1,7 @@
 <launch>
+    <arg name="subname" default="leviathan"/>
     <node pkg="pololu_controller" type="old_controller.py" name="pololu_controller" output="screen" ns="cusub_common">
-        <param name="sub_yaml" value="$(find pololu_controller)/launch/sub.yaml" />
+        <rosparam command="load" file="$(find pololu_controller)/launch/$(arg subname).yaml" />
         <param name="baud_rate" value="115200" />
         <param name="rate_hz" value="10" />
         <param name="daisy_chain" value="false" />

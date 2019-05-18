@@ -26,12 +26,9 @@ import serial
 
 class Controller():
     def __init__(self):
-        f = rospy.get_param("pololu_controller/sub_yaml/")
-        paramlist = rosparam.load_file(f,default_namespace="motors")
-        for params, ns in paramlist:
-            rosparam.upload_params(ns,params)
-        port = rospy.get_param("pololu_controller/port_name/")
-        baud = rospy.get_param("pololu_controller/baud_rate/")
+        self.map = rospy.get_param("pololu_controller/map")
+        port = rospy.get_param("pololu_controller/port_name")
+        baud = rospy.get_param("pololu_controller/baud_rate")
         self.port = serial.Serial(port, baud, timeout=0.5)
         self.port.flush()
 
@@ -40,7 +37,13 @@ class Controller():
 
     def command_callback(self,msg):
 	# order: [front, frontright, frontleft, backright, backleft, back, left, right]
-        arr = [msg.data[0],0,msg.data[2],msg.data[3],msg.data[5],msg.data[4],msg.data[1],0,msg.data[7],msg.data[6]]
+        #arr = [msg.data[0],msg.data[2],msg.data[1],msg.data[3],msg.data[6],msg.data[7],msg.data[4],msg.data[5],0,0]
+        arr = []
+        for i in range(10):
+            if self.map[i] != 9:
+                arr.append(msg.data[int(self.map[i])])
+            else:
+                arr.append(0)
 
         serialBytes = [
         0x9f,

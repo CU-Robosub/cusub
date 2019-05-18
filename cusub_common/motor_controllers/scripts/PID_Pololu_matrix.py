@@ -38,10 +38,12 @@ class PID_Pololu():
         self.motor_array[7] = [ 0,  0, -0.2,   0, -.8,   0] #Right -.8
 
         '''FR, FL, BR, BL,  F,  B,  L,  R'''
-        self.flip_motor_array = np.array([1, 1, 1, 1, 1, 1, 1, 1])
+        self.flip_motor_array = np.array(rospy.get_param("flip_motor_array"))
         self.scale_array      = np.array([5, 5, 5, 5, 5, 5, 5, 5])
         self.offset_array     = np.array([1420, 1420, 1420, 1420,
                                           1500, 1500, 1500, 1500])
+
+        rospy.logfatal(self.flip_motor_array)
 
         ## Publisher for sending commands to the pololu
         self.motor_pub = rospy.Publisher('cusub_common/motor_controllers/pololu_control/command',

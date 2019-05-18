@@ -2,6 +2,9 @@
 
 	<arg name="setpoint" default="true" />
 	<arg name="pid_type" default="real" />
+	<arg name="subname" default="leviathan"/>
+
+	<rosparam command="load" file="$(find motor_controllers)/conf/$(arg subname).yaml" />
 
 	<node name="pose_pid" pkg="motor_controllers" type="Pose_PID.py" output="screen"/>
 	<node name="pid_pololu" pkg="motor_controllers" type="PID_Pololu_matrix.py" output="screen"/>

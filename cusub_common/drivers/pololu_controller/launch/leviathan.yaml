@@ -1,5 +1,7 @@
 # Pololu based motors
 
+map: [0, 2, 1, 3, 6, 7, 4, 5, 9, 9]
+
 front:
   pololu_id: 12
   motor_id: 0
