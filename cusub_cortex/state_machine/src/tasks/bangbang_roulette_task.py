@@ -21,12 +21,13 @@ from actuator.srv import ActivateActuator
 
 class BangBangRouletteTask(Task):
 
+    name = "bangbang_roulette"
     outcomes = ['task_success','task_aborted']
 
     def __init__(self, prior, searchAlg):
 
         super(BangBangRouletteTask, self).__init__(self.outcomes) # become a state machine first
-        self.initObjectives(prior, searchAlg)
+        self.initObjectives(self.getPrior(), rospy.get_param("tasks/" + self.name + "/search_alg"))
         self.linkObjectives()
 
     def initObjectives(self, prior, searchAlg):
