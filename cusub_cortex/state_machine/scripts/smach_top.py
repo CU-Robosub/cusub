@@ -18,15 +18,10 @@ from tasks.visit_task import VisitTask
 from tasks.bangbang_dice_task import BangBangDiceTask
 from tasks.bangbang_roulette_task import BangBangRouletteTask
 from tasks.naive_visual_servo_objective import NaiveVisualServoTask
-from tasks.dropper_task import DropperTask
+# from tasks.dropper_task import DropperTask
 # from tasks.bangbang_roulette_task import BangBangRouletteTask
 
-def genPoseMsg(list_xyz):
-    pose = Pose()
-    pose.position.x = list_xyz[0]
-    pose.position.y = list_xyz[1]
-    pose.position.z = list_xyz[2]
-    return pose
+
 
 def loadStateMachines(task_list):
     """
@@ -45,24 +40,20 @@ def loadStateMachines(task_list):
             task = task[6:] # trim "visit_"
             visit = True
 
-        # load params common to all tasks
-        prior = genPoseMsg(rospy.get_param("tasks/" + task + "/prior"))
-        search_alg = rospy.get_param("tasks/" + task + "/search_alg")
-
         if visit == True:
-            task_sm = VisitTask(prior, search_alg)
+            task_sm = VisitTask(task)
         elif task == "start_gate":
             task_sm = StartGate()
         elif task == "dice":
             task_sm = Dice()
         elif task == "bangbang_dice":
-            task_sm = BangBangDiceTask(prior, search_alg)
+            task_sm = BangBangDiceTask()
         elif task == "bangbang_roulette":
-            task_sm = BangBangRouletteTask(prior, search_alg)
-        elif task == "dropper":
-            task_sm = DropperTask(prior, search_alg)
+            task_sm = BangBangRouletteTask()
+        # elif task == "dropper":
+            # task_sm = DropperTask(prior, search_alg)
         elif task == "naive_visual_servo_objective":
-            task_sm = NaiveVisualServoTask(prior)
+            task_sm = NaiveVisualServoTask()
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 
@@ -81,9 +72,9 @@ def main():
     Loop through the statemachines in order and link them
     """
     rospy.init_node('smach_top')
-
+    
     # All Objectives depend on the waypoint server so let's wait for it to initalize here
-    wayClient = actionlib.SimpleActionClient('cusub_common/waypoint', waypointAction)
+    wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
     rospy.loginfo("Waiting for waypoint server")
     wayClient.wait_for_server()
     rospy.loginfo("---connected to server")

@@ -18,7 +18,7 @@ from std_msgs.msg import Empty
 
 
 class StartGate(Task):
-
+    name = "start_gate"
     outcomes = ['task_success','task_aborted']
 
     def __init__(self):
@@ -27,14 +27,13 @@ class StartGate(Task):
         self.linkObjectives()
 
     def initObjectives(self):
-        prior = self.priorList2Pose(rospy.get_param('tasks/start_gate/prior'))
-        search_alg = rospy.get_param("tasks/start_gate/search_alg")
-        self.search = Search(search_alg, prior, "cusub_cortex/mapper_out/start_gate")
+        search_alg = rospy.get_param("tasks/" + self.name + "/search_alg")
+        self.search = Search(self.getPrior(), search_alg, "cusub_cortex/mapper_out/start_gate")
         self.attack = Attack()
 
     def linkObjectives(self):
         with self: # we are a StateMachine
-            smach.StateMachine.add('Search', self.search, transitions={'aborted':'Attack', 'success':'Search'})
+            smach.StateMachine.add('Search', self.search, transitions={'found':'Attack', 'not_found':'Search'})
             smach.StateMachine.add('Attack', self.attack, transitions={'success':'task_success', 'aborted':'Attack'})
 
 class Attack(Objective):
@@ -42,25 +41,25 @@ class Attack(Objective):
     Tell the sub to go through the gate
     """
 
-    replanThreshold = 1.0 # if the change in startgate pose is greater than this value, we should replan our path there
     outcomes=['success','aborted']
 
     def __init__(self):
         rospy.loginfo("---Attack objective initializing")
         super(Attack, self).__init__(self.outcomes, "Attack")
         self.distBehind = float(rospy.get_param('tasks/start_gate/dist_behind_gate', 1.0))
+        replanThreshold = float(rospy.get_param('tasks/start_gate/replan_thresh', 1.0))
         self.first_pose_received = False
         self.start_gate_pose = None
         rospy.Subscriber("cusub_cortex/mapper_out/start_gate", PoseStamped, self.start_gate_callback)
 
     def start_gate_callback(self, msg):
-        # Set the first pose, note this case is different b/c we won't abort the Attack Objective
+        # Set the first pose and don't  abort the Attack Objective
         if self.start_gate_pose == None:
             self.start_gate_pose = msg
             return
-        
+
         changeInPose = self.getDistance(self.start_gate_pose.position, msg.position)
-        
+
         if changeInPose > self.replanThreshold:
             self.start_gate_pose = new_pose
             self.request_abort() # this will loop us back to execute
