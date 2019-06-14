@@ -4,6 +4,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <sensor_msgs/Image.h>
 #include <darknet_ros_msgs/BoundingBox.h>
+#include <vector>
 
 namespace pose_generator
 {
@@ -12,7 +13,7 @@ namespace pose_generator
         public:
             virtual bool generatePose(
                 sensor_msgs::Image& image, 
-                darknet_ros_msgs::BoundingBox bbs[],
+                std::vector<darknet_ros_msgs::BoundingBox>& bbs,
                 geometry_msgs::Pose& pose,
                 std::string& class_name
             ){;}

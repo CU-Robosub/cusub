@@ -9,6 +9,7 @@
 #include <darknet_ros_msgs/BoundingBoxes.h>
 #include <localizer/pose_generator.h>
 #include <localizer/start_gate_watershed.h>
+#include <geometry_msgs/Pose.h>
 
 namespace localizer_ns
 {
@@ -18,7 +19,7 @@ namespace localizer_ns
     virtual void onInit();
   private:
     void loadRosParams(ros::NodeHandle& nh);
-    void darknetCallback(const darknet_ros_msgs::BoundingBoxes& bbs);
+    void darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs);
     std::map<std::string, pose_generator::PoseGenerator*> mappings;
     ros::Publisher pub;
     ros::Subscriber sub;
