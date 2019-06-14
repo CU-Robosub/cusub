@@ -12,6 +12,9 @@ namespace localizer_ns
     // Sub to ros
     // init pub
     // load rosparams & create vector structures
+    pose_generator::StartGateWatershed sgw;
+    pose_gens.push_back(sgw);
+    NODELET_INFO("%lu", pose_gens.size());
   }
   void Localizer::loadRosParams()
   {

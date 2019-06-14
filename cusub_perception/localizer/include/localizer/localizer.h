@@ -6,7 +6,8 @@
 #include <vector>
 #include <string>
 #include <darknet_ros_msgs/BoundingBoxes.h>
-//#include <darknet_ros_msgs/BoundingBoxes.h>
+#include <localizer/pose_generator.h>
+#include <localizer/start_gate_watershed.h>
 
 namespace localizer_ns
 {
@@ -18,7 +19,7 @@ namespace localizer_ns
     void loadRosParams();
     void darknetCallback(const darknet_ros_msgs::BoundingBoxes& bbs);
     std::vector<std::string> class_names;
-//    std::vector<pose_generator::PoseGenerator> pose_generators;
+    std::vector<pose_generator::PoseGenerator> pose_gens;
     ros::Publisher pub;
     ros::Subscriber sub;
   };

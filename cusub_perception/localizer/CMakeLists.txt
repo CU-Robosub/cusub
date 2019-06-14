@@ -18,6 +18,7 @@ catkin_package(
 include_directories(include ${catkin_INCLUDE_DIRS})
 add_library(localizer
   src/localizer.cpp
+  src/start_gate_watershed.cpp
 )
 target_link_libraries(localizer ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
