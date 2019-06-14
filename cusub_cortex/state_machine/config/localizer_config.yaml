@@ -1,0 +1,7 @@
+localizer:
+ start_gate_pole : watershed # watershed, ...
+ fat_head : bouy_pnp
+ slick : bouy_pnp
+ no_torso : bouy_pnp
+ walking : bouy_pnp
+ dice5 : ignore

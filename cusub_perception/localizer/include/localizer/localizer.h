@@ -9,6 +9,7 @@
 #include <darknet_ros_msgs/BoundingBoxes.h>
 #include <localizer/pose_generator.h>
 #include <localizer/start_gate_watershed.h>
+#include <localizer/ignore_pg.h>
 #include <geometry_msgs/Pose.h>
 
 namespace localizer_ns
@@ -29,11 +30,13 @@ namespace localizer_ns
   {
     // Pose Generators Declarations
     pose_generator::StartGateWatershed sgw;
+    pose_generator::IgnorePG ignore_pg;
   }
   // Pose Generator Mappings
   std::map<std::string, pose_generator::PoseGenerator*> sel_mappings =  {
     { "watershed", &pose_gen_decls::sgw},
-    {"bouy_pnp", &pose_gen_decls::sgw}
+    {"bouy_pnp", &pose_gen_decls::sgw},
+    {"ignore", &pose_gen_decls::ignore_pg}
   };
   
 }
