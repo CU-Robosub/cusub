@@ -1,3 +1,7 @@
+/*
+    PG used to ignore darknet boxes of unwanted classes.
+ */
+
 #ifndef IGNORE_PG_CLASS_SRC_IGNORE_CLASS_H_
 #define IGNORE_PG_CLASS_SRC_IGNORE_CLASS_H_
 

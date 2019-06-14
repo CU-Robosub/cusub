@@ -1,3 +1,12 @@
+/*
+  The job of the localizer is to turn darknet bounding boxes into class poses.
+  
+  It does this by distributing the bounding boxes and image to
+  pose generators (inheritors of PoseGenerator class). 
+  Pose generators return a pose and its class which are sent
+  to the mapper in the form of Detection msgs.
+ */
+
 #include <pluginlib/class_list_macros.h>
 #include <localizer/localizer.h>
 
@@ -12,6 +21,10 @@ namespace localizer_ns
     loadRosParams(nh);
   }
 
+  /*
+    Fills mappings data structure, provides link from darknet class to 
+    which pose generator to use.
+   */
   void Localizer::loadRosParams(ros::NodeHandle& nh)
   {
     std::map<std::string, std::string> map_params;
@@ -29,6 +42,11 @@ namespace localizer_ns
     }
   }
 
+  /*
+    Darknet callback, uses mappings data structure to aggregate
+    darknet bounding boxes into a vector and pass it into the pose generator.
+    Publishes pose and class received from pose generator as detection msg.
+   */
   void Localizer::darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs)
   {
     NODELET_INFO("Received darknet Image.");
