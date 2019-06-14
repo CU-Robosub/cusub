@@ -4,6 +4,7 @@
 #include <nodelet/nodelet.h>
 #include <ros/ros.h>
 #include <vector>
+#include <map>
 #include <string>
 #include <darknet_ros_msgs/BoundingBoxes.h>
 #include <localizer/pose_generator.h>
@@ -16,13 +17,24 @@ namespace localizer_ns
   public:
     virtual void onInit();
   private:
-    void loadRosParams();
+    void loadRosParams(ros::NodeHandle& nh);
     void darknetCallback(const darknet_ros_msgs::BoundingBoxes& bbs);
-    std::vector<std::string> class_names;
-    std::vector<pose_generator::PoseGenerator> pose_gens;
+    std::map<std::string, pose_generator::PoseGenerator*> mappings;
     ros::Publisher pub;
     ros::Subscriber sub;
   };
+
+  namespace pose_gen_decls
+  {
+    // Pose Generators Declarations
+    pose_generator::StartGateWatershed sgw;
+  }
+  // Pose Generator Mappings
+  std::map<std::string, pose_generator::PoseGenerator*> sel_mappings =  {
+    { "watershed", &pose_gen_decls::sgw},
+    {"bouy_pnp", &pose_gen_decls::sgw}
+  };
+  
 }
 
 #endif
