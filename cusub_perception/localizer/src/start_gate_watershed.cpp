@@ -21,3 +21,13 @@ namespace pose_generator
         ROS_INFO("Initializing StartGate Watershed!");
     }
 }
+
+int main(int argc, char **argv)
+{
+    cout << "Starting Watershed Testing" <<endl;
+    pose_generator::StartGateWatershed sgw;
+    
+    // really load the images & display them
+    // pass them into generate pose
+    return 0;
+}

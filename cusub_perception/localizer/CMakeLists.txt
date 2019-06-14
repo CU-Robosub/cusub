@@ -24,3 +24,6 @@ target_link_libraries(localizer ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(localizer ${catkin_EXPORTED_LIBRARIES})
 endif()
+
+add_executable(sg_2019 src/start_gate_watershed.cpp)
+target_link_libraries(sg_2019 ${catkin_LIBRARIES})
