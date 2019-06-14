@@ -27,14 +27,14 @@ namespace localizer_ns
    */
   void Localizer::loadRosParams(ros::NodeHandle& nh)
   {
-    std::map<std::string, std::string> map_params;
+    map<string, string> map_params;
     if( !nh.getParam("localizer", map_params))
     {
       NODELET_ERROR("Localizer failed to locate params");
       abort();
     }
-    std::map<std::string, pose_generator::PoseGenerator*>::iterator sel_it;
-    std::map<std::string, std::string>::iterator it;
+    map<string, pose_generator::PoseGenerator*>::iterator sel_it;
+    map<string, string>::iterator it;
     for ( it=map_params.begin(); it != map_params.end(); it++)
     {
       pose_generator::PoseGenerator* pg_ptr = sel_mappings.find(it->second)->second;
@@ -44,7 +44,7 @@ namespace localizer_ns
 
   /*
     Darknet callback, uses mappings data structure to aggregate
-    darknet bounding boxes into a vector and pass it into the pose generator.
+    darknet bounding boxes into a vector and pass it into a pose generator.
     Publishes pose and class received from pose generator as detection msg.
    */
   void Localizer::darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs)
@@ -52,8 +52,8 @@ namespace localizer_ns
     NODELET_INFO("Received darknet Image.");
 
     // Group all bounding boxes that use same PoseGenerator into vectors
-    std::map<pose_generator::PoseGenerator*, std::vector<darknet_ros_msgs::BoundingBox>> bb_map;
-    std::map<std::string, pose_generator::PoseGenerator*>::iterator it;
+    map<pose_generator::PoseGenerator*, vector<darknet_ros_msgs::BoundingBox>> bb_map;
+    map<string, pose_generator::PoseGenerator*>::iterator it;
 
     NODELET_INFO("#bbs: %lu", bbs->bounding_boxes.size());
 
@@ -67,7 +67,7 @@ namespace localizer_ns
         if(bb_map.find(it->second) == bb_map.end()) // pose gen ptr hasn't been added to bb_map yet
         {
           NODELET_INFO("Creating new vector for: %s", it->first.c_str());
-          std::vector<darknet_ros_msgs::BoundingBox> new_bb_vector;
+          vector<darknet_ros_msgs::BoundingBox> new_bb_vector;
           bb_map[it->second] = new_bb_vector;
         }
         NODELET_INFO("Adding %s", box.Class.c_str());
@@ -76,11 +76,11 @@ namespace localizer_ns
     }
 
     // Call generatePose on all PoseGenerators passing in vector of bounding boxes
-    std::map<pose_generator::PoseGenerator*, std::vector<darknet_ros_msgs::BoundingBox>>::iterator bb_map_it;
+    map<pose_generator::PoseGenerator*, vector<darknet_ros_msgs::BoundingBox>>::iterator bb_map_it;
     for(bb_map_it=bb_map.begin(); bb_map_it != bb_map.end(); bb_map_it++)
     {
       geometry_msgs::Pose p;
-      std::string class_name;
+      string class_name;
       if( bb_map_it->first->generatePose(bbs->image, bb_map_it->second, p, class_name))
       {
         NODELET_INFO("Pose Localized!");

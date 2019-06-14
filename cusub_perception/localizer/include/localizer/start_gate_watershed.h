@@ -8,6 +8,8 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Pose.h>
 
+using namespace std;
+
 namespace pose_generator
 {
     class StartGateWatershed : public PoseGenerator
@@ -15,9 +17,9 @@ namespace pose_generator
         public:
             bool generatePose(
                 sensor_msgs::Image& image, 
-                std::vector<darknet_ros_msgs::BoundingBox>& bbs,
+                vector<darknet_ros_msgs::BoundingBox>& bbs,
                 geometry_msgs::Pose& pose,
-                std::string& class_name
+                string& class_name
             );
             StartGateWatershed();
     };

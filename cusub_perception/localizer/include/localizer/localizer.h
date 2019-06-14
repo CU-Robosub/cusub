@@ -12,6 +12,8 @@
 #include <localizer/ignore_pg.h>
 #include <geometry_msgs/Pose.h>
 
+using namespace std;
+
 namespace localizer_ns
 {
   class Localizer : public nodelet::Nodelet
@@ -21,7 +23,7 @@ namespace localizer_ns
   private:
     void loadRosParams(ros::NodeHandle& nh);
     void darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs);
-    std::map<std::string, pose_generator::PoseGenerator*> mappings;
+    map<string, pose_generator::PoseGenerator*> mappings;
     ros::Publisher pub;
     ros::Subscriber sub;
   };
@@ -33,7 +35,7 @@ namespace localizer_ns
     pose_generator::IgnorePG ignore_pg;
   }
   // Pose Generator Mappings
-  std::map<std::string, pose_generator::PoseGenerator*> sel_mappings =  {
+  map<string, pose_generator::PoseGenerator*> sel_mappings =  {
     { "watershed", &pose_gen_decls::sgw},
     {"bouy_pnp", &pose_gen_decls::sgw},
     {"ignore", &pose_gen_decls::ignore_pg}
