@@ -29,6 +29,8 @@ namespace pose_generator
                 geometry_msgs::Pose& pose,
                 string& class_name
             );
+            void sortBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs);
+            bool getPoints(Mat& img, vector<Point>& points);
             StartGateWatershed();
     };
 }

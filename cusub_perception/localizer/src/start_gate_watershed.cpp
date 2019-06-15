@@ -7,13 +7,76 @@
 
 namespace pose_generator
 {   
+    void StartGateWatershed::sortBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs)
+    {
+        // We want [left_leg, middle_leg, right_leg]
+        ;
+    }
+    bool StartGateWatershed::getPoints(Mat& img, vector<Point>& points)
+    {
+        Mat gray, binary, eroded;
+        vector<Vec4i> lines;
+
+        cvtColor(img, gray, COLOR_BGR2GRAY);
+        threshold(gray, binary, 0, 255, THRESH_BINARY_INV + THRESH_OTSU);
+        erode(binary, eroded, Mat());
+        HoughLinesP(eroded, lines, 1, CV_PI/180, img.rows/4,img.rows/4,10);
+        if(lines.empty()) {return false;}
+        
+        Point bottom_pt = Point(0,0);
+        Point top_pt = Point(0,img.rows);
+        for( size_t i = 0; i < lines.size(); i++ )
+        {
+            Vec4i l = lines[i];
+            if(l[1] > bottom_pt.y)
+                bottom_pt = Point(l[0],l[1]);
+            if(l[3] < top_pt.y)
+                top_pt = Point(l[2],l[3]);
+        }
+        points.push_back(bottom_pt);
+        points.push_back(top_pt);
+        return true;
+    }
     bool StartGateWatershed::generatePose(
         sensor_msgs::Image& image, 
         vector<darknet_ros_msgs::BoundingBox>& bbs,
         geometry_msgs::Pose& pose,
         string& class_name
     ){
+        if(bbs.size() != 2) {return false;} // to be adjusted for 3 leg case
+        sortLegs(bbs);
         ROS_INFO("Localizing the gate!");
+        // Double check that its RGB8 not BGR8
+        Rect left_rect(bbs[0].xmin, bbs[0].ymin,bbs[0].xmax-bbs[0].xmin,bbs[0].ymax-bbs[0].ymin);
+        Rect right_rect(bbs[1].xmin, bbs[1].ymin,bbs[1].xmax-bbs[1].xmin,bbs[1].ymax-bbs[1].ymin);
+        cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::RGB8);
+        Mat left_pole = cv_ptr->image(left_rect);
+        Mat right_pole = cv_ptr->image(right_rect);
+        vector<Point> points;
+        if(!getPoints(left_pole, points)) {return false;}
+        if(!getPoints(right_pole, points)) {return false;}
+
+        // Transform Points back to main image
+        points[0].x += bbs[0].xmin;
+        points[0].y += bbs[0].ymin;
+        points[1].x += bbs[0].xmin;
+        points[1].y += bbs[0].ymin;
+        points[2].x += bbs[1].xmin;
+        points[2].y += bbs[1].ymin;
+        points[3].x += bbs[1].xmin;
+        points[3].y += bbs[1].ymin;
+
+        circle(cv_ptr->image, points[0],3,Scalar(0,0,255),3);
+        circle(cv_ptr->image, points[1],3,Scalar(0,0,255),3);
+        circle(cv_ptr->image, points[2],3,Scalar(0,0,255),3);
+        circle(cv_ptr->image, points[3],3,Scalar(0,0,255),3);
+        imshow("Display Window", cv_ptr->image);
+        waitKey(0);
+
+        // Let's display on the big image...
+        // PNP solve this bitch!
+
+        
         return true;
     }
     StartGateWatershed::StartGateWatershed()
