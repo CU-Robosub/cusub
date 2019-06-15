@@ -1,5 +1,8 @@
 /*
-    PG used to ignore darknet boxes of unwanted classes.
+    PG used to ignore certain darknet bb box classes.
+
+    Used to not get the error:
+    "No pose generator given for"
  */
 
 #ifndef IGNORE_PG_CLASS_SRC_IGNORE_CLASS_H_
@@ -10,6 +13,8 @@
 #include <darknet_ros_msgs/BoundingBox.h>
 #include <geometry_msgs/Pose.h>
 
+using namespace std;
+
 namespace pose_generator
 {
     class IgnorePG : public PoseGenerator
@@ -17,9 +22,9 @@ namespace pose_generator
         public:
         bool generatePose(
                 sensor_msgs::Image& image, 
-                std::vector<darknet_ros_msgs::BoundingBox>& bbs,
+                vector<darknet_ros_msgs::BoundingBox>& bbs,
                 geometry_msgs::Pose& pose,
-                std::string& class_name
+                string& class_name
             ){return false;}
     };
 }
