@@ -8,6 +8,14 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Pose.h>
 
+// Testing of Watershed Algorithm
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <sensor_msgs/image_encodings.h>
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+using namespace cv;
+
 using namespace std;
 
 namespace pose_generator

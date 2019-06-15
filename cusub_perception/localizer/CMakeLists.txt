@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(localizer)
 
+set(OpenCV_DIR /usr/share/OpenCV)
+
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
@@ -9,6 +11,9 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   darknet_ros_msgs
+  OpenCV
+  cv_bridge
+  image_transport
 )
 
 catkin_package(
