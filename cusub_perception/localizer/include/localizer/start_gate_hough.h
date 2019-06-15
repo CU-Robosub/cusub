@@ -1,5 +1,5 @@
-#ifndef START_GATE_WATERSHED_CLASS_SRC_START_GATE_WATERSHED_CLASS_H_
-#define START_GATE_WATERSHED_CLASS_SRC_START_GATE_WATERSHED_CLASS_H_
+#ifndef START_GATE_HOUGH_CLASS_SRC_START_GATE_HOUGH_CLASS_H_
+#define START_GATE_HOUGH_CLASS_SRC_START_GATE_HOUGH_CLASS_H_
 
 #include <nodelet/nodelet.h>
 #include <localizer/pose_generator.h>
@@ -8,10 +8,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Pose.h>
 #include <localizer/Detection.h>
-
-// Testing of Watershed Algorithm
 #include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <sensor_msgs/image_encodings.h>
@@ -20,22 +17,22 @@
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/LinearMath/Scalar.h>
 #include <tf2/LinearMath/Quaternion.h>
-// #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
+// Testing
+#include <opencv2/highgui/highgui.hpp>
+
 /* 1-------3    SolvePnp Points
    |       |      
    |   X   |
    0       2
  */
 using namespace cv;
-
-using namespace std;
-
 using namespace std;
 
 namespace pose_generator
 {
-    class StartGateWatershed : public PoseGenerator
+    class StartGateHough : public PoseGenerator
     {
         public:
             bool generatePose(

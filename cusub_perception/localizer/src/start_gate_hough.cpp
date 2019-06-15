@@ -1,13 +1,13 @@
 /*
-    The start gate localizer that uses the watershed algorithm
+    The start gate localizer that uses the Hough algorithm
     along with a pnp solve to localize the gate.
  */
 
-#include <localizer/start_gate_watershed.h>
+#include <localizer/start_gate_hough.h>
 
 namespace pose_generator
 {   
-    void StartGateWatershed::getPoseFromVectors(Mat rvec, Mat tvec, geometry_msgs::Pose& pose)
+    void StartGateHough::getPoseFromVectors(Mat rvec, Mat tvec, geometry_msgs::Pose& pose)
     {
         Mat rot_matrix;
         tf2::Quaternion q;
@@ -31,13 +31,13 @@ namespace pose_generator
         pose.position.z = tvec.at<double>(2);
     }
 
-    void StartGateWatershed::sortBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs)
+    void StartGateHough::sortBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs)
     {
         // We want [left_leg, middle_leg, right_leg]
         ;
     }
 
-    bool StartGateWatershed::getPoints(Mat& img, vector<Point2f>& points)
+    bool StartGateHough::getPoints(Mat& img, vector<Point2f>& points)
     {
         Mat gray, binary, eroded;
         vector<Vec4i> lines;
@@ -63,7 +63,7 @@ namespace pose_generator
         return true;
     }
 
-    bool StartGateWatershed::generatePose(
+    bool StartGateHough::generatePose(
         sensor_msgs::Image& image, 
         vector<darknet_ros_msgs::BoundingBox>& bbs,
         geometry_msgs::Pose& pose,
@@ -124,8 +124,8 @@ void draw_on_image(Mat& image)
 
 int main(int argc, char **argv)
 {
-    cout << "Starting Watershed Testing" <<endl;
-    pose_generator::StartGateWatershed sgw;
+    cout << "Starting Hough Testing" <<endl;
+    pose_generator::StartGateHough sgw;
 
     // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/src/frame0000.jpg";
     string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/src/T0_10-27-18-image0_0137.jpg";
