@@ -36,7 +36,7 @@ namespace pose_generator
         // We want [left_leg, middle_leg, right_leg]
         ;
     }
-    
+
     bool StartGateWatershed::getPoints(Mat& img, vector<Point2f>& points)
     {
         Mat gray, binary, eroded;
@@ -100,9 +100,9 @@ namespace pose_generator
         Mat tvec(3,1,cv::DataType<double>::type);
 
         solvePnP(gate_truth_pts, img_points, occam_camera_matrix, occam_dist_coefs, rvec, tvec);
-        cout << tvec << endl;
+        // cout << tvec << endl;
         getPoseFromVectors(rvec, tvec, pose);
-        cout << pose << endl;
+        // cout << pose << endl;
         class_name = "start_gate";
         return true;
     }

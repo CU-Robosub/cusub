@@ -16,6 +16,7 @@ namespace localizer_ns
   {
     ros::NodeHandle& nh = getMTNodeHandle();
     sub = nh.subscribe("/leviathan/darknet_ros/bounding_boxes", 1, &Localizer::darknetCallback, this);
+    pub = nh.advertise<localizer::Detection>("Global_State/task_poses",1);
     // pub = nh.advertise<>
     NODELET_INFO("Starting Localizer");
     loadRosParams(nh);
@@ -49,13 +50,13 @@ namespace localizer_ns
    */
   void Localizer::darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs)
   {
-    NODELET_INFO("Received darknet Image.");
+    // NODELET_INFO("Received darknet Image.");
 
     // Group all bounding boxes that use same PoseGenerator into vectors
     map<pose_generator::PoseGenerator*, vector<darknet_ros_msgs::BoundingBox>> bb_map;
     map<string, pose_generator::PoseGenerator*>::iterator it;
 
-    NODELET_INFO("#bbs: %lu", bbs->bounding_boxes.size());
+    // NODELET_INFO("#bbs: %lu", bbs->bounding_boxes.size());
 
     for(darknet_ros_msgs::BoundingBox box : bbs->bounding_boxes)
     {
@@ -66,11 +67,11 @@ namespace localizer_ns
       } else {
         if(bb_map.find(it->second) == bb_map.end()) // pose gen ptr hasn't been added to bb_map yet
         {
-          NODELET_INFO("Creating new vector for: %s", it->first.c_str());
+          // NODELET_INFO("Creating new vector for: %s", it->first.c_str());
           vector<darknet_ros_msgs::BoundingBox> new_bb_vector;
           bb_map[it->second] = new_bb_vector;
         }
-        NODELET_INFO("Adding %s", box.Class.c_str());
+        // NODELET_INFO("Adding %s", box.Class.c_str());
         bb_map[it->second].push_back(box);
       }
     }
@@ -79,11 +80,12 @@ namespace localizer_ns
     map<pose_generator::PoseGenerator*, vector<darknet_ros_msgs::BoundingBox>>::iterator bb_map_it;
     for(bb_map_it=bb_map.begin(); bb_map_it != bb_map.end(); bb_map_it++)
     {
-      geometry_msgs::Pose p;
-      string class_name;
-      if( bb_map_it->first->generatePose(bbs->image, bb_map_it->second, p, class_name))
+      localizer::Detection det;
+      det.pose.header = bbs->image.header;
+      if( bb_map_it->first->generatePose(bbs->image, bb_map_it->second, det.pose.pose, det.class_id))
       {
         NODELET_INFO("Pose Localized!");
+        pub.publish(det);
       } 
     }
   }

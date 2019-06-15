@@ -4,20 +4,30 @@ project(localizer)
 set(OpenCV_DIR /usr/share/OpenCV)
 
 find_package(catkin REQUIRED COMPONENTS
-  cv_bridge
-  image_transport
   nodelet
   roscpp
-  sensor_msgs
-  std_msgs
-  darknet_ros_msgs
   OpenCV
+  darknet_ros_msgs
+  sensor_msgs
   cv_bridge
   image_transport
+  message_generation
+  geometry_msgs
+)
+
+add_message_files(
+  FILES
+  Detection.msg
+)
+
+generate_messages(
+  DEPENDENCIES
+  geometry_msgs
 )
 
 catkin_package(
   LIBRARIES localizer
+  DEPENDS message_runtime geometry_msgs
   CATKIN_DEPENDS cv_bridge image_transport nodelet roscpp sensor_msgs std_msgs
 )
 include_directories(include ${catkin_INCLUDE_DIRS})

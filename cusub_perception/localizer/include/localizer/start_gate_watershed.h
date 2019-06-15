@@ -7,6 +7,7 @@
 #include <darknet_ros_msgs/BoundingBox.h>
 #include <ros/ros.h>
 #include <geometry_msgs/Pose.h>
+#include <localizer/Detection.h>
 
 // Testing of Watershed Algorithm
 #include <opencv2/core/core.hpp>
