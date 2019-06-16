@@ -40,30 +40,29 @@ class Dice(Task):
         super(Dice, self).__init__(self.outcomes) # become a state machine first
         self.initObjectives()
         self.linkObjectives()
-        
+
     def initObjectives(self):
         self.targets = rospy.get_param('tasks/dice/targets')
         search_alg = rospy.get_param('tasks/dice/search_alg')
-        prior = self.priorList2Pose(rospy.get_param('tasks/dice/prior'))
         if not self.targets:
             raise Exception("No targets given to Dice.")
-        
-        self.search = Search(search_alg, prior, 'cusub_cortex/mapper_out/'+self.targets[0])
+
+        self.search = Search(self.getPrior(), search_alg, 'cusub_cortex/mapper_out/'+self.targets[0])
         self.approaches = []
         self.attacks = []
         for t in self.targets:
             self.approaches.append(Approach(t))
             self.attacks.append(Attack(t))
-            
+
     def linkObjectives(self):
         with self:
             name_first_app = "Approach_" + self.targets[0]
-            smach.StateMachine.add("Search", self.search, transitions={'aborted':name_first_app, 'success':'Search'})
+            smach.StateMachine.add("Search", self.search, transitions={'found':name_first_app, 'not_found':'Search'})
             for i in range(len(self.targets)):
                 name_app = "Approach_" + self.targets[i]
                 name_att = "Attack_" + self.targets[i]
                 smach.StateMachine.add(name_app, self.approaches[i], transitions={"success":name_att, "aborted":"task_aborted", "replan":name_app})
-                
+
                 if i+1 != len(self.targets): # we have more targets to go
                     name_app_next = "Approach_" +self.targets[i+1]
                     smach.StateMachine.add(name_att, self.attacks[i], transitions={"success":name_app_next, "aborted":"task_aborted"})
@@ -75,15 +74,15 @@ class Approach(Objective):
     outcomes = ['success','aborted', 'replan']
     curPose = None
     object_poses = {}
-    
+
     def __init__(self, target):
-        
+
         rospy.loginfo("---Approach " + target +" objective initializing")
         super(Approach, self).__init__(self.outcomes, "Approach_" + target)
         self.load_rosparams()
         self.target = target
         self._replan_requested = False
-        
+
         rospy.Subscriber('cusub_cortex/mapper_out/dice1', PoseStamped, self.callback)
         rospy.Subscriber('cusub_cortex/mapper_out/dice2', PoseStamped, self.callback)
         rospy.Subscriber('cusub_cortex/mapper_out/dice5', PoseStamped, self.callback)
@@ -94,17 +93,17 @@ class Approach(Objective):
         self.orbital_radius = float(rospy.get_param('tasks/dice/orbital_radius'))
         self.approach_radius = float(rospy.get_param('tasks/dice/approach_radius'))
         assert(self.orbital_radius > self.approach_radius)
-        
-        
+
+
     def clear_replan(self):
         self._replan_requested = False
         self.clear_abort()
-        
+
     def request_replan(self):
         rospy.loginfo("---replanning")
         self._replan_requested = True
         self.request_abort()
-        
+
     def replan_requested(self):
         return self._replan_requested
 
@@ -118,11 +117,11 @@ class Approach(Objective):
                 self.request_replan()
             return
         prev_pose = self.object_poses[obj_name]
-        self.object_poses[obj_name] = msg    
+        self.object_poses[obj_name] = msg
         if self.getDistance(prev_pose.pose.position, msg.pose.position) > self.replan_thresh:
             if self.started:
                 self.request_replan()
-        
+
     def execute(self, userdata):
         rospy.loginfo("---Executing Approach for " + self.target)
         if self.replan_requested():
@@ -136,7 +135,7 @@ class Approach(Objective):
 
         self.started = True
         dice_list = [die.pose.position for key,die in self.object_poses.iteritems()]
-        # dice_list = [value.position for key,value in self.object_poses.items()] # Python3        
+        # dice_list = [value.position for key,value in self.object_poses.items()] # Python3
 
         approach_method = rospy.get_param('tasks/dice/approach_method')
         if(approach_method == 'direct'):
@@ -145,7 +144,7 @@ class Approach(Objective):
             path = self.getApproachPath(self.object_poses[self.target].pose.position, dice_list)
 
         pose = path.pop(0)
-        
+
         status = self.goToPose(pose, useYaw=True)
         if status:
             if self.replan_requested():
@@ -153,7 +152,7 @@ class Approach(Objective):
                 return "replan"
             else:
                 return "aborted"
-        
+
         for goal in path:
             status = self.goToPose(goal, useYaw=False)
             if status:
@@ -164,7 +163,7 @@ class Approach(Objective):
                     return "aborted"
 
         # Face the dice
-        # goal_pose = Pose()        
+        # goal_pose = Pose()
         # quat = self.getFacingQuaternion(self.curPose.position, self.object_poses[self.target].pose.position)
         # goal_pose.orientation = quat
         # goal_pose.position = self.curPose.position
@@ -252,11 +251,11 @@ class Approach(Objective):
         path_poses = self.points2Poses(goal_pt, path_pts)
 
         # goal_pt and dice list
-        # xdata = [i.x for i in dice_list]; xdata = [x] + xdata;  xdata += [i.x for i in path]; 
-        # ydata = [i.y for i in dice_list]; ydata = [y] + ydata;  ydata += [i.y for i in path]; 
-        # zdata = [-5 for i in dice_list]; zdata = [-5] + zdata;  zdata += [-5 for i in path]; 
+        # xdata = [i.x for i in dice_list]; xdata = [x] + xdata;  xdata += [i.x for i in path];
+        # ydata = [i.y for i in dice_list]; ydata = [y] + ydata;  ydata += [i.y for i in path];
+        # zdata = [-5 for i in dice_list]; zdata = [-5] + zdata;  zdata += [-5 for i in path];
         # cdata = [0 for i in dice_list]; cdata = [1] + cdata;  cdata += [0.7 for i in path];
-        
+
         # xdata.append(centroid.x)
         # ydata.append(centroid.y);
         # zdata.append(-5);
@@ -269,7 +268,7 @@ class Approach(Objective):
         # print(ydata)
         # print(zdata)
         # print(cdata)
-        
+
         # fig = plt.figure()
         # ax = fig.add_subplot(111, projection='3d')
         # # ax.scatter3D(xdata, ydata, zdata, c=np.array(cdata))
@@ -299,9 +298,9 @@ class Approach(Objective):
         quat.x = quat_list[0]
         quat.y = quat_list[1]
         quat.z = quat_list[2]
-        quat.w = quat_list[3]        
+        quat.w = quat_list[3]
         return quat
-    
+
     def getCentroid(self, pts):
         x_sum = 0
         y_sum = 0
@@ -312,8 +311,8 @@ class Approach(Objective):
         avg_pt.x = x_sum / len(pts)
         avg_pt.y = y_sum / len(pts)
         return avg_pt
-        
-        
+
+
     def getCirclePoints(self, x, y, z, radius=1, num_points=20):
         """
         Return a circle of points around an x,y at depth z
@@ -330,8 +329,8 @@ class Approach(Objective):
             new_pt.y = y_coords[j]
             new_pt.z = z
             pts.append(new_pt)
-                
-        
+
+
         # xdata = list(x_coords) + [x]
         # ydata = list(y_coords) + [y]
         # zdata = list(np.zeros(len(ydata)))
@@ -347,7 +346,7 @@ class Approach(Objective):
 
 class Attack(Objective):
     outcomes = ['success','aborted']
-    
+
     def __init__(self, target):
         rospy.loginfo("---Attack " + target + " Initializing")
         super(Attack, self).__init__(self.outcomes, "Attack")
@@ -370,7 +369,7 @@ class Attack(Objective):
         self.backup_dist = float(rospy.get_param('tasks/dice/backup_dist'))
         param_dict['lockon_time'] = float(rospy.get_param('tasks/dice/lockon_time', '5.0'))
         return param_dict
-    
+
     def complete_servoing(self):
         self.spike = True
         self.active = False
@@ -384,7 +383,7 @@ class Attack(Objective):
 
     def drive_callback(self, msg):
         self.current_drive = msg.data
-        
+
     def handle_servoing(self, image, box):
         drive_msg = Float64()
         if self.spike:
@@ -395,7 +394,7 @@ class Attack(Objective):
         else:
             drive_msg.data = self.current_drive + self.carrot_dist
             self.drive_pub.publish(drive_msg)
-            
+
     def imu_callback(self, msg):
         accel = msg.linear_acceleration.x # default to x
 
@@ -407,7 +406,7 @@ class Attack(Objective):
             accel = msg.linear_acceleration.z
         else:
             rospy.logwarn("unrecognized acceleration axis in imu callback")
-        
+
         if accel < self.accel_spike_thresh and self.active:
             self.complete_servoing()
 
@@ -416,11 +415,11 @@ class Attack(Objective):
         x = current_pose.position.x
         y = current_pose.position.y
         z = current_pose.position.z
-        
+
         quat = current_pose.orientation
         roll, pitch, yaw = tf.transformations.euler_from_quaternion((quat.x, quat.y, quat.z, quat.w))
         backwards_yaw = yaw + np.pi
-        
+
         new_x = dist_behind * np.cos(backwards_yaw) + x
         new_y = dist_behind * np.sin(backwards_yaw) + y
 
@@ -430,7 +429,7 @@ class Attack(Objective):
         new_pose.position.z = z
         new_pose.orientation = quat
         return new_pose
-        
+
     def backup(self):
         rospy.loginfo("---backing up")
 
@@ -440,26 +439,26 @@ class Attack(Objective):
         # rospy.loginfo("To pose:")
         # rospy.loginfo(new_pose)
         self.goToPose(new_pose, useYaw=False)
-    
+
         # msg = Float64()
         # msg.data = self.current_drive - self.backup_dist
         # self.drive_pub.publish(msg)
 
         # while abs(self.current_drive - msg.data) > 0.5 and not rospy.is_shutdown():
         #     rospy.sleep(0.25)
-        
+
     def execute(self, userdata):
-    
+
         self.active = True
         rospy.loginfo("---Executing Attack for " + self.target)
-        
+
         self.timer = rospy.Timer(rospy.Duration.from_sec(self.timeout), self.timeout_callback)
 
         self.servo_tool.run()
 
         self.backup()
         return "success"
-        
+
 def genTestPoints(minDist, maxDist):
     """
     Returns a list of 5 points
@@ -471,11 +470,11 @@ def genTestPoints(minDist, maxDist):
     """
 
     # Should be some point randomly -100 through 100
-    goal_pt = Point()    
+    goal_pt = Point()
     goal_pt.x = ( random.random() - 0.5) * 200
     goal_pt.y = ( random.random() - 0.5) * 200
     goal_vec = np.array([goal_pt.x, goal_pt.y], dtype=np.float32)
-    
+
     dice = []
     while len(dice) < 3:
         x = (random.random() - 0.5) * (maxDist / 0.5) + goal_pt.x
@@ -485,7 +484,7 @@ def genTestPoints(minDist, maxDist):
         diff = vec - goal_vec
         if np.linalg.norm(diff) < minDist:
             continue
-        
+
         goodPos = True
         for i in dice:
             diff = vec - np.array([i.x,i.y], dtype=np.float32)
@@ -497,8 +496,8 @@ def genTestPoints(minDist, maxDist):
             p.x = x
             p.y = y
             dice.append(p)
-            
-    start_pt = Point()            
+
+    start_pt = Point()
     start_pt.x = ( random.random() - 0.5) * 200
     start_pt.y = ( random.random() - 0.5) * 200
 
@@ -523,23 +522,23 @@ def test():
     """
     rospy.init_node("dice_node")
     a = Approach()
-    
+
     for i in range(1):
         pts = genTestPoints(0.5,1) # min dist & max dist
         # print(pts)
-        
+
         p = Pose()
         p.position = pts[4]
         a.curPose = p
-        
+
         a.getApproachPath(pts[0], pts[1:4])
-        
+
     return
     # for i in range(10):
     #     genTestPoints(0.3, 1)
     # a.getCirclePoints(0,0, 3, 21)
     # return
-    
+
     gp = Point(); gp.x = 0; gp.y = 0;
     # p1 = Point(); p1.x = -1; p1.y = 0;
     # p2 = Point(); p2.x = 0; p2.y = -1;
@@ -550,7 +549,7 @@ def test():
     p_list = [p1,p2,p3]
     a.getApproachPath(gp, p_list)
 
-                      
+
 if __name__ == "__main__":
     try:
         test()

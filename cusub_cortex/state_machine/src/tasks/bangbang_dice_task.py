@@ -19,23 +19,18 @@ from darknet_ros_msgs.msg import BoundingBox, BoundingBoxes
 
 class BangBangDiceTask(Task):
 
+    name = "bangbang_dice"
     outcomes = ['task_success','task_aborted']
 
-    def __init__(self, prior, searchAlg):
+    def __init__(self):
 
         super(BangBangDiceTask, self).__init__(self.outcomes) # become a state machine first
-        self.initObjectives(prior, searchAlg)
+        self.initObjectives(self.getPrior(), rospy.get_param("tasks/" + self.name + "/search_alg"))
         self.linkObjectives()
 
     def initObjectives(self, prior, searchAlg):
         self.search = Search(searchAlg, prior)
         self.attack = Attack(prior)
-
-    def initMapperSubs(self):
-        """
-        Just going to the prior so no need to act on any pose estimates
-        """
-        pass
 
     def linkObjectives(self):
         with self:
@@ -112,7 +107,7 @@ class Attack(Objective):
         self.darknetSub = rospy.Subscriber('darknet_ros/bounding_boxes', BoundingBoxes, self.boxes_received, queue_size=1, buff_size=10000000)
 
         # Okay this is what we'll use, interesting what's the cv?
-        self.diceStatePub = rospy.Publisher('cusub_common/motor_controllers/cv/yaw/state', Float64, queue_size=1) 
+        self.diceStatePub = rospy.Publisher('cusub_common/motor_controllers/cv/yaw/state', Float64, queue_size=1)
         self.diceSetpointPub = rospy.Publisher('cusub_common/motor_controllers/cv/yaw/setpoint', Float64, queue_size=1)
 
         # Depth and drive control those, just hold them in place, huh cv again here?
@@ -120,7 +115,7 @@ class Attack(Objective):
         self.diceDepthSetpointPub = rospy.Publisher('cusub_common/motor_controllers/cv/depth/setpoint', Float64, queue_size=1)
         self.driveStateSub = rospy.Subscriber("cusub_common/motor_controllers/pid/drive/state", Float64, self.driveStateCallback)
         self.drivePub = rospy.Publisher('cusub_common/motor_controllers/pid/drive/setpoint', Float64, queue_size=1)
-        self.imuSub = rospy.Subscriber("cusub_common/imu", Imu, self.imuCallback)        
+        self.imuSub = rospy.Subscriber("cusub_common/imu", Imu, self.imuCallback)
 
         self.yawStateSub = rospy.Subscriber("cusub_common/motor_controllers/pid/yaw/state", Float64, self.yawStateCallback)
         self.depthStateSub = rospy.Subscriber("cusub_common/motor_controllers/pid/depth/state", Float64, self.depthStateCallback)

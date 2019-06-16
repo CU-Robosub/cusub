@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """
-This class serves as the meta class for all tasks and objectives
+These classes serves as the meta class for all tasks and objectives
 The best way to write a new task is to learn by example from a simple task, such as start gate
 """
 
 import smach
 import rospy
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 from waypoint_navigator.msg import waypointAction, waypointGoal
 from geometry_msgs.msg import PoseStamped, Pose, Point
 from nav_msgs.msg import Odometry
@@ -29,6 +29,10 @@ class Task(smach.StateMachine):
         rospy.Subscriber('kill_sm', Empty, self.kill_sm)
         super(Task, self).__init__(outcomes=outcomes)
 
+    @abstractproperty
+    def name(self):
+        pass
+
     @abstractmethod
     def initObjectives(self):
         """
@@ -49,13 +53,27 @@ class Task(smach.StateMachine):
         print cs
         self.sm._states[cs].request_abort()
 
-    def priorList2Pose(self,list_xyz):
-        """ Turn a pose list from the configuration file into a Pose message """
+    def getPrior(self):
+        """
+        Get the prior for the task from the rosparameter server
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        pose : Pose
+             The prior pose of the task
+        """
+
+        list_xyz = rospy.get_param("tasks/" + self.name + "/prior")
         pose = Pose()
         pose.position.x = list_xyz[0]
         pose.position.y = list_xyz[1]
         pose.position.z = list_xyz[2]
         return pose
+
 """
 Objectives are subtasks within a task
 They have:
@@ -69,7 +87,7 @@ class Objective(smach.State):
 
     def __init__(self, outcomes, objtv_name):
         """ Objective initialization method
-        
+
         Parameters
         ---------
         outcomes : list of strs
@@ -81,7 +99,7 @@ class Objective(smach.State):
         rospy.Subscriber('cusub_common/odometry/filtered', Odometry, self.sub_pose_cb)
         self._abort_requested = False
         self._replan_requested = False
-        self.wayClient = actionlib.SimpleActionClient('cusub_common/waypoint', waypointAction)
+        self.wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
         self.started = False
 
         # initialize the pose
@@ -95,7 +113,7 @@ class Objective(smach.State):
 
     def goToPose(self, targetPose, useYaw=True):
         """ Traverse to the targetPose given
-        
+
         Parameters
         ----------
         targetPose : Pose
@@ -103,8 +121,8 @@ class Objective(smach.State):
              If None, the sub will stop where it currently is and wait to be aborted
         useYaw : bool
              true : the waypoint navigtator will use yaw mode to navigate to the target pose
-             false : use strafe-drive mode to the target pose 
-        
+             false : use strafe-drive mode to the target pose
+
         Returns
         -------
         bool : success/aborted

@@ -1,7 +1,7 @@
 """
 Searching Algorithms
 
-We have a prior but are not sufficiently confident on an object's location. Let's approach the prior in a manner that let's us angle our view to get a better pose estimate of the object.
+Approach a prior for a task, once we get a few yolo hits on searchTopic quit out
 
 SEARCH TYPES:
 simple | brief: go straight to the prior pose
@@ -21,40 +21,42 @@ WAIT_INDEX = 1
 
 class Search(Objective):
     """ Search state that implements an indicated search algorithm """
-    outcomes = ['success','aborted']
-    def __init__(self, searchAlg, priorPose, searchTopic, numQuitPoses=5):
+
+    outcomes = ['found','not_found'] # We found task or timed out
+
+    def __init__(self, priorPose, searchAlg, searchTopic, numQuitPoses=5):
         """
         Search objective initialization function
-        
+
         Parameters
         ---------
+        priorPose : Pose
+             Prior pose of the task
         searchAlg : str
              Search algorithm to navigate to the prior
              'simple' is the only currently supported
-        priorPose : Pose
-             Prior pose of the task
         searchTopic : str
              Topic name to listen for task poses
         numQuitPoses : int
              Number of poses to receive before aborting and transitioning
         """
-        
+
         rospy.loginfo("---Search objective initializing")
         self._loadSearchAlg(searchAlg)
         self.prior = priorPose
         rospy.Subscriber(searchTopic, PoseStamped, self.exit_callback)
         self.numQuitPoses = numQuitPoses
         self.numPosesReceived = 0
-        
+
         super(Search, self).__init__(self.outcomes, "Search")
-        
+
     def exit_callback(self, msg): # Abort on the first publishing
         self.numPosesReceived += 1
         if not self.abort_requested() and self.numPosesReceived > self.numQuitPoses:
             self.request_abort()
-        
+
     def _loadSearchAlg(self, searchAlg):
-        
+
         if searchAlg.lower() == 'simple':
             rospy.loginfo("---simple search")
             self.search = SimpleSearch()
@@ -66,12 +68,12 @@ class Search(Objective):
             self.search = HalfHalfSearch()
         else:
             raise(Exception("Unrecognized search algorithm"))
-        
+
     def execute(self, ueserdata):
-        rospy.loginfo("---Executing Search")        
+        rospy.loginfo("---Executing Search")
         if self.abort_requested():
-            return "aborted"
-        
+            return "found"
+
         path = self.search.get_path(self.curPose, self.prior)
         for pose_and_wait in path: # path includes both a pose to reach and the waiting time
             pose = pose_and_wait[POSE_INDEX]
@@ -80,10 +82,10 @@ class Search(Objective):
             pose_stamped.header.frame_id = 'leviathan/description/map'
             pose_stamped.pose = pose
             if self.goToPose(pose_stamped):
-                rospy.loginfo("---"+self.name+" aborted")
-                return "aborted"
+                rospy.loginfo("---Exiting Search Obj, pose found")
+                return "found"
             rospy.sleep(wait_secs) # wait at our destination this many seconds
-        return "success" # we should get preempted before this, if not we should loop on this task until finding our task object
+        return "not_found" # we should get preempted before this, if not we should loop on this task until finding our task object
 
 class SearchAlg(object):
     __metaclass__ = ABCMeta
