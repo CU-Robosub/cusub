@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro"
-  name="buoy_jiangshi">
+  name="triangular_buoy">
 
 <!-- Loading file with sensor macros -->
 <xacro:include filename="$(find uuv_sensor_ros_plugins)/urdf/sensor_snippets.xacro"/>
 
-<xacro:macro name="buoy_jiangshi" params="namespace">
+<xacro:macro name="triangular_buoy" params="namespace">
 
   <link name="${namespace}/base_link">
       <inertial>
@@ -28,7 +28,7 @@
 	  rpy="0 0 0" />
         <geometry>
         <mesh
-          filename="package://robosub_descriptions/models/buoy_jiangshi/buoy.dae" />
+          filename="package://robosub_descriptions/models/triangular_buoy/triangular_buoy.dae" />
         </geometry>
       </visual>
       <collision>
@@ -37,7 +37,7 @@
 	  rpy="0 0 0" />
         <geometry>
         <mesh
-          filename="package://robosub_descriptions/models/buoy_jiangshi/buoy.dae" />
+          filename="package://robosub_descriptions/models/triangular_buoy/triangular_buoy.dae" />
         </geometry>
       </collision>
   </link>
@@ -96,6 +96,11 @@
       rpy="0 0 0" />
     <parent link="${namespace}/base_link"/>
     <child link="${namespace}/string_link"/>
+
+    <axis xyz="0 1 0" />
+    <dynamics damping="1.0" friction="1.0"/>
+    <limit effort="1000.0" velocity="10.0" />
+
   </joint>
   <joint name="${namespace}/anchor_joint" type="continuous">
     <origin
@@ -103,9 +108,28 @@
       rpy="0 0 0" />
     <parent link="${namespace}/string_link"/>
     <child link="${namespace}/anchor_link"/>
+    <axis xyz="0 1 0" />
+    <dynamics damping="100.0" friction="100.0"/>
+    <limit effort="1000.0" velocity="10.0" />
+
   </joint>
 
+  <transmission name="${namespace}/buoy_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${namespace}/base_joint">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${namespace}/buoy_servo">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+  </transmission>
+
   <gazebo>
+
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/buoy_spin_1</robotNamespace>
+    </plugin>
 
     <plugin filename="libuuv_underwater_object_ros_plugin.so" name="uuv_plugin">
     <fluid_density>1028.0</fluid_density>
@@ -132,10 +156,11 @@
         </hydrodynamic_model>
       </link>
     </plugin>
+
   </gazebo>
 
 </xacro:macro>
 
-<xacro:buoy_jiangshi namespace="$(arg namespace)"/>
+<xacro:triangular_buoy namespace="$(arg namespace)"/>
 
 </robot>

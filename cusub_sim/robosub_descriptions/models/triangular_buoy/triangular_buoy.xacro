@@ -1,0 +1,77 @@
+<robot name="bouy_robot">
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="20" />
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="1.0 1.0 0.1"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="1.0 1.0 0.1"/>
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="buoy_link">
+    <inertial>
+      <origin
+        xyz="0 0.0 0"
+        rpy="0 0 0" />
+      <mass
+        value="1" />
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0.0 0" />
+      <geometry>
+        <mesh filename="package://robosub_descriptions/models/triangular_buoy/triangular_buoy.dae" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0.0 0" />
+      <geometry>
+        <mesh filename="package://robosub_descriptions/models/triangular_buoy/triangular_buoy.dae" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="anchor_joint"
+    type="continuous">
+    <origin
+      xyz="0 0 2.5"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="buoy_link" />
+    <axis xyz="0 0 1" />
+    <dynamics damping="0.0" friction="0.0"/>
+    <limit effort="1000.0" velocity="10.0" />
+  </joint>
+  <transmission name="anchor_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+      <joint name="anchor_joint">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="anchor_servo">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+  </transmission>
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/triangular_buoy_1</robotNamespace>
+    </plugin>
+  </gazebo>
+</robot>
