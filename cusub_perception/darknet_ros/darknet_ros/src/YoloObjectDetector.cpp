@@ -32,22 +32,25 @@ char **detectionNames;
 ::std_msgs::Header headers[3];
 ::std_msgs::Header curr_header;
 
-YoloObjectDetector::YoloObjectDetector(ros::NodeHandle nh)
-    : nodeHandle_(nh),
-      imageTransport_(nodeHandle_),
-      numClasses_(0),
-      classLabels_(0),
-      rosBoxes_(0),
-      rosBoxCounter_(0)
+void YoloObjectDetector::onInit()
 {
-  ROS_INFO("[YoloObjectDetector] Node started.");
-
+  NODELET_INFO("[YoloObjectDetector] Node started.");
+  nodeHandle_ = getMTPrivateNodeHandle();
+  image_transport::ImageTransport imageTransport_(nodeHandle_);
   // Read parameters from config file.
   if (!readParameters()) {
     ros::requestShutdown();
   }
+  init(imageTransport_);
+}
 
-  init();
+YoloObjectDetector::YoloObjectDetector()
+    : numClasses_(0),
+      classLabels_(0),
+      rosBoxes_(0),
+      rosBoxCounter_(0)
+{
+  ;
 }
 
 YoloObjectDetector::~YoloObjectDetector()
@@ -71,9 +74,9 @@ bool YoloObjectDetector::readParameters()
   // Check if Xserver is running on Linux.
   if (XOpenDisplay(NULL)) {
     // Do nothing!
-    ROS_INFO("[YoloObjectDetector] Xserver is running.");
+    NODELET_INFO("[YoloObjectDetector] Xserver is running.");
   } else {
-    ROS_INFO("[YoloObjectDetector] Xserver is not running.");
+    NODELET_INFO("[YoloObjectDetector] Xserver is not running.");
     viewImage_ = false;
   }
 
@@ -87,9 +90,13 @@ bool YoloObjectDetector::readParameters()
   return true;
 }
 
-void YoloObjectDetector::init()
+void YoloObjectDetector::init(image_transport::ImageTransport& imageTransport_)
 {
-  ROS_INFO("[YoloObjectDetector] init().");
+  NODELET_INFO("[YoloObjectDetector] init().");
+  for(int i=0; i < 100000; i++)
+  {
+    ;
+  }
 
   // Initialize deep network of darknet.
   std::string weightsPath;
@@ -100,8 +107,10 @@ void YoloObjectDetector::init()
 
   // Threshold of object detection.
   float thresh;
+  NODELET_INFO("Getting Threshold...");
   nodeHandle_.param("yolo_model/threshold/value", thresh, (float) 0.3);
-
+  NODELET_INFO("Printing threshold..");
+  std::cout << thresh << std::endl;
   // Path to weights file.
   nodeHandle_.param("yolo_model/weight_file/name", weightsModel,
                     std::string("yolov2-tiny.weights"));
@@ -109,14 +118,16 @@ void YoloObjectDetector::init()
   weightsPath += "/" + weightsModel;
   weights = new char[weightsPath.length() + 1];
   strcpy(weights, weightsPath.c_str());
-
+  std::cout << weightsModel << std::endl;
+  std::cout << weightsPath << std::endl;
   // Path to config file.
   nodeHandle_.param("yolo_model/config_file/name", configModel, std::string("yolov2-tiny.cfg"));
   nodeHandle_.param("config_path", configPath, std::string("/default"));
   configPath += "/" + configModel;
   cfg = new char[configPath.length() + 1];
   strcpy(cfg, configPath.c_str());
-
+  std::cout << configModel << std::endl;
+  std::cout << configPath << std::endl;
   // Path to data folder.
   dataPath = darknetFilePath_;
   dataPath += "/data";
@@ -735,3 +746,4 @@ void *YoloObjectDetector::publishInThread()
 
 
 } /* namespace darknet_ros*/
+PLUGINLIB_EXPORT_CLASS(darknet_ros::YoloObjectDetector, nodelet::Nodelet);

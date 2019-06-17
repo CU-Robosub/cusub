@@ -57,6 +57,9 @@ extern "C" {
 #include <sys/time.h>
 }
 
+#include <pluginlib/class_list_macros.h>
+#include <nodelet/nodelet.h>
+
 extern "C" void ipl_into_image(IplImage* src, image im);
 extern "C" image ipl_to_image(IplImage* src);
 extern "C" void show_image_cv(image p, const char *name, IplImage *disp);
@@ -70,14 +73,14 @@ typedef struct
   int num, Class;
 } RosBox_;
 
-class YoloObjectDetector
+class YoloObjectDetector : public nodelet::Nodelet
 {
  public:
   /*!
    * Constructor.
    */
-  explicit YoloObjectDetector(ros::NodeHandle nh);
-
+   explicit YoloObjectDetector();
+   virtual void onInit();
   /*!
    * Destructor.
    */
@@ -93,7 +96,7 @@ class YoloObjectDetector
   /*!
    * Initialize the ROS connections.
    */
-  void init();
+  void init(image_transport::ImageTransport& imageTransport_);
 
   /*!
    * Callback of camera.
@@ -140,7 +143,7 @@ class YoloObjectDetector
   CheckForObjectsActionServerPtr checkForObjectsActionServer_;
 
   //! Advertise and subscribe to image topics.
-  image_transport::ImageTransport imageTransport_;
+  // image_transport::ImageTransport imageTransport_;
 
   //! ROS subscriber and publisher.
   image_transport::Subscriber imageSubscriber_;
