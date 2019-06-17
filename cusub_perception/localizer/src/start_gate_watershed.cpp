@@ -60,6 +60,12 @@ namespace pose_generator
         }
         points.push_back(bottom_pt);
         points.push_back(top_pt);
+        Mat c_eroded;
+        cvtColor(eroded, c_eroded, COLOR_GRAY2BGR);
+        circle(c_eroded, bottom_pt,3,Scalar(0,0,255),3);
+        circle(c_eroded, top_pt,3,Scalar(0,0,255),3);
+        imshow("Display Window", c_eroded);
+        waitKey(0);
         return true;
     }
 
@@ -96,6 +102,13 @@ namespace pose_generator
         img_points[3].x += bbs[1].xmin;
         img_points[3].y += bbs[1].ymin;
 
+        circle(cv_ptr->image, img_points[0],3,Scalar(0,0,255),3);
+        circle(cv_ptr->image, img_points[1],3,Scalar(0,0,255),3);
+        circle(cv_ptr->image, img_points[2],3,Scalar(0,0,255),3);
+        circle(cv_ptr->image, img_points[3],3,Scalar(0,0,255),3);
+        imshow("Display Window", cv_ptr->image);
+        waitKey(0);
+
         Mat rvec(3,1,cv::DataType<double>::type);
         Mat tvec(3,1,cv::DataType<double>::type);
 
@@ -127,49 +140,49 @@ int main(int argc, char **argv)
     cout << "Starting Watershed Testing" <<endl;
     pose_generator::StartGateWatershed sgw;
 
-    // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/src/frame0000.jpg";
-    string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/src/T0_10-27-18-image0_0137.jpg";
+    string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/src/frame0000.jpg";
+    // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/src/T0_10-27-18-image0_0137.jpg";
     // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/src/T0_10-27-18-image0_0160.jpg";
     Mat image = imread(image_name, CV_LOAD_IMAGE_COLOR);
     
 
     // First image
-    // darknet_ros_msgs::BoundingBox image_left;
-    // darknet_ros_msgs::BoundingBox image_right;
-    // image_left.Class = "start_gate_pole";
-    // image_left.probability = 1.0;
-    // image_left.xmin = 390;
-    // image_left.ymin = 160;
-    // image_left.xmax = 420;
-    // image_left.ymax = 300;
-    // image_right.Class = "start_gate_pole";
-    // image_right.probability = 1.0;
-    // image_right.xmin = 650;
-    // image_right.ymin = 155;
-    // image_right.xmax = 680;
-    // image_right.ymax = 310;
-    // vector<darknet_ros_msgs::BoundingBox> bbs;
-    // bbs.push_back(image_left);
-    // bbs.push_back(image_right);
-
-    // Second image
     darknet_ros_msgs::BoundingBox image_left;
     darknet_ros_msgs::BoundingBox image_right;
     image_left.Class = "start_gate_pole";
     image_left.probability = 1.0;
-    image_left.xmin = 340;
-    image_left.ymin = 50;
-    image_left.xmax = 375;
-    image_left.ymax = 225;
+    image_left.xmin = 390;
+    image_left.ymin = 160;
+    image_left.xmax = 420;
+    image_left.ymax = 300;
     image_right.Class = "start_gate_pole";
     image_right.probability = 1.0;
-    image_right.xmin = 575;
-    image_right.ymin = 100;
-    image_right.xmax = 640;
-    image_right.ymax = 275;
+    image_right.xmin = 650;
+    image_right.ymin = 155;
+    image_right.xmax = 680;
+    image_right.ymax = 310;
     vector<darknet_ros_msgs::BoundingBox> bbs;
     bbs.push_back(image_left);
     bbs.push_back(image_right);
+
+    // Second image
+    // darknet_ros_msgs::BoundingBox image_left;
+    // darknet_ros_msgs::BoundingBox image_right;
+    // image_left.Class = "start_gate_pole";
+    // image_left.probability = 1.0;
+    // image_left.xmin = 340;
+    // image_left.ymin = 50;
+    // image_left.xmax = 375;
+    // image_left.ymax = 225;
+    // image_right.Class = "start_gate_pole";
+    // image_right.probability = 1.0;
+    // image_right.xmin = 575;
+    // image_right.ymin = 100;
+    // image_right.xmax = 640;
+    // image_right.ymax = 275;
+    // vector<darknet_ros_msgs::BoundingBox> bbs;
+    // bbs.push_back(image_left);
+    // bbs.push_back(image_right);
 
     std_msgs::Header header;
     cv_bridge::CvImage img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::RGB8, image);
@@ -197,16 +210,5 @@ int main(int argc, char **argv)
 }
 
 // Add to generatePose to visualize dots
-// circle(cv_ptr->image, img_points[0],3,Scalar(0,0,255),3);
-// circle(cv_ptr->image, img_points[1],3,Scalar(0,0,255),3);
-// circle(cv_ptr->image, img_points[2],3,Scalar(0,0,255),3);
-// circle(cv_ptr->image, img_points[3],3,Scalar(0,0,255),3);
-// imshow("Display Window", cv_ptr->image);
-// waitKey(0);
+
 // ADD to getPoints to visualize single leg
-// Mat c_eroded;
-// cvtColor(eroded, c_eroded, COLOR_GRAY2BGR);
-// circle(c_eroded, bottom_pt,3,Scalar(0,0,255),3);
-// circle(c_eroded, top_pt,3,Scalar(0,0,255),3);
-// imshow("Display Window", c_eroded);
-// waitKey(0);
