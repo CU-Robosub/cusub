@@ -1,0 +1,7 @@
+<library path="lib/liboccam">
+  <class name="OccamNode" type="OccamNode" base_class_type="nodelet::Nodelet">
+    <description>
+      Occam Omni60 Driver
+    </description>
+  </class>
+</library>
