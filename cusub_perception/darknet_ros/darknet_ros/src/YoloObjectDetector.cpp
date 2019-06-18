@@ -93,10 +93,6 @@ bool YoloObjectDetector::readParameters()
 void YoloObjectDetector::init(image_transport::ImageTransport& imageTransport_)
 {
   NODELET_INFO("[YoloObjectDetector] init().");
-  for(int i=0; i < 100000; i++)
-  {
-    ;
-  }
 
   // Initialize deep network of darknet.
   std::string weightsPath;
@@ -107,10 +103,7 @@ void YoloObjectDetector::init(image_transport::ImageTransport& imageTransport_)
 
   // Threshold of object detection.
   float thresh;
-  NODELET_INFO("Getting Threshold...");
   nodeHandle_.param("yolo_model/threshold/value", thresh, (float) 0.3);
-  NODELET_INFO("Printing threshold..");
-  std::cout << thresh << std::endl;
   // Path to weights file.
   nodeHandle_.param("yolo_model/weight_file/name", weightsModel,
                     std::string("yolov2-tiny.weights"));
@@ -118,16 +111,12 @@ void YoloObjectDetector::init(image_transport::ImageTransport& imageTransport_)
   weightsPath += "/" + weightsModel;
   weights = new char[weightsPath.length() + 1];
   strcpy(weights, weightsPath.c_str());
-  std::cout << weightsModel << std::endl;
-  std::cout << weightsPath << std::endl;
   // Path to config file.
   nodeHandle_.param("yolo_model/config_file/name", configModel, std::string("yolov2-tiny.cfg"));
   nodeHandle_.param("config_path", configPath, std::string("/default"));
   configPath += "/" + configModel;
   cfg = new char[configPath.length() + 1];
   strcpy(cfg, configPath.c_str());
-  std::cout << configModel << std::endl;
-  std::cout << configPath << std::endl;
   // Path to data folder.
   dataPath = darknetFilePath_;
   dataPath += "/data";
@@ -650,6 +639,8 @@ bool YoloObjectDetector::isNodeRunning(void)
 
 void *YoloObjectDetector::publishInThread()
 {
+  darknet_ros_msgs::BoundingBoxesPtr boundingBoxesResults_(new darknet_ros_msgs::BoundingBoxes);
+
   // Publish image.
   cv::Mat cvImage = cv::cvarrToMat(ipl_);
   if (!publishDetectionImage(cv::Mat(cvImage))) {
@@ -697,15 +688,15 @@ void *YoloObjectDetector::publishInThread()
           boundingBox.ymin = ymin;
           boundingBox.xmax = xmax;
           boundingBox.ymax = ymax;
-          boundingBoxesResults_.bounding_boxes.push_back(boundingBox);
+          boundingBoxesResults_->bounding_boxes.push_back(boundingBox);
         }
       }
     }
 
-    boundingBoxesResults_.image_header = curr_header;
+    boundingBoxesResults_->image_header = curr_header;
 
-    boundingBoxesResults_.header.stamp = ros::Time::now();
-    boundingBoxesResults_.header.frame_id = "detection";
+    boundingBoxesResults_->header.stamp = ros::Time::now();
+    boundingBoxesResults_->header.frame_id = "detection";
 
     // We add publishing of image with header so we can keep it synced
     // for further classical processing to better pin down points in the
@@ -717,11 +708,10 @@ void *YoloObjectDetector::publishInThread()
     cvImage.header.frame_id = "detection_image";
     cvImage.encoding = sensor_msgs::image_encodings::BGR8;
     cvImage.image = cv::cvarrToMat(ipl2_);
-    boundingBoxesResults_.image = *cvImage.toImageMsg();
+    boundingBoxesResults_->image = *cvImage.toImageMsg();
 
     //boundingBoxesResults_.image_header = imageHeader_;
     //boundingBoxesResults_.image_header.frame_id = curr_frame_id;
-
     boundingBoxesPublisher_.publish(boundingBoxesResults_);
   } else {
     std_msgs::Int8 msg;
@@ -732,10 +722,10 @@ void *YoloObjectDetector::publishInThread()
     ROS_DEBUG("[YoloObjectDetector] check for objects in image.");
     darknet_ros_msgs::CheckForObjectsResult objectsActionResult;
     objectsActionResult.id = buffId_[0];
-    objectsActionResult.bounding_boxes = boundingBoxesResults_;
+    // objectsActionResult.bounding_boxes = boundingBoxesResults_;
     checkForObjectsActionServer_->setSucceeded(objectsActionResult, "Send bounding boxes.");
   }
-  boundingBoxesResults_.bounding_boxes.clear();
+  // boundingBoxesResults_.bounding_boxes.clear();
   for (int i = 0; i < numClasses_; i++) {
     rosBoxes_[i].clear();
     rosBoxCounter_[i] = 0;

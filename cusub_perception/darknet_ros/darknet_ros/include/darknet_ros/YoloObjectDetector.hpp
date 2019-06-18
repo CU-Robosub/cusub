@@ -153,7 +153,7 @@ class YoloObjectDetector : public nodelet::Nodelet
   //! Detected objects.
   std::vector<std::vector<RosBox_> > rosBoxes_;
   std::vector<int> rosBoxCounter_;
-  darknet_ros_msgs::BoundingBoxes boundingBoxesResults_;
+  // darknet_ros_msgs::BoundingBoxesPtr boundingBoxesResults_;
 
   //! Camera related parameters.
   int frameWidth_;
