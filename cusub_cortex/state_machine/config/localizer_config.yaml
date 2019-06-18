@@ -1,5 +1,5 @@
 localizer:
- start_gate_pole : watershed # watershed, ...
+ start_gate_pole : hough # hough, ...
  fat_head : bouy_pnp
  slick : bouy_pnp
  no_torso : bouy_pnp

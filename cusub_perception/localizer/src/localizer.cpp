@@ -17,7 +17,6 @@ namespace localizer_ns
     ros::NodeHandle& nh = getMTNodeHandle();
     sub = nh.subscribe("/leviathan/darknet_ros/bounding_boxes", 1, &Localizer::darknetCallback, this);
     pub = nh.advertise<localizer::Detection>("Global_State/task_poses",1);
-    // pub = nh.advertise<>
     NODELET_INFO("Starting Localizer");
     loadRosParams(nh);
   }
@@ -50,14 +49,9 @@ namespace localizer_ns
    */
   void Localizer::darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs)
   {
-    // NODELET_INFO("Received darknet Image.");
-
     // Group all bounding boxes that use same PoseGenerator into vectors
     map<pose_generator::PoseGenerator*, vector<darknet_ros_msgs::BoundingBox>> bb_map;
     map<string, pose_generator::PoseGenerator*>::iterator it;
-
-    // NODELET_INFO("#bbs: %lu", bbs->bounding_boxes.size());
-
     for(darknet_ros_msgs::BoundingBox box : bbs->bounding_boxes)
     {
       it = mappings.find(box.Class);
@@ -67,11 +61,9 @@ namespace localizer_ns
       } else {
         if(bb_map.find(it->second) == bb_map.end()) // pose gen ptr hasn't been added to bb_map yet
         {
-          // NODELET_INFO("Creating new vector for: %s", it->first.c_str());
           vector<darknet_ros_msgs::BoundingBox> new_bb_vector;
           bb_map[it->second] = new_bb_vector;
         }
-        // NODELET_INFO("Adding %s", box.Class.c_str());
         bb_map[it->second].push_back(box);
       }
     }
