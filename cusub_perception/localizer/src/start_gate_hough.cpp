@@ -7,8 +7,14 @@
 
 namespace pose_generator
 {   
-    void StartGateHough::getPoseFromVectors(Mat rvec, Mat tvec, geometry_msgs::Pose& pose)
+    void StartGateHough::getPoseFromPoints(vector<Point2f>& img_points, geometry_msgs::Pose& pose)
     {
+        // SolvePnp
+        Mat rvec(3,1,cv::DataType<double>::type);
+        Mat tvec(3,1,cv::DataType<double>::type);
+        solvePnP(gate_truth_pts, img_points, occam_camera_matrix, occam_dist_coefs, rvec, tvec);
+
+        // Generate Rotation Matrix from rvec -> turn into Quaternion
         Mat rot_matrix;
         tf2::Quaternion q;
 
@@ -97,11 +103,8 @@ namespace pose_generator
         img_points[3].x += bbs[1].xmin;
         img_points[3].y += bbs[1].ymin;
 
-        Mat rvec(3,1,cv::DataType<double>::type);
-        Mat tvec(3,1,cv::DataType<double>::type);
-
-        solvePnP(gate_truth_pts, img_points, occam_camera_matrix, occam_dist_coefs, rvec, tvec);
-        getPoseFromVectors(rvec, tvec, pose);
+        // Get pose from image points using a solvepnp
+        getPoseFromPoints(img_points, pose);
         class_name = "start_gate";
         return true;
     }

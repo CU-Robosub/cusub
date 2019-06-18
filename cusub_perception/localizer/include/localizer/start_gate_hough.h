@@ -42,7 +42,7 @@ namespace pose_generator
                 string& class_name
             );
         private:
-            void getPoseFromVectors(Mat rvec, Mat tvec, geometry_msgs::Pose& pose);
+            void getPoseFromPoints(vector<Point2f>& points, geometry_msgs::Pose& pose);
             void sortBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs);
             bool getPoints(Mat& img, vector<Point2f>& points);
             vector<Point3f> gate_truth_pts{
