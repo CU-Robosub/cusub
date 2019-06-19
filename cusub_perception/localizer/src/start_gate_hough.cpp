@@ -7,6 +7,18 @@
 
 namespace pose_generator
 {   
+    StartGateHough::StartGateHough()
+    {
+        ros::NodeHandle nh;
+        small_leg_side_pub = nh.advertise<std_msgs::Bool>("start_gate_small_pole_left_side",1);
+        nh.param<bool>("localizer/hough/three_legs", three_legs, true);
+        if(!three_legs) { ROS_WARN("Localizing gate with 2 legs."); }
+        else { ROS_INFO("Localizing gate with 3 legs."); }
+    }
+    /*
+        Given top and bottom points of each leg, solvepnp and return a pose
+        Assumes first two points in img_points are left leg, last two right leg
+     */
     void StartGateHough::getPoseFromPoints(vector<Point2f>& img_points, geometry_msgs::Pose& pose)
     {
         // SolvePnp
@@ -37,12 +49,36 @@ namespace pose_generator
         pose.position.z = tvec.at<double>(2);
     }
 
-    void StartGateHough::sortBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs)
+    /*
+        Publishes side of gate middle leg is on
+     */
+    void StartGateHough::publishLegSide(vector<darknet_ros_msgs::BoundingBox>& bbs)
     {
-        // We want [left_leg, middle_leg, right_leg]
-        ;
+        std_msgs::Bool left;
+        left.data = abs(bbs[0].xmin - bbs[1].xmin) < abs(bbs[1].xmin - bbs[2].xmin);
+        small_leg_side_pub.publish(left);
+        if (left.data)
+            cout << "publishing left" << endl;
+        else
+            cout << "publishing right" << endl;
     }
 
+    /*
+        Sorts 3 start gate bounding boxes in a frame
+        Publishes the side the small leg is closer to
+     */
+    void StartGateHough::sortBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs)
+    {
+        // Sort using lambda operator
+        sort(bbs.begin(), bbs.end(), []( const darknet_ros_msgs::BoundingBox& b1, const darknet_ros_msgs::BoundingBox& b2 )
+            {
+                return b1.xmin < b2.xmin;
+            });
+    }
+
+    /*
+        Finds the top and bottom points of the leg using the hough lines algorithm
+     */
     bool StartGateHough::getPoints(Mat& img, vector<Point2f>& points)
     {
         Mat gray, binary, eroded;
@@ -76,7 +112,8 @@ namespace pose_generator
         geometry_msgs::Pose& pose,
         string& class_name
     ){
-        if(bbs.size() != 2) {return false;} // to be adjusted for 3 leg case
+        if ( three_legs && bbs.size() != 3 ) {return false;}
+        if ( !three_legs && bbs.size() != 2) {return false;}
         sortBoxes(bbs);
         ROS_INFO("Localizing the gate!");
         // Double check that its RGB8 not BGR8
@@ -84,7 +121,7 @@ namespace pose_generator
 
         // Trim each leg out of image
         Rect left_rect(bbs[0].xmin, bbs[0].ymin,bbs[0].xmax-bbs[0].xmin,bbs[0].ymax-bbs[0].ymin);
-        Rect right_rect(bbs[1].xmin, bbs[1].ymin,bbs[1].xmax-bbs[1].xmin,bbs[1].ymax-bbs[1].ymin);
+        Rect right_rect(bbs.back().xmin, bbs.back().ymin,bbs.back().xmax-bbs.back().xmin,bbs.back().ymax-bbs.back().ymin);
         Mat left_pole = cv_ptr->image(left_rect);
         Mat right_pole = cv_ptr->image(right_rect);
 
@@ -98,13 +135,14 @@ namespace pose_generator
         img_points[0].y += bbs[0].ymin;
         img_points[1].x += bbs[0].xmin;
         img_points[1].y += bbs[0].ymin;
-        img_points[2].x += bbs[1].xmin;
-        img_points[2].y += bbs[1].ymin;
-        img_points[3].x += bbs[1].xmin;
-        img_points[3].y += bbs[1].ymin;
+        img_points[2].x += bbs.back().xmin;
+        img_points[2].y += bbs.back().ymin;
+        img_points[3].x += bbs.back().xmin;
+        img_points[3].y += bbs.back().ymin;
 
         // Get pose from image points using a solvepnp
         getPoseFromPoints(img_points, pose);
+        if (three_legs) { publishLegSide(bbs); }
         class_name = "start_gate";
         return true;
     }

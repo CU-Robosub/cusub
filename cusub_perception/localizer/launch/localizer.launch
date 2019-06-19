@@ -9,7 +9,7 @@
     <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/ros.yaml"/>
     <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/robosub1CustomModel.yaml"/>
 
-    <rosparam command="load" file="$(find state_machine)/config/localizer_config.yaml"/>
+    <rosparam command="load" file="$(find localizer)/config/localizer_config.yaml"/>
 
     <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
     <node pkg="nodelet" type="nodelet" name="localizer" args="load localizer/Localizer standalone_nodelet" output="screen"/>

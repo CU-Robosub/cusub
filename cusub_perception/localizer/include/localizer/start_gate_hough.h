@@ -1,9 +1,11 @@
 #ifndef START_GATE_HOUGH_CLASS_SRC_START_GATE_HOUGH_CLASS_H_
 #define START_GATE_HOUGH_CLASS_SRC_START_GATE_HOUGH_CLASS_H_
 
+#include <cstdlib>
 #include <nodelet/nodelet.h>
 #include <localizer/pose_generator.h>
 #include <sensor_msgs/Image.h>
+#include <std_msgs/Bool.h>
 #include <darknet_ros_msgs/BoundingBox.h>
 #include <ros/ros.h>
 #include <geometry_msgs/Pose.h>
@@ -41,10 +43,13 @@ namespace pose_generator
                 geometry_msgs::Pose& pose,
                 string& class_name
             );
+            StartGateHough();
         private:
             void getPoseFromPoints(vector<Point2f>& points, geometry_msgs::Pose& pose);
             void sortBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs);
             bool getPoints(Mat& img, vector<Point2f>& points);
+            void publishLegSide(vector<darknet_ros_msgs::BoundingBox>& bbs);
+            ros::Publisher small_leg_side_pub; // left or right
             vector<Point3f> gate_truth_pts{
                 Point3f(0,-1.6,-0.6),
                 Point3f(0,-1.6, 0.6),
@@ -59,6 +64,7 @@ namespace pose_generator
             };
             Mat occam_camera_matrix{3,3,DataType<double>::type, occam_camera_matrix_values.data()};
             Mat occam_dist_coefs{4,1, DataType<double>::type, occam_dist_coefs_values.data()};
+            bool three_legs;
     };
 }
 

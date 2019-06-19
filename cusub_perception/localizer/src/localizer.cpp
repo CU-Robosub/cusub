@@ -15,7 +15,7 @@ namespace localizer_ns
   void Localizer::onInit()
   {
     ros::NodeHandle& nh = getMTNodeHandle();
-    sub = nh.subscribe("/leviathan/darknet_ros/bounding_boxes", 1, &Localizer::darknetCallback, this);
+    sub = nh.subscribe("/leviathan/cusub_perception/darknet_ros/bounding_boxes", 1, &Localizer::darknetCallback, this);
     pub = nh.advertise<localizer::Detection>("Global_State/task_poses",1);
     NODELET_INFO("Starting Localizer");
     loadRosParams(nh);
@@ -28,7 +28,7 @@ namespace localizer_ns
   void Localizer::loadRosParams(ros::NodeHandle& nh)
   {
     map<string, string> map_params;
-    if( !nh.getParam("localizer", map_params))
+    if( !nh.getParam("localizer/classes", map_params))
     {
       NODELET_ERROR("Localizer failed to locate params");
       abort();
@@ -76,9 +76,8 @@ namespace localizer_ns
       det.pose.header = bbs->image.header;
       if( bb_map_it->first->generatePose(bbs->image, bb_map_it->second, det.pose.pose, det.class_id))
       {
-        NODELET_INFO("Pose Localized!");
         pub.publish(det);
-      } 
+      }
     }
   }
 }
