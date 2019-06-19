@@ -10,7 +10,7 @@ namespace pose_generator
     StartGateHough::StartGateHough()
     {
         ros::NodeHandle nh;
-        small_leg_side_pub = nh.advertise<std_msgs::Bool>("start_gate_small_pole_left_side",1);
+        small_leg_side_pub = nh.advertise<std_msgs::Bool>("start_gate/small_pole_left_side",1);
         nh.param<bool>("localizer/hough/three_legs", three_legs, true);
         if(!three_legs) { ROS_WARN("Localizing gate with 2 legs."); }
         else { ROS_INFO("Localizing gate with 3 legs."); }

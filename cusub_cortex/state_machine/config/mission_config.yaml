@@ -6,12 +6,11 @@
 tasks:
  start_gate:
   prior: [4,0,-1.5]
-  search_alg: simple
   dist_behind_gate: 1.0
   replan_thresh: 1.0
+  third_leg_adjustment: 0.5
   failed_repeat: true
-  object_localizers:
-    start_gate_pole: ['gate_pnp_color', 'gate_pnp_bb', 'gate_midpoint']
+
  dice:
   prior: [3,0,-2.3]
   search_alg: simple
