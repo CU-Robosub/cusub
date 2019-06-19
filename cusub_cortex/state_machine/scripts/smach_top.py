@@ -108,13 +108,7 @@ def main():
             else: # link to next task
                 success_transition = task_list[ index + 1 ]
 
-            # find task aborted transition
-            if rospy.get_param('tasks/'+sm_name+'/failed_repeat'):
-                aborted_transition = sm_name # loop back on this task if aborted
-            else:
-                aborted_transition = success_transition # increment
-
-
+            aborted_transition = success_transition
             smach.StateMachine.add(sm_name, sm, transitions={'task_aborted' : aborted_transition, 'task_success':success_transition})
 
 

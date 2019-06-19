@@ -3,9 +3,6 @@ Searching Algorithms
 
 Approach a prior for a task, once we get a few yolo hits on searchTopic quit out
 
-SEARCH TYPES:
-simple | brief: go straight to the prior pose
-zigzag | brief: make a zigzag motion to the prior pose
 halfhalf
 
 """
@@ -39,7 +36,6 @@ class Search(Objective):
         """
 
         rospy.loginfo("---Search objective initializing")
-        self.search = SimpleSearch()
         self.prior = priorPose
         rospy.Subscriber(searchTopic, PoseStamped, self.exit_callback)
         self.numQuitPoses = numQuitPoses
