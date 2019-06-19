@@ -1,7 +1,9 @@
 <library path="lib/liboccam">
-  <class name="OccamNode" type="OccamNode" base_class_type="nodelet::Nodelet">
+  <class name="ros_indigosdk/occam" type="OccamNode" base_class_type="nodelet::Nodelet">
     <description>
       Occam Omni60 Driver
     </description>
   </class>
 </library>
+
+darknet_ros/YoloObjectDetector depth_image_proc/convert_metric depth_image_proc/crop_foremost depth_image_proc/disparity depth_image_proc/point_cloud_xyz depth_image_proc/point_cloud_xyz_radial depth_image_proc/point_cloud_xyzi depth_image_proc/point_cloud_xyzi_radial depth_image_proc/point_cloud_xyzrgb depth_image_proc/register image_proc/crop_decimate image_proc/crop_nonZero image_proc/crop_non_zero image_proc/debayer image_proc/rectify image_proc/resize image_publisher/image_publisher image_rotate/image_rotate image_view/disparity image_view/image localizer/Localizer nodelet_tutorial_math/Plus occam pcl/BAGReader pcl/BoundaryEstimation pcl/ConvexHull2D pcl/CropBox pcl/EuclideanClusterExtraction pcl/ExtractIndices pcl/ExtractPolygonalPrismData pcl/FPFHEstimation pcl/FPFHEstimationOMP pcl/MomentInvariantsEstimation pcl/MovingLeastSquares pcl/NodeletDEMUX pcl/NodeletMUX pcl/NormalEstimation pcl/NormalEstimationOMP pcl/NormalEstimationTBB pcl/PCDReader pcl/PCDWriter pcl/PFHEstimation pcl/PassThrough pcl/PointCloudConcatenateDataSynchronizer pcl/PointCloudConcatenateFieldsSynchronizer pcl/PrincipalCurvaturesEstimation pcl/ProjectInliers pcl/RadiusOutlierRemoval pcl/SACSegmentation pcl/SACSegmentationFromNormals pcl/SHOTEstimation pcl/SHOTEstimationOMP pcl/SegmentDifferences pcl/StatisticalOutlierRemoval pcl/VFHEstimation pcl/VoxelGrid stereo_image_proc/disparity stereo_image_proc/point_cloud2

@@ -54,4 +54,36 @@ add_subdirectory(${INDIGOSDK_PATH} indigosdk)
 
 add_library( occam
 	nodes/ros_indigosdk_node.cpp
+	sdk/src/bm_stereo.cc
+	sdk/src/cylinder_blend.cc
+	sdk/src/debayer_filter.cc
+	sdk/src/device_data_cache.cc
+	sdk/src/device_enum.cc
+	sdk/src/device_iface.cc
+	sdk/src/device_iface.tcc
+	sdk/src/gl_utils.cc
+	sdk/src/image.cc
+	sdk/src/image_collect.cc
+	sdk/src/image_filter.cc
+	sdk/src/indigo.cc
+	sdk/src/libusb_utils.cc
+	sdk/src/markers.cc
+	sdk/src/module.cc
+	sdk/src/module_utils.cc
+	sdk/src/offset_blend.cc
+	sdk/src/omni5u3mt9v022.cc
+	sdk/src/omni_libusb.cc
+	sdk/src/omnis5u3mt9v022.cc
+	sdk/src/planar_rectify.cc
+	sdk/src/point_cloud.cc
+	sdk/src/rate_utils.cc
+	sdk/src/remap.cc
+	sdk/src/serialize_utils.tcc
+	sdk/src/system.cc
+	sdk/src/undistort_filter.cc
+)
+target_link_libraries(occam indigo ${catkin_LIBRARIES})
+install(TARGETS occam
+ RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )

@@ -500,10 +500,6 @@ public:
       nh = getMTPrivateNodeHandle();
       int r;
       sub = nh.subscribe("/occam/set_exposure", 1000, &OccamNode::exposure_callback, this);
-      int update_freq;
-      nh.param<int>("frame_id", update_freq, 60);
-      timer = nh.createTimer(ros::Duration(1 / update_freq), &OccamNode::take_and_send_data, this);
-      wait_count_max = update_freq;
 
       std::string frame_id;
       nh.param<std::string>("frame_id", frame_id, "occam");
@@ -529,9 +525,11 @@ public:
         return;
       }
 
+      NODELET_INFO("Reached here!");
       OCCAM_CHECK(occamOpenDevice(device_list->entries[dev_index].cid, &device));
+      NODELET_INFO("Reached here!");
       OCCAM_CHECK(occamFreeDeviceList(device_list));
-
+      NODELET_INFO("Reached here!");
       image_transport::ImageTransport it(nh);
 
       int req_count;
@@ -557,6 +555,10 @@ public:
       occamFree(types);
 
       config = std::make_shared<OccamConfig>(nh,cid,device);
+      int loop_freq;
+      nh.param<int>("loop_freq", loop_freq, 100);
+      wait_count_max = loop_freq;
+      timer = nh.createTimer(ros::Duration(1 / loop_freq), &OccamNode::take_and_send_data, this);
   }
 
   OccamNode() : device(0) {
