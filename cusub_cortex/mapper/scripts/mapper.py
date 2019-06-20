@@ -158,7 +158,7 @@ class Mapper(object):
         # sub_name = ns[0:index+2]
         # print(sub_name)
         
-        rospy.Subscriber('cusub_cortex/mapper_in/task_poses', Detection, self.pose_received)
+        # rospy.Subscriber('cusub_cortex/mapper_in/task_poses', Detection, self.pose_received)
 
         # separate topics for each task obstacle
         # dice
@@ -207,7 +207,7 @@ class Mapper(object):
         self.start_gate_found = False
 
         # filters
-        self.gate_filter = filter_poses.GatePoseFilter()
+        self.gate_filter = ExpWeightedAvg(200) # filter_poses.GatePoseFilter()
         self.dice_filter = filter_poses.DicePoseFilter()
 
         self.dice5_filter = ExpWeightedAvg(20)
@@ -236,6 +236,9 @@ class Mapper(object):
         #     self.map.update_landmark(detection.class_id, map_pose)
         
 #        map_pose = self.listener.transformPose(rospy.get_namespace() + 'description/map', detection.pose)
+
+        # rospy.loginfo("Yo received a pose dawg")
+        # rospy.loginfo(detection.pose.header.frame_id)
         
         transformed_pose = self.transform_occam_to_odom(detection.pose)
         
@@ -269,7 +272,10 @@ class Mapper(object):
 
         elif detection.class_id == 'start_gate':
             self.start_gate_unfiltered_pose = transformed_pose
-            self.start_gate_pose = transformed_pose 
+            new_pose = PoseStamped()
+            new_pose.pose = self.gate_filter.get_new_avg_pose(transformed_pose.pose)
+            new_pose.header = transformed_pose.header
+            self.start_gate_pose = new_pose
             self.start_gate_found = True
 
         elif detection.class_id == 'roulette':

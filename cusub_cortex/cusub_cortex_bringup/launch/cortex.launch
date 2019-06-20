@@ -1,6 +1,6 @@
 <launch>
   <arg name="sub" default="leviathan" />
-  <group ns="$(arg sub)/cusub_cortex">
+  <group ns="$(arg sub)">
     <include file="$(find mapper)/launch/mapper.launch"/>
     <include file="$(find state_machine)/launch/state_machine.launch" >
       <arg name="sub" value="$(arg sub)" />

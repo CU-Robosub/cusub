@@ -26,6 +26,7 @@ namespace localizer_ns
     map<string, pose_generator::PoseGenerator*> mappings;
     ros::Publisher pub;
     ros::Subscriber sub;
+    int detection_num;
   };
 
   namespace pose_gen_decls

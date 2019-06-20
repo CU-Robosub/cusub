@@ -6,7 +6,7 @@
 tasks:
  start_gate:
   prior: [4,0,-1.5]
-  dist_behind_gate: 1.0
+  dist_behind_gate: 0.0
   third_leg_adjustment: 0.5
   replan_thresh: 1.0
 

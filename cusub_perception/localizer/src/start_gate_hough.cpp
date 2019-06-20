@@ -10,8 +10,9 @@ namespace pose_generator
     StartGateHough::StartGateHough()
     {
         ros::NodeHandle nh;
-        small_leg_side_pub = nh.advertise<std_msgs::Bool>("start_gate/small_pole_left_side",1);
-        nh.param<bool>("localizer/hough/three_legs", three_legs, true);
+        small_leg_side_pub = nh.advertise<std_msgs::Bool>("cusub_perception/start_gate/small_pole_left_side",1);
+        if ( !nh.getParam("localizer/hough/three_legs", three_legs) ) { ROS_ERROR("Startgate couldn't locate params"); abort(); }
+        // nh.param<bool>("localizer/hough/three_legs", three_legs, true);
         if(!three_legs) { ROS_WARN("Localizing gate with 2 legs."); }
         else { ROS_INFO("Localizing gate with 3 legs."); }
     }
@@ -50,7 +51,9 @@ namespace pose_generator
     }
 
     /*
-        Publishes side of gate middle leg is on
+        Publishes middle leg gate side
+        Darknet boxes have already been sorted to:
+        [ left, middle, right ]
      */
     void StartGateHough::publishLegSide(vector<darknet_ros_msgs::BoundingBox>& bbs)
     {
@@ -65,7 +68,7 @@ namespace pose_generator
 
     /*
         Sorts 3 start gate bounding boxes in a frame
-        Publishes the side the small leg is closer to
+        [ left, middle, right ]
      */
     void StartGateHough::sortBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs)
     {
@@ -115,7 +118,6 @@ namespace pose_generator
         if ( three_legs && bbs.size() != 3 ) {return false;}
         if ( !three_legs && bbs.size() != 2) {return false;}
         sortBoxes(bbs);
-        ROS_INFO("Localizing the gate!");
         // Double check that its RGB8 not BGR8
         cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::RGB8);
 

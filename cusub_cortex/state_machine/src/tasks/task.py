@@ -158,6 +158,7 @@ class Objective(smach.State):
 
         while (res == None or not res.complete) and not rospy.is_shutdown():
             res = self.wayClient.get_result()
+            print(res)
 
             if self.abort_requested():
                 rospy.loginfo("---objective aborted, causing waypoint request to quit")
