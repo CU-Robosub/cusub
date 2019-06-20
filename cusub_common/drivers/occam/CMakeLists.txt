@@ -6,7 +6,8 @@ find_package(catkin
 		roscpp 
 		std_msgs 
 		sensor_msgs 
-        camera_info_manager)
+        camera_info_manager
+		nodelet)
 
 
 set(ROS_BUILD_TYPE Release)
@@ -26,6 +27,7 @@ catkin_package(
 		std_msgs 
 		sensor_msgs
         camera_info_manager
+		nodelet
 )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x -Wno-format-extra-args")
@@ -42,10 +44,17 @@ include_directories(
 )
 add_subdirectory(${INDIGOSDK_PATH} indigosdk)
 
-add_executable(ros_indigosdk_node nodes/ros_indigosdk_node.cpp)
-target_link_libraries(ros_indigosdk_node indigo ${catkin_LIBRARIES})
+# add_executable(ros_indigosdk_node nodes/ros_indigosdk_node.cpp)
+# target_link_libraries(ros_indigosdk_node indigo ${catkin_LIBRARIES})
 
-install(TARGETS ros_indigosdk_node
+# install(TARGETS ros_indigosdk_node
+#  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+#  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+# )
+
+add_library(occam nodes/ros_indigosdk_node.cpp)
+target_link_libraries(occam indigo ${catkin_LIBRARIES})
+install(TARGETS occam
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )

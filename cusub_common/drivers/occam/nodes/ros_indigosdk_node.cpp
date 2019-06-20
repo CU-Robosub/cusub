@@ -23,6 +23,9 @@
 #include <dynamic_reconfigure/Reconfigure.h>
 #include "indigo.h"
 
+#include <nodelet/nodelet.h>
+#include <pluginlib/class_list_macros.h>
+
 static void reportError(int error_code) {
   ROS_INFO("Occam API Error: %i", error_code);
   abort();
@@ -190,19 +193,19 @@ class ImagePublisher : public Publisher {
       int width = img0->width;
       int height = img0->height;
 
-      sensor_msgs::Image img1;
-      img1.header.frame_id = frame_id;
-      img1.header.stamp = now;
-      img1.encoding = image_encoding;
-      img1.height = height;
-      img1.width = width;
-      img1.step = width*bpp;
-      img1.data.resize(img1.height*img1.step);
-      img1.is_bigendian = 0;
+      sensor_msgs::ImagePtr img1(new sensor_msgs::Image);
+      img1->header.frame_id = frame_id;
+      img1->header.stamp = now;
+      img1->encoding = image_encoding;
+      img1->height = height;
+      img1->width = width;
+      img1->step = width*bpp;
+      img1->data.resize(img1->height*img1->step);
+      img1->is_bigendian = 0;
       const uint8_t* srcp = img0->data[0];
       int src_step = img0->step[0];
-      uint8_t* dstp = &img1.data[0];
-      int dst_step = img1.step;
+      uint8_t* dstp = &img1->data[0];
+      int dst_step = img1->step;
       for (int j=0;j<height;++j,dstp+=dst_step,srcp+=src_step)
         memcpy(dstp,srcp,width*bpp);
 
@@ -479,26 +482,25 @@ public:
   }
 };
 
-class OccamNode {
+class OccamNode : public nodelet::Nodelet {
 public:
 
   ros::NodeHandle nh;
-
-  // not occam
-  ros::Subscriber sub = nh.subscribe("/occam/set_exposure", 1000, &OccamNode::exposure_callback, this);
+    // not occam
+  ros::Subscriber sub;
+  ros::Timer timer;
 
   std::string cid;
   OccamDevice* device;
   std::vector<std::shared_ptr<Publisher> > pubs;
   std::shared_ptr<OccamConfig> config;
 
-  OccamNode() :
-
-    nh("~"),
-
-    device(0) {
-
+  void onInit() {
+      device = 0;
+      OCCAM_CHECK(occamInitialize());
+      nh = getMTPrivateNodeHandle();
       int r;
+      sub = nh.subscribe("/occam/set_exposure", 1000, &OccamNode::exposure_callback, this);
 
       std::string frame_id;
       nh.param<std::string>("frame_id", frame_id, "occam");
@@ -526,7 +528,6 @@ public:
 
       OCCAM_CHECK(occamOpenDevice(device_list->entries[dev_index].cid, &device));
       OCCAM_CHECK(occamFreeDeviceList(device_list));
-
       image_transport::ImageTransport it(nh);
 
       int req_count;
@@ -552,7 +553,14 @@ public:
       occamFree(types);
 
       config = std::make_shared<OccamConfig>(nh,cid,device);
+      int loop_freq;
+      nh.param<int>("loop_freq", loop_freq, 100);
+      wait_count_max = loop_freq;
+      timer = nh.createTimer(ros::Duration(1 / loop_freq), &OccamNode::take_and_send_data, this);
+  }
 
+  OccamNode() : device(0) {
+      ;
     }
 
   virtual ~OccamNode() {
@@ -574,8 +582,14 @@ public:
 
   }
 
+  int wait_count_max;
+  int wait_count;
+  void take_and_send_data(const ros::TimerEvent& event) {
+    if (wait_count > 0){
+      wait_count -= 1;
+      return;
+    }
 
-  bool take_and_send_data() {
     int r;
 
     std::vector<OccamDataName> reqs;
@@ -597,36 +611,19 @@ public:
       char error_str[256] = {0};
       occamGetErrorString((OccamError)r, error_str, sizeof(error_str));
       ROS_ERROR_THROTTLE(10,"Driver returned error %s (%i)",error_str,r);
-      return false;
+      wait_count = wait_count_max;
+      return;
     }
-    if (r != OCCAM_API_SUCCESS)
-      return false;
+    if (r != OCCAM_API_SUCCESS)  {
+      wait_count = wait_count_max;
+      return;
+    }
 
     ros::Time now = ros::Time::now();
     for (int j=0;j<reqs.size();++j)
       reqs_pubs[j]->publish(data[j], now);
 
-    return true;
-  }
-
-  bool spin() {
-    if (!device)
-      return false;
-
-    while (nh.ok()) {
-      if (!take_and_send_data())
-        usleep(1000);
-      ros::spinOnce();
-    }
-    return true;
+    return;
   }
 };
-
-int main(int argc, char **argv) {
-  OCCAM_CHECK(occamInitialize());
-  ros::init(argc, argv, "occam");
-  OccamNode a;
-  a.spin();
-  exit(0);
-  return 0;
-}
+PLUGINLIB_EXPORT_CLASS(OccamNode, nodelet::Nodelet);
