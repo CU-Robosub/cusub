@@ -193,19 +193,19 @@ class ImagePublisher : public Publisher {
       int width = img0->width;
       int height = img0->height;
 
-      sensor_msgs::Image img1;
-      img1.header.frame_id = frame_id;
-      img1.header.stamp = now;
-      img1.encoding = image_encoding;
-      img1.height = height;
-      img1.width = width;
-      img1.step = width*bpp;
-      img1.data.resize(img1.height*img1.step);
-      img1.is_bigendian = 0;
+      sensor_msgs::ImagePtr img1(new sensor_msgs::Image);
+      img1->header.frame_id = frame_id;
+      img1->header.stamp = now;
+      img1->encoding = image_encoding;
+      img1->height = height;
+      img1->width = width;
+      img1->step = width*bpp;
+      img1->data.resize(img1->height*img1->step);
+      img1->is_bigendian = 0;
       const uint8_t* srcp = img0->data[0];
       int src_step = img0->step[0];
-      uint8_t* dstp = &img1.data[0];
-      int dst_step = img1.step;
+      uint8_t* dstp = &img1->data[0];
+      int dst_step = img1->step;
       for (int j=0;j<height;++j,dstp+=dst_step,srcp+=src_step)
         memcpy(dstp,srcp,width*bpp);
 
@@ -496,6 +496,7 @@ public:
   std::shared_ptr<OccamConfig> config;
 
   void onInit() {
+      device = 0;
       OCCAM_CHECK(occamInitialize());
       nh = getMTPrivateNodeHandle();
       int r;
@@ -525,11 +526,8 @@ public:
         return;
       }
 
-      NODELET_INFO("Reached here!");
       OCCAM_CHECK(occamOpenDevice(device_list->entries[dev_index].cid, &device));
-      NODELET_INFO("Reached here!");
       OCCAM_CHECK(occamFreeDeviceList(device_list));
-      NODELET_INFO("Reached here!");
       image_transport::ImageTransport it(nh);
 
       int req_count;
@@ -627,31 +625,5 @@ public:
 
     return;
   }
-
-  // bool spin() {
-  //   if (!device)
-  //     return false;
-
-  //   while (nh.ok()) {
-  //     if (!take_and_send_data())
-  //       usleep(1000);
-  //     ros::spinOnce();
-  //   }
-  //   return true;
-  // }
 };
-
-/*
-  I think I might be able to do this if I write a 60Hz timer that calls take_and_send_data, idk if it'll work...
-  Not sure what its subscribing to!!? No subscribers...
- */
-
-// int main(int argc, char **argv) {
-//   OCCAM_CHECK(occamInitialize());
-//   ros::init(argc, argv, "occam");
-//   OccamNode a;
-//   a.spin();
-//   exit(0);
-//   return 0;
-// }
 PLUGINLIB_EXPORT_CLASS(OccamNode, nodelet::Nodelet);
