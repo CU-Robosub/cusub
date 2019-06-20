@@ -15,10 +15,11 @@ namespace localizer_ns
   void Localizer::onInit()
   {
     ros::NodeHandle& nh = getMTNodeHandle();
-    sub = nh.subscribe("/leviathan/cusub_perception/darknet_ros/bounding_boxes", 1, &Localizer::darknetCallback, this);
-    pub = nh.advertise<localizer::Detection>("Global_State/task_poses",1);
+    sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &Localizer::darknetCallback, this);
+    pub = nh.advertise<localizer::Detection>("cusub_perception/mapper/task_poses",1);
     NODELET_INFO("Starting Localizer");
     loadRosParams(nh);
+    detection_num = 0;
   }
 
   /*
@@ -43,7 +44,7 @@ namespace localizer_ns
   }
 
   /*
-    Darknet callback, uses mappings data structure to aggregate
+    Darknet callback, uses mappings data structure to aggregate common
     darknet bounding boxes into a vector and pass it into a pose generator.
     Publishes pose and class received from pose generator as detection msg.
    */
@@ -73,7 +74,9 @@ namespace localizer_ns
     for(bb_map_it=bb_map.begin(); bb_map_it != bb_map.end(); bb_map_it++)
     {
       localizer::Detection det;
-      det.pose.header = bbs->image.header;
+      det.pose.header.seq = detection_num++;
+      det.pose.header.stamp = ros::Time::now();
+      det.pose.header.frame_id = "/leviathan/description/occam0_frame_optical";
       if( bb_map_it->first->generatePose(bbs->image, bb_map_it->second, det.pose.pose, det.class_id))
       {
         pub.publish(det);

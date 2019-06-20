@@ -6,16 +6,12 @@
 tasks:
  start_gate:
   prior: [4,0,-1.5]
-  search_alg: simple
-  dist_behind_gate: 1.0
+  dist_behind_gate: 0.0
+  third_leg_adjustment: 0.5
   replan_thresh: 1.0
-  failed_repeat: true
-  object_localizers:
-    start_gate_pole: ['gate_pnp_color', 'gate_pnp_bb', 'gate_midpoint']
+
  dice:
   prior: [3,0,-2.3]
-  search_alg: simple
-  failed_repeat: false
   targets: ['dice5', 'dice6']
   replan_threshold: 1.0
   approach_method: 'optimal' # optimal, twopoint, direct
@@ -34,8 +30,6 @@ tasks:
     dice6: dice_box
  dropper:
   prior: [-7,-4.5,-1]
-  search_alg: simple
-  failed_repeat: false
   object_localizers:
     roulette: roulette_watershed
 

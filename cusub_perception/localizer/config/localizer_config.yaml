@@ -7,5 +7,5 @@ localizer:
     walking : bouy_pnp
     dice5 : ignore
   hough:
-    three_legs : false  # true, false
+    three_legs : False  # true, false
 
