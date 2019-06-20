@@ -1,0 +1,11 @@
+localizer:
+  classes:
+    start_gate_pole : hough # hough, ...
+    fat_head : bouy_pnp
+    slick : bouy_pnp
+    no_torso : bouy_pnp
+    walking : bouy_pnp
+    dice5 : ignore
+  hough:
+    three_legs : false  # true, false
+

@@ -1,0 +1,7 @@
+<library path="lib/libdarknet_ros_lib">
+  <class name="darknet_ros/YoloObjectDetector" type="darknet_ros::YoloObjectDetector" base_class_type="nodelet::Nodelet">
+    <description>
+      Generates darknet bounding boxes from images.
+    </description>
+  </class>
+</library>
