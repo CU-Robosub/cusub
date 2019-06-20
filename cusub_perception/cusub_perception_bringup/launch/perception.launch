@@ -3,8 +3,6 @@
   <group ns="$(arg sub)">
 
     <arg name="fakeyolo" default="false"/> 
-
-    <remap from="darknet_ros/bounding_boxes" to="cusub_perception/darknet_ros/bounding_boxes" />
     <arg name="launch_prefix" default=""/>
     <arg name="detect_sleep_time" default="0.0"/>
     <!-- Config and weights folder. -->
@@ -19,6 +17,7 @@
     <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
     <node pkg="nodelet" type="nodelet" name="localizer" args="load localizer/Localizer standalone_nodelet" output="screen"/>
     <node pkg="nodelet" type="nodelet" name="darknet_ros" args="load darknet_ros/YoloObjectDetector standalone_nodelet" output="screen" unless="$(arg fakeyolo)">
+        <remap from="darknet_ros/bounding_boxes" to="cusub_perception/darknet_ros/bounding_boxes" />
         <param name="yolo_model/threshold/value"          value="0.06" />
         <param name="weights_path"          value="$(arg yolo_weights_path)" />
         <param name="config_path"           value="$(arg yolo_config_path)" />
