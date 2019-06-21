@@ -51,7 +51,7 @@ class Attack(Objective):
         self.leg_adjustment_meters = rospy.get_param('tasks/start_gate/third_leg_adjustment', 0.5)
         self.first_pose_received = False
         self.start_gate_pose = None
-        self.small_leg_left_side = True
+        self.small_leg_left_side = None
         self.started = False
         rospy.Subscriber("cusub_cortex/mapper_out/start_gate", PoseStamped, self.start_gate_callback)
         rospy.Subscriber("cusub_perception/start_gate/small_pole_left_side", Bool, self.small_leg_callback)

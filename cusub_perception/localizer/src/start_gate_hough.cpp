@@ -12,7 +12,6 @@ namespace pose_generator
         ros::NodeHandle nh;
         small_leg_side_pub = nh.advertise<std_msgs::Bool>("cusub_perception/start_gate/small_pole_left_side",1);
         if ( !nh.getParam("localizer/hough/three_legs", three_legs) ) { ROS_ERROR("Startgate couldn't locate params"); abort(); }
-        // nh.param<bool>("localizer/hough/three_legs", three_legs, true);
         if(!three_legs) { ROS_WARN("Localizing gate with 2 legs."); }
         else { ROS_INFO("Localizing gate with 3 legs."); }
     }
