@@ -43,9 +43,9 @@ if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(localizer ${catkin_EXPORTED_LIBRARIES})
 endif()
 
-add_executable( sg_2019 
+add_executable( start_gate_unit 
   unit_tests/start_gate_hough_test.cpp
   src/pose_generator.cpp
   src/start_gate_hough.cpp
 )
-target_link_libraries(sg_2019 ${catkin_LIBRARIES})
+target_link_libraries(start_gate_unit ${catkin_LIBRARIES})

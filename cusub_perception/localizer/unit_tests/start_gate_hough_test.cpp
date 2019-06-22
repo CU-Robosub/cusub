@@ -50,7 +50,7 @@ int main(int argc, char **argv)
     vector<darknet_ros_msgs::BoundingBox> bbs;
     bbs.push_back(image_left);
     bbs.push_back(image_right);
-    bbs.push_back(image_middle);
+    // bbs.push_back(image_middle);
     // Second image
     // darknet_ros_msgs::BoundingBox image_left;
     // darknet_ros_msgs::BoundingBox image_right;
