@@ -35,7 +35,6 @@ class Search(Objective):
              Number of poses to receive before aborting and transitioning
         """
 
-        rospy.loginfo("---Search objective initializing")
         self.prior = priorPose
         rospy.Subscriber(searchTopic, PoseStamped, self.exit_callback)
         self.numQuitPoses = numQuitPoses

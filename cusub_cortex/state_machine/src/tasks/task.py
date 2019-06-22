@@ -77,7 +77,7 @@ class Task(smach.StateMachine):
 """
 Objectives are subtasks within a task
 They have:
-     Pose of the sub (self.curPose)
+     Pose of the sub (self.cur_pose)
      a waypointNavigator client (self.wayClient)
      Helper functions { goToPose(), getDistance() }
 """
@@ -107,7 +107,7 @@ class Objective(smach.State):
         pose.position.x = 0
         pose.position.y = 0
         pose.position.z = 0
-        self.curPose = pose
+        self.cur_pose = pose
 
         super(Objective, self).__init__(outcomes=outcomes)
 
@@ -169,7 +169,7 @@ class Objective(smach.State):
         return False
 
     def sub_pose_cb(self, msg):
-        self.curPose = msg.pose.pose # store the pose part of the odom msg
+        self.cur_pose = msg.pose.pose # store the pose part of the odom msg
 
     def getDistance(self, point1, point2):
         """ Get distance between 2 points """

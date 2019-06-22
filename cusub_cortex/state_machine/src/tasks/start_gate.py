@@ -16,7 +16,6 @@ from geometry_msgs.msg import PoseStamped, Pose, Point
 from tf.transformations import euler_from_quaternion
 from std_msgs.msg import Empty, Bool
 import numpy as np
-import matplotlib.pyplot as plt
 
 class StartGate(Task):
     name = "start_gate"
@@ -44,7 +43,6 @@ class Attack(Objective):
     outcomes=['success','aborted']
 
     def __init__(self):
-        rospy.loginfo("---Attack objective initializing")
         super(Attack, self).__init__(self.outcomes, "Attack")
         self.dist_behind = rospy.get_param('tasks/start_gate/dist_behind_gate', 1.0)
         self.replan_threshold = rospy.get_param('tasks/start_gate/replan_thresh', 1.0)
@@ -79,7 +77,7 @@ class Attack(Objective):
         self.clear_abort()
 
         target_pose = self.adjust_gate_pose(
-            self.curPose, \
+            self.cur_pose, \
             self.start_gate_pose.pose, \
             self.dist_behind, \
             self.small_leg_left_side, \
@@ -94,7 +92,7 @@ class Attack(Objective):
         """
         Draws a line from the sub to the gate and adjusts the gate's pose along this line, behind the gate, by 
         'dist_behind'. Likewise, if small_leg_left_side is not None, a perpendicular line to the first is created
-        and according to whichever side the small leg is on, the gate's pose is adjusted by 'third_leg_adjustment'
+        and according to whichever side the small leg is on, the gate's pose is adjusted laterally by 'third_leg_adjustment'
         ( Assumes gate is approximately facing the sub. )
 
         Parameters
@@ -155,97 +153,3 @@ class Attack(Objective):
         target_pose.position.y = y_new2
         target_pose.position.z = gate_pose.position.z
         return target_pose
-
-
-if __name__ == "__main__":
-    left_side = True
-    p = Pose()
-    p.position.x = 0
-    p.position.y = 0
-    p2 = Pose()
-    p2.position.x = 2
-    p2.position.y = 0
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-    ###########
-    p2 = Pose()
-    p2.position.x = 2
-    p2.position.y = 2
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-    ###########
-    p2 = Pose()
-    p2.position.x = 0
-    p2.position.y = 2
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-    ###########
-    p2 = Pose()
-    p2.position.x = -2
-    p2.position.y = 2
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-    ###########
-    p2 = Pose()
-    p2.position.x = -2
-    p2.position.y = 0
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-    ###########
-    p2 = Pose()
-    p2.position.x = -2
-    p2.position.y = -2
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-    ###########
-    p2 = Pose()
-    p2.position.x = 0
-    p2.position.y = -2
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-    ###########
-    p2 = Pose()
-    p2.position.x = 2
-    p2.position.y = -2
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-
-    print('\n\n')
-    print('sub\n----')
-    print(p.position)
-    print('\ngate\n----')
-    print(p2.position)
-    print('\ngoal\n----')
-    print(p3.position)
