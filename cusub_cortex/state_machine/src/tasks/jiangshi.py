@@ -11,6 +11,8 @@ Objectives:
 """
 from tasks.task import Task, Objective
 from tasks.search import Search
+import tf
+import numpy as np
 
 class Jiangshi(Task):
     name = "jaingshi"
@@ -40,6 +42,8 @@ class Slay(Objective):
         super(Approach, self).__init__(self.outcomes, "Slay")
         rospy.Subscriber("cusub_cortex/mapper_out/jiangshi", PoseStamped, self.jiangshi_callback)
         self.started = False
+        self.approach_dist = rospy.get_param('tasks/jiangshi/approach_dist', 2.0)
+        self.slay_dist = rospy.get_param('tasks/jiangshi/slay_dist', 0.5)
 
     def jiangshi_callback(self, msg):
         # Set the first pose and don't abort
@@ -51,15 +55,42 @@ class Slay(Objective):
             self.start_gate_pose = msg
             self.request_abort() # this will loop us back to execute
 
+    def get_slay_path(self):
+        """
+        Calculate approach pose (also the backingup pose) and slaying pose
+
+        Parameters
+        ----------
+        self.jiangshi_pose : PoseStamped
+            Jiangshi's pose
+
+        Returns
+        -------
+        approach_pose : Pose
+        slay_pose : Pose
+        """
+        approach_pose = Pose()
+        slay_pose = Pose()
+        jiangshi_roll, jiangshi_pitch, jiangshi_yaw = tf.transformations.euler_from_quaternion(self.jiangshi_pose.pose.orientation)
+        approach_pose.position.x = self.jiangshi_pose.pose.position.x + self.approach_dist * np.cos(jiangshi_yaw)
+        approach_pose.position.y = self.jiangshi_pose.pose.position.y + self.approach_dist * np.sin(jiangshi_yaw)
+        approach_pose.position.z = self.jiangshi_pose.pose.position.z
+        approach_pose.orientation = tf.transformations.quaternion_from_euler(jiangshi_roll, jiangshi_pitch, jiangshi_yaw + np.pi)
+
+        slay_pose.position.x = self.jiangshi_pose.pose.position.x - self.slay_dist * np.cos(jiangshi_yaw)
+        slay_pose.position.y = self.jiangshi_pose.pose.position.y - self.slay_dist * np.sin(jiangshi_yaw)
+        slay_pose.position.z = self.jiangshi_pose.pose.position.z
+        slay_pose.orientation = approach_pose.orientation
+
+        return approach_pose, slay_pose
+
     def execute(self, userdata):
         self.started = True
         self.clear_abort()
-
-        # Calculate the line according to the vector of the pose
-        # go to x meters out in front of pose
-        # Slay bouy by going y meters behind buoy
-        # Backup to x meters using STRAFE MODE
-        
-        if self.go_to_pose(target_pose):
+        approach_pose, slay_pose = self.get_slay_path()
+        if self.go_to_pose(approach_pose) or \
+            self.go_to_pose(slay_pose) or \
+            self.go_to_pose(approach_pose, use_yaw=True):
             return 'aborted'
-        return "success"
+        else:
+            return "success"

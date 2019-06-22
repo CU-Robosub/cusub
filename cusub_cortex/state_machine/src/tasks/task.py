@@ -111,7 +111,7 @@ class Objective(smach.State):
 
         super(Objective, self).__init__(outcomes=outcomes)
 
-    def go_to_pose(self, targetPose, useYaw=True):
+    def go_to_pose(self, targetPose, use_yaw=True):
         """ Traverse to the targetPose given
 
         Parameters
@@ -119,7 +119,7 @@ class Objective(smach.State):
         targetPose : Pose
              The pose to navigate to
              If None, the sub will stop where it currently is and wait to be aborted
-        useYaw : bool
+        use_yaw : bool
              true : the waypoint navigtator will use yaw mode to navigate to the target pose
              false : use strafe-drive mode to the target pose
 
@@ -145,7 +145,7 @@ class Objective(smach.State):
             wpGoal.goal_pose.pose.orientation = targetPose.orientation
             wpGoal.goal_pose.header.frame_id = 'leviathan/description/odom'
 
-        if useYaw:
+        if use_yaw:
             wpGoal.movement_mode = YAW_MODE
         else:
             wpGoal.movement_mode = STRAFE_MODE
