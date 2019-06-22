@@ -21,9 +21,8 @@ int main(int argc, char **argv)
     cout << "Starting Hough Testing" <<endl;
     pose_generator::StartGateHough sgh;
 
-    string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/frame0000.jpg";
-    // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_test/T0_10-27-18-image0_0137.jpg";
-    // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/src/T0_10-27-18-image0_0160.jpg";
+    string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/start_gate0.jpg";
+    // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_test/images/start_gate1.jpg";
     Mat image = imread(image_name, CV_LOAD_IMAGE_COLOR);
 
     // First image
