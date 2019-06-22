@@ -2,18 +2,8 @@
 
 sim_pub:
   start_gate: /StartGate_1/pose_gt
-  dice1: /Dice1_1/pose_gt
-  dice2: /Dice2_1/pose_gt
-  dice5: /Dice5_1/pose_gt
-  dice6: /Dice6_1/pose_gt
-  path: ['/PathMarker_1/pose_gt', '/PathMarker_2/pose_gt']
-  roulette: /Roulette_1/pose_gt
+  jiangshi: /buoy_jiangshi_1/pose_gt
   objects_to_publish: # controls which objects to actually publish poses for
     - start_gate
-    - dice1
-    - dice2
-    - dice5
-    - dice6
-    - path
-    - roulette
+    - jiangshi
     
