@@ -33,7 +33,7 @@ catkin_package(
   CATKIN_DEPENDS cv_bridge image_transport nodelet roscpp sensor_msgs std_msgs
 )
 include_directories(include ${catkin_INCLUDE_DIRS})
-add_library(localizer
+add_library( localizer
   src/localizer.cpp
   src/pose_generator.cpp
   src/start_gate_hough.cpp
@@ -43,8 +43,9 @@ if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(localizer ${catkin_EXPORTED_LIBRARIES})
 endif()
 
-add_executable(sg_2019 unit_tests/start_gate_hough_test.cpp
-src/pose_generator.cpp
-src/start_gate_hough.cpp
+add_executable( sg_2019 
+  unit_tests/start_gate_hough_test.cpp
+  src/pose_generator.cpp
+  src/start_gate_hough.cpp
 )
 target_link_libraries(sg_2019 ${catkin_LIBRARIES})
