@@ -4,9 +4,10 @@ from __future__ import division
 Jiangshi Buoy Task, attempts to slay Jiangshi
 Objectives:
 - Search
-- Approach
 - Slay
-
+---> Go to approach point
+---> Slay vampire
+---> Backup
 """
 from tasks.task import Task, Objective
 from tasks.search import Search
@@ -17,26 +18,26 @@ class Jiangshi(Task):
 
     def __init__(self):
         super(Jiangshi, self).__init__(self.outcomes)
-        self.initObjectives()
-        self.linkObjectives()
+        self.init_objectives()
+        self.link_objectives()
 
-    def initObjectives(self):
-        self.search = Search(self.getPrior(), "cusub_cortex/mapper_out/jiangshi")
-        # self.approach = Approach()
+    def init_objectives(self):
+        self.search = Search(self.get_prior(), "cusub_cortex/mapper_out/jiangshi")
         self.slay = Slay()
 
-    def linkObjectives(self):
+    def link_objectives(self):
         with self:
             smach.StateMachine.add('Search', self.search, transitions={'found':'Attack', 'not_found':'Search'})
+            smach.StateMachine.add('Slay', self.search, transitions={'success':'task_success', 'aborted':'Slay'})
 
-class Approach(Objective):
+class Slay(Objective):
     """
     Go to a point in front of the bouy
     """
     outcomes=['success','aborted']
 
     def __init__(self):
-        super(Approach, self).__init__(self.outcomes, "Approach")
+        super(Approach, self).__init__(self.outcomes, "Slay")
         rospy.Subscriber("cusub_cortex/mapper_out/jiangshi", PoseStamped, self.jiangshi_callback)
         self.started = False
 
@@ -52,22 +53,13 @@ class Approach(Objective):
 
     def execute(self, userdata):
         self.started = True
-        rospy.loginfo("Executing Approach")
         self.clear_abort()
 
-        target_pose = self.adjust_gate_pose(
-            self.cur_pose, \
-            self.start_gate_pose.pose, \
-            self.dist_behind, \
-            self.small_leg_left_side, \
-            self.leg_adjustment_meters)
+        # Calculate the line according to the vector of the pose
+        # go to x meters out in front of pose
+        # Slay bouy by going y meters behind buoy
+        # Backup to x meters using STRAFE MODE
         
         if self.go_to_pose(target_pose):
             return 'aborted'
         return "success"
-
-class Slay(Objective):
-    """
-    Hit buoy and backup
-    """
-    pass

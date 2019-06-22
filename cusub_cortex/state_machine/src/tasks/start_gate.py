@@ -23,14 +23,14 @@ class StartGate(Task):
 
     def __init__(self):
         super(StartGate, self).__init__(self.outcomes) # become a state machine first
-        self.initObjectives()
-        self.linkObjectives()
+        self.init_objectives()
+        self.link_objectives()
 
-    def initObjectives(self):
-        self.search = Search(self.getPrior(), "cusub_cortex/mapper_out/start_gate")
+    def init_objectives(self):
+        self.search = Search(self.get_prior(), "cusub_cortex/mapper_out/start_gate")
         self.attack = Attack()
 
-    def linkObjectives(self):
+    def link_objectives(self):
         with self: # we are a StateMachine
             smach.StateMachine.add('Search', self.search, transitions={'found':'Attack', 'not_found':'Search'})
             smach.StateMachine.add('Attack', self.attack, transitions={'success':'task_success', 'aborted':'Attack'})

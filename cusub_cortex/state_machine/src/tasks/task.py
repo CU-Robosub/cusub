@@ -34,14 +34,14 @@ class Task(smach.StateMachine):
         pass
 
     @abstractmethod
-    def initObjectives(self):
+    def init_objectives(self):
         """
         Initialize all objectives
         """
         pass
 
     @abstractmethod
-    def linkObjectives(self):
+    def link_objectives(self):
         """
         Link the objectives to the state machine
         """
@@ -53,7 +53,7 @@ class Task(smach.StateMachine):
         print cs
         self.sm._states[cs].request_abort()
 
-    def getPrior(self):
+    def get_prior(self):
         """
         Get the prior for the task from the rosparameter server
 
