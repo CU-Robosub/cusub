@@ -65,9 +65,9 @@ class Attack(Objective):
             self.start_gate_pose = msg
             return
 
-        changeInPose = self.getDistance(self.start_gate_pose.pose.position, msg.pose.position)
+        change_in_pose = self.get_istance(self.start_gate_pose.pose.position, msg.pose.position)
 
-        if changeInPose > self.replan_threshold:
+        if change_in_pose > self.replan_threshold:
             self.start_gate_pose = msg
             self.request_abort() # this will loop us back to execute
 
@@ -83,7 +83,7 @@ class Attack(Objective):
             self.small_leg_left_side, \
             self.leg_adjustment_meters)
         
-        if self.goToPose(target_pose):
+        if self.go_to_pose(target_pose):
             return 'aborted'
         return "success"
 

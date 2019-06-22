@@ -79,7 +79,7 @@ Objectives are subtasks within a task
 They have:
      Pose of the sub (self.cur_pose)
      a waypointNavigator client (self.wayClient)
-     Helper functions { goToPose(), getDistance() }
+     Helper functions { go_to_pose(), get_distance() }
 """
 class Objective(smach.State):
 
@@ -111,7 +111,7 @@ class Objective(smach.State):
 
         super(Objective, self).__init__(outcomes=outcomes)
 
-    def goToPose(self, targetPose, useYaw=True):
+    def go_to_pose(self, targetPose, useYaw=True):
         """ Traverse to the targetPose given
 
         Parameters
@@ -171,7 +171,7 @@ class Objective(smach.State):
     def sub_pose_cb(self, msg):
         self.cur_pose = msg.pose.pose # store the pose part of the odom msg
 
-    def getDistance(self, point1, point2):
+    def get_distance(self, point1, point2):
         """ Get distance between 2 points """
         dx = point2.x - point1.x
         dy = point2.y - point1.y

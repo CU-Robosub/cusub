@@ -31,30 +31,28 @@ class Jiangshi(Task):
 
 class Approach(Objective):
     """
-    
+    Go to a point in front of the bouy
     """
     outcomes=['success','aborted']
 
     def __init__(self):
         super(Approach, self).__init__(self.outcomes, "Approach")
-        rospy.Subscriber("cusub_cortex/mapper_out/start_gate", PoseStamped, self.start_gate_callback)
+        rospy.Subscriber("cusub_cortex/mapper_out/jiangshi", PoseStamped, self.jiangshi_callback)
         self.started = False
 
-    def start_gate_callback(self, msg):
-        # Set the first pose and don't abort the Attack Objective
-        if self.start_gate_pose == None:
-            self.start_gate_pose = msg
+    def jiangshi_callback(self, msg):
+        # Set the first pose and don't abort
+        if self.jiangshi_pose == None:
+            self.jiangshi_pose = msg
             return
-
-        changeInPose = self.getDistance(self.start_gate_pose.pose.position, msg.pose.position)
-
-        if changeInPose > self.replan_threshold:
+        change_in_pose = self.get_distance(self.start_gate_pose.pose.position, msg.pose.position)
+        if change_in_pose > self.replan_threshold:
             self.start_gate_pose = msg
             self.request_abort() # this will loop us back to execute
 
     def execute(self, userdata):
         self.started = True
-        rospy.loginfo("Executing Attack")
+        rospy.loginfo("Executing Approach")
         self.clear_abort()
 
         target_pose = self.adjust_gate_pose(
@@ -64,11 +62,12 @@ class Approach(Objective):
             self.small_leg_left_side, \
             self.leg_adjustment_meters)
         
-        if self.goToPose(target_pose):
+        if self.go_to_pose(target_pose):
             return 'aborted'
         return "success"
 
 class Slay(Objective):
     """
-
+    Hit buoy and backup
     """
+    pass

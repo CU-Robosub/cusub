@@ -55,7 +55,7 @@ class Search(Objective):
         pose_stamped = PoseStamped()
         pose_stamped.header.frame_id = 'leviathan/description/map'
         pose_stamped.pose = self.prior
-        if self.goToPose(pose_stamped):
+        if self.go_to_pose(pose_stamped):
             return "found"
         else:
             return "not_found"
