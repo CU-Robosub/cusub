@@ -65,7 +65,7 @@ class Attack(Objective):
             self.start_gate_pose = msg
             return
 
-        change_in_pose = self.get_istance(self.start_gate_pose.pose.position, msg.pose.position)
+        change_in_pose = self.get_distance(self.start_gate_pose.pose.position, msg.pose.position)
 
         if change_in_pose > self.replan_threshold:
             self.start_gate_pose = msg

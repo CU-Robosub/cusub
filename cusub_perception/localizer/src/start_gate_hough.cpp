@@ -15,39 +15,6 @@ namespace pose_generator
         if(!three_legs) { ROS_WARN("Localizing gate with 2 legs."); }
         else { ROS_INFO("Localizing gate with 3 legs."); }
     }
-    /*
-        Given top and bottom points of each leg, solvepnp and return a pose
-        Assumes first two points in img_points are left leg, last two right leg
-     */
-    void StartGateHough::getPoseFromPoints(vector<Point2f>& img_points, geometry_msgs::Pose& pose)
-    {
-        // SolvePnp
-        Mat rvec(3,1,cv::DataType<double>::type);
-        Mat tvec(3,1,cv::DataType<double>::type);
-        solvePnP(gate_truth_pts, img_points, occam_camera_matrix, occam_dist_coefs, rvec, tvec);
-
-        // Generate Rotation Matrix from rvec -> turn into Quaternion
-        Mat rot_matrix;
-        tf2::Quaternion q;
-
-        Rodrigues(rvec, rot_matrix);
-        tf2::Matrix3x3 m3{
-            tf2Scalar(rot_matrix.at<double>(0,0)),
-            tf2Scalar(rot_matrix.at<double>(1,0)),
-            tf2Scalar(rot_matrix.at<double>(2,0)),
-            tf2Scalar(rot_matrix.at<double>(0,1)),
-            tf2Scalar(rot_matrix.at<double>(1,1)),
-            tf2Scalar(rot_matrix.at<double>(2,1)),
-            tf2Scalar(rot_matrix.at<double>(0,2)),
-            tf2Scalar(rot_matrix.at<double>(1,2)),
-            tf2Scalar(rot_matrix.at<double>(2,2))
-        };
-        m3.getRotation(q);
-        pose.orientation = tf2::toMsg(q);
-        pose.position.x = tvec.at<double>(0);
-        pose.position.y = tvec.at<double>(1);
-        pose.position.z = tvec.at<double>(2);
-    }
 
     /*
         Publishes middle leg gate side
@@ -142,7 +109,7 @@ namespace pose_generator
         img_points[3].y += bbs.back().ymin;
 
         // Get pose from image points using a solvepnp
-        getPoseFromPoints(img_points, pose);
+        getPoseFromPoints(gate_truth_pts, img_points, pose); // inherited
         if (three_legs) { publishLegSide(bbs); }
         class_name = "start_gate";
         return true;
