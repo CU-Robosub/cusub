@@ -39,7 +39,7 @@ class ExpWeightedAvg():
         pose.orientation = new_pose.orientation
         self.avg_pose = pose
     
-    def get_avg(self)
+    def get_avg(self):
         return self.avg_pose
 
 # NOTE landmark code has been moved to landmark.py file for future integration
@@ -62,25 +62,25 @@ class Mapper(object):
             self.classes[class_name]['pub'] = rospy.Publisher('cusub_cortex/mapper_out/'+class_name, PoseStamped, queue_size = 10)
             self.classes[class_name]['filter'] = ExpWeightedAvg(rospy.get_param('mapper/classes/'+class_name))
             self.classes[class_name]['unfiltered_pub'] = rospy.Publisher('cusub_cortex/mapper_out/unfiltered/'+class_name, PoseStamped, queue_size = 10)
-            self.classes[class_name]['latest_pose'] = None
+            self.classes[class_name]['latest_pose_stamped'] = None
 
     def pose_received(self, msg):
         if msg.class_id in self.classes.keys():
-            odom_pose = self.transform_to_odom(msg)
+            odom_pose = self.transform_to_odom(msg.pose)
             if odom_pose != None:
-                self.classes[class_name]['latest_pose'] = msg
-                self.classes[class_name]['filter'].add_new_pose(msg.pose)
+                self.classes[msg.class_id]['latest_pose_stamped'] = msg.pose
+                self.classes[msg.class_id]['filter'].add_new_pose(msg.pose.pose)
         else:
             rospy.logwarn("Mapper doesn't know about class: " + msg.class_id + ". Add to mapper/config/mapper.yaml")
 
     def publish_poses(self, msg):
         for class_name in self.classes:
-            if self.classes[class_name]['latest_pose'] != None:
+            if self.classes[class_name]['latest_pose_stamped'] != None:
                 msg = PoseStamped()
-                msg.header = self.classes[class_name]['latest_pose'].header
+                msg.header = self.classes[class_name]['latest_pose_stamped'].header
                 msg.pose = self.classes[class_name]['filter'].get_avg()
                 self.classes[class_name]['pub'].publish(msg)
-                self.classes[class_name]['unfiltered_pub'].publish(self.classes[class_name]['latest_pose'])
+                self.classes[class_name]['unfiltered_pub'].publish(self.classes[class_name]['latest_pose_stamped'])
     
     def transform_to_odom(self, cv_pose):
         try:
