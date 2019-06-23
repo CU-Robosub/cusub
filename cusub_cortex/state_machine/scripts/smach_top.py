@@ -20,7 +20,7 @@ from tasks.bangbang_roulette_task import BangBangRouletteTask
 from tasks.naive_visual_servo_objective import NaiveVisualServoTask
 # from tasks.dropper_task import DropperTask
 # from tasks.bangbang_roulette_task import BangBangRouletteTask
-
+from tasks.jiangshi import Jiangshi
 
 
 def loadStateMachines(task_list):
@@ -54,6 +54,8 @@ def loadStateMachines(task_list):
             # task_sm = DropperTask(prior, search_alg)
         elif task == "naive_visual_servo_objective":
             task_sm = NaiveVisualServoTask()
+        elif task == "jiangshi":
+            task_sm = Jiangshi()
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 

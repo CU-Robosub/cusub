@@ -2,6 +2,7 @@
 
 int32 YAW_MODE=1
 int32 STRAFE_MODE=2
+int32 BACKUP_MODE=3
 
 int32 movement_mode
 float64 target_yaw

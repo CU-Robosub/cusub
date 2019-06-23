@@ -13,6 +13,7 @@ from nav_msgs.msg import Odometry
 
 YAW_MODE = 1
 STRAFE_MODE = 2
+BACKUP_MODE = 3
 
 REACHED_THRESHOLD = 0.25
 
@@ -118,6 +119,30 @@ class WaypointNavigator(object):
                         self.advance_waypoint()
                     else:
                         rospy.loginfo("distance: " + str(dist))
+                        
+            if self.movement_mode == BACKUP_MODE:
+                # point toward waypoint
+                targetyaw = math.atan2(dy, dx) + math.pi
+                # rospy.logdebug("dx, dy: %f %f" % (dx, dy))
+                # rospy.logdebug("Yaw, Target Yaw: %f %f" % (yaw, targetyaw))
+                yaw_f64 = Float64()
+                yaw_f64.data = targetyaw
+                self.yaw_pub.publish(yaw_f64)
+
+                # normalize change in yaw
+                dyaw = yaw - targetyaw
+                while(dyaw > math.pi):
+                    dyaw = dyaw - 2*math.pi
+                while(dyaw < -math.pi):
+                    dyaw = dyaw + 2*math.pi
+
+                # If we are pointing in about the right direction
+                # start driving the distance to the target
+                if(abs(math.degrees(dyaw)) < 7.5):
+                    drive_f64 = Float64()
+                    drive_f64.data = self.currentDrive - min(xy_dist, 3.0)
+                    self.drive_pub.publish(drive_f64)
+                    # rospy.logdebug(xy_dist)
 
             # Set target depth
             depth_f64 = Float64()
