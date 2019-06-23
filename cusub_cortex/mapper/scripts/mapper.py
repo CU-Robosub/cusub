@@ -68,8 +68,8 @@ class Mapper(object):
         if msg.class_id in self.classes.keys():
             odom_pose = self.transform_to_odom(msg.pose)
             if odom_pose != None:
-                self.classes[msg.class_id]['latest_pose_stamped'] = msg.pose
-                self.classes[msg.class_id]['filter'].add_new_pose(msg.pose.pose)
+                self.classes[msg.class_id]['latest_pose_stamped'] = odom_pose
+                self.classes[msg.class_id]['filter'].add_new_pose(odom_pose.pose)
         else:
             rospy.logwarn("Mapper doesn't know about class: " + msg.class_id + ". Add to mapper/config/mapper.yaml")
 

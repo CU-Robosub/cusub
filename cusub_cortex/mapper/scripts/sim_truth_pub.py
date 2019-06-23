@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import division
 """
 Publishes gazebo's truth data as Detection msgs to the mapper
 Configurable via the config/sim_truth.yaml
@@ -10,6 +10,7 @@ import rospy
 from localizer.msg import Detection
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped
+import tf
 
 # Used with internal self.pubs structure
 CLASS_INDEX = 0
@@ -45,8 +46,16 @@ class SimTruthPub:
         return self.correctPoses(det)
     
     def correctPoses(self, det):
-        if "dice" in det.class_id:
-            det.pose.pose.position.z -= 0.5
+        if "jiangshi" in det.class_id:
+            pose = det.pose.pose
+            quat_list = [pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w]
+            roll, pitch, yaw = tf.transformations.euler_from_quaternion(quat_list)
+            yaw += 3.1415 / 2
+            new_quat_list = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
+            det.pose.pose.orientation.x = new_quat_list[0]
+            det.pose.pose.orientation.y = new_quat_list[1]
+            det.pose.pose.orientation.z = new_quat_list[2]
+            det.pose.pose.orientation.w = new_quat_list[3]
         return det
 
 def main():

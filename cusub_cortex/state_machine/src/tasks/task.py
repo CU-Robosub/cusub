@@ -21,6 +21,7 @@ import inspect
 # Waypoint Navigator Macros
 YAW_MODE = 1
 STRAFE_MODE = 2
+BACKUP_MODE = 3
 
 class Task(smach.StateMachine):
     __metaclass__ = ABCMeta
@@ -111,17 +112,18 @@ class Objective(smach.State):
 
         super(Objective, self).__init__(outcomes=outcomes)
 
-    def go_to_pose(self, targetPose, use_yaw=True):
-        """ Traverse to the targetPose given
+    def go_to_pose(self, target_pose, move_mode="yaw"):
+        """ Traverse to the target_pose given
 
         Parameters
         ----------
-        targetPose : Pose
+        target_pose : Pose
              The pose to navigate to
              If None, the sub will stop where it currently is and wait to be aborted
-        use_yaw : bool
-             true : the waypoint navigtator will use yaw mode to navigate to the target pose
-             false : use strafe-drive mode to the target pose
+        move_mode : str
+             "yaw" : the waypoint navigtator will use yaw mode to navigate to the target pose
+             "strafe" : use strafe-drive mode to the target pose
+             "backup" : turn 180 deg away from object, backup to target point, turn to target orientation
 
         Returns
         -------
@@ -129,26 +131,23 @@ class Objective(smach.State):
              1 aborted
              0 success, waypoint reached
         """
-        if type(targetPose) == type(None):  # Wait where we currently are until being aborted
+        if type(target_pose) == type(None):  # Wait where we currently are until being aborted
             rospy.logwarn("Objective has instructed Sub to wait where it is until being aborted")
             while not self.abort_requested():
                 rospy.sleep(0.5)
             return "aborted"
 
         wpGoal = waypointGoal()
-        if type(targetPose) == PoseStamped:
-            wpGoal.goal_pose.pose.position = targetPose.pose.position
-            wpGoal.goal_pose.pose.orientation = targetPose.pose.orientation
-            wpGoal.goal_pose.header.frame_id = targetPose.header.frame_id
-        else:
-            wpGoal.goal_pose.pose.position = targetPose.position
-            wpGoal.goal_pose.pose.orientation = targetPose.orientation
-            wpGoal.goal_pose.header.frame_id = 'leviathan/description/odom'
+        wpGoal.goal_pose.pose.position = target_pose.position
+        wpGoal.goal_pose.pose.orientation = target_pose.orientation
+        wpGoal.goal_pose.header.frame_id = 'leviathan/description/odom'
 
-        if use_yaw:
-            wpGoal.movement_mode = YAW_MODE
-        else:
+        if move_mode == "backup":
+            wpGoal.movement_mode = BACKUP_MODE
+        elif move_mode == "strafe":
             wpGoal.movement_mode = STRAFE_MODE
+        else:
+            wpGoal.movement_mode = YAW_MODE
 
         self.wayClient.cancel_all_goals()
         rospy.sleep(0.2)
@@ -162,6 +161,9 @@ class Objective(smach.State):
             if self.abort_requested():
                 rospy.loginfo("---objective aborted, causing waypoint request to quit")
                 return True
+            elif self.get_distance(self.cur_pose.position, target_pose.position) < 0.5:
+                self.wayClient.cancel_all_goals()
+                return False
 
             rospy.sleep(0.25)
 
