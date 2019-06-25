@@ -32,11 +32,11 @@ int main(int argc, char ** argv)
 {
     cout << "Starting Jiangshi Watershed Testing" << endl;
     pose_generator::JiangshiWatershed jw;
-    string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_close.jpg";
+    // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_close.jpg";
     // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_far.jpg";
     // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_real_far.jpg";
     // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_real_really_far.jpg";
-    // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_real_close.jpg";
+    string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_real_close.jpg";
     Mat image = imread(image_name, CV_LOAD_IMAGE_COLOR);
     // draw_on_image(image);
     // imshow("Jiangshi Window", image);
@@ -46,10 +46,10 @@ int main(int argc, char ** argv)
     darknet_ros_msgs::BoundingBox box;
     box.Class = "jiangshi";
     box.probability = 1.0;
-    box.xmin = 560;
-    box.ymin = 100;
-    box.xmax = 720;
-    box.ymax = 370;
+    // box.xmin = 560;
+    // box.ymin = 100;
+    // box.xmax = 720;
+    // box.ymax = 370;
     // -----------
     // box.xmin = 420;
     // box.ymin = 150;
@@ -66,10 +66,10 @@ int main(int argc, char ** argv)
     // box.xmax = 100;
     // box.ymax = 200;
     // -----------
-    // box.xmin = 300;
-    // box.ymin = 10;
-    // box.xmax = 550;
-    // box.ymax = 340;
+    box.xmin = 300;
+    box.ymin = 10;
+    box.xmax = 550;
+    box.ymax = 340;
     vector<darknet_ros_msgs::BoundingBox> bbs;
     bbs.push_back(box);
 
@@ -83,6 +83,7 @@ int main(int argc, char ** argv)
     if(jw.generatePose(test_image, bbs, pose, class_id))
     {
         cout << "localized pose!" <<endl;
+        cout << pose << endl;
     }
     
     // rectangle(image, Point(box.xmin,box.ymin), Point(box.xmax, box.ymax), Scalar(0,0,255));

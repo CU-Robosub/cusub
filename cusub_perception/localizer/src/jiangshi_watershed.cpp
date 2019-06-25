@@ -101,20 +101,9 @@ namespace pose_generator
             img_points[3].x += bbs[0].xmin - border_size;
             img_points[3].y += bbs[0].ymin - border_size;
 
-            cv::circle(cv_ptr->image, img_points[0], 3, cv::Scalar(0,0,255));
-            cv::circle(cv_ptr->image, img_points[1], 3, cv::Scalar(0,0,255));
-            cv::circle(cv_ptr->image, img_points[2], 3, cv::Scalar(0,0,255));
-            cv::circle(cv_ptr->image, img_points[3], 3, cv::Scalar(0,0,255));
-
-            cv::imshow("points", cv_ptr->image);
-            cv::waitKey(0);
-
-            // // Get pose from image points using a solvepnp
-            // getPoseFromPoints(truth_pts, img_points, pose); // inherited
+            // Get pose from image points using a solvepnp
+            getPoseFromPoints(truth_pts, img_points, pose); // inherited
             class_name = "jiangshi";
             return true;
         }
 }
-
-
-// There are probably some bag files that I can download of Jiangshi
