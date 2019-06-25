@@ -101,7 +101,7 @@ namespace pose_generator
             cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::RGB8);
 
             // Trim image to jiangshi
-            int border_size = 20; // add room for a border that we'll say is part of the 'not bouy' class
+            int border_size = 10; // add room for a border that we'll say is part of the 'not bouy' class
             Rect rect (bbs[0].xmin-border_size, bbs[0].ymin-border_size,bbs[0].xmax-bbs[0].xmin+2*border_size,bbs[0].ymax-bbs[0].ymin+2*border_size);
             Mat img = cv_ptr->image(rect);
 

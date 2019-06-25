@@ -34,9 +34,9 @@ int main(int argc, char ** argv)
     pose_generator::JiangshiWatershed jw;
     // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_close.jpg";
     // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_far.jpg";
-    string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_real_far.jpg";
+    // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_real_far.jpg";
     // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_real_really_far.jpg";
-    // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_real_close.jpg";
+    string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_real_close.jpg";
     Mat image = imread(image_name, CV_LOAD_IMAGE_COLOR);
     // draw_on_image(image);
     // imshow("Jiangshi Window", image);
@@ -56,10 +56,20 @@ int main(int argc, char ** argv)
     // box.xmax = 500;
     // box.ymax = 300;
     // -----------
-    box.xmin = 600;
-    box.ymin = 110;
-    box.xmax = 690;
-    box.ymax = 270;
+    // box.xmin = 600;
+    // box.ymin = 110;
+    // box.xmax = 690;
+    // box.ymax = 270;
+    // -----------
+    // box.xmin = 30;
+    // box.ymin = 100;
+    // box.xmax = 100;
+    // box.ymax = 200;
+    // -----------
+    box.xmin = 300;
+    box.ymin = 10;
+    box.xmax = 550;
+    box.ymax = 340;
     vector<darknet_ros_msgs::BoundingBox> bbs;
     bbs.push_back(box);
 
@@ -75,8 +85,9 @@ int main(int argc, char ** argv)
         cout << "localized pose!" <<endl;
     }
     
-    // rectangle(image, Point(box.xmin,box.ymin), Point(box.xmax, box.ymax), Scalar(0,0,255));
-    // namedWindow("Display Window", WINDOW_AUTOSIZE);
-    // imshow("Jiangshi Window", image);
-    // waitKey(0);
+    rectangle(image, Point(box.xmin,box.ymin), Point(box.xmax, box.ymax), Scalar(0,0,255));
+    namedWindow("Display Window", WINDOW_AUTOSIZE);
+    imshow("Jiangshi Window", image);
+    waitKey(0);
+    return 0;
 }
