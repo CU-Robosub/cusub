@@ -1,7 +1,7 @@
-#ifndef START_GATE_HOUGH_CLASS_SRC_START_GATE_HOUGH_CLASS_H_
-#define START_GATE_HOUGH_CLASS_SRC_START_GATE_HOUGH_CLASS_H_
+#ifndef JIANGSHI_WATERSHED_CLASS_SRC_JIANGSHI_WATERSHED_CLASS_H_
+#define JIANGSHI_WATERSHED_CLASS_SRC_JIANGSHI_WATERSHED_CLASS_H_
 
-#include <cstdlib>
+#include <localizer/pose_generator.h>
 #include <nodelet/nodelet.h>
 #include <localizer/pose_generator.h>
 #include <sensor_msgs/Image.h>
@@ -16,21 +16,10 @@
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
-#include <tf2/LinearMath/Scalar.h>
-#include <tf2/LinearMath/Quaternion.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-
-/* 1-------3    SolvePnp Points
-   |       |      
-   |   X   |
-   0       2
- */
-using namespace cv;
-using namespace std;
 
 namespace pose_generator
 {
-    class StartGateHough : public PoseGenerator
+    class JiangshiWatershed : public PoseGenerator
     {
         public:
             bool generatePose(
@@ -39,19 +28,14 @@ namespace pose_generator
                 geometry_msgs::Pose& pose,
                 string& class_name
             );
-            StartGateHough();
         private:
-            void sortBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs);
-            bool getPoints(Mat& img, vector<Point2f>& points);
-            void publishLegSide(vector<darknet_ros_msgs::BoundingBox>& bbs);
-            ros::Publisher small_leg_side_pub; // left or right
-            vector<Point3f> gate_truth_pts{
+            bool getPoints(Mat& img, int border_size, vector<Point2f>& points);
+            vector<Point3f> truth_pts{      // TODO lookup the actual dimensions of jiangshi
                 Point3f(0,-1.6,-0.6),
                 Point3f(0,-1.6, 0.6),
                 Point3f(0, 1.6,-0.6),
                 Point3f(0, 1.6, 0.6)
             };
-            bool three_legs;
     };
 }
 

@@ -1,5 +1,6 @@
 #include <localizer/start_gate_hough.h>
 #include <ros/ros.h>
+#include <opencv2/highgui/highgui.hpp>
 
 void draw_on_image(Mat& image)
 {   
