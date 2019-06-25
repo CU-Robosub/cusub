@@ -7,13 +7,6 @@
 
 using namespace cv;
 
- /*
- Load and display images, find bounding boxes
- Apply getPoints algorithm and see how far we can get
- Add generatePose method call
-
-  */
-
 void draw_on_image(Mat& image)
 {   
     // Column then row
@@ -32,6 +25,8 @@ int main(int argc, char ** argv)
 {
     cout << "Starting Jiangshi Watershed Testing" << endl;
     pose_generator::JiangshiWatershed jw;
+
+    //      UNCOMMENT a line here and its corresponding bounding box below to test the algorithm. You will of course need to update the path
     // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_close.jpg";
     // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_far.jpg";
     // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_real_far.jpg";
@@ -93,7 +88,7 @@ int main(int argc, char ** argv)
     return 0;
 }
 
-// To view 4 points: insert after sortPoints in getPoints
+// To view 4 points: insert after sortPoints in getPoints in jiangshi_watershed src file
 // cv::circle(img, Point(approxDP.at<int>(0,0), approxDP.at<int>(0,1)), 1, cv::Scalar(255,255,255));
 // cv::circle(img, Point(approxDP.at<int>(1,0), approxDP.at<int>(1,1)), 1, cv::Scalar(255,255,255));
 // cv::circle(img, Point(approxDP.at<int>(2,0), approxDP.at<int>(2,1)), 1, cv::Scalar(255,255,255));
