@@ -4,7 +4,6 @@
  */
 
 #include <localizer/jiangshi_watershed.h>
-#include <opencv2/highgui/highgui.hpp>
 
 namespace pose_generator
 {  
@@ -89,9 +88,10 @@ namespace pose_generator
             Rect rect (bbs[0].xmin-border_size, bbs[0].ymin-border_size,bbs[0].xmax-bbs[0].xmin+2*border_size,bbs[0].ymax-bbs[0].ymin+2*border_size);
             Mat img = cv_ptr->image(rect);
 
-            // Transform Points back to main image
+            // find target points on image
             vector<Point2f> img_points;
             if(!getPoints(img,border_size, img_points)) {return false;}
+            // Transform Points back to main image
             img_points[0].x += bbs[0].xmin - border_size;
             img_points[0].y += bbs[0].ymin - border_size;
             img_points[1].x += bbs[0].xmin - border_size;
