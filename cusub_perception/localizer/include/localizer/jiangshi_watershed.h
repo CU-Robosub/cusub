@@ -30,6 +30,7 @@ namespace pose_generator
             );
         private:
             bool getPoints(Mat& img, int border_size, vector<Point2f>& points);
+            void sortPoints(Mat& img, vector<Point2f>& points);
             vector<Point3f> truth_pts{      // TODO lookup the actual dimensions of jiangshi
                 Point3f(0,-1.6,-0.6),
                 Point3f(0,-1.6, 0.6),

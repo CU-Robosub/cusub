@@ -10,20 +10,11 @@ namespace pose_generator
 {  
     bool JiangshiWatershed::getPoints(Mat& img, int border_size, vector<Point2f>& points)
     {
-        cv::imshow("Img", img);
-        cv::waitKey(0);
-
-        Mat trimmed, bordered, gray, binary, eroded, dilated, markers, borders, jiangshi, corners, approxDP;
+        Mat bordered, markers, borders, approxDP;
         vector<vector<Point> > contours;
         vector<Vec4i> hierarchy;
-        vector<Point2f> corners_float;
-        vector<Point> corners_int;
 
-        // cout << img.cols << endl;
-        // cout << img.rows << endl;
-        // int dilation = (int) img.cols / 20;
-        // Rect rect (border_size, border_size, img.cols - 2*border_size, img.rows-2*border_size);
-        // trimmed = img(rect);
+        // Draw rectangle to classify jiangshi points
         cv::Mat jiangshi_center(cv::Size(img.cols - 2*border_size, img.rows-2*border_size), CV_8U, Scalar(0));
         int top_pixel_x = (int) jiangshi_center.cols / 4;
         int top_pixel_y = (int) jiangshi_center.rows / 4;
@@ -31,66 +22,55 @@ namespace pose_generator
         int length = (int) jiangshi_center.rows / 2;
         Rect rect (top_pixel_x,top_pixel_y, width, length);
         cv::rectangle(jiangshi_center, rect, cv::Scalar(255), -1);
+
+        // Draw a border around bounding box to classify waterpoints
         cv::copyMakeBorder(jiangshi_center, bordered, border_size, border_size,border_size,border_size, cv::BORDER_CONSTANT, Scalar(1,1,1));
+
+        // Run watershed
         cv::connectedComponents(bordered, markers);
         cv::watershed(img, markers);
+
+        // Find contour around watershed found jiangshi points
         cv::compare(markers, Scalar(2), borders, cv::CMP_EQ);
         cv::findContours(borders, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
         double epsilon = 0.1 * cv::arcLength(contours[0], true);
+
+        // Polygon fit a rectangle to contour
         cv::approxPolyDP(contours[0], approxDP, epsilon, true);
-        cout << approxDP << endl;
-        cout << approxDP.at<int>(0,0) << endl;
-        cout << approxDP.size() << endl;
-        cv::circle(img, Point(approxDP.at<int>(0,0), approxDP.at<int>(0,1)), 1, cv::Scalar(255,255,255));
-        cv::circle(img, Point(approxDP.at<int>(1,0), approxDP.at<int>(1,1)), 1, cv::Scalar(255,255,255));
-        cv::circle(img, Point(approxDP.at<int>(2,0), approxDP.at<int>(2,1)), 1, cv::Scalar(255,255,255));
-        cv::circle(img, Point(approxDP.at<int>(3,0), approxDP.at<int>(3,1)), 1, cv::Scalar(255,255,255));
-        cv::imshow("contours", img);
-        cv::waitKey(0);
+        sortPoints(approxDP, points);
         return true;
-
-        // cv::imshow("borders", borders);
-        // cv::waitKey(0);
-
-        // cv::imshow("jiangshi_center", jiangshi_center);
-        // waitKey(0);
-        // return false;
-        // initialize an image with zeros, make a rectangle of 2's
-        // cv::cvtColor(trimmed, gray, COLOR_BGR2GRAY);
-        // cv::threshold(gray, binary, 0, 255, THRESH_BINARY_INV + THRESH_OTSU);
-        // cv::erode(binary, eroded, Mat());;
-        // cv::dilate(eroded,dilated, Mat(),Point(-1,1), dilation);
-        
-        
-        
-
-        // int dilation = (int) img.cols / 20;
-        // Rect rect (border_size, border_size, img.cols - 2*border_size, img.rows-2*border_size);
-        // trimmed = img(rect);
-        // cv::cvtColor(trimmed, gray, COLOR_BGR2GRAY);
-        // cv::threshold(gray, binary, 0, 255, THRESH_BINARY_INV + THRESH_OTSU);
-        // cv::erode(binary, eroded, Mat());
-        // cv::dilate(eroded,dilated, Mat(),Point(-1,1), dilation);
-        // cv::copyMakeBorder(dilated, bordered, border_size, border_size,border_size,border_size, cv::BORDER_CONSTANT, Scalar(1,1,1));
-        // cv::connectedComponents(bordered, markers);
-        // cv::watershed(img, markers);
-        // cv::compare(markers, Scalar(2), borders, cv::CMP_EQ);
-        // cv::imshow("borders", borders);
-        // cv::waitKey(0);
-        // cv::findContours(borders, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
-        // double epsilon = 0.1 * cv::arcLength(contours[0], true);
-        // cv::approxPolyDP(contours[0], approxDP, epsilon, true);
-        // cout << approxDP << endl;
-        // cout << approxDP.at<int>(0,0) << endl;
-        // cout << approxDP.size() << endl;
-        // cv::circle(img, Point(approxDP.at<int>(0,0), approxDP.at<int>(0,1)), 1, cv::Scalar(255,255,255));
-        // cv::circle(img, Point(approxDP.at<int>(1,0), approxDP.at<int>(1,1)), 1, cv::Scalar(255,255,255));
-        // cv::circle(img, Point(approxDP.at<int>(2,0), approxDP.at<int>(2,1)), 1, cv::Scalar(255,255,255));
-        // cv::circle(img, Point(approxDP.at<int>(3,0), approxDP.at<int>(3,1)), 1, cv::Scalar(255,255,255));
-        // cv::imshow("contours", img);
-        // cv::waitKey(0);
-        // return true;
     }
+    void JiangshiWatershed::sortPoints(Mat& array, vector<Point2f>& points)
+    {
+        Point2f top_left, top_right, bot_left, bot_right;
+        int row_sum = 0;
+        int col_sum = 0;
+        for(int i=0; i<array.rows; i++)
+        {
+            col_sum += array.at<int>(i,0);
+            row_sum += array.at<int>(i,1);
+        }
+        for(int j=0; j<array.rows; j++)
+        {
+            if (array.at<int>(j,0) > col_sum / 4)       // right side
+            {
+                if(array.at<int>(j,1) > row_sum / 4)    // bottom right
+                    bot_right = Point2f((float)array.at<int>(j,0), (float)array.at<int>(j,1));
+                else                                    // top right
+                    top_right = Point2f((float)array.at<int>(j,0), (float)array.at<int>(j,1));
+            } else {                                    // left side
+                if(array.at<int>(j,1) > row_sum / 4)    // bottom left
+                    bot_left = Point2f((float)array.at<int>(j,0), (float)array.at<int>(j,1));
+                else                                    // top left
+                    top_left = Point2f((float)array.at<int>(j,0), (float)array.at<int>(j,1));
+            }
+        }
+        points.push_back(bot_left);
+        points.push_back(top_left);
+        points.push_back(bot_right);
+        points.push_back(top_right);
+    }
+
     bool JiangshiWatershed::generatePose(
         sensor_msgs::Image& image, 
         vector<darknet_ros_msgs::BoundingBox>& bbs,
