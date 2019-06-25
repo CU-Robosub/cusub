@@ -23,23 +23,27 @@ namespace pose_generator
         Rect rect (top_pixel_x,top_pixel_y, width, length);
         cv::rectangle(jiangshi_center, rect, cv::Scalar(255), -1);
 
-        // Draw a border around bounding box to classify waterpoints
+        // Draw a border around bounding box to classify water points
         cv::copyMakeBorder(jiangshi_center, bordered, border_size, border_size,border_size,border_size, cv::BORDER_CONSTANT, Scalar(1,1,1));
 
         // Run watershed
         cv::connectedComponents(bordered, markers);
         cv::watershed(img, markers);
 
-        // Find contour around watershed found jiangshi points
+        // Find contours around watershed markers of jiangshi
         cv::compare(markers, Scalar(2), borders, cv::CMP_EQ);
         cv::findContours(borders, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
         double epsilon = 0.1 * cv::arcLength(contours[0], true);
 
-        // Polygon fit a rectangle to contour
+        // Polygon fit a rectangle to first contour
         cv::approxPolyDP(contours[0], approxDP, epsilon, true);
         sortPoints(approxDP, points);
         return true;
     }
+    
+    /*
+        Sort the img corner points to match the order of ground truth points
+     */
     void JiangshiWatershed::sortPoints(Mat& array, vector<Point2f>& points)
     {
         Point2f top_left, top_right, bot_left, bot_right;
@@ -88,14 +92,26 @@ namespace pose_generator
             // Transform Points back to main image
             vector<Point2f> img_points;
             if(!getPoints(img,border_size, img_points)) {return false;}
-            img_points[0].x += bbs[0].xmin;
-            img_points[0].y += bbs[0].ymin;
-            img_points[1].x += bbs[0].xmin;
-            img_points[1].y += bbs[0].ymin;
+            img_points[0].x += bbs[0].xmin - border_size;
+            img_points[0].y += bbs[0].ymin - border_size;
+            img_points[1].x += bbs[0].xmin - border_size;
+            img_points[1].y += bbs[0].ymin - border_size;
+            img_points[2].x += bbs[0].xmin - border_size;
+            img_points[2].y += bbs[0].ymin - border_size;
+            img_points[3].x += bbs[0].xmin - border_size;
+            img_points[3].y += bbs[0].ymin - border_size;
+
+            cv::circle(cv_ptr->image, img_points[0], 3, cv::Scalar(0,0,255));
+            cv::circle(cv_ptr->image, img_points[1], 3, cv::Scalar(0,0,255));
+            cv::circle(cv_ptr->image, img_points[2], 3, cv::Scalar(0,0,255));
+            cv::circle(cv_ptr->image, img_points[3], 3, cv::Scalar(0,0,255));
+
+            cv::imshow("points", cv_ptr->image);
+            cv::waitKey(0);
 
             // // Get pose from image points using a solvepnp
             // getPoseFromPoints(truth_pts, img_points, pose); // inherited
-            // class_name = "jiangshi";
+            class_name = "jiangshi";
             return true;
         }
 }
