@@ -33,8 +33,8 @@ int main(int argc, char ** argv)
     cout << "Starting Jiangshi Watershed Testing" << endl;
     pose_generator::JiangshiWatershed jw;
     // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_close.jpg";
-    string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_far.jpg";
-    // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_real_far.jpg";
+    // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_far.jpg";
+    string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_real_far.jpg";
     // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_real_really_far.jpg";
     // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/localizer/unit_tests/images/jiangshi_real_close.jpg";
     Mat image = imread(image_name, CV_LOAD_IMAGE_COLOR);
@@ -51,15 +51,15 @@ int main(int argc, char ** argv)
     // box.xmax = 720;
     // box.ymax = 370;
     // -----------
-    box.xmin = 420;
-    box.ymin = 150;
-    box.xmax = 500;
-    box.ymax = 300;
+    // box.xmin = 420;
+    // box.ymin = 150;
+    // box.xmax = 500;
+    // box.ymax = 300;
     // -----------
-    // box.xmin = 600;
-    // box.ymin = 110;
-    // box.xmax = 690;
-    // box.ymax = 270;
+    box.xmin = 600;
+    box.ymin = 110;
+    box.xmax = 690;
+    box.ymax = 270;
     vector<darknet_ros_msgs::BoundingBox> bbs;
     bbs.push_back(box);
 

@@ -21,19 +21,20 @@ namespace pose_generator
 
         // cout << img.cols << endl;
         // cout << img.rows << endl;
-        int dilation = (int) img.cols / 20;
-        Rect rect (border_size, border_size, img.cols - 2*border_size, img.rows-2*border_size);
-        trimmed = img(rect);
-        cv::cvtColor(trimmed, gray, COLOR_BGR2GRAY);
-        cv::threshold(gray, binary, 0, 2, THRESH_BINARY_INV + THRESH_OTSU);
-        cv::erode(binary, eroded, Mat());
-        cv::dilate(eroded,dilated, Mat(),Point(-1,1), dilation);
-        cv::copyMakeBorder(dilated, bordered, border_size, border_size,border_size,border_size, cv::BORDER_CONSTANT, Scalar(1,1,1));
+        // int dilation = (int) img.cols / 20;
+        // Rect rect (border_size, border_size, img.cols - 2*border_size, img.rows-2*border_size);
+        // trimmed = img(rect);
+        cv::Mat jiangshi_center(cv::Size(img.cols - 2*border_size, img.rows-2*border_size), CV_8U, Scalar(0));
+        int top_pixel_x = (int) jiangshi_center.cols / 4;
+        int top_pixel_y = (int) jiangshi_center.rows / 4;
+        int width = (int) jiangshi_center.cols / 2;
+        int length = (int) jiangshi_center.rows / 2;
+        Rect rect (top_pixel_x,top_pixel_y, width, length);
+        cv::rectangle(jiangshi_center, rect, cv::Scalar(255), -1);
+        cv::copyMakeBorder(jiangshi_center, bordered, border_size, border_size,border_size,border_size, cv::BORDER_CONSTANT, Scalar(1,1,1));
         cv::connectedComponents(bordered, markers);
         cv::watershed(img, markers);
         cv::compare(markers, Scalar(2), borders, cv::CMP_EQ);
-        cv::imshow("borders", borders);
-        cv::waitKey(0);
         cv::findContours(borders, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
         double epsilon = 0.1 * cv::arcLength(contours[0], true);
         cv::approxPolyDP(contours[0], approxDP, epsilon, true);
@@ -44,92 +45,51 @@ namespace pose_generator
         cv::circle(img, Point(approxDP.at<int>(1,0), approxDP.at<int>(1,1)), 1, cv::Scalar(255,255,255));
         cv::circle(img, Point(approxDP.at<int>(2,0), approxDP.at<int>(2,1)), 1, cv::Scalar(255,255,255));
         cv::circle(img, Point(approxDP.at<int>(3,0), approxDP.at<int>(3,1)), 1, cv::Scalar(255,255,255));
-
-        // cv::circle(img, corners_int[i], 1, Scalar(255,255,255), 3);
-        // cv::drawContours(img, approxDP, 0, cv::Scalar(255,255,255), 3);
-
-        // cout << contours[0] << endl;
-        // for( int i=0; i<contours.size(); i++)
-        // {
-        //     cv::Rect r = cv::boundingRect(contours[i]);
-        //     cv::rectangle(img, r, Scalar::all(255));
-        //     // cv::Point p0(r.x, r.y);
-        //     // cv::Point p1(r.x+r.width, r.y + r.height);
-        //     // cv::rectangle(img, p0,p1)
-        // }
         cv::imshow("contours", img);
         cv::waitKey(0);
-
-
-        // cv::cornerHarris(borders, corners, 7, 5, 0.05, cv::BORDER_DEFAULT);
-
-        // cv::imshow("corners", corners);
-        // cv::waitKey(0);
-
-        // double qualityLevel = 0.01;
-        // double minDistance = 10;
-        // int blockSize = 3;
-        // bool useHarrisDetector = true;
-        // double k = 0.04;
-        // cv::goodFeaturesToTrack(borders, corners_float, 4, qualityLevel, minDistance, Mat(), blockSize, useHarrisDetector, k);
-        // cout << corners_float.size() << endl;
-        // for(int i=0; i < corners_float.size(); i++)
-        // {
-        //     corners_int.push_back( cv::Point( (int) corners_float[i].x, (int) corners_float[i].y));
-        //     cv::circle(img, corners_int[i], 1, Scalar(255,255,255), 3);
-        // }
-        
+        return true;
 
         // cv::imshow("borders", borders);
         // cv::waitKey(0);
-        // cv::imshow("corners", img);
-        // cv::waitKey(0);
 
-        // cv::RotatedRect rrect = cv::minAreaRect(contours[0]);
-        // cv::Point2f* pts;
-        // rrect.points(pts);
-        // cout << sizeof(pts) / sizeof(pts[0]) << endl;
-
-        // for(int i=0; i<rrect.points; i++)
-        // {
-        //     cv::Point p;
-        //     p[0] = int(rrect.points[i][0]);
-        //     p[1] = int(rrect.points[i][1]);
-        //     cv::circle(img, p, 1, cv::Scalar(255,255,255), 1);
-        // }
-
+        // cv::imshow("jiangshi_center", jiangshi_center);
+        // waitKey(0);
+        // return false;
+        // initialize an image with zeros, make a rectangle of 2's
+        // cv::cvtColor(trimmed, gray, COLOR_BGR2GRAY);
+        // cv::threshold(gray, binary, 0, 255, THRESH_BINARY_INV + THRESH_OTSU);
+        // cv::erode(binary, eroded, Mat());;
+        // cv::dilate(eroded,dilated, Mat(),Point(-1,1), dilation);
         
-        // cv::RNG rng(12345);
-        // Mat drawing = Mat::zeros( borders.size(), CV_8UC3 );
-        // for( int i = 0; i< contours.size(); i++ )
-        // {
-        //     Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-        //     drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
-        //     namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
-        //     cout << "---------------------------------------------------" << endl;
-        //     cout << contours[i] << endl;
-        //     imshow( "Contours", drawing );
-        //     waitKey(0);
-        // }
+        
         
 
-        // cout << markers.size() << endl;
-        // cout << img.size() << endl;
-        
-        // cout << markers << endl;
-        // cout << borders << endl;
-        // cv::imshow("watershed", markers);
+        // int dilation = (int) img.cols / 20;
+        // Rect rect (border_size, border_size, img.cols - 2*border_size, img.rows-2*border_size);
+        // trimmed = img(rect);
+        // cv::cvtColor(trimmed, gray, COLOR_BGR2GRAY);
+        // cv::threshold(gray, binary, 0, 255, THRESH_BINARY_INV + THRESH_OTSU);
+        // cv::erode(binary, eroded, Mat());
+        // cv::dilate(eroded,dilated, Mat(),Point(-1,1), dilation);
+        // cv::copyMakeBorder(dilated, bordered, border_size, border_size,border_size,border_size, cv::BORDER_CONSTANT, Scalar(1,1,1));
+        // cv::connectedComponents(bordered, markers);
+        // cv::watershed(img, markers);
+        // cv::compare(markers, Scalar(2), borders, cv::CMP_EQ);
+        // cv::imshow("borders", borders);
         // cv::waitKey(0);
-        // cv::imshow("binary", binary);
+        // cv::findContours(borders, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+        // double epsilon = 0.1 * cv::arcLength(contours[0], true);
+        // cv::approxPolyDP(contours[0], approxDP, epsilon, true);
+        // cout << approxDP << endl;
+        // cout << approxDP.at<int>(0,0) << endl;
+        // cout << approxDP.size() << endl;
+        // cv::circle(img, Point(approxDP.at<int>(0,0), approxDP.at<int>(0,1)), 1, cv::Scalar(255,255,255));
+        // cv::circle(img, Point(approxDP.at<int>(1,0), approxDP.at<int>(1,1)), 1, cv::Scalar(255,255,255));
+        // cv::circle(img, Point(approxDP.at<int>(2,0), approxDP.at<int>(2,1)), 1, cv::Scalar(255,255,255));
+        // cv::circle(img, Point(approxDP.at<int>(3,0), approxDP.at<int>(3,1)), 1, cv::Scalar(255,255,255));
+        // cv::imshow("contours", img);
         // cv::waitKey(0);
-        // cv::imshow("eroded", eroded);
-        // cv::waitKey(0);
-        // cv::imshow("dilated", dilated);
-        // cv::waitKey(0);
-        // cv::imshow("dilated", dilated2);
-        // cv::waitKey(0);
-        // cv::imshow("dilated", dilated3);
-        // cv::waitKey(0);
+        // return true;
     }
     bool JiangshiWatershed::generatePose(
         sensor_msgs::Image& image, 
