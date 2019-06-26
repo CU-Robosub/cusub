@@ -41,4 +41,4 @@ tasks:
     roulette: roulette_watershed
 
 mission_tasks: # Tasks To Do In Order
- - jiangshi
+ - start_gate

@@ -20,13 +20,13 @@ namespace pose_generator
         Rodrigues(rvec, rot_matrix);
         tf2::Matrix3x3 m3{
             tf2Scalar(rot_matrix.at<double>(0,0)),
-            tf2Scalar(rot_matrix.at<double>(1,0)),
-            tf2Scalar(rot_matrix.at<double>(2,0)),
             tf2Scalar(rot_matrix.at<double>(0,1)),
-            tf2Scalar(rot_matrix.at<double>(1,1)),
-            tf2Scalar(rot_matrix.at<double>(2,1)),
             tf2Scalar(rot_matrix.at<double>(0,2)),
+            tf2Scalar(rot_matrix.at<double>(1,0)),
+            tf2Scalar(rot_matrix.at<double>(1,1)),
             tf2Scalar(rot_matrix.at<double>(1,2)),
+            tf2Scalar(rot_matrix.at<double>(2,0)),
+            tf2Scalar(rot_matrix.at<double>(2,1)),
             tf2Scalar(rot_matrix.at<double>(2,2))
         };
         m3.getRotation(q);

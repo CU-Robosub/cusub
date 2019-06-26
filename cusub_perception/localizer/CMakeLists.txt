@@ -37,6 +37,7 @@ add_library( localizer
   src/localizer.cpp
   src/pose_generator.cpp
   src/start_gate_hough.cpp
+  src/jiangshi_watershed.cpp
 )
 target_link_libraries(localizer ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)

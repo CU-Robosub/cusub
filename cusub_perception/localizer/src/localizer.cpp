@@ -80,9 +80,6 @@ namespace localizer_ns
       if( bb_map_it->first->generatePose(bbs->image, bb_map_it->second, det.pose.pose, det.class_id))
       {
         pub.publish(det);
-	NODELET_INFO("Localized baby!");
-      }else {
-	NODELET_INFO("Failed to localize class");
       }
     }
   }
