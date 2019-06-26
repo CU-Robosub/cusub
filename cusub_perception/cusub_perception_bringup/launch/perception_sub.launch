@@ -1,5 +1,7 @@
 <launch>
   <arg name="sub" default="leviathan" />
+  <arg name="show_image" default="false" />
+
   <group ns="$(arg sub)">
     <arg name="launch_prefix" default=""/>
     <arg name="detect_sleep_time" default="0.0"/>
@@ -10,9 +12,12 @@
     <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/ros.yaml"/>
     <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/robosub1CustomModel.yaml"/>
 
+    <!-- Configurations -->
     <rosparam command="load" file="$(find localizer)/config/localizer_config.yaml"/>
+    <rosparam command="load" file="$(find darknet_multiplexer)/config/darknet_multiplexer.yaml"/>
 
     <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="darknet_multiplexer" args="load darknet_multiplexer/Multiplexer standalone_nodelet" output="screen"/>
     <node pkg="nodelet" type="nodelet" name="localizer" args="load localizer/Localizer standalone_nodelet" output="screen"/>
     <node pkg="nodelet" type="nodelet" name="darknet_ros" args="load darknet_ros/YoloObjectDetector standalone_nodelet" output="screen">
         <remap from="darknet_ros/bounding_boxes" to="cusub_perception/darknet_ros/bounding_boxes" />
@@ -20,7 +25,8 @@
         <param name="weights_path"          value="$(arg yolo_weights_path)" />
         <param name="config_path"           value="$(arg yolo_config_path)" />
         <param name="detect_sleep_time"     value="$(arg detect_sleep_time)" />
-        <remap from="/camera/rgb/image_raw"       to="cusub_common/occam/image0"/>
+        <remap from="/camera/rgb/image_raw"       to="cusub_common/darknet_multiplexer/out"/>
+        <param name="show_image" value="$(arg show_image)"/>
     </node>
     <node pkg="nodelet" type="nodelet" name="occam" args="load ros_indigosdk/occam standalone_nodelet" output="screen"/>
   </group>

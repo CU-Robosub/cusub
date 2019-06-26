@@ -203,6 +203,8 @@ class YoloObjectDetector : public nodelet::Nodelet
 
   double detectSleepTime_;
 
+  bool showImage_;
+
   std_msgs::Header imageHeader_;
   cv::Mat camImageCopy_;
   boost::shared_mutex mutexImageCallback_;

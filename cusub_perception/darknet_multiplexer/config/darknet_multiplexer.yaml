@@ -1,9 +1,9 @@
 darknet_multiplexer:
-  update_freq: 80
+  update_freq: 30
   startup_configuration:
     - true # occam0
     - true # 1
     - true # 2
-    - true # 3
-    - true # 4
+    - false # 3
+    - false # 4
     - false # downcam
