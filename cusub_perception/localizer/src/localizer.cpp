@@ -7,7 +7,6 @@
   to the mapper in the form of Detection msgs.
  */
 
-#include <pluginlib/class_list_macros.h>
 #include <localizer/localizer.h>
 
 namespace localizer_ns
