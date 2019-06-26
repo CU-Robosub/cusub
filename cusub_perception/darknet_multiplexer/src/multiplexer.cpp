@@ -4,19 +4,21 @@
     Update rate configurable via config/darknet_multiplexer.yaml
  */
 
+ #include <darknet_multiplexer/multiplexer.h>
+
  namespace darknet_multiplexer_ns
  {
      void Multiplexer::onInit()
      {
-         ;
+         NODELET_INFO("Starting darknet multiplexer");
      }
 
-     void Multiplexer::cameraCallback()
-     {
-         ;
-     }
+    //  void Multiplexer::cameraCallback()
+    //  {
+    //      ;
+    //  }
 
-     void Multiplexer::publishFrame()
+    //  void Multiplexer::publishFrame()
  }
 
- PLUGINLIB_EXPORT_CLASS(localizer_ns::Localizer, nodelet::Nodelet);
+ PLUGINLIB_EXPORT_CLASS(darknet_multiplexer_ns::Multiplexer, nodelet::Nodelet);

@@ -1,6 +1,7 @@
 #ifndef LOCALIZER_CLASS_SRC_LOCALIZER_CLASS_H_
 #define LOCALIZER_CLASS_SRC_LOCALIZER_CLASS_H_
 
+#include <pluginlib/class_list_macros.h>
 #include <nodelet/nodelet.h>
 #include <ros/ros.h>
 #include <vector>
