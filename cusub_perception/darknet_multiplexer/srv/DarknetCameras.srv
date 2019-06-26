@@ -1,0 +1,6 @@
+# How to publish from cmd line: rosservice call darknet_multiplexer/configure_active_cameras "{actives:[1,0,1,0,1,0]}"
+int8 DOWNCAM_INDEX=5
+bool[] actives
+uint8 NUMBER_CAMERAS=5
+---
+bool success
