@@ -11,6 +11,11 @@ namespace darknet_multiplexer_ns
     {
     public:
         virtual void onInit();
+    private:
+        void publishFrame(const ros::TimerEvent& event);
+        ros::NodeHandle nh;
+        ros::Subscriber sub;
+        ros::Timer timer;
     };
 }
 #endif
