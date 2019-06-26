@@ -15,10 +15,20 @@ namespace darknet_multiplexer_ns
         virtual void onInit();
     private:
         void publishFrame(const ros::TimerEvent& event);
-        void cameraCallback(const sensor_msgs::ImagePtr image);
+        void occamCallback0(const sensor_msgs::ImagePtr image);
+        void occamCallback1(const sensor_msgs::ImagePtr image);
+        void occamCallback2(const sensor_msgs::ImagePtr image);
+        void occamCallback3(const sensor_msgs::ImagePtr image);
+        void occamCallback4(const sensor_msgs::ImagePtr image);
+        void downcamCallback(const sensor_msgs::ImagePtr image);
         ros::NodeHandle nh;
-        std::vector<ros::Subscriber> subs;
         ros::Timer timer;
+        std::vector<ros::Subscriber> subs;
+        std::vector<sensor_msgs::ImagePtr> recent_images = std::vector<sensor_msgs::ImagePtr>(6);
+        std::vector<bool> image_received = std::vector<bool>(6);
+        ros::Publisher darknet_pub;
+        std::vector<bool> activePublishers;
+        int current_pub_index;
     };
 }
 #endif

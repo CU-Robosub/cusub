@@ -1,5 +1,5 @@
 darknet_multiplexer:
-  update_freq: 30
+  update_freq: 80
   startup_configuration:
     - true # occam0
     - true # 1
