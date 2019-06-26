@@ -4,6 +4,8 @@
 #include <pluginlib/class_list_macros.h>
 #include <nodelet/nodelet.h>
 #include <ros/ros.h>
+#include <sensor_msgs/Image.h>
+#include <vector>
 
 namespace darknet_multiplexer_ns
 {
@@ -13,8 +15,9 @@ namespace darknet_multiplexer_ns
         virtual void onInit();
     private:
         void publishFrame(const ros::TimerEvent& event);
+        void cameraCallback(const sensor_msgs::ImagePtr image);
         ros::NodeHandle nh;
-        ros::Subscriber sub;
+        std::vector<ros::Subscriber> subs;
         ros::Timer timer;
     };
 }

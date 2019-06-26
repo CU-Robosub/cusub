@@ -18,19 +18,25 @@
              NODELET_ERROR("Darknet Multiplexer failed to locate params.");
              abort();
          }
-         // setup subscribers
+         subs.push_back( nh.subscribe("cusub_common/occam/image0", 1, &Multiplexer::cameraCallback, this) );
+         subs.push_back( nh.subscribe("cusub_common/occam/image1", 1, &Multiplexer::cameraCallback, this) );
+         subs.push_back( nh.subscribe("cusub_common/occam/image2", 1, &Multiplexer::cameraCallback, this) );
+         subs.push_back( nh.subscribe("cusub_common/occam/image3", 1, &Multiplexer::cameraCallback, this) );
+         subs.push_back( nh.subscribe("cusub_common/occam/image4", 1, &Multiplexer::cameraCallback, this) );
+         subs.push_back( nh.subscribe("cusub_common/downcam", 1, &Multiplexer::cameraCallback, this) );
          // setup startup configuration
          timer = nh.createTimer(ros::Duration(1 / update_freq), &Multiplexer::publishFrame, this);
      }
 
-    //  void Multiplexer::cameraCallback()
-    //  {
-    //      ;
-    //  }
+     void Multiplexer::cameraCallback(const sensor_msgs::ImagePtr image)
+     {
+         NODELET_INFO("Image received");
+     }
 
      void Multiplexer::publishFrame(const ros::TimerEvent& event)
      {
-         NODELET_INFO("Publishing a frame.");
+        //  NODELET_INFO("Publishing a frame.");
+        ;
      }
  }
 
