@@ -6,6 +6,8 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <vector>
+#include <darknet_multiplexer/DarknetCameras.h>
+#include <std_msgs/UInt8MultiArray.h>
 
 namespace darknet_multiplexer_ns
 {
@@ -14,6 +16,7 @@ namespace darknet_multiplexer_ns
     public:
         virtual void onInit();
     private:
+        bool configureActives(darknet_multiplexer::DarknetCameras::Request& request, darknet_multiplexer::DarknetCameras::Response& response);
         void publishFrame(const ros::TimerEvent& event);
         void occamCallback0(const sensor_msgs::ImagePtr image);
         void occamCallback1(const sensor_msgs::ImagePtr image);
@@ -23,11 +26,13 @@ namespace darknet_multiplexer_ns
         void downcamCallback(const sensor_msgs::ImagePtr image);
         ros::NodeHandle nh;
         ros::Timer timer;
+        ros::ServiceServer service;
         std::vector<ros::Subscriber> subs;
         std::vector<sensor_msgs::ImagePtr> recent_images = std::vector<sensor_msgs::ImagePtr>(6);
         std::vector<bool> image_received = std::vector<bool>(6);
         ros::Publisher darknet_pub;
-        std::vector<bool> activePublishers;
+        ros::Publisher actives_pub;
+        std::vector<bool> activeCameras;
         int current_pub_index;
     };
 }
