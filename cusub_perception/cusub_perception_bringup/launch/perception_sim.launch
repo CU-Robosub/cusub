@@ -27,7 +27,7 @@
         <param name="weights_path"          value="$(arg yolo_weights_path)" />
         <param name="config_path"           value="$(arg yolo_config_path)" />
         <param name="detect_sleep_time"     value="$(arg detect_sleep_time)" />
-        <remap from="/camera/rgb/image_raw"       to="cusub_common/darknet_multiplexer/out"/>
+        <remap from="/camera/rgb/image_raw"       to="cusub_perception/darknet_multiplexer/out"/>
         <param name="show_image" value="$(arg show_image)"/>
     </node>
     <include file="$(find gazebo_drivers)/launch/fakeyolo.launch" if="$(arg fakeyolo)"/>

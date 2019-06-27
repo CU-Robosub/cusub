@@ -8,6 +8,9 @@
 #include <vector>
 #include <darknet_multiplexer/DarknetCameras.h>
 #include <std_msgs/UInt8MultiArray.h>
+#include <cv_bridge/cv_bridge.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 namespace darknet_multiplexer_ns
 {

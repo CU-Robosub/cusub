@@ -1,12 +1,14 @@
 <launch>
 
     <arg name="config_filename" default="mission_config.yaml"/>
+    <arg name="using_darknet" default="true"/> <!-- Tells SM whether or not to configure darknet cameras per task -->
     <arg name="sub" default="leviathan" />
     <!-- Include the mission config parameters -->
     <rosparam command="load" file="$(find state_machine)/config/$(arg config_filename)"/>
 
     <node name="state_machine_node" pkg="state_machine" type="smach_top.py" output="screen">
         <param name="robotname" value="$(arg sub)"/>
+        <param name="using_darknet" value="$(arg using_darknet)" />
     </node>
 
 </launch>

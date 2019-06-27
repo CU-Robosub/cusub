@@ -14,6 +14,7 @@ import math
 import actionlib
 from tf.transformations import euler_from_quaternion
 from std_msgs.msg import Empty
+from darknet_multiplexer.srv import DarknetCameras
 
 from optparse import OptionParser
 import inspect
@@ -102,6 +103,7 @@ class Objective(smach.State):
         self._replan_requested = False
         self.wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
         self.started = False
+        self.using_darknet = rospy.get_param("~using_darknet")
 
         # initialize the pose
         pose = Pose()
@@ -111,6 +113,32 @@ class Objective(smach.State):
         self.cur_pose = pose
 
         super(Objective, self).__init__(outcomes=outcomes)
+
+    def configure_darknet_cameras(self, camera_bool_list):
+        """
+        Configures which cameras for darknet to use.
+
+        Params
+        ------
+        camera_bool_list : list of bools, length 6
+            Darknet active cameras, 1 for use
+
+        Returns
+        -------
+        bool
+            1 success
+            0 failed
+        """
+        if not self.using_darknet:
+            return False
+        rospy.wait_for_service("cusub_perception/darknet_multiplexer/configure_active_cameras")
+        try:
+            darknet_config = rospy.ServiceProxy("cusub_perception/darknet_multiplexer/configure_active_cameras", DarknetCameras)
+            resp1 = darknet_config(camera_bool_list)
+            return True
+        except rospy.ServiceException, e:
+            rospy.logerr("Darknet Config Service call failed: %s"%e)
+            return False
 
     def go_to_pose(self, target_pose, move_mode="yaw"):
         """ Traverse to the target_pose given

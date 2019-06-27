@@ -81,12 +81,20 @@ def main():
     wayClient.wait_for_server()
     rospy.loginfo("---connected to server")
 
+
+    if rospy.get_param('~using_darknet'):
+        rospy.loginfo("Waiting for darknet multiplexer server")
+        rospy.wait_for_service("cusub_perception/darknet_multiplexer/configure_active_cameras")
+        rospy.loginfo("---connected to server")
+    else:
+        rospy.logwarn("SM not using darknet configuration service.")
+
     sm_top = smach.StateMachine(['success', 'aborted'])
 
     # initialize all of the state machines
     rospy.loginfo("Waiting for rosparams")
     while not rospy.has_param("mission_tasks") and not rospy.is_shutdown():
-        pass
+        rospy.sleep(1)
     rospy.loginfo("--rosparams found")
 
     task_list = rospy.get_param("mission_tasks")
