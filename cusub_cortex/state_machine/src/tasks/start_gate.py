@@ -76,6 +76,8 @@ class Attack(Objective):
         rospy.loginfo("Executing Attack")
         self.clear_abort()
 
+        self.configure_darknet_cameras([1,1,0,0,1,0])
+
         target_pose = self.adjust_gate_pose(
             self.cur_pose, \
             self.start_gate_pose.pose, \
