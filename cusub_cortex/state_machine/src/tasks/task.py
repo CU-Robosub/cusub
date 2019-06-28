@@ -122,6 +122,7 @@ class Objective(smach.State):
         ------
         camera_bool_list : list of bools, length 6
             Darknet active cameras, 1 for use
+            [ occam0, 1, 2, 3, 4, downcam ]
 
         Returns
         -------
@@ -137,7 +138,7 @@ class Objective(smach.State):
             resp1 = darknet_config(camera_bool_list)
             return True
         except rospy.ServiceException, e:
-            rospy.logerr("Darknet Config Service call failed: %s"%e)
+            rospy.logerr("Darknet Camera Config Service call failed: %s"%e)
             return False
 
     def go_to_pose(self, target_pose, move_mode="yaw"):

@@ -59,4 +59,5 @@ class Search(Objective):
         if self.go_to_pose(self.prior):
             return "found"
         else:
+            rospy.logerr("Search unable to find task.")
             return "not_found"

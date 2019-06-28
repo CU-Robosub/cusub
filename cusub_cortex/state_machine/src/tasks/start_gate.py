@@ -32,7 +32,7 @@ class StartGate(Task):
 
     def link_objectives(self):
         with self: # we are a StateMachine
-            smach.StateMachine.add('Search', self.search, transitions={'found':'Attack', 'not_found':'Search'})
+            smach.StateMachine.add('Search', self.search, transitions={'found':'Attack', 'not_found':'task_aborted'})
             smach.StateMachine.add('Attack', self.attack, transitions={'success':'task_success', 'aborted':'Attack'})
 
 class Attack(Objective):

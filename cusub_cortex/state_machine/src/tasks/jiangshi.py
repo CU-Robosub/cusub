@@ -34,7 +34,7 @@ class Jiangshi(Task):
 
     def link_objectives(self):
         with self:
-            smach.StateMachine.add('Search', self.search, transitions={'found':'Slay', 'not_found':'Search'})
+            smach.StateMachine.add('Search', self.search, transitions={'found':'Slay', 'not_found':'task_aborted'})
             smach.StateMachine.add('Slay', self.slay, transitions={'success':'task_success', 'aborted':'Slay'})
 
 class Slay(Objective):
@@ -99,6 +99,7 @@ class Slay(Objective):
     def execute(self, userdata):
         self.started = True
         self.clear_abort()
+        self.configure_darknet_cameras([1,0,0,0,0,0])
         approach_pose, slay_pose = self.get_slay_path()
         if self.go_to_pose(approach_pose) or \
             self.go_to_pose(slay_pose, move_mode="backup") or \
