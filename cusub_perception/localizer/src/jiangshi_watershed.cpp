@@ -74,17 +74,35 @@ namespace pose_generator
         points.push_back(top_right);
     }
 
+    /*
+        Checks that each bounding box is border_size away from the edge of the image.
+     */
+    bool JiangshiWatershed::checkBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs, int border_size)
+    {
+        for( int i=0; i<bbs.size(); i++)
+        {
+            if( bbs[i].xmin - border_size < 0 ||
+                bbs[i].ymin - border_size < 0 ||
+                bbs[i].xmax + border_size >= 752 ||
+                bbs[i].ymax + border_size >= 480)
+                { return false; }
+        }
+        return true;
+    }
+
     bool JiangshiWatershed::generatePose(
         sensor_msgs::Image& image, 
         vector<darknet_ros_msgs::BoundingBox>& bbs,
         geometry_msgs::Pose& pose,
         string& class_name
         ){
+            class_name = "jiangshi";
             if( bbs.size() != 1 ) { return false; }
+            int border_size = 10; // add room for a border that we'll say is part of the 'not bouy' class
+            checkBoxes(bbs, border_size);
             cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::RGB8);
 
             // Trim image to jiangshi
-            int border_size = 10; // add room for a border that we'll say is part of the 'not bouy' class
             Rect rect (bbs[0].xmin-border_size, bbs[0].ymin-border_size,bbs[0].xmax-bbs[0].xmin+2*border_size,bbs[0].ymax-bbs[0].ymin+2*border_size);
             Mat img = cv_ptr->image(rect);
 
@@ -103,7 +121,6 @@ namespace pose_generator
 
             // Get pose from image points using a solvepnp
             getPoseFromPoints(truth_pts, img_points, pose); // inherited
-            class_name = "jiangshi";
             return true;
         }
 }

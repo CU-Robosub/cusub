@@ -25,6 +25,7 @@ namespace localizer_ns
   private:
     void loadRosParams(ros::NodeHandle& nh);
     void darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs);
+    bool checkBox(const darknet_ros_msgs::BoundingBox& bb);
     map<string, pose_generator::PoseGenerator*> mappings;
     ros::Publisher pub;
     ros::Subscriber sub;

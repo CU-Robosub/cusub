@@ -25,7 +25,7 @@ namespace pose_generator
                 vector<darknet_ros_msgs::BoundingBox>& bbs,
                 geometry_msgs::Pose& pose,
                 string& class_name
-            ){return false;}
+            ){ ROS_INFO("Ignoring bounding box"); return false;}
     };
 }
 

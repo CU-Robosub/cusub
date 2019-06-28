@@ -43,6 +43,17 @@ namespace localizer_ns
   }
 
   /*
+    Throw out all boxes that touch the edge of the image. One of our localization assumptions is full view of the task.
+   */
+  bool Localizer::checkBox(const darknet_ros_msgs::BoundingBox& bb)
+  {
+    if( bb.xmin == 0 || bb.ymin == 0 ||  // TODO logic to allow for downcam bounding box checking
+        bb.xmax >= 752 || bb.ymax >= 480)
+      { return false; }
+    else { return true; }
+  }
+
+  /*
     Darknet callback, uses mappings data structure to aggregate common
     darknet bounding boxes into a vector and pass it into a pose generator.
     Publishes pose and class received from pose generator as detection msg.
@@ -64,7 +75,7 @@ namespace localizer_ns
           vector<darknet_ros_msgs::BoundingBox> new_bb_vector;
           bb_map[it->second] = new_bb_vector;
         }
-        bb_map[it->second].push_back(box);
+        if ( checkBox(box) ) { bb_map[it->second].push_back(box); }
       }
     }
 
@@ -73,12 +84,15 @@ namespace localizer_ns
     for(bb_map_it=bb_map.begin(); bb_map_it != bb_map.end(); bb_map_it++)
     {
       localizer::Detection det;
+      det.class_id = "pose";
       det.pose.header.seq = detection_num++;
       det.pose.header.stamp = ros::Time::now();
       det.pose.header.frame_id = "/leviathan/description/occam0_frame_optical";
       if( bb_map_it->first->generatePose(bbs->image, bb_map_it->second, det.pose.pose, det.class_id))
       {
         pub.publish(det);
+      } else {
+        NODELET_WARN_THROTTLE(1, "Localizer failed to localize %s", det.class_id.c_str());
       }
     }
   }
