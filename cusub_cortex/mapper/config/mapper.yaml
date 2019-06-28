@@ -4,4 +4,4 @@ mapper:
   publish_freq: 10
   classes:
     start_gate: 200
-    jiangshi: 200
+    jiangshi: 50

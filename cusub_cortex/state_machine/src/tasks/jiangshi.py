@@ -58,7 +58,8 @@ class Slay(Objective):
             self.jiangshi_pose = msg
             return
         change_in_pose = self.get_distance(self.jiangshi_pose.pose.position, msg.pose.position)
-        if change_in_pose > self.replan_threshold and self.started:
+        if (change_in_pose > self.replan_threshold) and self.started:
+            rospy.logwarn_throttle(1,"Jiangshi Pose jump.")
             self.jiangshi_pose = msg
             self.request_abort() # this will loop us back to execute
 

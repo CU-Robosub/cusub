@@ -14,6 +14,7 @@ namespace pose_generator
         vector<Vec4i> hierarchy;
 
         // Draw rectangle to classify jiangshi points
+        if ( (img.cols - 2*border_size < 4) || ( img.rows-2*border_size < 4 ) ) { return false; } // min rectangle width 4 pixels
         cv::Mat jiangshi_center(cv::Size(img.cols - 2*border_size, img.rows-2*border_size), CV_8U, Scalar(0));
         int top_pixel_x = (int) jiangshi_center.cols / 4;
         int top_pixel_y = (int) jiangshi_center.rows / 4;
@@ -81,10 +82,10 @@ namespace pose_generator
     {
         for( int i=0; i<bbs.size(); i++)
         {
-            if( bbs[i].xmin - border_size < 0 ||
-                bbs[i].ymin - border_size < 0 ||
-                bbs[i].xmax + border_size >= 752 ||
-                bbs[i].ymax + border_size >= 480)
+            if( bbs[i].xmin - border_size <= 0 ||
+                bbs[i].ymin - border_size <= 0 ||
+                bbs[i].xmax + border_size >= 751 ||
+                bbs[i].ymax + border_size >= 479)
                 { return false; }
         }
         return true;

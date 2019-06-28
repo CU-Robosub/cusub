@@ -12,24 +12,53 @@ from geometry_msgs.msg import Pose, PoseStamped, Quaternion
 from localizer.msg import Detection
 import numpy as np
 
+MAX_SUM_TASK_POSITION_VALUE=500
+
 class ExpWeightedAvg():
 
     num_poses = 0
 
     def __init__(self, num_poses_to_avg):
+        self.num_poses_to_avg = num_poses_to_avg
         self.beta = (1.0 - float(num_poses_to_avg)) / ( - float(num_poses_to_avg))
         self.avg_pose = Pose()
+        self.pose_list_x = []
+        self.pose_list_y = []
+        self.pose_list_z = []
+        self.pose_list_yaw = []
 
     def add_new_pose(self, new_pose):
-        self.num_poses += 1
-        if self.num_poses == 1:
+        if abs(new_pose.position.x) + abs(new_pose.position.y) + abs(new_pose.position.z) > MAX_SUM_TASK_POSITION_VALUE:
+            rospy.logwarn_throttle(1,"Mapper rejecting outlier pose: " + str(new_pose))
+            return
+        elif self.num_poses == 0:
             self.avg_pose = new_pose
 
         # Convert to positive euler angles
-        quat_list_avg = [self.avg_pose.orientation.x, self.avg_pose.orientation.y, self.avg_pose.orientation.z, self.avg_pose.orientation.w]
         quat_list_new = [new_pose.orientation.x, new_pose.orientation.y, new_pose.orientation.z, new_pose.orientation.w]
+        new_angles = self.make_pos_angles(tf.transformations.euler_from_quaternion(quat_list_new))
+        quat_list_avg = [self.avg_pose.orientation.x, self.avg_pose.orientation.y, self.avg_pose.orientation.z, self.avg_pose.orientation.w]
         avg_angles = self.make_pos_angles(tf.transformations.euler_from_quaternion(quat_list_avg))
-        new_angles = self.make_pos_angles(tf.transformations.euler_from_quaternion(quat_list_new))        
+
+        # if self.num_poses > self.num_poses_to_avg:
+        #     if ( abs(self.avg_pose.position.x - new_pose.position.x) > 3*np.std(self.pose_list_x) ) or \
+        #     ( abs(self.avg_pose.position.y - new_pose.position.y) > 3*np.std(self.pose_list_y) ) or \
+        #     ( abs(self.avg_pose.position.z - new_pose.position.z) > 3*np.std(self.pose_list_z) ): #or \
+        #     # ( abs(avg_angles[2] - new_angles[2]) > 3*np.std(self.pose_list_yaw) ):
+        #         rospy.logwarn_throttle(1,"Mapper rejecting outlier pose:\n" + str(new_pose))
+        #         return
+        #     else:
+        #         self.pose_list_x.pop(0)
+        #         self.pose_list_y.pop(0)
+        #         self.pose_list_z.pop(0)
+        #         self.pose_list_yaw.pop(0)
+
+        # self.pose_list_x.append(new_pose.position.x)
+        # self.pose_list_y.append(new_pose.position.y)
+        # self.pose_list_z.append(new_pose.position.z)
+        # self.pose_list_yaw.append(new_angles[2])
+
+        self.num_poses += 1
 
         x_avg = self.avg_pose.position.x
         y_avg = self.avg_pose.position.y
@@ -43,8 +72,9 @@ class ExpWeightedAvg():
         new_pitch_avg = (self.beta * avg_angles[1]) + (1-self.beta) * new_angles[1]
         new_yaw_avg = (self.beta * avg_angles[2]) + (1-self.beta) * new_angles[2]
 
+        
         # Store avg orientation as quaternion
-        new_quat_list_avg = tf.transformations.quaternion_from_euler(new_roll_avg, new_pitch_avg, new_yaw_avg)
+        new_quat_list_avg = tf.transformations.quaternion_from_euler(0, 0, new_yaw_avg) # assume no pitch or roll
         q = Quaternion()
         q.x = new_quat_list_avg[0]
         q.y = new_quat_list_avg[1]
@@ -56,6 +86,7 @@ class ExpWeightedAvg():
         pose.position.x = new_x_avg
         pose.position.y = new_y_avg
         pose.position.z = new_z_avg
+        # pose.orientation = q
         pose.orientation = q
         self.avg_pose = pose
 
