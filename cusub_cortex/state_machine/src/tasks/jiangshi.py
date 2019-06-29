@@ -57,7 +57,7 @@ class Slay(Objective):
         self.monitor_imu = False
 
     def imu_callback(self, msg):
-        if self.monitor_imu == False:
+        if ( self.monitor_imu == False ) or self.abort_requested():
             return
 
         hit_detected = False
@@ -146,5 +146,6 @@ class Slay(Objective):
         self.monitor_imu = True
         self.go_to_pose(slay_pose, move_mode="backup")
         self.monitor_imu = False
+        self.clear_abort()
         self.go_to_pose(approach_pose)
         return "success"
