@@ -15,12 +15,12 @@
         <mass
           value="0.5" />
         <inertia
-          ixx="1.0E-5"
+          ixx="10.0" 
           ixy="0.0"
           ixz="0.0"
-          iyy="1.0E-5"
+          iyy="10.0"
           iyz="0.0"
-          izz="1.0E-5" />
+          izz="10.0" />
       </inertial>
       <visual>
         <origin

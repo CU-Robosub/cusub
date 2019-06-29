@@ -32,7 +32,7 @@ namespace pose_generator
         m3.getRotation(q);
         pose.orientation = tf2::toMsg(q);
         pose.position.x = tvec.at<double>(0);
-        pose.position.y = tvec.at<double>(1) - 1.0; // 1.5 added to correct for optical to odom bad transform
+        pose.position.y = tvec.at<double>(1) - 0.7; // 1.5 added to correct for optical to odom bad transform
         pose.position.z = tvec.at<double>(2);
     }
 }

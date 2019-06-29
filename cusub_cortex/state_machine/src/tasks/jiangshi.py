@@ -17,7 +17,7 @@ import rospy
 from geometry_msgs.msg import PoseStamped, Pose
 import smach
 import smach_ros
-import pdb
+from sensor_msgs.msg import Imu
 
 class Jiangshi(Task):
     name = "jiangshi"
@@ -46,11 +46,48 @@ class Slay(Objective):
     def __init__(self):
         super(Slay, self).__init__(self.outcomes, "Slay")
         rospy.Subscriber("cusub_cortex/mapper_out/jiangshi", PoseStamped, self.jiangshi_callback)
+        rospy.Subscriber("cusub_common/imu", Imu, self.imu_callback)
         self.started = False
+        self.imu_axis = rospy.get_param("tasks/jiangshi/imu_axis")
+        self.jump_thresh = rospy.get_param("tasks/jiangshi/jump_thresh")
         self.approach_dist = rospy.get_param('tasks/jiangshi/approach_dist', 2.0)
         self.slay_dist = rospy.get_param('tasks/jiangshi/slay_dist', 0.5)
         self.replan_threshold = rospy.get_param('tasks/jiangshi/replan_threshold', 0.5)
         self.jiangshi_pose = None
+        self.monitor_imu = False
+
+    def imu_callback(self, msg):
+        if self.monitor_imu == False:
+            return
+
+        hit_detected = False
+
+        if self.imu_axis == 'x':
+            if (self.jump_thresh < 0) and ( msg.linear_acceleration.x < self.jump_thresh ):
+                hit_detected = True
+                self.request_abort()
+            elif (self.jump_thresh > 0) and ( msg.linear_acceleration.x > self.jump_thresh ):
+                hit_detected = True
+                self.request_abort()
+        elif self.imu_axis == 'y':
+            if (self.jump_thresh < 0) and ( msg.linear_acceleration.y < self.jump_thresh ):
+                hit_detected = True
+                self.request_abort()
+            elif (self.jump_thresh > 0) and ( msg.linear_acceleration.y > self.jump_thresh ):
+                hit_detected = True
+                self.request_abort()
+        elif self.imu_axis == 'z':
+            if (self.jump_thresh < 0) and ( msg.linear_acceleration.z < self.jump_thresh ):
+                hit_detected = True
+                self.request_abort()
+            elif (self.jump_thresh > 0) and ( msg.linear_acceleration.z > self.jump_thresh ):
+                hit_detected = True
+                self.request_abort()
+        else:
+            rospy.logerr("Unrecognized imu axis: " + str(self.imu_axis))
+
+        if hit_detected:
+            rospy.loginfo_throttle(1, "Detected a buoy hit!")
 
     def jiangshi_callback(self, msg):
         # Set the first pose and don't abort
@@ -102,9 +139,14 @@ class Slay(Objective):
         self.clear_abort()
         self.configure_darknet_cameras([1,0,0,0,0,0])
         approach_pose, slay_pose = self.get_slay_path()
-        if self.go_to_pose(approach_pose) or \
-            self.go_to_pose(slay_pose, move_mode="backup") or \
-            self.go_to_pose(approach_pose):
-            return 'aborted'
-        else:
+        if self.go_to_pose(approach_pose):
+            return "aborted"
+        rospy.loginfo("---slaying buoy")
+        self.monitor_imu = True
+        if self.go_to_pose(slay_pose, move_mode="backup"):
+            self.monitor_imu = False
+            self.go_to_pose(approach_pose)
             return "success"
+        else:
+            self.monitor_imu = False
+            return "aborted"

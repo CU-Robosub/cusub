@@ -16,6 +16,8 @@ tasks:
   approach_dist: 2.0
   slay_dist: 0.0
   replan_thresh: 2.0
+  imu_axis: 'x'
+  jump_thresh: -0.05
 
  dice:
   prior: [3,0,-2.3]

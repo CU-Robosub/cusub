@@ -1,9 +1,9 @@
 <launch>
 
   <arg name="TASK_x" default="4.0"/>
-  <arg name="TASK_y" default="0.0"/>
+  <arg name="TASK_y" default="-2.0"/>
   <arg name="TASK_z" default="-0.5"/>
-  <arg name="TASK_yaw" default="1.57"/>
+  <arg name="TASK_yaw" default="0.785" />
 
   <!-- Start the a underwater world simulation scenario -->
   <include file="$(find robosub_descriptions)/launch/divewell.launch"/>
