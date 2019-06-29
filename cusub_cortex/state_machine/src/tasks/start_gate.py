@@ -16,7 +16,6 @@ from geometry_msgs.msg import PoseStamped, Pose, Point
 from tf.transformations import euler_from_quaternion
 from std_msgs.msg import Empty, Bool
 import numpy as np
-import matplotlib.pyplot as plt
 
 class StartGate(Task):
     name = "start_gate"
@@ -24,16 +23,16 @@ class StartGate(Task):
 
     def __init__(self):
         super(StartGate, self).__init__(self.outcomes) # become a state machine first
-        self.initObjectives()
-        self.linkObjectives()
+        self.init_objectives()
+        self.link_objectives()
 
-    def initObjectives(self):
-        self.search = Search(self.getPrior(), "cusub_cortex/mapper_out/start_gate")
+    def init_objectives(self):
+        self.search = Search(self.get_prior(), "cusub_cortex/mapper_out/start_gate")
         self.attack = Attack()
 
-    def linkObjectives(self):
+    def link_objectives(self):
         with self: # we are a StateMachine
-            smach.StateMachine.add('Search', self.search, transitions={'found':'Attack', 'not_found':'Search'})
+            smach.StateMachine.add('Search', self.search, transitions={'found':'Attack', 'not_found':'task_aborted'})
             smach.StateMachine.add('Attack', self.attack, transitions={'success':'task_success', 'aborted':'Attack'})
 
 class Attack(Objective):
@@ -44,14 +43,13 @@ class Attack(Objective):
     outcomes=['success','aborted']
 
     def __init__(self):
-        rospy.loginfo("---Attack objective initializing")
         super(Attack, self).__init__(self.outcomes, "Attack")
         self.dist_behind = rospy.get_param('tasks/start_gate/dist_behind_gate', 1.0)
         self.replan_threshold = rospy.get_param('tasks/start_gate/replan_thresh', 1.0)
         self.leg_adjustment_meters = rospy.get_param('tasks/start_gate/third_leg_adjustment', 0.5)
         self.first_pose_received = False
         self.start_gate_pose = None
-        self.small_leg_left_side = True
+        self.small_leg_left_side = None
         self.started = False
         rospy.Subscriber("cusub_cortex/mapper_out/start_gate", PoseStamped, self.start_gate_callback)
         rospy.Subscriber("cusub_perception/start_gate/small_pole_left_side", Bool, self.small_leg_callback)
@@ -67,9 +65,9 @@ class Attack(Objective):
             self.start_gate_pose = msg
             return
 
-        changeInPose = self.getDistance(self.start_gate_pose.pose.position, msg.pose.position)
+        change_in_pose = self.get_distance(self.start_gate_pose.pose.position, msg.pose.position)
 
-        if changeInPose > self.replan_threshold:
+        if change_in_pose > self.replan_threshold:
             self.start_gate_pose = msg
             self.request_abort() # this will loop us back to execute
 
@@ -78,14 +76,16 @@ class Attack(Objective):
         rospy.loginfo("Executing Attack")
         self.clear_abort()
 
+        self.configure_darknet_cameras([1,1,0,0,1,0])
+
         target_pose = self.adjust_gate_pose(
-            self.curPose, \
+            self.cur_pose, \
             self.start_gate_pose.pose, \
             self.dist_behind, \
             self.small_leg_left_side, \
             self.leg_adjustment_meters)
         
-        if self.goToPose(target_pose):
+        if self.go_to_pose(target_pose):
             return 'aborted'
         return "success"
 
@@ -94,7 +94,7 @@ class Attack(Objective):
         """
         Draws a line from the sub to the gate and adjusts the gate's pose along this line, behind the gate, by 
         'dist_behind'. Likewise, if small_leg_left_side is not None, a perpendicular line to the first is created
-        and according to whichever side the small leg is on, the gate's pose is adjusted by 'third_leg_adjustment'
+        and according to whichever side the small leg is on, the gate's pose is adjusted laterally by 'third_leg_adjustment'
         ( Assumes gate is approximately facing the sub. )
 
         Parameters
@@ -155,97 +155,3 @@ class Attack(Objective):
         target_pose.position.y = y_new2
         target_pose.position.z = gate_pose.position.z
         return target_pose
-
-
-if __name__ == "__main__":
-    left_side = True
-    p = Pose()
-    p.position.x = 0
-    p.position.y = 0
-    p2 = Pose()
-    p2.position.x = 2
-    p2.position.y = 0
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-    ###########
-    p2 = Pose()
-    p2.position.x = 2
-    p2.position.y = 2
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-    ###########
-    p2 = Pose()
-    p2.position.x = 0
-    p2.position.y = 2
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-    ###########
-    p2 = Pose()
-    p2.position.x = -2
-    p2.position.y = 2
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-    ###########
-    p2 = Pose()
-    p2.position.x = -2
-    p2.position.y = 0
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-    ###########
-    p2 = Pose()
-    p2.position.x = -2
-    p2.position.y = -2
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-    ###########
-    p2 = Pose()
-    p2.position.x = 0
-    p2.position.y = -2
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-    ###########
-    p2 = Pose()
-    p2.position.x = 2
-    p2.position.y = -2
-    p3 = Attack.adjust_gate_pose(p, p2, dist_behind=1, small_leg_left_side=left_side, third_leg_adjustment=1)
-    x = np.array([p.position.x, p2.position.x, p3.position.x])
-    y = np.array([p.position.y, p2.position.y, p3.position.y])
-    color = np.array([0.0,0.5,1.0])
-    plt.scatter(x,y, c=color)
-    plt.show()
-
-    print('\n\n')
-    print('sub\n----')
-    print(p.position)
-    print('\ngate\n----')
-    print(p2.position)
-    print('\ngoal\n----')
-    print(p3.position)

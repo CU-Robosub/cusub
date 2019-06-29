@@ -1,0 +1,46 @@
+# Mission Config of the sub
+# ALL UNITS IN M
+
+using_sim_params : True
+
+tasks:
+ start_gate:
+  # prior: [0,-8.0,-1.5]
+  prior: [8.0,0,-1.5]
+  dist_behind_gate: 1.0
+  third_leg_adjustment: 0.5
+  replan_thresh: 1.0
+
+ jiangshi:
+  prior: [2.0,0,-1.5]
+  approach_dist: 2.0
+  slay_dist: 2.0
+  replan_thresh: 3.0
+  imu_axis: 'x'
+  jump_thresh: -1.0
+
+ dice:
+  prior: [3,0,-2.3]
+  targets: ['dice5', 'dice6']
+  replan_threshold: 1.0
+  approach_method: 'optimal' # optimal, twopoint, direct
+  approach_radius: 1.0
+  orbital_radius: 2.0
+  lockon_time: 5.0
+  carrot_dist: 2.0
+  backup_dist: 2.0
+  accel_spike_thresh: -0.15
+  accel_axis: 'x'
+  attack_timeout: 30
+  object_localizers:
+    dice1: dice_box
+    dice2: dice_box
+    dice5: dice_box
+    dice6: dice_box
+ dropper:
+  prior: [-7,-4.5,-1]
+  object_localizers:
+    roulette: roulette_watershed
+
+mission_tasks: # Tasks To Do In Order
+ - jiangshi

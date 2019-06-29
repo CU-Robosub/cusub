@@ -1,15 +1,23 @@
 # Mission Config of the sub
 # ALL UNITS IN M
 
-# Search Algorithms: simple
+using_sim_params : False
 
 tasks:
  start_gate:
-  prior: [0,-8.0,-1.5]
-  dist_behind_gate: 2.5
-  
+  # prior: [0,-8.0,-1.5]
+  prior: [8.0,0,-1.5]
+  dist_behind_gate: 1.0
   third_leg_adjustment: 0.5
   replan_thresh: 1.0
+
+ jiangshi:
+  prior: [2.0,0,-1.5]
+  approach_dist: 2.0
+  slay_dist: 0.0
+  replan_thresh: 2.0
+  imu_axis: 'x'
+  jump_thresh: -0.05
 
  dice:
   prior: [3,0,-2.3]
@@ -35,4 +43,4 @@ tasks:
     roulette: roulette_watershed
 
 mission_tasks: # Tasks To Do In Order
- - start_gate
+ - jiangshi

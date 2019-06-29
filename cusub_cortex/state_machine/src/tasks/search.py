@@ -21,7 +21,7 @@ class Search(Objective):
     
     outcomes = ['found','not_found'] # We found task or timed out
 
-    def __init__(self, priorPose, searchTopic, numQuitPoses=5):
+    def __init__(self, priorPose, searchTopic, numQuitPoses=5, darknet_cameras=[1,1,1,1,1,1]):
         """
         Search objective initialization function
 
@@ -33,13 +33,15 @@ class Search(Objective):
              Topic name to listen for task poses
         numQuitPoses : int
              Number of poses to receive before aborting and transitioning
+        darknet_cameras : bool list, len 6
+            Darknet cameras to use
         """
 
-        rospy.loginfo("---Search objective initializing")
         self.prior = priorPose
         rospy.Subscriber(searchTopic, PoseStamped, self.exit_callback)
         self.numQuitPoses = numQuitPoses
         self.numPosesReceived = 0
+        self.darknet_config = darknet_cameras
 
         super(Search, self).__init__(self.outcomes, "Search")
 
@@ -52,11 +54,10 @@ class Search(Objective):
         rospy.loginfo("---Executing Search")
         if self.abort_requested():
             return "found"
+        self.configure_darknet_cameras(self.darknet_config)
 
-        pose_stamped = PoseStamped()
-        pose_stamped.header.frame_id = 'leviathan/description/map'
-        pose_stamped.pose = self.prior
-        if self.goToPose(pose_stamped):
+        if self.go_to_pose(self.prior):
             return "found"
         else:
+            rospy.logerr("Search unable to find task.")
             return "not_found"

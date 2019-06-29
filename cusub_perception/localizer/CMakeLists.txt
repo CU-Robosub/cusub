@@ -33,15 +33,29 @@ catkin_package(
   CATKIN_DEPENDS cv_bridge image_transport nodelet roscpp sensor_msgs std_msgs
 )
 include_directories(include ${catkin_INCLUDE_DIRS})
-add_library(localizer
+add_library( localizer
   src/localizer.cpp
+  src/pose_generator.cpp
   src/start_gate_hough.cpp
+  src/jiangshi_watershed.cpp
 )
 target_link_libraries(localizer ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(localizer ${catkin_EXPORTED_LIBRARIES})
 endif()
 
-add_executable(sg_2019 unit_tests/start_gate_hough_test.cpp
-src/start_gate_hough.cpp)
-target_link_libraries(sg_2019 ${catkin_LIBRARIES})
+# Test files
+
+add_executable( start_gate_unit 
+  unit_tests/start_gate_hough_test.cpp
+  src/pose_generator.cpp
+  src/start_gate_hough.cpp
+)
+target_link_libraries(start_gate_unit ${catkin_LIBRARIES})
+
+add_executable( jiangshi_unit 
+  unit_tests/jiangshi_watershed_test.cpp
+  src/pose_generator.cpp
+  src/jiangshi_watershed.cpp
+)
+target_link_libraries(jiangshi_unit ${catkin_LIBRARIES})

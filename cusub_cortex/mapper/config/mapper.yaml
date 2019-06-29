@@ -1,0 +1,7 @@
+# Tell mapper what classes to expect from localizer
+# FORMAT-> 'object_class' : 'number of poses to average'
+mapper:
+  publish_freq: 10
+  classes:
+    start_gate: 200
+    jiangshi: 100

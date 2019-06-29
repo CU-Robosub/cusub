@@ -1,6 +1,7 @@
 localizer:
   classes:
     start_gate_pole : hough # hough, ...
+    vampire_cute : jiangshi_watershed
     fat_head : bouy_pnp
     slick : bouy_pnp
     no_torso : bouy_pnp

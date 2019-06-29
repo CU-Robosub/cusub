@@ -14,13 +14,17 @@ import math
 import actionlib
 from tf.transformations import euler_from_quaternion
 from std_msgs.msg import Empty
+from darknet_multiplexer.srv import DarknetCameras
 
 from optparse import OptionParser
 import inspect
 
+POSE_REACHED_THRESHOLD = 0.3
+
 # Waypoint Navigator Macros
 YAW_MODE = 1
 STRAFE_MODE = 2
+BACKUP_MODE = 3
 
 class Task(smach.StateMachine):
     __metaclass__ = ABCMeta
@@ -34,14 +38,14 @@ class Task(smach.StateMachine):
         pass
 
     @abstractmethod
-    def initObjectives(self):
+    def init_objectives(self):
         """
         Initialize all objectives
         """
         pass
 
     @abstractmethod
-    def linkObjectives(self):
+    def link_objectives(self):
         """
         Link the objectives to the state machine
         """
@@ -53,7 +57,7 @@ class Task(smach.StateMachine):
         print cs
         self.sm._states[cs].request_abort()
 
-    def getPrior(self):
+    def get_prior(self):
         """
         Get the prior for the task from the rosparameter server
 
@@ -77,9 +81,9 @@ class Task(smach.StateMachine):
 """
 Objectives are subtasks within a task
 They have:
-     Pose of the sub (self.curPose)
+     Pose of the sub (self.cur_pose)
      a waypointNavigator client (self.wayClient)
-     Helper functions { goToPose(), getDistance() }
+     Helper functions { go_to_pose(), get_distance() }
 """
 class Objective(smach.State):
 
@@ -101,27 +105,56 @@ class Objective(smach.State):
         self._replan_requested = False
         self.wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
         self.started = False
+        self.using_darknet = rospy.get_param("~using_darknet")
 
         # initialize the pose
         pose = Pose()
         pose.position.x = 0
         pose.position.y = 0
         pose.position.z = 0
-        self.curPose = pose
+        self.cur_pose = pose
 
         super(Objective, self).__init__(outcomes=outcomes)
 
-    def goToPose(self, targetPose, useYaw=True):
-        """ Traverse to the targetPose given
+    def configure_darknet_cameras(self, camera_bool_list):
+        """
+        Configures which cameras for darknet to use.
+
+        Params
+        ------
+        camera_bool_list : list of bools, length 6
+            Darknet active cameras, 1 for use
+            [ occam0, 1, 2, 3, 4, downcam ]
+
+        Returns
+        -------
+        bool
+            1 success
+            0 failed
+        """
+        if not self.using_darknet:
+            return False
+        rospy.wait_for_service("cusub_perception/darknet_multiplexer/configure_active_cameras")
+        try:
+            darknet_config = rospy.ServiceProxy("cusub_perception/darknet_multiplexer/configure_active_cameras", DarknetCameras)
+            resp1 = darknet_config(camera_bool_list)
+            return True
+        except rospy.ServiceException, e:
+            rospy.logerr("Darknet Camera Config Service call failed: %s"%e)
+            return False
+
+    def go_to_pose(self, target_pose, move_mode="yaw"):
+        """ Traverse to the target_pose given
 
         Parameters
         ----------
-        targetPose : Pose
+        target_pose : Pose
              The pose to navigate to
              If None, the sub will stop where it currently is and wait to be aborted
-        useYaw : bool
-             true : the waypoint navigtator will use yaw mode to navigate to the target pose
-             false : use strafe-drive mode to the target pose
+        move_mode : str
+             "yaw" : the waypoint navigtator will use yaw mode to navigate to the target pose
+             "strafe" : use strafe-drive mode to the target pose
+             "backup" : turn 180 deg away from object, backup to target point, turn to target orientation
 
         Returns
         -------
@@ -129,26 +162,23 @@ class Objective(smach.State):
              1 aborted
              0 success, waypoint reached
         """
-        if type(targetPose) == type(None):  # Wait where we currently are until being aborted
+        if type(target_pose) == type(None):  # Wait where we currently are until being aborted
             rospy.logwarn("Objective has instructed Sub to wait where it is until being aborted")
             while not self.abort_requested():
                 rospy.sleep(0.5)
             return "aborted"
 
         wpGoal = waypointGoal()
-        if type(targetPose) == PoseStamped:
-            wpGoal.goal_pose.pose.position = targetPose.pose.position
-            wpGoal.goal_pose.pose.orientation = targetPose.pose.orientation
-            wpGoal.goal_pose.header.frame_id = targetPose.header.frame_id
-        else:
-            wpGoal.goal_pose.pose.position = targetPose.position
-            wpGoal.goal_pose.pose.orientation = targetPose.orientation
-            wpGoal.goal_pose.header.frame_id = 'leviathan/description/odom'
+        wpGoal.goal_pose.pose.position = target_pose.position
+        wpGoal.goal_pose.pose.orientation = target_pose.orientation
+        wpGoal.goal_pose.header.frame_id = 'leviathan/description/odom'
 
-        if useYaw:
-            wpGoal.movement_mode = YAW_MODE
-        else:
+        if move_mode == "backup":
+            wpGoal.movement_mode = BACKUP_MODE
+        elif move_mode == "strafe":
             wpGoal.movement_mode = STRAFE_MODE
+        else:
+            wpGoal.movement_mode = YAW_MODE
 
         self.wayClient.cancel_all_goals()
         rospy.sleep(0.2)
@@ -158,11 +188,13 @@ class Objective(smach.State):
 
         while (res == None or not res.complete) and not rospy.is_shutdown():
             res = self.wayClient.get_result()
-            print(res)
 
             if self.abort_requested():
                 rospy.loginfo("---objective aborted, causing waypoint request to quit")
                 return True
+            elif self.get_distance(self.cur_pose.position, target_pose.position) < POSE_REACHED_THRESHOLD:
+                self.wayClient.cancel_all_goals()
+                return False
 
             rospy.sleep(0.25)
 
@@ -170,9 +202,9 @@ class Objective(smach.State):
         return False
 
     def sub_pose_cb(self, msg):
-        self.curPose = msg.pose.pose # store the pose part of the odom msg
+        self.cur_pose = msg.pose.pose # store the pose part of the odom msg
 
-    def getDistance(self, point1, point2):
+    def get_distance(self, point1, point2):
         """ Get distance between 2 points """
         dx = point2.x - point1.x
         dy = point2.y - point1.y

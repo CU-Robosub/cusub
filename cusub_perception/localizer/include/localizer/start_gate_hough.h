@@ -16,13 +16,9 @@
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
-#include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/LinearMath/Scalar.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-
-// Testing
-#include <opencv2/highgui/highgui.hpp>
 
 /* 1-------3    SolvePnp Points
    |       |      
@@ -45,7 +41,6 @@ namespace pose_generator
             );
             StartGateHough();
         private:
-            void getPoseFromPoints(vector<Point2f>& points, geometry_msgs::Pose& pose);
             void sortBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs);
             bool getPoints(Mat& img, vector<Point2f>& points);
             void publishLegSide(vector<darknet_ros_msgs::BoundingBox>& bbs);
@@ -56,14 +51,6 @@ namespace pose_generator
                 Point3f(0, 1.6,-0.6),
                 Point3f(0, 1.6, 0.6)
             };
-            vector<double> occam_camera_matrix_values{
-                656.911402, 0.000000, 373.735385, 0.000000, 719.001469, 156.944858, 0.000000, 0.000000, 1.000000
-            };
-            vector<double> occam_dist_coefs_values{
-                -0.360085, 0.115116, 0.007768, 0.004616, 0.000000   
-            };
-            Mat occam_camera_matrix{3,3,DataType<double>::type, occam_camera_matrix_values.data()};
-            Mat occam_dist_coefs{4,1, DataType<double>::type, occam_dist_coefs_values.data()};
             bool three_legs;
     };
 }

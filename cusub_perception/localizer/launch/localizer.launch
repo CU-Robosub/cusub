@@ -1,26 +1,6 @@
 <!-- Typically don't want to launch the localizer by itself, defeats purpose of nodeleting -->
 <launch>
-    <arg name="launch_prefix" default=""/>
-    <arg name="detect_sleep_time" default="0.0"/>
-    <!-- Config and weights folder. -->
-    <arg name="yolo_weights_path"          default="$(find darknet_cv)/launch/yolo_network_config/weights"/>
-    <arg name="yolo_config_path"           default="$(find darknet_cv)/launch/yolo_network_config/cfg"/>
-    <!-- Load parameters -->
-    <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/ros.yaml"/>
-    <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/robosub1CustomModel.yaml"/>
-
     <rosparam command="load" file="$(find localizer)/config/localizer_config.yaml"/>
-
     <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
     <node pkg="nodelet" type="nodelet" name="localizer" args="load localizer/Localizer standalone_nodelet" output="screen"/>
-    <node pkg="nodelet" type="nodelet" name="darknet_ros" args="load darknet_ros/YoloObjectDetector standalone_nodelet" output="screen">
-        <remap from="darknet_ros/bounding_boxes" to="cusub_perception/darknet_ros/bounding_boxes" />
-        <param name="yolo_model/threshold/value"          value="0.06" />
-        <param name="weights_path"          value="$(arg yolo_weights_path)" />
-        <param name="config_path"           value="$(arg yolo_config_path)" />
-        <param name="detect_sleep_time"     value="$(arg detect_sleep_time)" />
-        <!-- <remap from="/camera/rgb/image_raw"       to="/leviathan/cusub_common/occam/image0"/> -->
-        <remap from="/camera/rgb/image_raw"       to="occam/image0"/>
-    </node>
-    <node pkg="nodelet" type="nodelet" name="occam" args="load ros_indigosdk/occam standalone_nodelet" output="screen"/>
 </launch>

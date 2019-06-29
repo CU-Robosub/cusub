@@ -70,7 +70,7 @@ bool YoloObjectDetector::readParameters()
   nodeHandle_.param("image_view/enable_console_output", enableConsoleOutput_, false);
 
   nodeHandle_.param("detect_sleep_time", detectSleepTime_, 0.0);
-
+  nodeHandle_.param("show_image", showImage_, false);
   // Check if Xserver is running on Linux.
   if (XOpenDisplay(NULL)) {
     // Do nothing!
@@ -487,6 +487,7 @@ void *YoloObjectDetector::fetchInThread()
 
 void *YoloObjectDetector::displayInThread(void *ptr)
 {
+  if(!showImage_) { return 0;}
   show_image_cv(buff_[(buffIndex_ + 1)%3], "YOLO V3", ipl_);
   int c = cvWaitKey(waitKeyDelay_);
   if (c != -1) c = c%256;

@@ -1,0 +1,7 @@
+<library path="lib/libmultiplexer">
+  <class name="darknet_multiplexer/Multiplexer" type="darknet_multiplexer_ns::Multiplexer" base_class_type="nodelet::Nodelet">
+    <description>
+        Funnels occam and downcam frames into darknet on a single topic. Configurable via rosservice.
+    </description>
+  </class>
+</library>

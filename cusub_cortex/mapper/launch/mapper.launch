@@ -1,6 +1,7 @@
 <launch>
 
     <arg name="truth_data" default="false" />
+    <arg name="sub_name" default="leviathan" />
 
 <group if="$(arg truth_data)" >
     <rosparam command="load" file="$(find mapper)/config/sim_truth.yaml" />
@@ -8,8 +9,9 @@
     <node name="gazebo_truth_pub" pkg="waypoint_navigator" type="gazebo_gt_localizer.py" />
 </group>
 
+    <rosparam command="load" file="$(find mapper)/config/mapper.yaml" />
     <node name="mapper" pkg="mapper" type="mapper.py" output="screen">
-        <param name="namespace_odom" value="leviathan/description"/>
+        <param name="sub_name" value="$(arg sub_name)"/>
     </node>
 
 </launch>

@@ -1,8 +1,0 @@
-#goal definition
-nav_msgs/Odometry end_point
----
-#result definition
-bool finish
----
-#feedback
-int32[] reply
