@@ -142,11 +142,9 @@ class Slay(Objective):
         if self.go_to_pose(approach_pose):
             return "aborted"
         rospy.loginfo("---slaying buoy")
+        rospy.sleep(2)
         self.monitor_imu = True
-        if self.go_to_pose(slay_pose, move_mode="backup"):
-            self.monitor_imu = False
-            self.go_to_pose(approach_pose)
-            return "success"
-        else:
-            self.monitor_imu = False
-            return "aborted"
+        self.go_to_pose(slay_pose, move_mode="backup")
+        self.monitor_imu = False
+        self.go_to_pose(approach_pose)
+        return "success"

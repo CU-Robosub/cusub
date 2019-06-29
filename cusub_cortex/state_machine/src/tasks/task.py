@@ -19,6 +19,8 @@ from darknet_multiplexer.srv import DarknetCameras
 from optparse import OptionParser
 import inspect
 
+POSE_REACHED_THRESHOLD = 0.3
+
 # Waypoint Navigator Macros
 YAW_MODE = 1
 STRAFE_MODE = 2
@@ -190,7 +192,7 @@ class Objective(smach.State):
             if self.abort_requested():
                 rospy.loginfo("---objective aborted, causing waypoint request to quit")
                 return True
-            elif self.get_distance(self.cur_pose.position, target_pose.position) < 0.5:
+            elif self.get_distance(self.cur_pose.position, target_pose.position) < POSE_REACHED_THRESHOLD:
                 self.wayClient.cancel_all_goals()
                 return False
 

@@ -1,7 +1,7 @@
 # Mission Config of the sub
 # ALL UNITS IN M
 
-# Search Algorithms: simple
+using_sim_params : False
 
 tasks:
  start_gate:
