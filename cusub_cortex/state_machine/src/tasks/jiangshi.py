@@ -39,7 +39,7 @@ class Jiangshi(Task):
 
 class Slay(Objective):
     """
-    Go to a point in front of the bouy
+    Go to a point in front of the bouy, slay jiangshi backwards, backup
     """
     outcomes=['success','aborted']
 
