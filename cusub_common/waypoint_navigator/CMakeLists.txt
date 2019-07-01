@@ -62,6 +62,7 @@ find_package(catkin REQUIRED COMPONENTS
    FILES
    AddWaypoint.srv
    CalibrateMagnetometer.srv
+   ToggleControl.srv
  )
 
 ## Generate actions in the 'action' folder

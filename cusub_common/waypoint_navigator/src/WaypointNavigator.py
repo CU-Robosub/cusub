@@ -8,7 +8,7 @@ from enum import Enum
 
 from waypoint_navigator.srv import *
 
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64, Bool
 from nav_msgs.msg import Odometry
 
 YAW_MODE = 1
@@ -37,6 +37,19 @@ class WaypointNavigator(object):
             self.waypoint = self.waypointlist[0]
 
         return []
+    
+    def toggleControl(self, req):
+        rospy.logwarn("Waypoint toggling control. Waypoint controlling: " + str(req.waypoint_controlling))
+        self.controlling_pids = req.waypoint_controlling
+        return True
+
+    def publish_controlling_pids(self, msg):
+        """
+        Publish whether the waypoint nav is currently controlling the pid loops
+        """
+        msg = Bool()
+        msg.data = self.controlling_pids
+        self.control_pub.publish(msg)
 
     def advance_waypoint(self):
         rospy.loginfo("Waypoint Reached!")
@@ -50,7 +63,7 @@ class WaypointNavigator(object):
 
         (roll, pitch, yaw) = tf.transformations.euler_from_quaternion([orientation.x, orientation.y,orientation.z,orientation.w])
 
-        if(self.waypoint is not None):
+        if(self.waypoint is not None and self.controlling_pids):
 
             currentwaypoint = self.waypoint
 
@@ -173,6 +186,11 @@ class WaypointNavigator(object):
 
         # service to add waypoints to drive to
         s = rospy.Service('addWaypoint', AddWaypoint, self.addWaypoint)
+
+        self.controlling_pids = True
+        s2 = rospy.Service('toggleWaypointControl', ToggleControl, self.toggleControl)
+        self.control_pub = rospy.Publisher("waypoint_controlling_pids", Bool, queue_size=10)
+        control_pub_timer = rospy.Timer(rospy.Duration(0.1), self.publish_controlling_pids)
 
         rospy.spin()
 
