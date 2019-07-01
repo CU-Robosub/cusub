@@ -5,3 +5,4 @@ mapper:
   classes:
     start_gate: 200
     jiangshi: 100
+    triangle_buoy: 50

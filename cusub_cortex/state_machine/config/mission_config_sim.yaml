@@ -5,7 +5,6 @@ using_sim_params : True
 
 tasks:
  start_gate:
-  # prior: [0,-8.0,-1.5]
   prior: [8.0,0,-1.5]
   dist_behind_gate: 1.0
   third_leg_adjustment: 0.5
@@ -18,6 +17,17 @@ tasks:
   replan_thresh: 3.0
   imu_axis: 'x'
   jump_thresh: -1.0
+
+ triangle_buoy:
+  prior: [4,0,-2]
+  approach_dist: 2.0
+  slay_dist: 2.0
+  replan_thresh: 3.0
+  imu_axis: 'x'
+  jump_thresh: -1.0
+  slay_class: 'vampire_fathead'
+  orbital_direction: 'left'
+  orbital_carrot_dist: 2.0
 
  dice:
   prior: [3,0,-2.3]
@@ -43,4 +53,6 @@ tasks:
     roulette: roulette_watershed
 
 mission_tasks: # Tasks To Do In Order
- - jiangshi
+#  - start_gate
+#  - jiangshi
+ - triangle_buoy

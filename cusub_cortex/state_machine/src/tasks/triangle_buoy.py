@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import division
 """
 Triangule Buoy Task, attempts to slay a particular class on the triangle buoy
 Objectives:
@@ -8,8 +9,14 @@ Objectives:
 ---> Slay vampire
 ---> Backup
 """
+import rospy
 from tasks.task import Task, Objective
+from tasks.search import Search
 import numpy as np
+from geometry_msgs.msg import Pose, PoseStamped
+from sensor_msgs.msg import Imu
+import smach
+import smach_ros
 
 class Triangle_Buoy(Task):
     name = "triangle_buoy"
@@ -30,9 +37,9 @@ class Triangle_Buoy(Task):
             smach.StateMachine.add('Slay', self.slay, transitions={'success':'task_success', 'aborted':'Slay'})
 
 class Slay(Objective):
-"""
-    Go to a point in front of the bouy, make actionlib orbit request, slay dat buoy
-"""
+    """
+        Go to a point in front of the bouy, make actionlib orbit request, slay dat buoy
+    """
     outcomes=['success','aborted']
 
     def __init__(self):
@@ -92,7 +99,8 @@ class Slay(Objective):
         if hit_detected:
             rospy.loginfo_throttle(1, "Detected a buoy hit!")
 
-    def get_approach_pose(self):
+    @staticmethod
+    def get_approach_pose(cur_pose, buoy_pose, orbit_radius):
         """
         Calculate approach pose to begin circling the buoy
 
@@ -105,18 +113,32 @@ class Slay(Objective):
         -------
         approach_pose : Pose
         """
-        approach_pose = Pose()
-        quat = [self.triangle_buoy_pose.pose.orientation.x, self.triangle_buoy_pose.pose.orientation.y,self.triangle_buoy_pose.pose.orientation.z,self.triangle_buoy_pose.pose.orientation.w]
-        triangle_buoy_roll, triangle_buoy_pitch, triangle_buoy_yaw = tf.transformations.euler_from_quaternion(quat)
-        approach_pose.position.x = self.triangle_buoy_pose.pose.position.x + self.approach_dist * np.cos(triangle_buoy_yaw)
-        approach_pose.position.y = self.triangle_buoy_pose.pose.position.y + self.approach_dist * np.sin(triangle_buoy_yaw)
-        approach_pose.position.z = self.triangle_buoy_pose.pose.position.z
-        goal_quat = tf.transformations.quaternion_from_euler(triangle_buoy_roll, triangle_buoy_pitch, triangle_buoy_yaw)
-        approach_pose.orientation.x = goal_quat[0]
-        approach_pose.orientation.x = goal_quat[1]
-        approach_pose.orientation.x = goal_quat[2]
-        approach_pose.orientation.x = goal_quat[3]
-        return approach_pose
+        # Find line from sub to buoy
+        if ( round(cur_pose.position.x, 2) == round(buoy_pose.position.x,2) ): # Avoid infinite slope in the polyfit
+            buoy_pose.position.x += 0.1
+        if ( round(cur_pose.position.y, 2) == round(buoy_pose.position.y,2) ): # Avoid infinite slope in the polyfit
+            buoy_pose.position.y -= 0.1
+
+        x_new = buoy_pose.position.x
+        y_new = buoy_pose.position.y
+
+        # Adjust buoy pose behind the buoy
+        x2 = np.array([cur_pose.position.x, x_new])
+        y2 = np.array([cur_pose.position.y, y_new])
+        m2, b2 = np.polyfit(x2,y2,1)
+        m2 = round(m2, 2)
+        b2 = round(b2, 2)
+        x_hat2 = np.sqrt( ( orbit_radius**2) / (m2**2 + 1) )
+        if x_new > cur_pose.position.x:
+            x_hat2 = -x_hat2
+        x_new2 = x_new + x_hat2
+        y_new2 = x_new2 * m2 + b2
+
+        target_pose = Pose()
+        target_pose.position.x = x_new2
+        target_pose.position.y = y_new2
+        target_pose.position.z = buoy_pose.position.z
+        return target_pose
 
     def execute(self, userdata):
         """
@@ -128,7 +150,7 @@ class Slay(Objective):
         self.started = True
         self.clear_abort()
         self.configure_darknet_cameras([1,0,0,0,0,0])
-        approach_pose = self.get_approach_pose()
+        approach_pose = self.get_approach_pose(self.cur_pose, self.triangle_buoy_pose.pose, self.approach_dist)
         if self.go_to_pose(approach_pose):
             return "aborted"        
         return "success"
