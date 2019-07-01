@@ -1,0 +1,3 @@
+bool waypoint_controlling # false for another program controlling
+---
+bool success
