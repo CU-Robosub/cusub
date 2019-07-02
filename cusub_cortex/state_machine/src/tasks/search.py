@@ -56,6 +56,7 @@ class Search(Objective):
             return "found"
         self.configure_darknet_cameras(self.darknet_config)
 
+        rospy.sleep(1) # in case we span in the spot of the prior, leave time to gather a few object poses
         if self.go_to_pose(self.prior):
             return "found"
         else:

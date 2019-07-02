@@ -195,7 +195,7 @@ class Slay(Objective):
 
         rospy.loginfo("Sendinig Goal to Buoy Orbitter")
         self.client.send_goal(goal)
-        self.client.wait_for_result(rospy.Duration(120))
+        self.client.wait_for_result(rospy.Duration(180))
         self.client.cancel_goal()
 
         # Now slay the buoy

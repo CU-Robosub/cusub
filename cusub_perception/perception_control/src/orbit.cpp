@@ -68,7 +68,7 @@ namespace perception_control
         // DRIVE
         std_msgs::Float64Ptr driveSetpt(new std_msgs::Float64);
         float xy_dist = std::sqrt(std::pow(dx,2) + std::pow(dy,2));
-        driveSetpt->data = xy_dist + activeGoal->orbit_radius;
+        driveSetpt->data = driveState - (activeGoal->orbit_radius - xy_dist);
 
         yawPub.publish(yawSetpt);
         strafePub.publish(strafeSetpt);
@@ -82,8 +82,8 @@ namespace perception_control
         toggle_srv.response.success = false;
         if( wayToggleClient.call(toggle_srv) )
         { 
-            if ( takeControl) { NODELET_INFO("Orbitter took control of pids."); }
-            else { NODELET_INFO("Orbitter released control of pids."); }
+            if ( takeControl) { NODELET_INFO("Orbitter TOOK control of pids."); }
+            else { NODELET_INFO("Orbitter RELEASED control of pids."); }
         }
         else { NODELET_ERROR("Orbitter unable to change control of PIDs"); }
         controllingPids = takeControl;

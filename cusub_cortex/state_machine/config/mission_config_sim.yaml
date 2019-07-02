@@ -26,8 +26,8 @@ tasks:
   imu_axis: 'x'
   jump_thresh: -1.0
   slay_class: 'vampire_fathead'
-  orbital_direction: 'left'
-  strafe_setpoint: 0.5
+  orbital_direction: 'right'
+  strafe_setpoint: 0.3
   number_solo_frames : 1
 
  dice:
