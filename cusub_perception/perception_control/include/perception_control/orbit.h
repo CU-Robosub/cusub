@@ -11,6 +11,7 @@
 #include <waypoint_navigator/ToggleControl.h>
 #include <string>
 #include <darknet_ros_msgs/BoundingBoxes.h>
+#include <math.h>
 
 namespace perception_control
 {
@@ -21,8 +22,9 @@ namespace perception_control
     public:
         virtual void onInit();
     private:
+        ~Orbit();
         void update(const ros::TimerEvent& e);
-        bool controlPids(const bool control);
+        bool controlPids(const bool takeControl);
         bool controllingPids;
         
         void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
@@ -32,23 +34,16 @@ namespace perception_control
         void strafeCallback(const std_msgs::Float64ConstPtr state);
 
         geometry_msgs::Pose subPose;
-        float driveState;
-        float yawState;
-        float strafeState;
+        float driveState, yawState, strafeState;
 
-        float driveSetpt;
-        float yawSetpt;
-        float strafeSetpt;
-
-        void execute(const perception_control::OrbitBuoyGoalConstPtr& goal);
+        void execute(const perception_control::OrbitBuoyGoalConstPtr goal);
+        ros::Publisher drivePub, yawPub, strafePub;
         ros::ServiceClient wayToggleClient; 
         ros::Timer timer;
-        ros::Subscriber darknetSub;
+        ros::Subscriber darknetSub, driveSub, yawSub, strafeSub, odomSub;
         orbitServer* server;
 
-        std::string targetVampire;
-        bool orbitLeft;
-        int numberSoloFramesThresh;
+        perception_control::OrbitBuoyGoalConstPtr activeGoal;
         int numberSoloFrames;
     };
 }

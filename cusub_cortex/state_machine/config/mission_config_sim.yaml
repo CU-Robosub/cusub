@@ -27,7 +27,8 @@ tasks:
   jump_thresh: -1.0
   slay_class: 'vampire_fathead'
   orbital_direction: 'left'
-  orbital_carrot_dist: 2.0
+  strafe_setpoint: 0.5
+  number_solo_frames : 1
 
  dice:
   prior: [3,0,-2.3]

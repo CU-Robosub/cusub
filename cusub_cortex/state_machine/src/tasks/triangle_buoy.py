@@ -17,6 +17,9 @@ from geometry_msgs.msg import Pose, PoseStamped
 from sensor_msgs.msg import Imu
 import smach
 import smach_ros
+from perception_control.msg import OrbitBuoyAction, OrbitBuoyGoal
+import actionlib
+import tf
 
 class Triangle_Buoy(Task):
     name = "triangle_buoy"
@@ -44,16 +47,29 @@ class Slay(Objective):
 
     def __init__(self):
         super(Slay, self).__init__(self.outcomes, "Slay")
-        rospy.Subscriber("cusub_cortex/mapper_out/triangle_buoy", PoseStamped, self.triangle_buoy_pose_callback)
-        rospy.Subscriber("cusub_common/imu", Imu, self.imu_callback)
         self.started = False
         self.imu_axis = rospy.get_param("tasks/triangle_buoy/imu_axis")
         self.jump_thresh = rospy.get_param("tasks/triangle_buoy/jump_thresh")
         self.approach_dist = rospy.get_param('tasks/triangle_buoy/approach_dist', 2.0)
         self.slay_dist = rospy.get_param('tasks/triangle_buoy/slay_dist', 0.5)
         self.replan_threshold = rospy.get_param('tasks/triangle_buoy/replan_threshold', 0.5)
+        self.slay_class = rospy.get_param("tasks/triangle_buoy/slay_class")
+        if rospy.get_param("tasks/triangle_buoy/orbital_direction") == "left":
+            self.orbit_left = True
+            rospy.loginfo("---orbiting traingle buoy LEFT")
+        else:
+            self.orbit_left = False
+            rospy.loginfo("---orbiting triangle buoy RIGHT")
+        self.strafe_setpoint = rospy.get_param("tasks/triangle_buoy/strafe_setpoint")
+        self.number_solo_frames = rospy.get_param("tasks/triangle_buoy/number_solo_frames")
         self.triangle_buoy_pose = None
         self.monitor_imu = False
+        rospy.logwarn("---waiting for orbit_buoy service")
+        self.client = actionlib.SimpleActionClient('orbit_buoy', OrbitBuoyAction)
+        self.client.wait_for_server()
+        rospy.loginfo("---found orbit_buoy service")
+        rospy.Subscriber("cusub_cortex/mapper_out/triangle_buoy", PoseStamped, self.triangle_buoy_pose_callback)
+        rospy.Subscriber("cusub_common/imu", Imu, self.imu_callback)
 
     def triangle_buoy_pose_callback(self, msg):
         # Set the first pose and don't abort
@@ -63,6 +79,8 @@ class Slay(Objective):
         change_in_pose = self.get_distance(self.triangle_buoy_pose.pose.position, msg.pose.position)
         if (change_in_pose > self.replan_threshold) and self.started:
             rospy.logwarn_throttle(1,"Triangle Buoy Pose jump.")
+            print(self.triangle_buoy_pose.pose.position)
+            print(msg.pose.position)
             self.triangle_buoy_pose = msg
             self.request_abort() # this will loop us back to execute
 
@@ -134,10 +152,22 @@ class Slay(Objective):
         x_new2 = x_new + x_hat2
         y_new2 = x_new2 * m2 + b2
 
+        # Find target yaw
+        dx = buoy_pose.position.x - cur_pose.position.x
+        dy = buoy_pose.position.y - cur_pose.position.y
+        target_yaw = np.arctan2(dy, dx)
+        quat_list = tf.transformations.quaternion_from_euler(0,0, target_yaw)
+
+        # Make Pose Msg
         target_pose = Pose()
         target_pose.position.x = x_new2
         target_pose.position.y = y_new2
         target_pose.position.z = buoy_pose.position.z
+        target_pose.orientation.x = quat_list[0]
+        target_pose.orientation.y = quat_list[1]
+        target_pose.orientation.z = quat_list[2]
+        target_pose.orientation.w = quat_list[3]
+
         return target_pose
 
     def execute(self, userdata):
@@ -152,5 +182,21 @@ class Slay(Objective):
         self.configure_darknet_cameras([1,0,0,0,0,0])
         approach_pose = self.get_approach_pose(self.cur_pose, self.triangle_buoy_pose.pose, self.approach_dist)
         if self.go_to_pose(approach_pose):
-            return "aborted"        
+            return "aborted"
+
+        # Create Orbit Goal
+        goal = OrbitBuoyGoal()
+        goal.target_class = self.slay_class
+        goal.buoy_pose = self.triangle_buoy_pose.pose
+        goal.strafe_setpoint = self.strafe_setpoint
+        goal.number_solo_frames = self.number_solo_frames
+        goal.orbit_left = self.orbit_left
+        goal.orbit_radius = self.approach_dist
+
+        rospy.loginfo("Sendinig Goal to Buoy Orbitter")
+        self.client.send_goal(goal)
+        self.client.wait_for_result(rospy.Duration(120))
+        self.client.cancel_goal()
+
+        # Now slay the buoy
         return "success"
