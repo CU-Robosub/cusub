@@ -37,6 +37,7 @@ namespace darknet_multiplexer_ns
         ros::Publisher actives_pub;
         std::vector<bool> activeCameras;
         int current_pub_index;
+        bool firstImageReceived;
     };
 }
 #endif
