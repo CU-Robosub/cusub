@@ -47,7 +47,7 @@ class Slay(Objective):
 
     def __init__(self):
         super(Slay, self).__init__(self.outcomes, "Slay")
-        self.started = False
+        self.approaching = False
         self.imu_axis = rospy.get_param("tasks/triangle_buoy/imu_axis")
         self.jump_thresh = rospy.get_param("tasks/triangle_buoy/jump_thresh")
         self.approach_dist = rospy.get_param('tasks/triangle_buoy/approach_dist', 2.0)
@@ -77,7 +77,7 @@ class Slay(Objective):
             self.triangle_buoy_pose = msg
             return
         change_in_pose = self.get_distance(self.triangle_buoy_pose.pose.position, msg.pose.position)
-        if (change_in_pose > self.replan_threshold) and self.started:
+        if (change_in_pose > self.replan_threshold) and self.approaching:
             rospy.logwarn_throttle(1,"Triangle Buoy Pose jump.")
             print(self.triangle_buoy_pose.pose.position)
             print(msg.pose.position)
@@ -153,8 +153,8 @@ class Slay(Objective):
         y_new2 = x_new2 * m2 + b2
 
         # Find target yaw
-        dx = buoy_pose.position.x - cur_pose.position.x
-        dy = buoy_pose.position.y - cur_pose.position.y
+        dx = buoy_pose.position.x - x_new2
+        dy = buoy_pose.position.y - y_new2
         target_yaw = np.arctan2(dy, dx)
         quat_list = tf.transformations.quaternion_from_euler(0,0, target_yaw)
 
@@ -170,6 +170,32 @@ class Slay(Objective):
 
         return target_pose
 
+    @staticmethod
+    def get_slay_pose(cur_pose, buoy_pose, slay_dist):
+        # Find line from sub to buoy
+        if ( round(cur_pose.position.x, 2) == round(buoy_pose.position.x,2) ): # Avoid infinite slope in the polyfit
+            buoy_pose.position.x += 0.1
+        if ( round(cur_pose.position.y, 2) == round(buoy_pose.position.y,2) ): # Avoid infinite slope in the polyfit
+            buoy_pose.position.y -= 0.1
+
+        x2 = np.array([cur_pose.position.x, buoy_pose.position.x])
+        y2 = np.array([cur_pose.position.y, buoy_pose.position.y])
+        m2, b2 = np.polyfit(x2,y2,1)
+        m2 = round(m2, 2)
+        b2 = round(b2, 2)
+        x_hat2 = np.sqrt( ( slay_dist**2) / (m2**2 + 1) )
+        if buoy_pose.position.x <= cur_pose.position.x:
+            x_hat2 = -x_hat2
+        x_new2 = buoy_pose.position.x + x_hat2
+        y_new2 = x_new2 * m2 + b2
+
+        target_pose = Pose()
+        target_pose.position.x = x_new2
+        target_pose.position.y = y_new2
+        target_pose.position.z = cur_pose.position.z
+        target_pose.orientation = cur_pose.orientation
+        return target_pose
+
     def execute(self, userdata):
         """
         Approach bouy
@@ -177,12 +203,14 @@ class Slay(Objective):
         Task code cancels the req
         proceed to slaying and backing up
         """
-        self.started = True
+        self.approaching = True
         self.clear_abort()
         self.configure_darknet_cameras([1,0,0,0,0,0])
         approach_pose = self.get_approach_pose(self.cur_pose, self.triangle_buoy_pose.pose, self.approach_dist)
         if self.go_to_pose(approach_pose):
             return "aborted"
+
+        self.approaching = False # Only abort b/c of pose jumps when we're approaching
 
         # Create Orbit Goal
         goal = OrbitBuoyGoal()
@@ -196,7 +224,17 @@ class Slay(Objective):
         rospy.loginfo("Sendinig Goal to Buoy Orbitter")
         self.client.send_goal(goal)
         self.client.wait_for_result(rospy.Duration(180))
-        self.client.cancel_goal()
+
+        # Slay a buoy either way...
+
+        preslay_pose = self.cur_pose
+        slay_pose = self.get_slay_pose(preslay_pose, self.triangle_buoy_pose.pose, self.slay_dist)
+
+        self.monitor_imu = True
+        self.go_to_pose(slay_pose, move_mode="backup")
+        self.monitor_imu = False
+        self.clear_abort()
+        self.go_to_pose(preslay_pose)
 
         # Now slay the buoy
         return "success"

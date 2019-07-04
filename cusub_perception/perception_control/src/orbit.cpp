@@ -17,7 +17,7 @@ namespace perception_control
         server = new orbitServer(nh, "orbit_buoy", boost::bind(&Orbit::execute, this, _1), false);
         wayToggleClient = nh.serviceClient<waypoint_navigator::ToggleControl>("cusub_common/toggleWaypointControl");
         darknetSub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &Orbit::darknetCallback, this);
-        timer = nh.createTimer(ros::Duration(1/80), &Orbit::update, this);
+        timer = nh.createTimer(ros::Duration(1/20), &Orbit::update, this);
         server->start();
     }
 
@@ -29,23 +29,16 @@ namespace perception_control
     void Orbit::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs)
     {
         if( !controllingPids ) { return; }
+        NODELET_INFO("Received bounding box");
 
-        bool vampireFound = false;
+        bool vampireSeen = false;
         for(darknet_ros_msgs::BoundingBox box : bbs->bounding_boxes)
         {
             // Check if we're only seeing our target vampire on the bouy
-            if (box.Class == activeGoal->target_class) { vampireFound = true;}
+            if (box.Class == activeGoal->target_class) { NODELET_INFO("FOUND VAMPIRE"); vampireSeen = true;}
             else if ( box.Class == "vampire_fathead" || box.Class == "vampire_flying" || box.Class == "vampire_walking") { return; }
         }
-        if ( vampireFound )
-        {
-            if ( numberSoloFrames++ > activeGoal->number_solo_frames)
-            {
-                OrbitBuoyResult result;
-                result.orbiting = true;
-                server->setSucceeded(result);
-            }
-        }
+        if ( vampireSeen && ( ++numberSoloFrames >= activeGoal->number_solo_frames) ) { vampireFound = true; }
     }
 
     void Orbit::update(const ros::TimerEvent& e)
@@ -71,7 +64,7 @@ namespace perception_control
         driveSetpt->data = driveState - (activeGoal->orbit_radius - xy_dist);
 
         yawPub.publish(yawSetpt);
-        strafePub.publish(strafeSetpt);
+        if( !vampireFound ) { strafePub.publish(strafeSetpt); }  // Stop strafing once we've found our vampire
         drivePub.publish(driveSetpt);
     }
 
@@ -105,6 +98,14 @@ namespace perception_control
                 OrbitBuoyResult result;
                 result.orbiting = true;
                 server->setPreempted(result);
+                break;
+            } else if ( vampireFound )
+            {
+                OrbitBuoyResult result;
+                result.orbiting = true;
+                server->setSucceeded(result);
+                ros::Duration(1.0).sleep(); // give the task code a second to update the waypoint nav
+                controlPids(false);
                 break;
             }
             r.sleep();

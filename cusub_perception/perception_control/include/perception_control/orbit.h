@@ -45,6 +45,7 @@ namespace perception_control
 
         perception_control::OrbitBuoyGoalConstPtr activeGoal;
         int numberSoloFrames;
+        bool vampireFound;
     };
 }
 

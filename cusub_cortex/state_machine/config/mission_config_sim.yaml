@@ -21,13 +21,13 @@ tasks:
  triangle_buoy:
   prior: [4,0,-2]
   approach_dist: 2.0
-  slay_dist: 2.0
+  slay_dist: 0.0
   replan_thresh: 3.0
-  imu_axis: 'x'
-  jump_thresh: -1.0
-  slay_class: 'vampire_fathead'
-  orbital_direction: 'right'
-  strafe_setpoint: 0.3
+  imu_axis: 'y'
+  jump_thresh: 3.0
+  slay_class: 'vampire_flying'
+  orbital_direction: 'left'
+  strafe_setpoint: 0.5
   number_solo_frames : 1
 
  dice:

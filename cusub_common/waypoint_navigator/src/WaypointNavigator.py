@@ -51,6 +51,28 @@ class WaypointNavigator(object):
         msg.data = self.controlling_pids
         self.control_pub.publish(msg)
 
+    def freeze_controls(self):
+
+        # YAW
+        yaw_f64 = Float64()
+        yaw_f64.data = self.currentYaw
+        self.yaw_pub.publish(yaw_f64)
+
+        # STRAFE
+        msg = Float64()
+        msg.data = self.currentStrafe
+        self.strafe_pub.publish(msg)
+
+        # DRIVE
+        msg = Float64()
+        msg.data = self.currentDrive
+        self.drive_pub.publish(msg)
+
+        # DEPTH
+        msg = Float64()
+        msg.data = self.currentDepth
+        self.depth_pub.publish(msg)
+
     def advance_waypoint(self):
         rospy.loginfo("Waypoint Reached!")
         if(len(self.waypointlist) > 0):
@@ -162,11 +184,21 @@ class WaypointNavigator(object):
             depth_f64.data = currentwaypoint.z
             self.depth_pub.publish(depth_f64)
 
+        elif self.controlling_pids:
+            self.freeze_controls()
+
+
     def driveStateCallback(self, data):
         self.currentDrive = data.data
 
     def strafeStateCallback(self, data):
         self.currentStrafe = data.data
+
+    def yawStateCallback(self, data):
+        self.currentYaw = data.data
+
+    def depthStateCallback(self, data):
+        self.currentDepth = data.data
 
     def run(self):
 
@@ -177,9 +209,16 @@ class WaypointNavigator(object):
         self.strafe_pub = rospy.Publisher("motor_controllers/pid/strafe/setpoint", Float64, queue_size=10)
         self.yaw_pub = rospy.Publisher("motor_controllers/pid/yaw/setpoint", Float64, queue_size=10)
 
-        # get current accumulated strafe and drive to use for adjustments
+        # get current accumulated strafe and drive to use for adjustments. (Depth and Yaw just used for freezing the sub)
         self.drive_state_sub = rospy.Subscriber("motor_controllers/pid/drive/state", Float64, self.driveStateCallback)
         self.strafe_state_sub = rospy.Subscriber("motor_controllers/pid/strafe/state", Float64, self.strafeStateCallback)
+        self.yaw_state_sub = rospy.Subscriber("motor_controllers/pid/yaw/state", Float64, self.yawStateCallback)
+        self.depth_state_sub = rospy.Subscriber("motor_controllers/pid/depth/state", Float64, self.depthStateCallback)
+
+        rospy.wait_for_message("motor_controllers/pid/drive/state", Float64)
+        rospy.wait_for_message("motor_controllers/pid/depth/state", Float64)
+        rospy.wait_for_message("motor_controllers/pid/yaw/state", Float64)
+        rospy.wait_for_message("motor_controllers/pid/strafe/state", Float64)
 
         # get current sub position to figure out how to get where we want
         self.pose_sub = rospy.Subscriber("odometry/filtered", Odometry, self.odometryCallback)
