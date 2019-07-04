@@ -149,7 +149,7 @@ class ImagePublisher : public Publisher {
 
       std::string req_name = dataNameString(req);
       ROS_INFO("advertising %s",req_name.c_str());
-      pub = it.advertise(req_name, 1);
+      pub = it.advertise("cusub_common/occam/"+req_name, 1);
 
       // Create frame id depending on camera number
       char camera_idx = req_name.at(req_name.length() - 1);
@@ -485,7 +485,7 @@ public:
 class OccamNode : public nodelet::Nodelet {
 public:
 
-  ros::NodeHandle nh;
+  ros::NodeHandle nh, nhp;
     // not occam
   ros::Subscriber sub;
   ros::Timer timer;
@@ -498,12 +498,13 @@ public:
   void onInit() {
       device = 0;
       OCCAM_CHECK(occamInitialize());
-      nh = getMTPrivateNodeHandle();
+      nh = getMTNodeHandle();
+      nhp = getMTPrivateNodeHandle();
       int r;
-      sub = nh.subscribe("/occam/set_exposure", 1000, &OccamNode::exposure_callback, this);
+      sub = nh.subscribe("set_exposure", 1000, &OccamNode::exposure_callback, this);
 
       std::string frame_id;
-      nh.param<std::string>("frame_id", frame_id, "occam");
+      nhp.param<std::string>("frame_id", frame_id, "occam");
 
       OccamDeviceList* device_list;
       OCCAM_CHECK(occamEnumerateDeviceList(2000, &device_list));
@@ -538,14 +539,16 @@ public:
       for (int j=0;j<req_count;++j) {
 
         if (types[j] == OCCAM_IMAGE) {
-
           pubs.push_back(std::make_shared<ImagePublisher>(req[j],it, frame_id));
-
-        } else if (types[j] == OCCAM_POINT_CLOUD) {
-
-          pubs.push_back(std::make_shared<PointCloudPublisher>(req[j],nh));
+          NODELET_INFO("Pushing back image: %lu", pubs.size());
 
         }
+
+        // } else if (types[j] == OCCAM_POINT_CLOUD) {
+
+        //   pubs.push_back(std::make_shared<PointCloudPublisher>(req[j],nh));
+
+        // }
 
       }
 
@@ -556,6 +559,7 @@ public:
       int loop_freq;
       nh.param<int>("loop_freq", loop_freq, 100);
       wait_count_max = loop_freq;
+      wait_count = 0;
       timer = nh.createTimer(ros::Duration(1 / loop_freq), &OccamNode::take_and_send_data, this);
   }
 
@@ -597,10 +601,12 @@ public:
     reqs.reserve(pubs.size());
     reqs_pubs.reserve(pubs.size());
     for (std::shared_ptr<Publisher> pub : pubs)
+    {
       if (pub->isRequested()) {
 	reqs.push_back(pub->dataName());
 	reqs_pubs.push_back(pub);
-      }
+      } 
+    }
 
     std::vector<OccamDataType> types;
     std::vector<void*> data;
