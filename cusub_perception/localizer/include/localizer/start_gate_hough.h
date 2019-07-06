@@ -9,7 +9,7 @@
 #include <darknet_ros_msgs/BoundingBox.h>
 #include <ros/ros.h>
 #include <geometry_msgs/Pose.h>
-#include <localizer/Detection.h>
+// #include <localizer/Detection.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
