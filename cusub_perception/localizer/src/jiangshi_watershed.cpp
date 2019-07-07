@@ -100,7 +100,7 @@ namespace pose_generator
             class_name = "jiangshi";
             if( bbs.size() != 1 ) { return false; }
             int border_size = 10; // add room for a border that we'll say is part of the 'not bouy' class
-            checkBoxes(bbs, border_size);
+            if(!checkBoxes(bbs, border_size)){ return false; }
             cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::RGB8);
 
             // Trim image to jiangshi
