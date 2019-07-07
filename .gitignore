@@ -1,10 +1,12 @@
 cusub_documentation/build
 
-
 cusub_perception/Robosub_CV_C++/build
 cusub_preception/Robosub_CV_C++/devel
 cusub_perception/usb_cam_ws/devel
 cusub_perception/usbcam_ws/build
 *.pyc
 *~
+
+# yolo
+*.weights
 # emacs
