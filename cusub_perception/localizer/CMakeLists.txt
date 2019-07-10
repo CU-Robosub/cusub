@@ -42,7 +42,9 @@ add_library( localizer
 target_link_libraries(localizer ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(localizer ${catkin_EXPORTED_LIBRARIES})
-endif()
+  endif()
+
+  add_dependencies(localizer localizer_generate_messages_cpp)
 
 # Test files
 
