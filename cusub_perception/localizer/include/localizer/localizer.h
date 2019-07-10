@@ -13,6 +13,7 @@
 #include <localizer/ignore_pg.h>
 #include <localizer/jiangshi_watershed.h>
 #include <geometry_msgs/Pose.h>
+#include "localizer/Detection.h"
 
 using namespace std;
 
