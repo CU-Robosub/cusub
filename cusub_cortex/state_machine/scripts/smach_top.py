@@ -44,16 +44,16 @@ def loadStateMachines(task_list):
             task_sm = VisitTask(task)
         elif task == "start_gate":
             task_sm = StartGate()
-        elif task == "dice":
-            task_sm = Dice()
-        elif task == "bangbang_dice":
-            task_sm = BangBangDiceTask()
-        elif task == "bangbang_roulette":
-            task_sm = BangBangRouletteTask()
-        # elif task == "dropper":
-            # task_sm = DropperTask(prior, search_alg)
-        elif task == "naive_visual_servo_objective":
-            task_sm = NaiveVisualServoTask()
+        # elif task == "dice":
+        #     task_sm = Dice()
+        # elif task == "bangbang_dice":
+        #     task_sm = BangBangDiceTask()
+        # elif task == "bangbang_roulette":
+        #     task_sm = BangBangRouletteTask()
+        # # elif task == "dropper":
+        #     # task_sm = DropperTask(prior, search_alg)
+        # elif task == "naive_visual_servo_objective":
+        #     task_sm = NaiveVisualServoTask()
         elif task == "jiangshi":
             task_sm = Jiangshi()
         else:

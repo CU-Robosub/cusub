@@ -57,7 +57,7 @@ class Task(smach.StateMachine):
         print cs
         self.sm._states[cs].request_abort()
 
-    def get_prior(self):
+    def get_prior_topic(self):
         """
         Get the prior for the task from the rosparameter server
 
@@ -67,16 +67,10 @@ class Task(smach.StateMachine):
 
         Returns
         -------
-        pose : Pose
-             The prior pose of the task
+        str : String
+             The rosparam name of prior
         """
-
-        list_xyz = rospy.get_param("tasks/" + self.name + "/prior")
-        pose = Pose()
-        pose.position.x = list_xyz[0]
-        pose.position.y = list_xyz[1]
-        pose.position.z = list_xyz[2]
-        return pose
+        return "tasks/" + self.name + "/prior"
 
 """
 Objectives are subtasks within a task

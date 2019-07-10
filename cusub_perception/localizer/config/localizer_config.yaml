@@ -2,10 +2,10 @@ localizer:
   classes:
     start_gate_pole : hough # hough, ...
     vampire_cute : jiangshi_watershed
-    fat_head : bouy_pnp
-    slick : bouy_pnp
-    no_torso : bouy_pnp
-    walking : bouy_pnp
+    fat_head : ignore
+    slick : ignore
+    no_torso : ignore
+    walking : ignore
     dice5 : ignore
   hough:
     three_legs : False  # true, false

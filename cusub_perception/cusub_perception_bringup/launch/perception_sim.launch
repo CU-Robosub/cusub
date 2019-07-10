@@ -13,7 +13,7 @@
     <arg name="yolo_config_path"           default="$(find darknet_cv)/launch/yolo_network_config/cfg"/>
     <!-- Load parameters -->
     <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/ros.yaml"/>
-    <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/vampire.yaml"/>
+    <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/robosub1CustomModel.yaml"/>
 
     <!-- Configurations -->
     <rosparam command="load" file="$(find localizer)/config/localizer_config.yaml"/>
