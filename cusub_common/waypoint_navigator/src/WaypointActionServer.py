@@ -74,6 +74,10 @@ class WaypointServer(WaypointNavigator):
                 result.complete = False
                 self.server.set_preempted(result)
                 self.waypoint = None
+                self.yawFreeze = self.currentYaw
+                self.driveFreeze = self.currentDrive
+                self.strafeFreeze = self.currentStrafe
+                self.depthFreeze = self.currentDepth
                 self.freeze_controls()
 
                 return

@@ -53,24 +53,27 @@ class WaypointNavigator(object):
 
     def freeze_controls(self):
 
+        if self.yawFreeze == None:
+            return
+
         # YAW
         yaw_f64 = Float64()
-        yaw_f64.data = self.currentYaw
+        yaw_f64.data = self.yawFreeze
         self.yaw_pub.publish(yaw_f64)
 
         # STRAFE
         msg = Float64()
-        msg.data = self.currentStrafe
+        msg.data = self.strafeFreeze
         self.strafe_pub.publish(msg)
 
         # DRIVE
         msg = Float64()
-        msg.data = self.currentDrive
+        msg.data = self.driveFreeze
         self.drive_pub.publish(msg)
 
         # DEPTH
         msg = Float64()
-        msg.data = self.currentDepth
+        msg.data = self.depthFreeze
         self.depth_pub.publish(msg)
 
     def advance_waypoint(self):
@@ -202,6 +205,10 @@ class WaypointNavigator(object):
 
     def run(self):
 
+        self.yawFreeze = None
+        self.driveFreeze = None
+        self.strafeFreeze = None
+        self.depthFreeze = None
 
         # setpoints to control sub motion
         self.depth_pub = rospy.Publisher("motor_controllers/pid/depth/setpoint", Float64, queue_size=10)

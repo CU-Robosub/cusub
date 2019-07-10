@@ -124,7 +124,6 @@ def main():
             aborted_transition = success_transition
             smach.StateMachine.add(sm_name, sm, transitions={'task_aborted' : aborted_transition, 'task_success':success_transition})
 
-
     try:
         outcome = sm_top.execute() # does this allow us to receive messages in the states?
     except rospy.ROSInterruptException:

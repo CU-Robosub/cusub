@@ -9,6 +9,9 @@ tasks:
   dist_behind_gate: 1.0
   third_leg_adjustment: 0.5
   replan_thresh: 1.0
+  style_dist: 1.5
+  do_style: True
+  spin_increment_rads: 0.7
 
  jiangshi:
   prior: [2.0,0,-1.5]
@@ -54,6 +57,6 @@ tasks:
     roulette: roulette_watershed
 
 mission_tasks: # Tasks To Do In Order
-#  - start_gate
+ - start_gate
 #  - jiangshi
- - triangle_buoy
+#  - triangle_buoy
