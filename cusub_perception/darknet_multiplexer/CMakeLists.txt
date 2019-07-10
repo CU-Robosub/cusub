@@ -209,3 +209,5 @@ target_link_libraries(multiplexer ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(multiplexer ${catkin_EXPORTED_LIBRARIES})
 endif()
+
+add_dependencies(multiplexer darknet_multiplexer_generate_messages_cpp)
