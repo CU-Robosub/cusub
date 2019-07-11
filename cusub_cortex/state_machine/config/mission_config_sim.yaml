@@ -14,12 +14,12 @@ tasks:
   spin_carrot_rads: 0.7
 
  jiangshi:
-  prior: [2.0,0,-1.5]
+  prior: [8.0,0,-1.5] # DIVEWELL
   approach_dist: 2.0
   slay_dist: 2.0
   replan_thresh: 3.0
-  imu_axis: 'x'
-  jump_thresh: -1.0
+  imu_axis: 'y'
+  jump_thresh: 4.0
 
  triangle_buoy:
   prior: [4,0,-2]
@@ -57,6 +57,6 @@ tasks:
     roulette: roulette_watershed
 
 mission_tasks: # Tasks To Do In Order
- - start_gate
-#  - jiangshi
+# - start_gate
+  - jiangshi
 #  - triangle_buoy

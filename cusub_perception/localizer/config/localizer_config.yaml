@@ -7,4 +7,6 @@ localizer:
     vampire_flying : ignore
   hough:
     three_legs : False  # true, false
+  jiangshi_watershed:
+    use_aspect_ratio : false
 

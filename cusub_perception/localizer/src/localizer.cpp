@@ -84,7 +84,7 @@ namespace localizer_ns
     for(bb_map_it=bb_map.begin(); bb_map_it != bb_map.end(); bb_map_it++)
     {
       localizer::Detection det;
-      det.class_id = "pose";
+      det.class_id = "pose"; // each generatePose() call should change this
       det.pose.header.seq = detection_num++;
       det.pose.header.stamp = bbs->image_header.stamp;
       det.pose.header.frame_id = bbs->image_header.frame_id;

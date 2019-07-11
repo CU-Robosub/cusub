@@ -7,6 +7,14 @@
 
 namespace pose_generator
 {  
+    JiangshiWatershed::JiangshiWatershed()
+    {
+        ros::NodeHandle nh;
+        useAspectRatio = false;
+        if ( !nh.getParam("localizer/jiangshi_watershed/use_aspect_ratio", useAspectRatio) ) { ROS_ERROR("Jiangshi couldn't locate params"); abort(); }
+        if(!useAspectRatio) { ROS_WARN("Jiangshi Watershed not using bb aspect ratio"); }
+        else { ROS_INFO("Jiangshi Watershed using bb aspect ratio"); }
+    }
     bool JiangshiWatershed::getPoints(Mat& img, int border_size, vector<Point2f>& points)
     {
         Mat bordered, markers, borders, approxDP;
@@ -91,6 +99,11 @@ namespace pose_generator
         return true;
     }
 
+    geometry_msgs::Quaternion JiangshiWatershed::getOrientationFromAspectRatio(darknet_ros_msgs::BoundingBox bb)
+    {
+        return geometry_msgs::Quaternion();
+    }
+
     bool JiangshiWatershed::generatePose(
         sensor_msgs::Image& image, 
         vector<darknet_ros_msgs::BoundingBox>& bbs,
@@ -122,6 +135,8 @@ namespace pose_generator
 
             // Get pose from image points using a solvepnp
             getPoseFromPoints(truth_pts, img_points, pose); // inherited
+            // Adjust Jiangshi Orientation according to aspect ratio of the bounding box
+            if ( useAspectRatio ) { pose.orientation = getOrientationFromAspectRatio( bbs[0] ); }
             return true;
         }
 }
