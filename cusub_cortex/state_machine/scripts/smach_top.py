@@ -21,6 +21,7 @@ from tasks.naive_visual_servo_objective import NaiveVisualServoTask
 # from tasks.dropper_task import DropperTask
 # from tasks.bangbang_roulette_task import BangBangRouletteTask
 from tasks.jiangshi import Jiangshi
+from tasks.triangle_buoy import Triangle_Buoy
 
 
 def loadStateMachines(task_list):
@@ -56,6 +57,8 @@ def loadStateMachines(task_list):
         #     task_sm = NaiveVisualServoTask()
         elif task == "jiangshi":
             task_sm = Jiangshi()
+        elif task == "triangle_buoy":
+            task_sm = Triangle_Buoy()
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 
@@ -120,7 +123,6 @@ def main():
 
             aborted_transition = success_transition
             smach.StateMachine.add(sm_name, sm, transitions={'task_aborted' : aborted_transition, 'task_success':success_transition})
-
 
     try:
         outcome = sm_top.execute() # does this allow us to receive messages in the states?

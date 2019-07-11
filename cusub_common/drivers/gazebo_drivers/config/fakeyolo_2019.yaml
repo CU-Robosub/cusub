@@ -21,7 +21,14 @@ yolo_faker:
 
 # Objects to run fake yolo on
 # You can have multiple classes per object with different point offsets, like the 2 start gate poles
- objects:  
+ objects:
+  # jiangshi:
+  #  link: 'buoy_jiangshi_1/base_link'
+  #  odom_topic: '/buoy_jiangshi_1/pose_gt'
+  #  classes:
+  #   - name: 'vampire_cute'
+  #     debug_color: [0, 255, 0]
+  #     points: [ [-0.5048, -0.0508, 0.8096], [ 0.5048, -0.0508,  0.8096], [ -.5048,  0.0508,  0.8096], [ 0.5048,  0.0508,  0.8096], [-0.5048, -0.0508, -.8096], [ 0.5048, -0.0508,  -.8096], [ -.5048,  0.0508,  -.8096], [ 0.5048,  0.0508,  -.8096] ]
   startgate:
    link: 'StartGate_1/base_link'
    odom_topic: '/StartGate_1/pose_gt'

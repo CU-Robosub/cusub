@@ -1,0 +1,7 @@
+<library path="lib/liborbit">
+  <class name="perception_control/Orbit" type="perception_control::Orbit" base_class_type="nodelet::Nodelet">
+    <description>
+        Orbits the triangle buoy until desired class is the only bounding box.
+    </description>
+  </class>
+</library>

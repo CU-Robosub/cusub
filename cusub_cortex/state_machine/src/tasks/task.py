@@ -162,6 +162,10 @@ class Objective(smach.State):
                 rospy.sleep(0.5)
             return "aborted"
 
+        self.go_to_pose_non_blocking(target_pose, move_mode)
+        return self.block_on_reaching_pose(target_pose)
+
+    def go_to_pose_non_blocking(self, target_pose, move_mode="yaw"):
         wpGoal = waypointGoal()
         wpGoal.goal_pose.pose.position = target_pose.position
         wpGoal.goal_pose.pose.orientation = target_pose.orientation
@@ -178,20 +182,20 @@ class Objective(smach.State):
         rospy.sleep(0.2)
         self.wayClient.send_goal(wpGoal)
         rospy.loginfo("---goal sent to waypointNav")
+    
+    def block_on_reaching_pose(self, target_pose):
         res = self.wayClient.get_result()
-
         while (res == None or not res.complete) and not rospy.is_shutdown():
             res = self.wayClient.get_result()
 
             if self.abort_requested():
-                rospy.loginfo("---objective aborted, causing waypoint request to quit")
+                self.wayClient.cancel_goal()
+                rospy.loginfo("---waypoint quitting")
                 return True
             elif self.get_distance(self.cur_pose.position, target_pose.position) < POSE_REACHED_THRESHOLD:
-                self.wayClient.cancel_all_goals()
+                self.wayClient.cancel_goal()
                 return False
-
             rospy.sleep(0.25)
-
         rospy.loginfo("---reached pose")
         return False
 

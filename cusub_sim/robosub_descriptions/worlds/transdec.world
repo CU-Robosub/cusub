@@ -4,11 +4,11 @@
     <physics name="default_physics" default="true" type="ode">
       <max_step_size>0.01</max_step_size>
       <real_time_factor>1</real_time_factor>
-      <real_time_update_rate>250</real_time_update_rate>
+      <real_time_update_rate>100</real_time_update_rate>
       <ode>
         <solver>
           <type>quick</type>
-          <iters>25</iters>
+          <iters>50</iters>
           <sor>0.5</sor>
         </solver>
       </ode>

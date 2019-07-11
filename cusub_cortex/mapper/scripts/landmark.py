@@ -97,7 +97,3 @@ dice1_landmark = MapLandmark("dice1", 1, "package://robosub_descriptions/models/
         self.map.add_landmark(dice6_landmark)
         self.map.add_landmark(start_gate_landmark)
 """
-
-"""
-This mapper is 200 lines long, betcha I can write it in <50
-"""
