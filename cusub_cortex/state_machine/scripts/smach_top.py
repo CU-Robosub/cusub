@@ -14,7 +14,6 @@ from waypoint_navigator.msg import waypointAction, waypointGoal
 import actionlib
 from tasks.dice import Dice
 from tasks.start_gate import StartGate
-from tasks.visit_task import VisitTask
 from tasks.bangbang_dice_task import BangBangDiceTask
 from tasks.bangbang_roulette_task import BangBangRouletteTask
 from tasks.naive_visual_servo_objective import NaiveVisualServoTask
@@ -35,15 +34,7 @@ def loadStateMachines(task_list):
         task_sm = None
         rospy.loginfo("Loading " + task + " state machine")
 
-        visit = False
-        # Check for just visiting a task
-        if "visit" in task:
-            task = task[6:] # trim "visit_"
-            visit = True
-
-        if visit == True:
-            task_sm = VisitTask(task)
-        elif task == "start_gate":
+        if task == "start_gate":
             task_sm = StartGate()
         # elif task == "dice":
         #     task_sm = Dice()
@@ -72,18 +63,18 @@ def loadStateMachines(task_list):
 
 def main():
     """
-    Search rosparameter for the configuration of our state machine
-    Initialize all statemachines
-    Loop through the statemachines in order and link them
+    Initialize all statemachines to be interconnected
+    All state transition logic is in the manager
     """
-    rospy.init_node('smach_top')
+    rospy.init_node('state_machine')
+
+    # Wait for the manager to become ready
     
     # All Objectives depend on the waypoint server so let's wait for it to initalize here
     wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
     rospy.loginfo("Waiting for waypoint server")
     wayClient.wait_for_server()
     rospy.loginfo("---connected to server")
-
 
     if rospy.get_param('~using_darknet'):
         rospy.loginfo("Waiting for darknet multiplexer server")
@@ -92,7 +83,7 @@ def main():
     else:
         rospy.logwarn("SM not using darknet configuration service.")
 
-    sm_top = smach.StateMachine(['success', 'aborted'])
+    sm_top = smach.StateMachine(['success'])
 
     # initialize all of the state machines
     rospy.loginfo("Waiting for rosparams")
@@ -102,11 +93,6 @@ def main():
 
     task_list = rospy.get_param("mission_tasks")
     sm_list = loadStateMachines(task_list)
-
-    # Trim visit from any names
-    for i in range(len(task_list)):
-        if "visit" in task_list[i]:
-            task_list[i] = task_list[i][6:] # 6 chars to trim "visit_"
 
     # Load all statemachines
     with sm_top:
