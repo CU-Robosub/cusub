@@ -52,6 +52,7 @@ class Slay(Objective):
         self.approach_dist = rospy.get_param('tasks/jiangshi/approach_dist', 2.0)
         self.slay_dist = rospy.get_param('tasks/jiangshi/slay_dist', 0.5)
         self.replan_threshold = rospy.get_param('tasks/jiangshi/replan_threshold', 0.5)
+        self.use_buoys_yaw = rospy.get_param('tasks/jiangshi/use_buoys_yaw', True)
         self.jiangshi_pose = None
         self.monitor_imu = False
         self.jiangshi_jump = False
@@ -108,6 +109,10 @@ class Slay(Objective):
         ----------
         self.jiangshi_pose : PoseStamped
             Jiangshi's pose
+        self.use_buoys_yaw : bool
+            Whether to calculate slay path and approach pose based on the buoys yaw
+        self.approach_dist : float
+            Meters from jiangshi to go upon approaching
 
         Returns
         -------
@@ -116,21 +121,24 @@ class Slay(Objective):
         """
         approach_pose = Pose()
         slay_pose = Pose()
-        quat = [self.jiangshi_pose.pose.orientation.x, self.jiangshi_pose.pose.orientation.y,self.jiangshi_pose.pose.orientation.z,self.jiangshi_pose.pose.orientation.w]
-        jiangshi_roll, jiangshi_pitch, jiangshi_yaw = tf.transformations.euler_from_quaternion(quat)
-        approach_pose.position.x = self.jiangshi_pose.pose.position.x + self.approach_dist * np.cos(jiangshi_yaw)
-        approach_pose.position.y = self.jiangshi_pose.pose.position.y + self.approach_dist * np.sin(jiangshi_yaw)
-        approach_pose.position.z = self.jiangshi_pose.pose.position.z
-        goal_quat = tf.transformations.quaternion_from_euler(jiangshi_roll, jiangshi_pitch, jiangshi_yaw)
-        approach_pose.orientation.x = goal_quat[0]
-        approach_pose.orientation.x = goal_quat[1]
-        approach_pose.orientation.x = goal_quat[2]
-        approach_pose.orientation.x = goal_quat[3]
-
-        slay_pose.position.x = self.jiangshi_pose.pose.position.x - self.slay_dist * np.cos(jiangshi_yaw)
-        slay_pose.position.y = self.jiangshi_pose.pose.position.y - self.slay_dist * np.sin(jiangshi_yaw)
-        slay_pose.position.z = self.jiangshi_pose.pose.position.z
-        slay_pose.orientation = approach_pose.orientation
+        if self.use_buoys_yaw:    
+            quat = [self.jiangshi_pose.pose.orientation.x, self.jiangshi_pose.pose.orientation.y,self.jiangshi_pose.pose.orientation.z,self.jiangshi_pose.pose.orientation.w]
+            jiangshi_roll, jiangshi_pitch, jiangshi_yaw = tf.transformations.euler_from_quaternion(quat)
+            approach_pose.position.x = self.jiangshi_pose.pose.position.x + self.approach_dist * np.cos(jiangshi_yaw)
+            approach_pose.position.y = self.jiangshi_pose.pose.position.y + self.approach_dist * np.sin(jiangshi_yaw)
+            approach_pose.position.z = self.jiangshi_pose.pose.position.z
+            goal_quat = tf.transformations.quaternion_from_euler(jiangshi_roll, jiangshi_pitch, jiangshi_yaw)
+            approach_pose.orientation.x = goal_quat[0]
+            approach_pose.orientation.x = goal_quat[1]
+            approach_pose.orientation.x = goal_quat[2]
+            approach_pose.orientation.x = goal_quat[3]
+            slay_pose.position.x = self.jiangshi_pose.pose.position.x - self.slay_dist * np.cos(jiangshi_yaw)
+            slay_pose.position.y = self.jiangshi_pose.pose.position.y - self.slay_dist * np.sin(jiangshi_yaw)
+            slay_pose.position.z = self.jiangshi_pose.pose.position.z
+            slay_pose.orientation = approach_pose.orientation
+        else: # just draw a line from sub to buoy and hit it
+            approach_pose = self.get_pose_between(self.cur_pose, self.jiangshi_pose.pose, self.approach_dist) # inherited
+            slay_pose = self.get_pose_behind(approach_pose, self.jiangshi_pose.pose, self.slay_dist)
 
         return approach_pose, slay_pose
 

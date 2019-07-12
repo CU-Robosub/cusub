@@ -15,6 +15,8 @@ import actionlib
 from tf.transformations import euler_from_quaternion
 from std_msgs.msg import Empty
 from darknet_multiplexer.srv import DarknetCameras
+import numpy as np
+import tf
 
 from optparse import OptionParser
 import inspect
@@ -244,3 +246,112 @@ class Objective(smach.State):
         self._replan_requested = True
     def clear_replan(self):
         self._replan_requested = False
+
+    @staticmethod
+    def get_pose_between(cur_pose, object_pose, dist_from_object):
+        """
+        @brief Calculates the pose between the sub and object with dist_from_object
+
+        xy line drawn from cur_pose to object_pose, z is pulled from object_pose
+
+        Parameters
+        ----------
+        cur_pose : Pose
+            pose of the sub
+        object_pose : Pose
+            pose of the object
+        dist_from_object : float
+            x meters away from the object on an xy line to the sub,
+            z is pulled from object
+        Returns
+        -------
+        Pose
+            pose between object and sub
+        """
+        # Find line from sub to buoy
+        if ( round(cur_pose.position.x, 2) == round(object_pose.position.x,2) ): # Avoid infinite slope in the polyfit
+            object_pose.position.x += 0.1
+        if ( round(cur_pose.position.y, 2) == round(object_pose.position.y,2) ): # Avoid infinite slope in the polyfit
+            object_pose.position.y -= 0.1
+
+        x_new = object_pose.position.x
+        y_new = object_pose.position.y
+
+        # Adjust buoy pose behind the buoy
+        x2 = np.array([cur_pose.position.x, x_new])
+        y2 = np.array([cur_pose.position.y, y_new])
+        m2, b2 = np.polyfit(x2,y2,1)
+        m2 = round(m2, 2)
+        b2 = round(b2, 2)
+        x_hat2 = np.sqrt( ( dist_from_object**2) / (m2**2 + 1) )
+        if x_new > cur_pose.position.x:
+            x_hat2 = -x_hat2
+        x_new2 = x_new + x_hat2
+        y_new2 = x_new2 * m2 + b2
+
+        # Find target yaw
+        dx = object_pose.position.x - x_new2
+        dy = object_pose.position.y - y_new2
+        target_yaw = np.arctan2(dy, dx)
+        quat_list = tf.transformations.quaternion_from_euler(0,0, target_yaw)
+
+        # Make Pose Msg
+        target_pose = Pose()
+        target_pose.position.x = x_new2
+        target_pose.position.y = y_new2
+        target_pose.position.z = object_pose.position.z
+        target_pose.orientation.x = quat_list[0]
+        target_pose.orientation.y = quat_list[1]
+        target_pose.orientation.z = quat_list[2]
+        target_pose.orientation.w = quat_list[3]
+
+        return target_pose
+
+    @staticmethod
+    def get_pose_behind(cur_pose, object_pose, dist_behind_object):
+        """
+        @brief Gets the pose from the cur_pose to object_pose with dist_behind_object
+
+        xy line drawn from cur_pose to object_pose, z is pulled from object_pose
+        Uses cur_pose's orientation
+
+        Intended for slaying bouys
+
+        Parameters
+        ----------
+        cur_pose : Pose
+            pose of the sub
+        object_pose : Pose
+            pose of the object
+        dist_behind_object : float
+            distance behind object, 
+
+        Returns
+        -------
+        Pose
+            pose behind the object
+        
+        """
+        # Find line from sub to buoy
+        if ( round(cur_pose.position.x, 2) == round(object_pose.position.x,2) ): # Avoid infinite slope in the polyfit
+            object_pose.position.x += 0.1
+        if ( round(cur_pose.position.y, 2) == round(object_pose.position.y,2) ): # Avoid infinite slope in the polyfit
+            object_pose.position.y -= 0.1
+
+        x2 = np.array([cur_pose.position.x, object_pose.position.x])
+        y2 = np.array([cur_pose.position.y, object_pose.position.y])
+        m2, b2 = np.polyfit(x2,y2,1)
+        m2 = round(m2, 2)
+        b2 = round(b2, 2)
+        x_hat2 = np.sqrt( ( dist_behind_object**2) / (m2**2 + 1) )
+        if object_pose.position.x <= cur_pose.position.x:
+            x_hat2 = -x_hat2
+        x_new2 = object_pose.position.x + x_hat2
+        y_new2 = x_new2 * m2 + b2
+
+        target_pose = Pose()
+        target_pose.position.x = x_new2
+        target_pose.position.y = y_new2
+        target_pose.position.z = cur_pose.position.z
+        target_pose.orientation = cur_pose.orientation
+        return target_pose

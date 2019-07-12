@@ -117,85 +117,6 @@ class Slay(Objective):
         if hit_detected:
             rospy.loginfo_throttle(1, "Detected a buoy hit!")
 
-    @staticmethod
-    def get_approach_pose(cur_pose, buoy_pose, orbit_radius):
-        """
-        Calculate approach pose to begin circling the buoy
-
-        Parameters
-        ----------
-        self.triangle_buoy_pose : PoseStamped
-            Triangle buoy's pose
-
-        Returns
-        -------
-        approach_pose : Pose
-        """
-        # Find line from sub to buoy
-        if ( round(cur_pose.position.x, 2) == round(buoy_pose.position.x,2) ): # Avoid infinite slope in the polyfit
-            buoy_pose.position.x += 0.1
-        if ( round(cur_pose.position.y, 2) == round(buoy_pose.position.y,2) ): # Avoid infinite slope in the polyfit
-            buoy_pose.position.y -= 0.1
-
-        x_new = buoy_pose.position.x
-        y_new = buoy_pose.position.y
-
-        # Adjust buoy pose behind the buoy
-        x2 = np.array([cur_pose.position.x, x_new])
-        y2 = np.array([cur_pose.position.y, y_new])
-        m2, b2 = np.polyfit(x2,y2,1)
-        m2 = round(m2, 2)
-        b2 = round(b2, 2)
-        x_hat2 = np.sqrt( ( orbit_radius**2) / (m2**2 + 1) )
-        if x_new > cur_pose.position.x:
-            x_hat2 = -x_hat2
-        x_new2 = x_new + x_hat2
-        y_new2 = x_new2 * m2 + b2
-
-        # Find target yaw
-        dx = buoy_pose.position.x - x_new2
-        dy = buoy_pose.position.y - y_new2
-        target_yaw = np.arctan2(dy, dx)
-        quat_list = tf.transformations.quaternion_from_euler(0,0, target_yaw)
-
-        # Make Pose Msg
-        target_pose = Pose()
-        target_pose.position.x = x_new2
-        target_pose.position.y = y_new2
-        target_pose.position.z = buoy_pose.position.z
-        target_pose.orientation.x = quat_list[0]
-        target_pose.orientation.y = quat_list[1]
-        target_pose.orientation.z = quat_list[2]
-        target_pose.orientation.w = quat_list[3]
-
-        return target_pose
-
-    @staticmethod
-    def get_slay_pose(cur_pose, buoy_pose, slay_dist):
-        # Find line from sub to buoy
-        if ( round(cur_pose.position.x, 2) == round(buoy_pose.position.x,2) ): # Avoid infinite slope in the polyfit
-            buoy_pose.position.x += 0.1
-        if ( round(cur_pose.position.y, 2) == round(buoy_pose.position.y,2) ): # Avoid infinite slope in the polyfit
-            buoy_pose.position.y -= 0.1
-
-        x2 = np.array([cur_pose.position.x, buoy_pose.position.x])
-        y2 = np.array([cur_pose.position.y, buoy_pose.position.y])
-        m2, b2 = np.polyfit(x2,y2,1)
-        m2 = round(m2, 2)
-        b2 = round(b2, 2)
-        x_hat2 = np.sqrt( ( slay_dist**2) / (m2**2 + 1) )
-        if buoy_pose.position.x <= cur_pose.position.x:
-            x_hat2 = -x_hat2
-        x_new2 = buoy_pose.position.x + x_hat2
-        y_new2 = x_new2 * m2 + b2
-
-        target_pose = Pose()
-        target_pose.position.x = x_new2
-        target_pose.position.y = y_new2
-        target_pose.position.z = cur_pose.position.z
-        target_pose.orientation = cur_pose.orientation
-        return target_pose
-
     def execute(self, userdata):
         """
         Approach bouy
@@ -206,7 +127,7 @@ class Slay(Objective):
         self.approaching = True
         self.clear_abort()
         self.configure_darknet_cameras([1,0,0,0,0,0])
-        approach_pose = self.get_approach_pose(self.cur_pose, self.triangle_buoy_pose.pose, self.approach_dist)
+        approach_pose = self.get_pose_between(self.cur_pose, self.triangle_buoy_pose.pose, self.approach_dist) # inherited
         if self.go_to_pose(approach_pose):
             return "aborted"
 
@@ -228,7 +149,7 @@ class Slay(Objective):
         # Slay a buoy either way...
 
         preslay_pose = self.cur_pose
-        slay_pose = self.get_slay_pose(preslay_pose, self.triangle_buoy_pose.pose, self.slay_dist)
+        slay_pose = self.get_pose_behind(preslay_pose, self.triangle_buoy_pose.pose, self.slay_dist)
 
         self.monitor_imu = True
         self.go_to_pose(slay_pose, move_mode="backup")

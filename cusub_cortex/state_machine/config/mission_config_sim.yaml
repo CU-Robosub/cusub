@@ -20,6 +20,7 @@ tasks:
   replan_thresh: 3.0
   imu_axis: 'y'
   jump_thresh: 0.5
+  use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
 
  triangle_buoy:
   prior: [4,0,-2]
