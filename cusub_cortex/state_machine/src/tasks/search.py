@@ -82,9 +82,7 @@ class Search(Objective):
                     print("...waiting for transform: " + odom_frame + " -> " + xyzframe_list[3])
                     self.listener.waitForTransform(p.header.frame_id, odom_frame, p.header.stamp, rospy.Duration(5))
                     print("...found transform")
-                    print(p)
                     p = self.listener.transformPose(odom_frame, p)
-                    print(p)
                 except (tf.ExtrapolationException, tf.ConnectivityException, tf.LookupException) as e:
                     rospy.logerr(e)
             return p.pose

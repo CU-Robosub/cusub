@@ -137,9 +137,10 @@ class Slay(Objective):
     def execute(self, userdata):
         self.started = True
         self.clear_abort()
-        self.configure_darknet_cameras([1,0,0,0,0,0])
+        self.configure_darknet_cameras([1,1,0,0,1,0])
         approach_pose, slay_pose = self.get_slay_path()
         if self.go_to_pose(approach_pose):
+            self.started = False
             return "aborted"
         rospy.loginfo("---slaying buoy")
         rospy.sleep(2)

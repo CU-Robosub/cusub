@@ -103,13 +103,7 @@ namespace pose_generator
 
     void JiangshiWatershed::getOrientationFromAspectRatio(darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat)
     {
-        std::cout << "---" << std::endl;
-        std::cout << horizontalDist << std::endl;
-        std::cout << bb.xmax - bb.xmin << std::endl;
-        std::cout << bb.xmax - bb.xmin << std::endl;
         float aspectRatio = ( (float) (bb.xmax - bb.xmin) ) / ( (float) (bb.ymax - bb.ymin) );
-        std::cout << aspectRatio << std::endl;
-
         // Linearly fit the transformation from aspectRatio to yaw angle of the buoy
         float m, b;
         if ( horizontalDist > 0 ) // on the right of us, all angles should be negative
@@ -117,14 +111,12 @@ namespace pose_generator
             m = -90 / ( aspectRatio90Deg - 0.5 );
             b = -90 - m * aspectRatio90Deg;
         } else {                 // on the left of us, all angles should be positive
-            ROS_WARN("Less than 0");
             m = 90 / ( aspectRatio90Deg - 0.5 );
             b = 90 - m * aspectRatio90Deg;
         }
         float yawDeg = m*aspectRatio + b;
         yawDeg += 90;                   // Make it align with pnp transform
         float yawRads = (M_PI / 180) * yawDeg;
-        std::cout << yawRads << std::endl;
         tf2::Quaternion tfQuat;
         tfQuat.setRPY( 0, 0, yawRads );
         tf2::convert(quat, tfQuat);
@@ -161,8 +153,7 @@ namespace pose_generator
 
             // Get pose from image points using a solvepnp
             getPoseFromPoints(truth_pts, img_points, pose); // inherited
-            std::cout << pose << std::endl;
-            // Adjust Jiangshi Orientation according to aspect ratio of the bounding box
+             // Adjust Jiangshi Orientation according to aspect ratio of the bounding box
             if ( useAspectRatio ) { getOrientationFromAspectRatio( bbs[0], pose.position.x, pose.orientation ); }
             return true;
         }

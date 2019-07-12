@@ -14,12 +14,12 @@ tasks:
   spin_carrot_rads: 0.7
 
  jiangshi:
-  prior: [8.0,0,-1.5] # DIVEWELL
+  prior: [7.0,4.3,-1.5, "world"] # DIVEWELL
   approach_dist: 2.0
-  slay_dist: 2.0
+  slay_dist: 0.0
   replan_thresh: 3.0
   imu_axis: 'y'
-  jump_thresh: 4.0
+  jump_thresh: 0.5
 
  triangle_buoy:
   prior: [4,0,-2]
