@@ -107,6 +107,7 @@ class Objective(smach.State):
         pose.position.y = 0
         pose.position.z = 0
         self.cur_pose = pose
+        self.cancel_goal = False
 
         super(Objective, self).__init__(outcomes=outcomes)
 
@@ -183,6 +184,10 @@ class Objective(smach.State):
         self.wayClient.send_goal(wpGoal)
         rospy.loginfo("---goal sent to waypointNav")
     
+    def cancel_wp_goal(self):
+        """ An alternative to abort for cancelling the current pose goal that prints a lot less """
+        self.cancel_goal = True
+    
     def block_on_reaching_pose(self, target_pose):
         res = self.wayClient.get_result()
         while (res == None or not res.complete) and not rospy.is_shutdown():
@@ -195,6 +200,10 @@ class Objective(smach.State):
             elif self.get_distance(self.cur_pose.position, target_pose.position) < POSE_REACHED_THRESHOLD:
                 self.wayClient.cancel_goal()
                 return False
+            elif self.cancel_goal:
+                self.wayClient.cancel_goal()
+                self.cancel_goal = False
+                return True
             rospy.sleep(0.25)
         rospy.loginfo("---reached pose")
         return False
@@ -202,13 +211,21 @@ class Objective(smach.State):
     def sub_pose_cb(self, msg):
         self.cur_pose = msg.pose.pose # store the pose part of the odom msg
 
+    def get_distance_xy(self, point1, point2):
+        """ Get xy distance between 2 points """
+        dx = point2.x - point1.x
+        dy = point2.y - point1.y
+
+        xy_dist = math.sqrt(dx**2 + dy**2)
+        return xy_dist
+
+
     def get_distance(self, point1, point2):
         """ Get distance between 2 points """
         dx = point2.x - point1.x
         dy = point2.y - point1.y
         dz = point2.z - point1.z
 
-        xy_dist = math.sqrt(dx**2 + dy**2)
         dist = math.sqrt(dx**2 + dy**2 + dz**2)
         return dist
 
