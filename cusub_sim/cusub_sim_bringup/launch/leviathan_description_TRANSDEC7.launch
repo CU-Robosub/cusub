@@ -1,8 +1,8 @@
 <launch>
-        <arg name="x" default="-7.5"/>
-        <arg name="y" default="2.5"/>
+        <arg name="x" default="0"/>
+        <arg name="y" default="29.7"/>
         <arg name="z" default="-2"/>
-        <arg name="yaw" default="0.79"/>
+        <arg name="yaw" default="-1.5"/>
         <arg name="namespace" default="leviathan/description" />
 
         <include file="$(find leviathan_description)/launch/upload.launch">

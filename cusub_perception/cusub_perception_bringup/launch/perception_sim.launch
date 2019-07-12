@@ -13,7 +13,7 @@
     <arg name="yolo_config_path"           default="$(find darknet_cv)/launch/yolo_network_config/cfg"/>
     <!-- Load parameters -->
     <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/ros.yaml"/>
-    <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/vampire.yaml"/>
+    <rosparam command="load" ns="darknet_ros" file="$(find darknet_cv)/launch/yolo_network_config/robosub1CustomModel.yaml"/>
 
     <!-- Configurations -->
     <rosparam command="load" file="$(find localizer)/config/localizer_config.yaml"/>
@@ -21,6 +21,7 @@
 
     <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
     <node pkg="nodelet" type="nodelet" name="darknet_multiplexer" args="load darknet_multiplexer/Multiplexer standalone_nodelet" output="screen" unless="$(arg fakeyolo)" />
+    <node pkg="nodelet" type="nodelet" name="darknet_drawer" args="load darknet_multiplexer/DarknetDrawer standalone_nodelet" output="screen"/>
     <node pkg="nodelet" type="nodelet" name="localizer" args="load localizer/Localizer standalone_nodelet" output="screen"/>
     <node pkg="nodelet" type="nodelet" name="darknet_ros" args="load darknet_ros/YoloObjectDetector standalone_nodelet" output="screen" unless="$(arg fakeyolo)">
         <remap from="darknet_ros/bounding_boxes" to="cusub_perception/darknet_ros/bounding_boxes" />

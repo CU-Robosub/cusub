@@ -185,12 +185,12 @@
           <cylinder radius="0.046" length="0.04"/>
         </geometry>
       </visual>
-      <collision>
+      <!-- <collision>
         <origin xyz="0 0 0" rpy="0 1.5707963 0"/>
         <geometry>
           <cylinder radius="0.046" length="0.04"/>
         </geometry>
-      </collision>
+      </collision> -->
       <inertial>
         <mass value="0.001" />
         <origin xyz="0 0 0" rpy="0 0 0"/>

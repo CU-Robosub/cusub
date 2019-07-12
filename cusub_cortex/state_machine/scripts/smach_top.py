@@ -21,6 +21,7 @@ from tasks.naive_visual_servo_objective import NaiveVisualServoTask
 # from tasks.dropper_task import DropperTask
 # from tasks.bangbang_roulette_task import BangBangRouletteTask
 from tasks.jiangshi import Jiangshi
+from tasks.triangle_buoy import Triangle_Buoy
 
 
 def loadStateMachines(task_list):
@@ -44,18 +45,20 @@ def loadStateMachines(task_list):
             task_sm = VisitTask(task)
         elif task == "start_gate":
             task_sm = StartGate()
-        elif task == "dice":
-            task_sm = Dice()
-        elif task == "bangbang_dice":
-            task_sm = BangBangDiceTask()
-        elif task == "bangbang_roulette":
-            task_sm = BangBangRouletteTask()
-        # elif task == "dropper":
-            # task_sm = DropperTask(prior, search_alg)
-        elif task == "naive_visual_servo_objective":
-            task_sm = NaiveVisualServoTask()
+        # elif task == "dice":
+        #     task_sm = Dice()
+        # elif task == "bangbang_dice":
+        #     task_sm = BangBangDiceTask()
+        # elif task == "bangbang_roulette":
+        #     task_sm = BangBangRouletteTask()
+        # # elif task == "dropper":
+        #     # task_sm = DropperTask(prior, search_alg)
+        # elif task == "naive_visual_servo_objective":
+        #     task_sm = NaiveVisualServoTask()
         elif task == "jiangshi":
             task_sm = Jiangshi()
+        elif task == "triangle_buoy":
+            task_sm = Triangle_Buoy()
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 
@@ -120,7 +123,6 @@ def main():
 
             aborted_transition = success_transition
             smach.StateMachine.add(sm_name, sm, transitions={'task_aborted' : aborted_transition, 'task_success':success_transition})
-
 
     try:
         outcome = sm_top.execute() # does this allow us to receive messages in the states?
