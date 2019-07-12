@@ -15,6 +15,8 @@ import actionlib
 from tf.transformations import euler_from_quaternion
 from std_msgs.msg import Empty
 from darknet_multiplexer.srv import DarknetCameras
+import numpy as np
+import tf
 
 from optparse import OptionParser
 import inspect
@@ -57,7 +59,7 @@ class Task(smach.StateMachine):
         print cs
         self.sm._states[cs].request_abort()
 
-    def get_prior(self):
+    def get_prior_topic(self):
         """
         Get the prior for the task from the rosparameter server
 
@@ -67,16 +69,10 @@ class Task(smach.StateMachine):
 
         Returns
         -------
-        pose : Pose
-             The prior pose of the task
+        str : String
+             The rosparam name of prior
         """
-
-        list_xyz = rospy.get_param("tasks/" + self.name + "/prior")
-        pose = Pose()
-        pose.position.x = list_xyz[0]
-        pose.position.y = list_xyz[1]
-        pose.position.z = list_xyz[2]
-        return pose
+        return "tasks/" + self.name + "/prior"
 
 """
 Objectives are subtasks within a task
@@ -113,6 +109,7 @@ class Objective(smach.State):
         pose.position.y = 0
         pose.position.z = 0
         self.cur_pose = pose
+        self.cancel_goal = False
 
         super(Objective, self).__init__(outcomes=outcomes)
 
@@ -168,6 +165,10 @@ class Objective(smach.State):
                 rospy.sleep(0.5)
             return "aborted"
 
+        self.go_to_pose_non_blocking(target_pose, move_mode)
+        return self.block_on_reaching_pose(target_pose)
+
+    def go_to_pose_non_blocking(self, target_pose, move_mode="yaw"):
         wpGoal = waypointGoal()
         wpGoal.goal_pose.pose.position = target_pose.position
         wpGoal.goal_pose.pose.orientation = target_pose.orientation
@@ -184,25 +185,42 @@ class Objective(smach.State):
         rospy.sleep(0.2)
         self.wayClient.send_goal(wpGoal)
         rospy.loginfo("---goal sent to waypointNav")
+    
+    def cancel_wp_goal(self):
+        """ An alternative to abort for cancelling the current pose goal that prints a lot less """
+        self.cancel_goal = True
+    
+    def block_on_reaching_pose(self, target_pose):
         res = self.wayClient.get_result()
-
         while (res == None or not res.complete) and not rospy.is_shutdown():
             res = self.wayClient.get_result()
 
             if self.abort_requested():
-                rospy.loginfo("---objective aborted, causing waypoint request to quit")
+                self.wayClient.cancel_goal()
+                rospy.loginfo("---waypoint quitting")
                 return True
             elif self.get_distance(self.cur_pose.position, target_pose.position) < POSE_REACHED_THRESHOLD:
-                self.wayClient.cancel_all_goals()
+                self.wayClient.cancel_goal()
                 return False
-
+            elif self.cancel_goal:
+                self.wayClient.cancel_goal()
+                self.cancel_goal = False
+                return True
             rospy.sleep(0.25)
-
         rospy.loginfo("---reached pose")
         return False
 
     def sub_pose_cb(self, msg):
         self.cur_pose = msg.pose.pose # store the pose part of the odom msg
+
+    def get_distance_xy(self, point1, point2):
+        """ Get xy distance between 2 points """
+        dx = point2.x - point1.x
+        dy = point2.y - point1.y
+
+        xy_dist = math.sqrt(dx**2 + dy**2)
+        return xy_dist
+
 
     def get_distance(self, point1, point2):
         """ Get distance between 2 points """
@@ -210,7 +228,6 @@ class Objective(smach.State):
         dy = point2.y - point1.y
         dz = point2.z - point1.z
 
-        xy_dist = math.sqrt(dx**2 + dy**2)
         dist = math.sqrt(dx**2 + dy**2 + dz**2)
         return dist
 
@@ -229,3 +246,112 @@ class Objective(smach.State):
         self._replan_requested = True
     def clear_replan(self):
         self._replan_requested = False
+
+    @staticmethod
+    def get_pose_between(cur_pose, object_pose, dist_from_object):
+        """
+        @brief Calculates the pose between the sub and object with dist_from_object
+
+        xy line drawn from cur_pose to object_pose, z is pulled from object_pose
+
+        Parameters
+        ----------
+        cur_pose : Pose
+            pose of the sub
+        object_pose : Pose
+            pose of the object
+        dist_from_object : float
+            x meters away from the object on an xy line to the sub,
+            z is pulled from object
+        Returns
+        -------
+        Pose
+            pose between object and sub
+        """
+        # Find line from sub to buoy
+        if ( round(cur_pose.position.x, 2) == round(object_pose.position.x,2) ): # Avoid infinite slope in the polyfit
+            object_pose.position.x += 0.1
+        if ( round(cur_pose.position.y, 2) == round(object_pose.position.y,2) ): # Avoid infinite slope in the polyfit
+            object_pose.position.y -= 0.1
+
+        x_new = object_pose.position.x
+        y_new = object_pose.position.y
+
+        # Adjust buoy pose behind the buoy
+        x2 = np.array([cur_pose.position.x, x_new])
+        y2 = np.array([cur_pose.position.y, y_new])
+        m2, b2 = np.polyfit(x2,y2,1)
+        m2 = round(m2, 2)
+        b2 = round(b2, 2)
+        x_hat2 = np.sqrt( ( dist_from_object**2) / (m2**2 + 1) )
+        if x_new > cur_pose.position.x:
+            x_hat2 = -x_hat2
+        x_new2 = x_new + x_hat2
+        y_new2 = x_new2 * m2 + b2
+
+        # Find target yaw
+        dx = object_pose.position.x - x_new2
+        dy = object_pose.position.y - y_new2
+        target_yaw = np.arctan2(dy, dx)
+        quat_list = tf.transformations.quaternion_from_euler(0,0, target_yaw)
+
+        # Make Pose Msg
+        target_pose = Pose()
+        target_pose.position.x = x_new2
+        target_pose.position.y = y_new2
+        target_pose.position.z = object_pose.position.z
+        target_pose.orientation.x = quat_list[0]
+        target_pose.orientation.y = quat_list[1]
+        target_pose.orientation.z = quat_list[2]
+        target_pose.orientation.w = quat_list[3]
+
+        return target_pose
+
+    @staticmethod
+    def get_pose_behind(cur_pose, object_pose, dist_behind_object):
+        """
+        @brief Gets the pose from the cur_pose to object_pose with dist_behind_object
+
+        xy line drawn from cur_pose to object_pose, z is pulled from object_pose
+        Uses cur_pose's orientation
+
+        Intended for slaying bouys
+
+        Parameters
+        ----------
+        cur_pose : Pose
+            pose of the sub
+        object_pose : Pose
+            pose of the object
+        dist_behind_object : float
+            distance behind object, 
+
+        Returns
+        -------
+        Pose
+            pose behind the object
+        
+        """
+        # Find line from sub to buoy
+        if ( round(cur_pose.position.x, 2) == round(object_pose.position.x,2) ): # Avoid infinite slope in the polyfit
+            object_pose.position.x += 0.1
+        if ( round(cur_pose.position.y, 2) == round(object_pose.position.y,2) ): # Avoid infinite slope in the polyfit
+            object_pose.position.y -= 0.1
+
+        x2 = np.array([cur_pose.position.x, object_pose.position.x])
+        y2 = np.array([cur_pose.position.y, object_pose.position.y])
+        m2, b2 = np.polyfit(x2,y2,1)
+        m2 = round(m2, 2)
+        b2 = round(b2, 2)
+        x_hat2 = np.sqrt( ( dist_behind_object**2) / (m2**2 + 1) )
+        if object_pose.position.x <= cur_pose.position.x:
+            x_hat2 = -x_hat2
+        x_new2 = object_pose.position.x + x_hat2
+        y_new2 = x_new2 * m2 + b2
+
+        target_pose = Pose()
+        target_pose.position.x = x_new2
+        target_pose.position.y = y_new2
+        target_pose.position.z = cur_pose.position.z
+        target_pose.orientation = cur_pose.orientation
+        return target_pose

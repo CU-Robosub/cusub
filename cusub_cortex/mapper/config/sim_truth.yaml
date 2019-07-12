@@ -3,7 +3,9 @@
 sim_pub:
   start_gate: /StartGate_1/pose_gt
   jiangshi: /buoy_jiangshi_1/pose_gt
+  triangle_buoy: /triangular_buoy_1/pose_gt
   objects_to_publish: # controls which objects to actually publish poses for
-    - start_gate
-    - jiangshi
+    # - start_gate
+    # - jiangshi
+    - triangle_buoy
     

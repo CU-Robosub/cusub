@@ -14,6 +14,59 @@ import numpy as np
 
 MAX_SUM_TASK_POSITION_VALUE=500
 
+class MovingMedianAvg():
+    """
+        Use a moving median averaging technique to reject outliers
+    """
+    def __init__(self, num_poses_to_avg):
+        self.num_poses_to_avg = num_poses_to_avg
+        self.avg_pose = Pose()
+        self.x_array = np.array([])
+        self.y_array = np.array([])
+        self.z_array = np.array([])
+        self.yaw_array = np.array([])
+        self.replace_index = 0
+
+    def add_new_pose(self, new_pose):
+        quat_list_new = [new_pose.orientation.x, new_pose.orientation.y, new_pose.orientation.z, new_pose.orientation.w]
+        new_angles = self.make_pos_angles(tf.transformations.euler_from_quaternion(quat_list_new))
+
+        # Adjust our recorded poses
+        if self.x_array.size < self.num_poses_to_avg: # We're still filling up the array
+            self.x_array = np.append(self.x_array, new_pose.position.x)
+            self.y_array = np.append(self.y_array, new_pose.position.y)
+            self.z_array = np.append(self.z_array, new_pose.position.z)
+            self.yaw_array = np.append(self.yaw_array, new_angles[2])
+        else: # We've filled up the array, now just adjust our insert index
+            self.x_array[self.replace_index] = new_pose.position.x
+            self.y_array[self.replace_index] = new_pose.position.y
+            self.z_array[self.replace_index] = new_pose.position.z
+            self.yaw_array[self.replace_index] = new_angles[2]
+            self.replace_index = ( self.replace_index + 1 ) % self.num_poses_to_avg
+        
+        new_quat_list_avg = tf.transformations.quaternion_from_euler(0, 0, np.median(self.yaw_array)) # assume no pitch or roll
+        quat_avg = Quaternion()
+        quat_avg.x = new_quat_list_avg[0]
+        quat_avg.y = new_quat_list_avg[1]
+        quat_avg.z = new_quat_list_avg[2]
+        quat_avg.w = new_quat_list_avg[3]
+
+        self.avg_pose.position.x = np.median(self.x_array)
+        self.avg_pose.position.y = np.median(self.y_array)
+        self.avg_pose.position.z = np.median(self.z_array)
+        self.avg_pose.orientation = quat_avg
+    
+    def make_pos_angles(self, angles):
+        """ Make all angles 0 - 2pi for convenient averaging """
+        pos_angles = []
+        for angle in angles:
+            angle = (angle + 2*np.pi) % (2*np.pi)
+            pos_angles.append(angle)
+        return pos_angles
+
+    def get_avg(self):
+        return self.avg_pose
+
 class ExpWeightedAvg():
 
     num_poses = 0
@@ -119,7 +172,7 @@ class Mapper(object):
         for class_name in classes_dict:
             self.classes[class_name] = {}
             self.classes[class_name]['pub'] = rospy.Publisher('cusub_cortex/mapper_out/'+class_name, PoseStamped, queue_size = 10)
-            self.classes[class_name]['filter'] = ExpWeightedAvg(rospy.get_param('mapper/classes/'+class_name))
+            self.classes[class_name]['filter'] = MovingMedianAvg(rospy.get_param('mapper/classes/'+class_name))
             self.classes[class_name]['unfiltered_pub'] = rospy.Publisher('cusub_cortex/mapper_out/unfiltered/'+class_name, PoseStamped, queue_size = 10)
             self.classes[class_name]['latest_pose_stamped'] = None
 
@@ -144,7 +197,7 @@ class Mapper(object):
     
     def transform_to_odom(self, cv_pose):
         try:
-            self.listener.waitForTransform('/'+ self.sub_name + '/description/odom', cv_pose.header.frame_id, cv_pose.header.stamp, rospy.Duration(0.2))
+            self.listener.waitForTransform(cv_pose.header.frame_id, '/'+ self.sub_name + '/description/odom', cv_pose.header.stamp, rospy.Duration(0.2))
             pose = self.listener.transformPose('/' + self.sub_name + '/description/odom', cv_pose)
         except (tf.ExtrapolationException, tf.ConnectivityException, tf.LookupException) as e:
             rospy.logwarn(e)

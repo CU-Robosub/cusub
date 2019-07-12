@@ -7,6 +7,16 @@
 
 namespace pose_generator
 {  
+    JiangshiWatershed::JiangshiWatershed()
+    {
+        ros::NodeHandle nh;
+        useAspectRatio = false;
+        if ( !nh.getParam("localizer/jiangshi_watershed/use_aspect_ratio", useAspectRatio) ) { ROS_ERROR("Jiangshi couldn't locate params"); abort(); }
+        if(!useAspectRatio) { ROS_WARN("Jiangshi Watershed not using bb aspect ratio"); }
+        else { ROS_INFO("Jiangshi Watershed using bb aspect ratio"); }
+        ros::param::param<float>("localizer/jiangshi_watershed/aspect_ratio_90_deg", aspectRatio90Deg, 0.1);
+        ROS_INFO("...using 90deg aspect ratio of %f", aspectRatio90Deg);
+    }
     bool JiangshiWatershed::getPoints(Mat& img, int border_size, vector<Point2f>& points)
     {
         Mat bordered, markers, borders, approxDP;
@@ -91,6 +101,27 @@ namespace pose_generator
         return true;
     }
 
+    void JiangshiWatershed::getOrientationFromAspectRatio(darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat)
+    {
+        float aspectRatio = ( (float) (bb.xmax - bb.xmin) ) / ( (float) (bb.ymax - bb.ymin) );
+        // Linearly fit the transformation from aspectRatio to yaw angle of the buoy
+        float m, b;
+        if ( horizontalDist > 0 ) // on the right of us, all angles should be negative
+        {
+            m = -90 / ( aspectRatio90Deg - 0.5 );
+            b = -90 - m * aspectRatio90Deg;
+        } else {                 // on the left of us, all angles should be positive
+            m = 90 / ( aspectRatio90Deg - 0.5 );
+            b = 90 - m * aspectRatio90Deg;
+        }
+        float yawDeg = m*aspectRatio + b;
+        yawDeg += 90;                   // Make it align with pnp transform
+        float yawRads = (M_PI / 180) * yawDeg;
+        tf2::Quaternion tfQuat;
+        tfQuat.setRPY( 0, 0, yawRads );
+        tf2::convert(quat, tfQuat);
+    }
+
     bool JiangshiWatershed::generatePose(
         sensor_msgs::Image& image, 
         vector<darknet_ros_msgs::BoundingBox>& bbs,
@@ -100,7 +131,7 @@ namespace pose_generator
             class_name = "jiangshi";
             if( bbs.size() != 1 ) { return false; }
             int border_size = 10; // add room for a border that we'll say is part of the 'not bouy' class
-            if(!checkBoxes(bbs, border_size)){ return false; }
+            if ( !checkBoxes(bbs, border_size) ) { return false; }
             cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::RGB8);
 
             // Trim image to jiangshi
@@ -122,6 +153,8 @@ namespace pose_generator
 
             // Get pose from image points using a solvepnp
             getPoseFromPoints(truth_pts, img_points, pose); // inherited
+             // Adjust Jiangshi Orientation according to aspect ratio of the bounding box
+            if ( useAspectRatio ) { getOrientationFromAspectRatio( bbs[0], pose.position.x, pose.orientation ); }
             return true;
         }
 }

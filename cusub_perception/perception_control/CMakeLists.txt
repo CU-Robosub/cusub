@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(waypoint_navigator)
+project(perception_control)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,23 +8,16 @@ project(waypoint_navigator)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  rospy
+  actionlib
+  actionlib_msgs
+  darknet_ros_msgs
+  roscpp
+  sensor_msgs
   std_msgs
   nav_msgs
-  message_generation
-  geometry_msgs
-  actionlib_msgs
-  actionlib
+  nodelet
+  waypoint_navigator
 )
-
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
-
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -58,27 +51,24 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
- add_service_files(
-   FILES
-   AddWaypoint.srv
-   CalibrateMagnetometer.srv
-   ToggleControl.srv
- )
+# add_service_files(
+#   FILES
+#   Service1.srv
+#   Service2.srv
+# )
 
 ## Generate actions in the 'action' folder
-add_action_files(
-   FILES
-   waypoint.action
- )
+# add_action_files(
+#   FILES
+#   Action1.action
+#   Action2.action
+# )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  geometry_msgs
-  nav_msgs
-  actionlib_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   darknet_ros_msgs#   sensor_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -109,10 +99,14 @@ generate_messages(
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
+
+add_action_files(DIRECTORY action FILES OrbitBuoy.action)
+generate_messages(DEPENDENCIES actionlib_msgs geometry_msgs)
+
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES waypoint_navigator
-#  CATKIN_DEPENDS rospy std_msgs message_runtime
+#  LIBRARIES perception_control
+  CATKIN_DEPENDS actionlib_msgs darknet_ros_msgs roscpp sensor_msgs
 #  DEPENDS system_lib
 )
 
@@ -129,7 +123,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/waypoint_navigator.cpp
+#   src/${PROJECT_NAME}/perception_control.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -140,7 +134,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/waypoint_navigator_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/perception_control_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -197,10 +191,18 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_waypoint_navigator.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_perception_control.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
-## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)
+
+
+include_directories(include ${catkin_INCLUDE_DIRS})
+add_library( orbit
+  src/orbit.cpp
+)
+target_link_libraries(orbit ${catkin_LIBRARIES})
+if(catkin_EXPORTED_LIBRARIES)
+  add_dependencies(orbit ${catkin_EXPORTED_LIBRARIES})
+endif()
