@@ -8,5 +8,6 @@ localizer:
   hough:
     three_legs : False  # true, false
   jiangshi_watershed:
-    use_aspect_ratio : false
+    use_aspect_ratio : true
+    aspect_ratio_90_deg: 0.1  # 0 degrees is 0.5
 

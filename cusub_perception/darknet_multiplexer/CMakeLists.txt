@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   OpenCV
   cv_bridge
+  darknet_ros_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -209,5 +210,12 @@ target_link_libraries(multiplexer ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(multiplexer ${catkin_EXPORTED_LIBRARIES})
 endif()
-
 add_dependencies(multiplexer darknet_multiplexer_generate_messages_cpp)
+
+add_library( drawer
+  src/drawer.cpp
+)
+target_link_libraries(drawer ${catkin_LIBRARIES})
+if(catkin_EXPORTED_LIBRARIES)
+  add_dependencies(drawer ${catkin_EXPORTED_LIBRARIES})
+endif()

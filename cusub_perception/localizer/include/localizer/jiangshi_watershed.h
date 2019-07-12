@@ -16,6 +16,9 @@
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
+#include <math.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 namespace pose_generator
 {
@@ -30,7 +33,7 @@ namespace pose_generator
                 string& class_name
             );
         private:
-            geometry_msgs::Quaternion getOrientationFromAspectRatio(darknet_ros_msgs::BoundingBox bb);
+            void getOrientationFromAspectRatio(darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat);
             bool getPoints(Mat& img, int border_size, vector<Point2f>& points);
             void sortPoints(Mat& img, vector<Point2f>& points);
             bool checkBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs, int border_size);
@@ -41,6 +44,7 @@ namespace pose_generator
                 Point3f(0, 0.3048, 0.61595)
             };
             bool useAspectRatio;
+            float aspectRatio90Deg;
     };
 }
 

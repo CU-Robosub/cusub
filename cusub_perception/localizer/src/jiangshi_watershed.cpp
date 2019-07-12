@@ -14,6 +14,8 @@ namespace pose_generator
         if ( !nh.getParam("localizer/jiangshi_watershed/use_aspect_ratio", useAspectRatio) ) { ROS_ERROR("Jiangshi couldn't locate params"); abort(); }
         if(!useAspectRatio) { ROS_WARN("Jiangshi Watershed not using bb aspect ratio"); }
         else { ROS_INFO("Jiangshi Watershed using bb aspect ratio"); }
+        ros::param::param<float>("localizer/jiangshi_watershed/aspect_ratio_90_deg", aspectRatio90Deg, 0.1);
+        ROS_INFO("...using 90deg aspect ratio of %f", aspectRatio90Deg);
     }
     bool JiangshiWatershed::getPoints(Mat& img, int border_size, vector<Point2f>& points)
     {
@@ -99,9 +101,33 @@ namespace pose_generator
         return true;
     }
 
-    geometry_msgs::Quaternion JiangshiWatershed::getOrientationFromAspectRatio(darknet_ros_msgs::BoundingBox bb)
+    void JiangshiWatershed::getOrientationFromAspectRatio(darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat)
     {
-        return geometry_msgs::Quaternion();
+        std::cout << "---" << std::endl;
+        std::cout << horizontalDist << std::endl;
+        std::cout << bb.xmax - bb.xmin << std::endl;
+        std::cout << bb.xmax - bb.xmin << std::endl;
+        float aspectRatio = ( (float) (bb.xmax - bb.xmin) ) / ( (float) (bb.ymax - bb.ymin) );
+        std::cout << aspectRatio << std::endl;
+
+        // Linearly fit the transformation from aspectRatio to yaw angle of the buoy
+        float m, b;
+        if ( horizontalDist > 0 ) // on the right of us, all angles should be negative
+        {
+            m = -90 / ( aspectRatio90Deg - 0.5 );
+            b = -90 - m * aspectRatio90Deg;
+        } else {                 // on the left of us, all angles should be positive
+            ROS_WARN("Less than 0");
+            m = 90 / ( aspectRatio90Deg - 0.5 );
+            b = 90 - m * aspectRatio90Deg;
+        }
+        float yawDeg = m*aspectRatio + b;
+        yawDeg += 90;                   // Make it align with pnp transform
+        float yawRads = (M_PI / 180) * yawDeg;
+        std::cout << yawRads << std::endl;
+        tf2::Quaternion tfQuat;
+        tfQuat.setRPY( 0, 0, yawRads );
+        tf2::convert(quat, tfQuat);
     }
 
     bool JiangshiWatershed::generatePose(
@@ -135,8 +161,9 @@ namespace pose_generator
 
             // Get pose from image points using a solvepnp
             getPoseFromPoints(truth_pts, img_points, pose); // inherited
+            std::cout << pose << std::endl;
             // Adjust Jiangshi Orientation according to aspect ratio of the bounding box
-            if ( useAspectRatio ) { pose.orientation = getOrientationFromAspectRatio( bbs[0] ); }
+            if ( useAspectRatio ) { getOrientationFromAspectRatio( bbs[0], pose.position.x, pose.orientation ); }
             return true;
         }
 }
