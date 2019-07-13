@@ -37,14 +37,14 @@ class Manager(smach.State):
         elif userdata.previous_outcome == "success":
             self.success()
         else:
-            response_param = "tasks/"+self.queued_tasks+"/"+userdata.previous_outcome
+            response_param = "tasks/"+self.queued_tasks[0]+"/"+userdata.previous_outcome
             prev_outcome_response = rospy.get_param(response_param)
             if prev_outcome_response == "skip":
                 self.skip()
             elif prev_outcome_response == "later":
                 self.later()
             else:
-                raise("Manager doesn't recognize " + prev_outcome_response + " from " + response_param)
+                raise(Exception("Manager doesn't recognize '" + prev_outcome_response + "' from param '" + response_param + "'"))
 
         if len(self.queued_tasks) == 0:
             return self.mission_end_outcome
