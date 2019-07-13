@@ -31,9 +31,14 @@ BACKUP_MODE = 3
 class Task(smach.StateMachine):
     __metaclass__ = ABCMeta
 
-    def __init__(self, outcomes):
+    outcome = ["manager"]
+
+    def __init__(self):
         rospy.Subscriber('kill_sm', Empty, self.kill_sm)
-        super(Task, self).__init__(outcomes=outcomes)
+        super(Task, self).__init__(
+            outcomes=self.outcome,\
+            input_keys=['timeout_obj'],\
+            output_keys=['timeout_obj', 'outcome'])
 
     @abstractproperty
     def name(self):
@@ -111,7 +116,10 @@ class Objective(smach.State):
         self.cur_pose = pose
         self.cancel_goal = False
 
-        super(Objective, self).__init__(outcomes=outcomes)
+        super(Objective, self).__init__(
+            outcomes=outcomes,\
+            input_keys=['timeout_obj'],\
+            output_keys=['timeout_obj', 'outcome'])
 
     def configure_darknet_cameras(self, camera_bool_list):
         """
@@ -355,3 +363,23 @@ class Objective(smach.State):
         target_pose.position.z = cur_pose.position.z
         target_pose.orientation = cur_pose.orientation
         return target_pose
+
+class Timeout():
+    """
+    @brief Timeout object for tasks
+    """
+    timer = None
+
+    def set_new_time(self, seconds):
+        if self.timer != None:
+            self.timer.shutdown()
+        self.timed_out = False
+        self.timer = rospy.Timer(rospy.Duration(seconds), self.timer_callback)
+        rospy.loginfo("Setting new time")
+
+    def timer_callback(self, msg):
+        self.timer.shutdown()
+        self.timed_out = True
+
+    def timed_out(self):
+        return self.timed_out
