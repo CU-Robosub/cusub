@@ -7,6 +7,7 @@ import smach
 import smach_ros
 from tasks.task import Timeout
 import rospy
+from state_machine.msg import TaskStatus
 
 # Possible task statuses:
 # queued, active, success, timedout, not_found
@@ -28,6 +29,11 @@ class Manager(smach.State):
         for task in self.queued_tasks:
             self.tasks_status[task] = 'queued'
 
+        self.pub_seq = 0
+        self.pub = rospy.Publisher("cusub_cortex/state_machine/task_status", TaskStatus, queue_size=1)
+        rate = rospy.get_param("manager_task_status_pub_rate")
+        rospy.Timer(rospy.Duration(1 / rate), self.publish_task_states_callback)
+
         # service to get the next available class
 
     def execute(self, userdata):
@@ -35,12 +41,14 @@ class Manager(smach.State):
         if userdata.previous_outcome == "starting":
             pass
         elif userdata.previous_outcome == "success":
-            self.success()
+            self.tasks_status[self.queued_tasks[0]] = "success"
+            self.move_on()
         else:
+            self.tasks_status[self.queued_tasks[0]] = userdata.previous_outcome
             response_param = "tasks/"+self.queued_tasks[0]+"/"+userdata.previous_outcome
             prev_outcome_response = rospy.get_param(response_param)
             if prev_outcome_response == "skip":
-                self.skip()
+                self.move_on()
             elif prev_outcome_response == "later":
                 self.later()
             else:
@@ -48,21 +56,25 @@ class Manager(smach.State):
 
         if len(self.queued_tasks) == 0:
             return self.mission_end_outcome
+        self.tasks_status[self.queued_tasks[0]] = "active"
         secs = rospy.get_param("tasks/"+self.queued_tasks[0]+"/timeout_secs")
         self.timeout_obj.set_new_time(secs)
         return self.queued_tasks[0]
 
-    def success(self):
-        rospy.loginfo("Success")
+    def move_on(self):
         self.queued_tasks.pop(0)
-    def skip(self):
-        rospy.loginfo("Skipping")
-        self.queued_tasks.pop(0)
-        pass
     def later(self):
         rospy.loginfo("Latering")
         self.queued_tasks.pop(0)
-        pass
+    
+    def publish_task_states_callback(self, msg):
+        ts = TaskStatus()
+        for task in self.tasks_status.keys():
+            ts.task_statuses.append(task)
+            ts.task_statuses.append(self.tasks_status[task])
+        ts.header.seq = self.pub_seq; self.pub_seq += 1
+        ts.header.stamp = rospy.Time.now()
+        self.pub.publish(ts)
         
     # get next task service, should just be the 2nd index in the array
 

@@ -20,14 +20,14 @@ class Search(Objective):
     
     outcomes = ['found','not_found'] # We found task or timed out
 
-    def __init__(self, prior_pose_topic, search_topic, num_quit_poses=5, darknet_cameras=[1,1,1,1,1,1]):
+    def __init__(self, prior_pose_param, search_topic, num_quit_poses=5, darknet_cameras=[1,1,1,1,1,1]):
         """
         Search objective initialization function
 
         Parameters
         ---------
-        prior_pose_topic : str
-             Prior pose given by the rosparam server
+        prior_pose_param : str
+             Param name of the prior for the task
         search_topic : str
              Topic name to listen for task poses
         num_quit_poses : int
@@ -35,8 +35,9 @@ class Search(Objective):
         darknet_cameras : bool list, len 6
             Darknet cameras to use
         """
+        rospy.loginfo("loading search")
         self.listener = tf.TransformListener() # Transform prior into odom
-        self.prior = self.get_odom_prior(prior_pose_topic)
+        self.prior_pose_param = prior_pose_param
         rospy.Subscriber(search_topic, PoseStamped, self.exit_callback)
         self.num_quit_poses = num_quit_poses
         self.num_poses_received = 0
@@ -49,7 +50,15 @@ class Search(Objective):
         if not self.abort_requested() and self.num_poses_received > self.num_quit_poses:
             self.request_abort()
 
-    def execute(self, ueserdata):
+    def execute(self, userdata):
+        
+        # DELETE
+        rospy.sleep(5)
+        userdata.outcome = "not_found"
+        return "not_found"
+        
+        prior = self.get_odom_prior(prior_pose_param)
+
         rospy.loginfo("---Executing Search")
         if self.abort_requested():
             return "found"
@@ -60,6 +69,7 @@ class Search(Objective):
             return "found"
         else:
             rospy.logerr("Search unable to find task.")
+            userdata.outcome = "not_found"
             return "not_found"
 
     def get_odom_prior(self, rosparam_str):
@@ -79,9 +89,9 @@ class Search(Objective):
                     raise("Launch file must specify private param 'robotname'")
                 try:
                     odom_frame = '/'+ rospy.get_param("~robotname") + '/description/odom'
-                    print("...waiting for transform: " + odom_frame + " -> " + xyzframe_list[3])
+                    rospy.loginfo("...waiting for transform: " + odom_frame + " -> /" + xyzframe_list[3])
                     self.listener.waitForTransform(p.header.frame_id, odom_frame, p.header.stamp, rospy.Duration(5))
-                    print("...found transform")
+                    rospy.loginfo("...found transform")
                     p = self.listener.transformPose(odom_frame, p)
                 except (tf.ExtrapolationException, tf.ConnectivityException, tf.LookupException) as e:
                     rospy.logerr(e)

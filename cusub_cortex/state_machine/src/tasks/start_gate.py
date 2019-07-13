@@ -21,10 +21,9 @@ import tf
 
 class StartGate(Task):
     name = "start_gate"
-    outcomes = ['task_success','task_aborted']
 
     def __init__(self):
-        super(StartGate, self).__init__(self.outcomes) # become a state machine first
+        super(StartGate, self).__init__() # become a state machine first
         self.init_objectives()
         self.link_objectives()
 
@@ -34,17 +33,22 @@ class StartGate(Task):
 
     def link_objectives(self):
         with self: # we are a StateMachine
-            smach.StateMachine.add('Search', self.search, transitions={'found':'Attack', 'not_found':'task_aborted'})
-            smach.StateMachine.add('Attack', self.attack, transitions={'success':'task_success', 'aborted':'Attack'})
+            smach.StateMachine.add('Search', self.search, transitions={'found':'Attack', 'not_found':'manager'}, \
+                remapping={'timeout_obj':'timeout_obj', \
+                            'outcome':'outcome'})
+            smach.StateMachine.add('Attack', self.attack, transitions={'done':'manager'}, \
+                remapping={'timeout_obj':'timeout_obj', \
+                            'outcome':'outcome'})
 
 class Attack(Objective):
     """
     Tell the sub to go through the gate
     """
 
-    outcomes=['success','aborted']
+    outcomes=['done']
 
     def __init__(self):
+        rospy.loginfo("Loading attack")
         super(Attack, self).__init__(self.outcomes, "Attack")
         self.dist_behind = rospy.get_param('tasks/start_gate/dist_behind_gate', 1.0)
         self.replan_threshold = rospy.get_param('tasks/start_gate/replan_thresh', 1.0)
@@ -58,9 +62,9 @@ class Attack(Objective):
         self.started = False
         self.current_yaw = None
         self.yaw_pub = rospy.Publisher("cusub_common/motor_controllers/pid/yaw/setpoint", Float64, queue_size=10)
-        rospy.loginfo("...waiting for cusub_common/toggleWaypointControl")
-        rospy.wait_for_service("cusub_common/toggleWaypointControl")
-        rospy.loginfo("...found service")
+        # rospy.loginfo("...waiting for cusub_common/toggleWaypointControl")
+        # rospy.wait_for_service("cusub_common/toggleWaypointControl")
+        # rospy.loginfo("...found service")
         rospy.Subscriber("cusub_cortex/mapper_out/start_gate", PoseStamped, self.start_gate_callback)
         rospy.Subscriber("cusub_perception/start_gate/small_pole_left_side", Bool, self.small_leg_callback)
         rospy.Subscriber("cusub_common/motor_controllers/pid/yaw/state", Float64, self.yaw_callback)
@@ -86,31 +90,37 @@ class Attack(Objective):
             self.request_abort() # this will loop us back to execute
 
     def execute(self, userdata):
-        self.started = True
-        rospy.loginfo("Executing Attack")
-        self.clear_abort()
 
-        self.configure_darknet_cameras([1,1,0,0,1,0])
+        # DELETE
+        userdata.outcome = "success"
+        return "done"
 
-        target_pose = self.adjust_gate_pose(
-            self.cur_pose, \
-            self.start_gate_pose.pose, \
-            self.dist_behind, \
-            self.small_leg_left_side, \
-            self.leg_adjustment_meters)
 
-        if self.do_style:
-            style_pose = self.get_style_pose(self.cur_pose, \
-                target_pose, \
-                self.style_dist)
-            if self.go_to_pose(style_pose):
-                return 'aborted'
-            rospy.loginfo("...reached style pose")
-            self.enact_style()
+        # self.started = True
+        # rospy.loginfo("Executing Attack")
+        # self.clear_abort()
 
-        if self.go_to_pose(target_pose):
-            return 'aborted'
-        return "success"
+        # self.configure_darknet_cameras([1,1,0,0,1,0])
+
+        # target_pose = self.adjust_gate_pose(
+        #     self.cur_pose, \
+        #     self.start_gate_pose.pose, \
+        #     self.dist_behind, \
+        #     self.small_leg_left_side, \
+        #     self.leg_adjustment_meters)
+
+        # if self.do_style:
+        #     style_pose = self.get_style_pose(self.cur_pose, \
+        #         target_pose, \
+        #         self.style_dist)
+        #     if self.go_to_pose(style_pose):
+        #         return 'aborted'
+        #     rospy.loginfo("...reached style pose")
+        #     self.enact_style()
+
+        # if self.go_to_pose(target_pose):
+        #     return 'aborted'
+        # return "success"
 
     def enact_style(self):
         if self.current_yaw == None:
