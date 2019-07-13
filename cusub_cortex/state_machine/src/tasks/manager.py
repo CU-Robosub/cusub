@@ -39,7 +39,6 @@ class Manager(smach.State):
         rospy.Service('cusub_cortex/state_machine/get_next_task', GetNextTask, self.handle_get_next_task)
 
     def execute(self, userdata):
-        rospy.loginfo("Executing Manager")
         if userdata.previous_outcome == "starting":
             pass
         elif userdata.previous_outcome == "success":
@@ -47,7 +46,7 @@ class Manager(smach.State):
             self.move_on()
         else:
             self.tasks_status[self.queued_tasks[0]] = userdata.previous_outcome
-            response_param = "tasks/"+self.queued_tasks[0]+"/outcome_"+userdata.previous_outcome
+            response_param = "tasks/"+self.queued_tasks[0]+"/manager_info/outcome_"+userdata.previous_outcome
             prev_outcome_response = rospy.get_param(response_param)
             if prev_outcome_response == "skip":
                 self.move_on()
@@ -59,8 +58,9 @@ class Manager(smach.State):
         if len(self.queued_tasks) == 0:
             return self.mission_end_outcome
         self.tasks_status[self.queued_tasks[0]] = "active"
-        secs = rospy.get_param("tasks/"+self.queued_tasks[0]+"/timeout_secs")
+        secs = rospy.get_param("tasks/"+self.queued_tasks[0]+"/manager_info/timeout_secs")
         self.timeout_obj.set_new_time(secs)
+        userdata.timeout_obj = self.timeout_obj
         return self.queued_tasks[0]
 
     def move_on(self):

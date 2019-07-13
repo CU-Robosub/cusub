@@ -21,10 +21,9 @@ from sensor_msgs.msg import Imu
 
 class Jiangshi(Task):
     name = "jiangshi"
-    outcomes = ['task_success','task_aborted']
 
     def __init__(self):
-        super(Jiangshi, self).__init__(self.outcomes)
+        super(Jiangshi, self).__init__()
         self.init_objectives()
         self.link_objectives()
 
@@ -34,14 +33,14 @@ class Jiangshi(Task):
 
     def link_objectives(self):
         with self:
-            smach.StateMachine.add('Search', self.search, transitions={'found':'Slay', 'not_found':'task_aborted'})
-            smach.StateMachine.add('Slay', self.slay, transitions={'success':'task_success', 'aborted':'task_aborted'})
+            # smach.StateMachine.add('Search', self.search, transitions={'found':'Slay', 'not_found':'manager'})
+            smach.StateMachine.add('Slay', self.slay, transitions={'exit':'manager'}) # State Transition info is passed through userdata
 
 class Slay(Objective):
     """
     Go to a point in front of the bouy, slay jiangshi backwards, backup
     """
-    outcomes=['success','aborted']
+    outcomes=['exit'] # Need to change a ton of shit here...
 
     def __init__(self):
         super(Slay, self).__init__(self.outcomes, "Slay")
@@ -143,6 +142,13 @@ class Slay(Objective):
         return approach_pose, slay_pose
 
     def execute(self, userdata):
+        r = rospy.Rate(1)
+        while not rospy.is_shutdown() and not userdata.timeout_obj.timed_out:
+            r.sleep()
+        print(userdata.timeout_obj.timed_out)
+        userdata.outcome = "timedout"
+        return "exit"
+
         self.clear_abort()
         self.configure_darknet_cameras([1,1,0,0,1,0])
         while not rospy.is_shutdown():          # Loop until we find a good SG pose

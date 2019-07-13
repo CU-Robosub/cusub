@@ -375,11 +375,11 @@ class Timeout():
             self.timer.shutdown()
         self.timed_out = False
         self.timer = rospy.Timer(rospy.Duration(seconds), self.timer_callback)
-        rospy.loginfo("Setting new time")
 
     def timer_callback(self, msg):
         self.timer.shutdown()
+        rospy.logerr("Task Timed Out")
         self.timed_out = True
 
-    def timed_out(self):
+    def timed_out(self, dontuse):
         return self.timed_out
