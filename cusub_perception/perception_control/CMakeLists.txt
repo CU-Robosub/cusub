@@ -206,3 +206,8 @@ target_link_libraries(orbit ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(orbit ${catkin_EXPORTED_LIBRARIES})
 endif()
+
+add_dependencies(
+  orbit
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+)
