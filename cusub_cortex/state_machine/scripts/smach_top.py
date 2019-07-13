@@ -45,8 +45,8 @@ def loadStateMachines(task_list):
 
         if task == "start_gate":
             task_sm = StartGate()
-        # elif task == "jiangshi":
-        #     task_sm = Jiangshi()
+        elif task == "jiangshi":
+            task_sm = Jiangshi()
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 
@@ -94,24 +94,17 @@ def main():
 
     # Load all statemachines
     with sm_top:
-        task_list=['start_gate']
         manager_transitions = createTransitionsForManager(task_list, final_outcome)
-        print(manager_transitions)
-        manager_obj = Manager(task_list, final_outcome)
-        smach.StateMachine.add('manager', manager_obj, transitions=manager_transitions, \
+        smach.StateMachine.add('manager', Manager(task_list, final_outcome), \
+            transitions=manager_transitions, \
             remapping={"timeout_obj":"timeout_obj", "previous_outcome":"previous_outcome"})
-        smach.StateMachine.add(task_list[0], sm_list[0], \
-            transitions={'manager':'manager'}, \
-            remapping={'outcome':'previous_outcome'}) # all states will transition to the manager
-
-        # rospy.loginfo("Loaded")
-        # for index in range(len(task_list)):
-        #     sm_name = task_list[ index ]
-        #     sm = sm_list[ index ]
-        #     smach.StateMachine.add(sm_name, sm, transitions={'manager':'manager'}) # all states will transition to the manager
+        for index in range(len(task_list)):
+            sm_name = task_list[ index ]
+            sm = sm_list[ index ]
+            smach.StateMachine.add(sm_name, sm, \
+                transitions={'manager':'manager'},\
+                remapping={'outcome':'previous_outcome'}) # all states will transition to the manager) # all states will transition to the manager
     try:
-        
-        rospy.loginfo("Executing sm")
         outcome = sm_top.execute()
     except rospy.ROSInterruptException:
         sys.exit()

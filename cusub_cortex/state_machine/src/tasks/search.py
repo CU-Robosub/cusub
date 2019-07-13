@@ -53,7 +53,7 @@ class Search(Objective):
     def execute(self, userdata):
         
         # DELETE
-        rospy.sleep(5)
+        rospy.sleep(2)
         userdata.outcome = "not_found"
         return "not_found"
         
