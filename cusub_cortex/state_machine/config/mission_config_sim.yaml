@@ -2,9 +2,13 @@
 # ALL UNITS IN M
 
 using_sim_params : True
+manager_task_status_pub_rate: 1
 
 tasks:
  start_gate:
+  timeout_secs: 100
+  outcome_not_found: 'skip'
+  outcome_timedout: 'uh_oh'
   prior: [-11,25,-1.5, "world"] # TRANSDEC, DIVEWELL 8,0,-1.5
   dist_behind_gate: 1.0
   third_leg_adjustment: 0.5
@@ -14,6 +18,8 @@ tasks:
   spin_carrot_rads: 0.7
 
  jiangshi:
+  not_found: 'skip'
+  timedout: 'later0'
   prior: [7.0,4.3,-1.5, "world"] # DIVEWELL
   approach_dist: 2.0
   slay_dist: 0.0
@@ -58,6 +64,6 @@ tasks:
     roulette: roulette_watershed
 
 mission_tasks: # Tasks To Do In Order
-# - start_gate
-  - jiangshi
-#  - triangle_buoy
+  - start_gate
+  # - jiangshi
+  # - triangle_buoy

@@ -47,7 +47,7 @@ class Manager(smach.State):
             self.move_on()
         else:
             self.tasks_status[self.queued_tasks[0]] = userdata.previous_outcome
-            response_param = "tasks/"+self.queued_tasks[0]+"/"+userdata.previous_outcome
+            response_param = "tasks/"+self.queued_tasks[0]+"/outcome_"+userdata.previous_outcome
             prev_outcome_response = rospy.get_param(response_param)
             if prev_outcome_response == "skip":
                 self.move_on()
