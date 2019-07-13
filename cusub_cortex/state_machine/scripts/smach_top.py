@@ -94,12 +94,15 @@ def main():
 
     # Load all statemachines
     with sm_top:
-        task_list=[]
+        task_list=['start_gate']
         manager_transitions = createTransitionsForManager(task_list, final_outcome)
         print(manager_transitions)
         manager_obj = Manager(task_list, final_outcome)
         smach.StateMachine.add('manager', manager_obj, transitions=manager_transitions, \
             remapping={"timeout_obj":"timeout_obj", "previous_outcome":"previous_outcome"})
+        smach.StateMachine.add(task_list[0], sm_list[0], \
+            transitions={'manager':'manager'}, \
+            remapping={'outcome':'previous_outcome'}) # all states will transition to the manager
 
         # rospy.loginfo("Loaded")
         # for index in range(len(task_list)):
