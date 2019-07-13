@@ -146,6 +146,10 @@ class Slay(Objective):
         while not rospy.is_shutdown() and not userdata.timeout_obj.timed_out:
             r.sleep()
         print(userdata.timeout_obj.timed_out)
+        userdata.timeout_obj.set_new_time(4)
+        while not rospy.is_shutdown() and not userdata.timeout_obj.timed_out:
+            print("looping")
+            r.sleep()
         userdata.outcome = "timedout"
         return "exit"
 

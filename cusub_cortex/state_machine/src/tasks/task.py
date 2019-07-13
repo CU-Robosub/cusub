@@ -381,5 +381,5 @@ class Timeout():
         rospy.logerr("Task Timed Out")
         self.timed_out = True
 
-    def timed_out(self, dontuse):
+    def timed_out(self):
         return self.timed_out
