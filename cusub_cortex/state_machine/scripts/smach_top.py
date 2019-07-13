@@ -21,6 +21,15 @@ from tasks.naive_visual_servo_objective import NaiveVisualServoTask
 # from tasks.bangbang_roulette_task import BangBangRouletteTask
 from tasks.jiangshi import Jiangshi
 from tasks.triangle_buoy import Triangle_Buoy
+from tasks.manager import Manager
+from tasks.task import Timeout
+
+def createTransitionsForManager(task_list, final_outcome):
+    transition_dict = {}
+    for task in task_list:
+        transition_dict[task] = task
+    transition_dict[final_outcome] = final_outcome
+    return transition_dict
 
 
 def loadStateMachines(task_list):
@@ -36,20 +45,8 @@ def loadStateMachines(task_list):
 
         if task == "start_gate":
             task_sm = StartGate()
-        # elif task == "dice":
-        #     task_sm = Dice()
-        # elif task == "bangbang_dice":
-        #     task_sm = BangBangDiceTask()
-        # elif task == "bangbang_roulette":
-        #     task_sm = BangBangRouletteTask()
-        # # elif task == "dropper":
-        #     # task_sm = DropperTask(prior, search_alg)
-        # elif task == "naive_visual_servo_objective":
-        #     task_sm = NaiveVisualServoTask()
-        elif task == "jiangshi":
-            task_sm = Jiangshi()
-        elif task == "triangle_buoy":
-            task_sm = Triangle_Buoy()
+        # elif task == "jiangshi":
+        #     task_sm = Jiangshi()
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 
@@ -67,14 +64,12 @@ def main():
     All state transition logic is in the manager
     """
     rospy.init_node('state_machine')
-
-    # Wait for the manager to become ready
     
     # All Objectives depend on the waypoint server so let's wait for it to initalize here
-    wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
-    rospy.loginfo("Waiting for waypoint server")
-    wayClient.wait_for_server()
-    rospy.loginfo("---connected to server")
+    # wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
+    # rospy.loginfo("Waiting for waypoint server")
+    # wayClient.wait_for_server()
+    # rospy.loginfo("---connected to server")
 
     if rospy.get_param('~using_darknet'):
         rospy.loginfo("Waiting for darknet multiplexer server")
@@ -82,8 +77,6 @@ def main():
         rospy.loginfo("---connected to server")
     else:
         rospy.logwarn("SM not using darknet configuration service.")
-
-    sm_top = smach.StateMachine(['success'])
 
     # initialize all of the state machines
     rospy.loginfo("Waiting for rosparams")
@@ -94,24 +87,29 @@ def main():
     task_list = rospy.get_param("mission_tasks")
     sm_list = loadStateMachines(task_list)
 
+    final_outcome = "mission_completed"
+    sm_top = smach.StateMachine(outcomes=[final_outcome])
+    sm_top.userdata.previous_outcome = "starting"
+    sm_top.userdata.timeout_obj = Timeout()
+
     # Load all statemachines
     with sm_top:
-        last_index = len(task_list) - 1
-        for index in range( len(task_list) ): # loop through all of the tasks
-            sm_name = task_list[ index ]
-            sm = sm_list[ index ]
+        task_list=[]
+        manager_transitions = createTransitionsForManager(task_list, final_outcome)
+        print(manager_transitions)
+        manager_obj = Manager(task_list, final_outcome)
+        smach.StateMachine.add('manager', manager_obj, transitions=manager_transitions, \
+            remapping={"timeout_obj":"timeout_obj", "previous_outcome":"previous_outcome"})
 
-            # find task success transition
-            if index == last_index: # check if we're the last task
-                success_transition = "success"
-            else: # link to next task
-                success_transition = task_list[ index + 1 ]
-
-            aborted_transition = success_transition
-            smach.StateMachine.add(sm_name, sm, transitions={'task_aborted' : aborted_transition, 'task_success':success_transition})
-
+        # rospy.loginfo("Loaded")
+        # for index in range(len(task_list)):
+        #     sm_name = task_list[ index ]
+        #     sm = sm_list[ index ]
+        #     smach.StateMachine.add(sm_name, sm, transitions={'manager':'manager'}) # all states will transition to the manager
     try:
-        outcome = sm_top.execute() # does this allow us to receive messages in the states?
+        
+        rospy.loginfo("Executing sm")
+        outcome = sm_top.execute()
     except rospy.ROSInterruptException:
         sys.exit()
 
