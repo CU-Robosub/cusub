@@ -8,6 +8,7 @@ import smach_ros
 from tasks.task import Timeout
 import rospy
 from state_machine.msg import TaskStatus
+from state_machine.srv import *
 
 # Possible task statuses:
 # queued, active, success, timedout, not_found
@@ -35,6 +36,7 @@ class Manager(smach.State):
         rospy.Timer(rospy.Duration(1 / rate), self.publish_task_states_callback)
 
         # service to get the next available class
+        rospy.Service('cusub_cortex/state_machine/get_next_task', GetNextTask, self.handle_get_next_task)
 
     def execute(self, userdata):
         rospy.loginfo("Executing Manager")
@@ -75,6 +77,12 @@ class Manager(smach.State):
         ts.header.seq = self.pub_seq; self.pub_seq += 1
         ts.header.stamp = rospy.Time.now()
         self.pub.publish(ts)
+
+    def handle_get_next_task(self, req):
+        if len(self.queued_tasks) < 2:
+            return GetNextTaskResponse("mission_complete")
+        else:
+            return GetNextTaskResponse(self.queued_tasks[1])
         
     # get next task service, should just be the 2nd index in the array
 
