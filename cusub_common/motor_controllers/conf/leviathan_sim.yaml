@@ -1,0 +1,11 @@
+flip_motor_array: [1, 1, 1, 1, 1, 1, 1, 1]
+cusub_common:
+  motor_controllers:
+    pid:
+      depth:
+        pid:
+          Kd: -105.0
+          Ki: -15.0
+          Kp: -140.0
+          windup_limit: 100.0
+
