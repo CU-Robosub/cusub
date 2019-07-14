@@ -148,14 +148,14 @@ class Objective(smach.State):
             rospy.logerr("Darknet Camera Config Service call failed: %s"%e)
             return False
 
-    def go_to_pose(self, target_pose, move_mode="yaw"):
+    def go_to_pose(self, target_pose, timeout_obj, move_mode="yaw"):
         """ Traverse to the target_pose given
 
         Parameters
         ----------
         target_pose : Pose
-             The pose to navigate to
-             If None, the sub will stop where it currently is and wait to be aborted
+             The pose for the sub to navigate to
+        timeout_obj : almost certainly this is userdata.timeout_obj
         move_mode : str
              "yaw" : the waypoint navigtator will use yaw mode to navigate to the target pose
              "strafe" : use strafe-drive mode to the target pose
@@ -163,18 +163,13 @@ class Objective(smach.State):
 
         Returns
         -------
-        bool : success/aborted
-             1 aborted
-             0 success, waypoint reached
+        bool : success/reached out OR failure/timedout
+            0 success, waypoint reached
+            1 failure, timedout
+             
         """
-        if type(target_pose) == type(None):  # Wait where we currently are until being aborted
-            rospy.logwarn("Objective has instructed Sub to wait where it is until being aborted")
-            while not self.abort_requested():
-                rospy.sleep(0.5)
-            return "aborted"
-
         self.go_to_pose_non_blocking(target_pose, move_mode)
-        return self.block_on_reaching_pose(target_pose)
+        return self.block_on_reaching_pose(target_pose, userdata.timeout_obj)
 
     def go_to_pose_non_blocking(self, target_pose, move_mode="yaw"):
         wpGoal = waypointGoal()
@@ -198,11 +193,13 @@ class Objective(smach.State):
         """ An alternative to abort for cancelling the current pose goal that prints a lot less """
         self.cancel_goal = True
     
-    def block_on_reaching_pose(self, target_pose):
+    def block_on_reaching_pose(self, target_pose, timeout_obj):
         res = self.wayClient.get_result()
+        print(res)
         while (res == None or not res.complete) and not rospy.is_shutdown():
             res = self.wayClient.get_result()
-
+            print(res)
+            # Remove aborts, replace with replans
             if self.abort_requested():
                 self.wayClient.cancel_goal()
                 rospy.loginfo("---waypoint quitting")
@@ -215,6 +212,7 @@ class Objective(smach.State):
                 self.cancel_goal = False
                 return True
             rospy.sleep(0.25)
+        print(res)
         rospy.loginfo("---reached pose")
         return False
 
@@ -225,27 +223,14 @@ class Objective(smach.State):
         """ Get xy distance between 2 points """
         dx = point2.x - point1.x
         dy = point2.y - point1.y
-
-        xy_dist = math.sqrt(dx**2 + dy**2)
-        return xy_dist
-
+        return math.sqrt(dx**2 + dy**2)
 
     def get_distance(self, point1, point2):
         """ Get distance between 2 points """
         dx = point2.x - point1.x
         dy = point2.y - point1.y
         dz = point2.z - point1.z
-
-        dist = math.sqrt(dx**2 + dy**2 + dz**2)
-        return dist
-
-    def abort_requested(self):
-        return self._abort_requested
-    def request_abort(self):
-        rospy.loginfo("---requesting abort of " + self.name + " objective")
-        self._abort_requested = True
-    def clear_abort(self):
-        self._abort_requested = False
+        return math.sqrt(dx**2 + dy**2 + dz**2)
 
     def replan_requested(self):
         return self._abort_requested
@@ -371,6 +356,7 @@ class Timeout():
     timer = None
 
     def set_new_time(self, seconds):
+        """ In objectives reference like: userdata.timeout_obj.set_new_time(4) """
         if self.timer != None:
             self.timer.shutdown()
         self.timed_out = False
@@ -382,4 +368,5 @@ class Timeout():
         self.timed_out = True
 
     def timed_out(self):
+        """ In objectives reference like: userdata.timeout_obj.timed_out """
         return self.timed_out
