@@ -34,18 +34,16 @@ class StartGate(Task):
     def link_objectives(self):
         with self: # we are a StateMachine
             smach.StateMachine.add('Search', self.search, transitions={'found':'Attack', 'not_found':'manager'}, \
-                remapping={'timeout_obj':'timeout_obj', \
-                            'outcome':'outcome'})
-            smach.StateMachine.add('Attack', self.attack, transitions={'done':'manager'}, \
-                remapping={'timeout_obj':'timeout_obj', \
-                            'outcome':'outcome'})
+                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
+            smach.StateMachine.add('Attack', self.attack, transitions={'success':'manager','timed_out':'manager'}, \
+                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
 class Attack(Objective):
     """
     Tell the sub to go through the gate
     """
 
-    outcomes=['done']
+    outcomes=['success', 'timed_out']
 
     def __init__(self):
         rospy.loginfo("Loading attack")
@@ -94,7 +92,7 @@ class Attack(Objective):
             self.request_replan() # this will loop us back to execute
 
     def do_gate_with_style(self, userdata):
-        while not rospy.is_shutdown():          # Loop until we find a good task pose
+        while not rospy.is_shutdown():          # Loop over the replans from a gate pose change
             target_pose = self.adjust_gate_pose(
                 self.cur_pose, \
                 self.start_gate_pose.pose, \
@@ -103,12 +101,12 @@ class Attack(Objective):
                 self.leg_adjustment_meters)
 
             dist_in_front_of_gate = self.style_dist + self.dist_behind
-            style_pose = self.get_style_pose(self.cur_pose,target_pose, dist_in_front_of_gate)
+            style_pose = self.get_style_pose(self.cur_pose, target_pose, dist_in_front_of_gate)
 
             if self.go_to_pose(style_pose, userdata.timeout_obj):
                 if userdata.timeout_obj.timed_out:
                     userdata.outcome = "timed_out"
-                    return "done"
+                    return "timed_out"
                 else: # Replan has been requested loop again
                     pass
             else: # Pose reached successfully!
@@ -118,13 +116,13 @@ class Attack(Objective):
         self.enact_style()
         if self.go_to_pose(target_pose, userdata.timeout_obj, replan_enabled=False):
             userdata.outcome = "timed_out"
-            return "done"
+            return "timed_out"
         else:
             userdata.outcome = "success"
-            return "done"
+            return "success"
 
     def do_gate_no_style(self, userdata):
-        while not rospy.is_shutdown():          # Loop until we find a good task pose
+        while not rospy.is_shutdown():          # Loop over the replans from a gate pose change
             target_pose = self.adjust_gate_pose(
                 self.cur_pose, \
                 self.start_gate_pose.pose, \
@@ -135,12 +133,12 @@ class Attack(Objective):
             if self.go_to_pose(target_pose, userdata.timeout_obj):
                 if userdata.timeout_obj.timed_out:
                     userdata.outcome = "timed_out"
-                    return "done"
+                    return "timed_out"
                 else: # Replan has been requested loop again
                     pass
             else:
                 userdata.outcome = "success"
-                return "done"
+                return "success"
 
     def execute(self, userdata):
         self.started = True
