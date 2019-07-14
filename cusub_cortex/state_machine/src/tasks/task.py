@@ -99,7 +99,6 @@ class Objective(smach.State):
         self.wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
         self.started = False
         self.using_darknet = rospy.get_param("~using_darknet")
-        self.target_pose = None
 
         # initialize the pose
         pose = Pose()
@@ -107,7 +106,6 @@ class Objective(smach.State):
         pose.position.y = 0
         pose.position.z = 0
         self.cur_pose = pose
-        self.cancel_goal = False
 
         super(Objective, self).__init__(
             outcomes=outcomes,\
