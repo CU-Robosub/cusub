@@ -10,9 +10,6 @@ import rospy
 from state_machine.msg import TaskStatus
 from state_machine.srv import *
 
-# Possible task statuses:
-# queued, active, success, timedout, not_found
-
 class Manager(smach.State):
 
     def __init__(self, task_names, mission_end_outcome='mission_success'):
@@ -67,7 +64,8 @@ class Manager(smach.State):
         self.queued_tasks.pop(0)
     def later(self):
         rospy.loginfo("Latering")
-        self.queued_tasks.pop(0)
+        task = self.queued_tasks.pop(0)
+        self.queued_tasks.append(task)
     
     def publish_task_states_callback(self, msg):
         ts = TaskStatus()
@@ -83,6 +81,4 @@ class Manager(smach.State):
             return GetNextTaskResponse("mission_complete")
         else:
             return GetNextTaskResponse(self.queued_tasks[1])
-        
-    # get next task service, should just be the 2nd index in the array
 
