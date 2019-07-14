@@ -62,9 +62,9 @@ class Attack(Objective):
         self.started = False
         self.current_yaw = None
         self.yaw_pub = rospy.Publisher("cusub_common/motor_controllers/pid/yaw/setpoint", Float64, queue_size=10)
-        # rospy.loginfo("...waiting for cusub_common/toggleWaypointControl")
-        # rospy.wait_for_service("cusub_common/toggleWaypointControl")
-        # rospy.loginfo("...found service")
+        rospy.loginfo("...waiting for cusub_common/toggleWaypointControl")
+        rospy.wait_for_service("cusub_common/toggleWaypointControl")
+        rospy.loginfo("...found service")
         rospy.Subscriber("cusub_cortex/mapper_out/start_gate", PoseStamped, self.start_gate_callback)
         rospy.Subscriber("cusub_perception/start_gate/small_pole_left_side", Bool, self.small_leg_callback)
         rospy.Subscriber("cusub_common/motor_controllers/pid/yaw/state", Float64, self.yaw_callback)
@@ -73,8 +73,12 @@ class Attack(Objective):
         self.current_yaw = msg.data
 
     def small_leg_callback(self, msg):
-        if self.small_leg_left_side == None and self.started:
-            self.request_abort()
+        rospy.loginfo_throttle(0.0001, "Received left leg side.")
+        if self.started and self.small_leg_left_side == None: # Receiving leg for the first time
+            self.request_replan()
+        elif self.started and self.small_leg_left_side != msg.data: # leg has switched sides!
+            rospy.logwarn("Third leg has switched sides!")
+            self.request_replan()
         self.small_leg_left_side = msg.data
 
     def start_gate_callback(self, msg):

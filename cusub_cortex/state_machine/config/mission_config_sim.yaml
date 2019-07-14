@@ -20,7 +20,7 @@ tasks:
 #  prior: [-11,25,-1.5, "world"] # TRANSDEC, DIVEWELL 8,0,-1.5
   prior: [8.0,0,-1.5, "world"] # TRANSDEC, DIVEWELL 8,0,-1.5  
   dist_behind_gate: 1.0
-  third_leg_adjustment: 0.5
+  third_leg_adjustment: 0.75
   replan_thresh: 1.0
   style_dist: 1.5
   do_style: True
