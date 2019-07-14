@@ -14,7 +14,7 @@
 
         <!-- Use playstation 4 controller mapping -->
         <!-- NOTE: Playstation 4 controller usualy maps imu to js0 and actual controls to j1  -->
-        <group if="$(eval arg('controller')=='ps4' and arg('setpoint') == 'setpoint')">
+        <group if="$(eval arg('controller')=='ps4' and (arg('setpoint') == 'setpoint' or arg('setpoint') == 'direct'))">
 
             <node name="joy_teleop" pkg="leviathan_control" type="joy_teleop.py">
 
