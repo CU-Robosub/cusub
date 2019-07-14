@@ -14,6 +14,10 @@ from actuator.srv import ActivateActuator
 
 class JoyTeleop(object):
 
+    SETPOINT_MODE = 'setpoint'
+    DIRECT_MODE = 'direct'
+    QUAD_DIRECT_MODE = 'quad'
+
     strafe_axes  = 0
     drive_axes = 1
     yaw_axes = 2
@@ -105,14 +109,14 @@ class JoyTeleop(object):
 
         rospy.init_node('joy_teleop', anonymous=True)
 
-        setpoint = rospy.get_param('~setpoint', True)
+        mode = rospy.get_param('~setpoint', 0)
 
         self.drive_f64 = Float64()
         self.drive_f64.data = 0.0
         self.strafe_f64 = Float64()
         self.strafe_f64.data = 0.0
 
-        if setpoint:
+        if mode == JoyTeleop.SETPOINT_MODE:
 
             pub_yaw = rospy.Publisher('motor_controllers/pid/yaw/setpoint',
                                       Float64, queue_size=10)
@@ -127,7 +131,12 @@ class JoyTeleop(object):
             rospy.Subscriber("motor_controllers/pid/strafe/state",
                              Float64, self.strafeStateCallback)
 
-        else: 
+            pub_pitch = rospy.Publisher('motor_controllers/pid/pitch/setpoint',
+                                        Float64, queue_size=10)
+            pub_roll = rospy.Publisher('motor_controllers/pid/roll/setpoint',
+                                       Float64, queue_size=10)
+
+        elif mode == JoyTeleop.DIRECT_MODE: 
 
             pub_yaw = rospy.Publisher('motor_controllers/mux/yaw/control_effort',
                                       Float64, queue_size=10)
@@ -136,10 +145,24 @@ class JoyTeleop(object):
             pub_strafe = rospy.Publisher('motor_controllers/mux/strafe/control_effort',
                                          Float64, queue_size=10)
 
-        pub_pitch = rospy.Publisher('motor_controllers/pid/pitch/setpoint',
-                                    Float64, queue_size=10)
-        pub_roll = rospy.Publisher('motor_controllers/pid/roll/setpoint',
-                                   Float64, queue_size=10)
+            pub_pitch = rospy.Publisher('motor_controllers/pid/pitch/setpoint',
+                                        Float64, queue_size=10)
+            pub_roll = rospy.Publisher('motor_controllers/pid/roll/setpoint',
+                                       Float64, queue_size=10)
+
+        elif mode == JoyTeleop.QUAD_DIRECT_MODE: 
+
+            pub_yaw = rospy.Publisher('motor_controllers/mux/yaw/control_effort',
+                                      Float64, queue_size=10)
+            pub_drive = rospy.Publisher('motor_controllers/mux/drive/control_effort',
+                                         Float64, queue_size=10)
+            pub_strafe = rospy.Publisher('motor_controllers/mux/strafe/control_effort',
+                                         Float64, queue_size=10)
+
+            pub_pitch = rospy.Publisher('motor_controllers/pid/pitch/control_effort',
+                                        Float64, queue_size=10)
+            pub_roll = rospy.Publisher('motor_controllers/pid/roll/control_effort',
+                                       Float64, queue_size=10)
 
         pub_depth = rospy.Publisher('motor_controllers/pid/depth/setpoint',
                                     Float64, queue_size=10)
@@ -173,7 +196,7 @@ class JoyTeleop(object):
 
         while not rospy.is_shutdown():
 
-            if setpoint:
+            if mode == JoyTeleop.SETPOINT_MODE:
 
                 yaw_f64.data = yaw_f64.data + self.yaw_val * self.yaw_sensitivity
                 pub_yaw.publish(yaw_f64)
@@ -184,7 +207,12 @@ class JoyTeleop(object):
                 self.strafe_f64.data = self.strafe_f64.data - self.strafe_val * self.strafe_sensitivity
                 pub_strafe.publish(self.strafe_f64)
 
-            else:
+                pitch_f64.data = self.pitch_val*math.radians(45.0) # allow 15 deg pitch
+                pub_pitch.publish(pitch_f64)
+                #roll_f64.data = self.roll_val*math.radians(15.0) # allow 15 deg roll
+                #pub_roll.publish(roll_f64)
+
+            elif mode == JoyTeleop.DIRECT_MODE: 
 
                 yaw_f64 = Float64()
                 yaw_f64.data = self.yaw_val * self.thruster_power * self.twist_effort
@@ -198,13 +226,35 @@ class JoyTeleop(object):
                 self.strafe_f64.data = -1 * self.strafe_val * self.thruster_power
                 pub_strafe.publish(self.strafe_f64)
 
+                pitch_f64.data = self.pitch_val*math.radians(45.0) # allow 15 deg pitch
+                pub_pitch.publish(pitch_f64)
+                #roll_f64.data = self.roll_val*math.radians(15.0) # allow 15 deg roll
+                #pub_roll.publish(roll_f64)
+
+            elif mode == JoyTeleop.QUAD_DIRECT_MODE: 
+
+                yaw_f64 = Float64()
+                yaw_f64.data = self.yaw_val * self.thruster_power * self.twist_effort
+                pub_yaw.publish(yaw_f64)
+
+                self.drive_f64 = Float64()
+                self.drive_f64.data = self.drive_val * self.thruster_power
+                pub_drive.publish(self.drive_f64)
+
+                self.strafe_f64 = Float64()
+                self.strafe_f64.data = -1 * self.strafe_val * self.thruster_power
+                pub_strafe.publish(self.strafe_f64)
+
+                pitch_f64 = Float64()
+                pitch_f64.data = self.pitch_val * self.thruster_power * -0.5
+                pub_pitch.publish(pitch_f64)
+
+                roll_f64 = Float64()
+                roll_f64.data = self.roll_val * self.thruster_power * 0.5
+                pub_roll.publish(roll_f64)
+
             depth_f64.data = depth_f64.data + self.depth_val * self.depth_sensitivity
             pub_depth.publish(depth_f64)
-
-            pitch_f64.data = self.pitch_val*math.radians(45.0) # allow 15 deg pitch
-            pub_pitch.publish(pitch_f64)
-            #roll_f64.data = self.roll_val*math.radians(15.0) # allow 15 deg roll
-            #pub_roll.publish(roll_f64)
 
             # 1.0 to -1.0, remap 0.65 to 0.0
             grip = self.gripper_val * 100.0

@@ -4,18 +4,17 @@
 
     <group ns="$(arg namespace)">
 
-        <arg name="setpoint" default="true"/>       <!-- Use setpoints for controlling, if false we publish directly to control efforts -->
+        <arg name="setpoint" default="setpoint"/>       <!-- Use setpoints for controlling, if false we publish directly to control efforts -->
         <arg name="controller" default="ps4"/>      <!-- Controller type: ps4, xbox -->
 
         <arg name="start_joy" default="false"/> <!-- autolaunch joy node.  This should be launched remotely if running on sub, locally if for sim -->
 
         <!-- joystic device path for joy node - Special case for ps4 we default to js1 -->
-        <arg name="joy_device" default="/dev/input/js0" unless="$(eval arg('controller')=='ps4')" />
-        <arg name="joy_device" default="/dev/input/js1" if="$(eval arg('controller')=='ps4')" />
+        <arg name="joy_device" default="/dev/input/js0"/>
 
         <!-- Use playstation 4 controller mapping -->
         <!-- NOTE: Playstation 4 controller usualy maps imu to js0 and actual controls to j1  -->
-        <group if="$(eval arg('controller')=='ps4')">
+        <group if="$(eval arg('controller')=='ps4' and arg('setpoint') == 'setpoint')">
 
             <node name="joy_teleop" pkg="leviathan_control" type="joy_teleop.py">
 
@@ -25,6 +24,25 @@
                 <param name="depth_axes" value="4" />
                 <param name="pitch_axes" value="7" />
                 <param name="roll_axes" value="6" />
+
+                <param name="default_depth" value="0" />
+
+                <param name="setpoint" value="$(arg setpoint)" />
+
+            </node>
+
+        </group>
+
+        <group if="$(eval arg('controller')=='ps4' and arg('setpoint') == 'quad')">
+
+            <node name="joy_teleop" pkg="leviathan_control" type="joy_teleop.py">
+
+                <param name="strafe_axes" value="6" />
+                <param name="drive_axes" value="7" />
+                <param name="yaw_axes" value="3" />
+                <param name="depth_axes" value="4" />
+                <param name="pitch_axes" value="1" />
+                <param name="roll_axes" value="0" />
 
                 <param name="default_depth" value="0" />
 
