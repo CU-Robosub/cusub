@@ -20,7 +20,7 @@ class Search(Objective):
     
     outcomes = ['found','not_found'] # We found task or timed out
 
-    def __init__(self, prior_pose_param, search_topic, num_quit_poses=5, darknet_cameras=[1,1,1,1,1,1]):
+    def __init__(self, prior_pose_param, search_topic, num_quit_poses=5, darknet_cameras=[1,1,0,0,1,0]):
         """
         Search objective initialization function
 
@@ -47,26 +47,22 @@ class Search(Objective):
 
     def exit_callback(self, msg): # Abort on the first publishing
         self.num_poses_received += 1
-        if not self.abort_requested() and self.num_poses_received > self.num_quit_poses:
-            self.request_abort()
+        if not self.replan_requested() and self.num_poses_received > self.num_quit_poses:
+            rospy.loginfo("Task Found!")
+            self.request_replan()
 
     def execute(self, userdata):
-        
-        # DELETE
-        rospy.sleep(2)
-        userdata.outcome = "not_found"
-        return "not_found"
-        
-        prior = self.get_odom_prior(prior_pose_param)
-
         rospy.loginfo("---Executing Search")
-        if self.abort_requested():
-            return "found"
-        self.configure_darknet_cameras(self.darknet_config)
+        prior = self.get_odom_prior(self.prior_pose_param)
 
+        self.configure_darknet_cameras(self.darknet_config)
         rospy.sleep(1) # in case we span in the spot of the prior, leave time to gather a few object poses
-        if self.go_to_pose(self.prior):
-            return "found"
+        if self.go_to_pose(prior, userdata.timeout_obj):
+            if userdata.timeout_obj.timed_out:
+                userdata.outcome = "timed_out"
+                return "not_found"
+            else:
+                return "found"
         else:
             rospy.logerr("Search unable to find task.")
             userdata.outcome = "not_found"
