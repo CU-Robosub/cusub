@@ -33,7 +33,6 @@
 	<group if="$(arg setpoint)">
 
 		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/pitch" >
-			<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_pitch.yaml" />
 			<param name="rate" value="25" />
 			<param name="upper_limit" value="100" />
 			<param name="lower_limit" value="-100" />
@@ -42,7 +41,6 @@
 			<param name="min_loop_frequency" value="25.0" />
 		</node>
 		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/roll" >
-			<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_roll.yaml" />
 			<param name="rate" value="25" />
 			<param name="upper_limit" value="100" />
 			<param name="lower_limit" value="-100" />
@@ -55,7 +53,6 @@
 			<param name="initial_topic " value="pid/yaw/control_effort" />
 		</node>
 		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/yaw" >
-			<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_yaw.yaml" />
 			<param name="rate" value="25" />
 			<param name="upper_limit" value="100" />
 			<param name="lower_limit" value="-100" />
@@ -77,7 +74,6 @@
 			<param name="initial_topic " value="pid/drive/control_effort" />
 		</node>
 		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/drive">
-			<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_drive.yaml" />
 			<param name="rate" value="25" />
 			<param name="upper_limit" value="100" />
 			<param name="lower_limit" value="-100" />
@@ -98,7 +94,6 @@
 			<param name="initial_topic " value="pid/strafe/control_effort" />
 		</node>
 		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/strafe">
-			<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_strafe.yaml" />
 			<param name="rate" value="25" />
 			<param name="upper_limit" value="100" />
 			<param name="lower_limit" value="-100" />
