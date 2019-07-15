@@ -1,19 +1,12 @@
 """
-Searching Algorithms
-
-Approach a prior for a task, once we get a few yolo hits on search_topic quit out
-
-halfhalf
-
+Search Objective:
+@brief Approach a prior for a task, once a few msgs have been received on 'exit_topic' quit out
 """
 from tasks.task import Objective
 import smach
 from geometry_msgs.msg import Point, PoseStamped, Pose
 import rospy
 import tf
-
-POSE_INDEX = 0
-WAIT_INDEX = 1
 
 class Search(Objective):
     """ Search state that implements an indicated search algorithm """
