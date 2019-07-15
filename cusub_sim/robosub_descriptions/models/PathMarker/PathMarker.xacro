@@ -47,6 +47,10 @@
       <turnGravityOff>false</turnGravityOff>
   </gazebo>
 
+  <gazebo>
+      <static>true</static>
+  </gazebo>
+
 </xacro:macro>
 
 <xacro:pathmarker namespace="$(arg namespace)"/>
