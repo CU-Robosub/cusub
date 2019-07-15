@@ -1,16 +1,17 @@
 <launch>
     <!-- params for yolo -->
-    <arg name="use_tiny"            />
-    <arg name="detect_sleep_time"   />
-    <arg name="show_image"          />
-    <arg name="detection_threshold" />
+    <arg name="use_tiny"            default="1"/>
+    <arg name="detect_sleep_time"   default="0.0"/>
+    <arg name="show_image"          default="false"/>
+    <arg name="detection_threshold" default="0.06"/>
+
     <param name="detect_sleep_time"          value="$(arg detect_sleep_time)"/>
     <param name="show_image"                 value="$(arg show_image)" />
     <param name="yolo_model/threshold/value" value="$(arg detection_threshold)"/>
 
-    <!-- these are not as dynamic -->
     <param name="weights_path"               value="$(find darknet_config)/weights"/>
     <param name="config_path"                value="$(find darknet_config)/cfg"/>
+    <!-- these are not as dynamic, defined by yamls -->
     <rosparam command="load" ns="yolo_model/detection_classes/names" file="$(find darknet_config)/yaml/class_names.txt"/>
     <rosparam command="load" file="$(find darknet_config)/yaml/ros_config.yaml" />
     
