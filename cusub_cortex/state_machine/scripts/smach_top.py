@@ -23,6 +23,7 @@ from tasks.jiangshi import Jiangshi
 from tasks.triangle_buoy import Triangle_Buoy
 from tasks.manager import Manager
 from tasks.task import Timeout
+from tasks.path import Path
 
 def createTransitionsForManager(task_list, final_outcome):
     transition_dict = {}
@@ -47,6 +48,10 @@ def loadStateMachines(task_list):
             task_sm = StartGate()
         elif task == "jiangshi":
             task_sm = Jiangshi()
+        elif task == "path0":
+            task_sm = Path("0")
+        elif task == "path1":
+            task_sm = Path("1")
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 
