@@ -1,0 +1,3 @@
+cusub_common:
+  waypoint_navigator:
+    carrot_drive: 1.5
