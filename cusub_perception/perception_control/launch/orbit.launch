@@ -1,4 +1,5 @@
 <launch>
     <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
-    <node pkg="nodelet" type="nodelet" name="orbit" args="load perception_control/Orbit standalone_nodelet" output="screen"/>
+    <!-- <node pkg="nodelet" type="nodelet" name="orbit" args="load perception_control/Orbit standalone_nodelet" output="screen"/> -->
+    <node pkg="nodelet" type="nodelet" name="visualservo" args="load perception_control/VisualServo standalone_nodelet" output="screen"/>
 </launch>

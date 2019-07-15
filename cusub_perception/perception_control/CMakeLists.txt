@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(perception_control)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -205,4 +205,12 @@ add_library( orbit
 target_link_libraries(orbit ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(orbit ${catkin_EXPORTED_LIBRARIES})
+endif()
+
+add_library( visual_servo
+  src/visual_servo.cpp
+)
+target_link_libraries(visual_servo ${catkin_LIBRARIES})
+if(catkin_EXPORTED_LIBRARIES)
+  add_dependencies(visual_servo ${catkin_EXPORTED_LIBRARIES})
 endif()

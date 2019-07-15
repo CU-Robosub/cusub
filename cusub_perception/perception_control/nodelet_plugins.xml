@@ -5,3 +5,11 @@
     </description>
   </class>
 </library>
+
+<library path="lib/libvisual_servo">
+  <class name="perception_control/VisualServo" type="perception_control::VisualServo" base_class_type="nodelet::Nodelet">
+    <description>
+        Visual Servos on a bounding box
+    </description>
+  </class>
+</library>  
