@@ -42,7 +42,7 @@ class Slay(Objective):
     """
     Go to a point in front of the bouy, slay jiangshi backwards, backup
     """
-    outcomes=['success', 'timed_out'] # Need to change a ton of shit here...
+    outcomes=['success', 'timed_out']
 
     def __init__(self):
         super(Slay, self).__init__(self.outcomes, "Slay")

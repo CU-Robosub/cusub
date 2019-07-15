@@ -27,6 +27,13 @@ tasks:
   do_style: True
   spin_carrot_rads: 0.7
 
+ path0:
+  manager_info:
+    timeout_secs: 1
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'skip'
+  prior: [8.0,0,-1.5, "world"] # Won't matter much b/c we'll almost immediately see it after the SG
+
  jiangshi:
   manager_info:
     timeout_secs: 0
@@ -77,5 +84,5 @@ tasks:
     roulette: roulette_watershed
 
 mission_tasks: # Tasks To Do In Order
-  - jiangshi
+  - path0
   
