@@ -26,7 +26,8 @@ class Path(Task):
         self.link_objectives()
 
     def init_objectives(self, path_num_str):
-        self.search = Search(self.get_prior_topic(), "cusub_perception/nodelet_perception/path" + path_num_str + "_seen")
+        path_topic = "cusub_perception/nodelet_perception/path" + path_num_str + "_seen"
+        self.search = Search(self.get_prior_topic(), path_topic, darknet_cameras=[0,0,0,0,0,1]) # just downcam
         self.follow = Follow(path_num_str)
 
     def link_objectives(self):

@@ -5,8 +5,8 @@
   <arg name="TASK_z" default="-0.5"/>
   <arg name="TASK_yaw" default="1.57" />
 
-  <arg name="PM1_x" default="2.0"/>
-  <arg name="PM1_y" default="0.2"/>
+  <arg name="PM1_x" default="-2.4"/>
+  <arg name="PM1_y" default="1.8"/>
   <arg name="PM1_z" default="-3.5"/>
   <arg name="PM1_yaw" default="-0.75"/>
 

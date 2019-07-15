@@ -68,7 +68,7 @@ namespace localizer_ns
       it = mappings.find(box.Class);
       if(it == mappings.end())
       {
-        NODELET_ERROR("No pose generator given for %s", box.Class.c_str());
+        NODELET_ERROR("No pose generator given for %s. Add to localizer/config/localizer_config.yaml", box.Class.c_str());
       } else {
         if(bb_map.find(it->second) == bb_map.end()) // pose gen ptr hasn't been added to bb_map yet
         {

@@ -64,10 +64,10 @@
 
     <!-- AR Tags for localization -->
 
-    <include>
+    <!-- <include>
       <uri>model://ar_tag_0</uri>
       <pose>0 5.9 -2 -1.57 0 3.14</pose>
-    </include>
+    </include> -->
     <!--
     <include>
       <uri>model://ar_tag_1</uri>
