@@ -21,10 +21,9 @@ import tf
 
 class StartGate(Task):
     name = "start_gate"
-    outcomes = ['task_success','task_aborted']
 
     def __init__(self):
-        super(StartGate, self).__init__(self.outcomes) # become a state machine first
+        super(StartGate, self).__init__() # become a state machine first
         self.init_objectives()
         self.link_objectives()
 
@@ -34,17 +33,20 @@ class StartGate(Task):
 
     def link_objectives(self):
         with self: # we are a StateMachine
-            smach.StateMachine.add('Search', self.search, transitions={'found':'Attack', 'not_found':'task_aborted'})
-            smach.StateMachine.add('Attack', self.attack, transitions={'success':'task_success', 'aborted':'Attack'})
+            smach.StateMachine.add('Search', self.search, transitions={'found':'Attack', 'not_found':'manager'}, \
+                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
+            smach.StateMachine.add('Attack', self.attack, transitions={'success':'manager','timed_out':'manager'}, \
+                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
 class Attack(Objective):
     """
     Tell the sub to go through the gate
     """
 
-    outcomes=['success','aborted']
+    outcomes=['success', 'timed_out']
 
     def __init__(self):
+        rospy.loginfo("Loading attack")
         super(Attack, self).__init__(self.outcomes, "Attack")
         self.dist_behind = rospy.get_param('tasks/start_gate/dist_behind_gate', 1.0)
         self.replan_threshold = rospy.get_param('tasks/start_gate/replan_thresh', 1.0)
@@ -69,8 +71,12 @@ class Attack(Objective):
         self.current_yaw = msg.data
 
     def small_leg_callback(self, msg):
-        if self.small_leg_left_side == None and self.started:
-            self.request_abort()
+        rospy.loginfo_throttle(0.0001, "Received left leg side.")
+        if self.started and self.small_leg_left_side == None: # Receiving leg for the first time
+            self.request_replan()
+        elif self.started and self.small_leg_left_side != msg.data: # leg has switched sides!
+            rospy.logwarn("Third leg has switched sides!")
+            self.request_replan()
         self.small_leg_left_side = msg.data
 
     def start_gate_callback(self, msg):
@@ -83,34 +89,65 @@ class Attack(Objective):
 
         if change_in_pose > self.replan_threshold:
             self.start_gate_pose = msg
-            self.request_abort() # this will loop us back to execute
+            self.request_replan() # this will loop us back to execute
+
+    def do_gate_with_style(self, userdata):
+        while not rospy.is_shutdown():          # Loop over the replans from a gate pose change
+            target_pose = self.adjust_gate_pose(
+                self.cur_pose, \
+                self.start_gate_pose.pose, \
+                self.dist_behind, \
+                self.small_leg_left_side, \
+                self.leg_adjustment_meters)
+
+            dist_in_front_of_gate = self.style_dist + self.dist_behind
+            style_pose = self.get_style_pose(self.cur_pose, target_pose, dist_in_front_of_gate)
+
+            if self.go_to_pose(style_pose, userdata.timeout_obj):
+                if userdata.timeout_obj.timed_out:
+                    userdata.outcome = "timed_out"
+                    return "timed_out"
+                else: # Replan has been requested loop again
+                    pass
+            else: # Pose reached successfully!
+                break
+
+        rospy.loginfo("...reached style pose")
+        self.enact_style()
+        if self.go_to_pose(target_pose, userdata.timeout_obj, replan_enabled=False):
+            userdata.outcome = "timed_out"
+            return "timed_out"
+        else:
+            userdata.outcome = "success"
+            return "success"
+
+    def do_gate_no_style(self, userdata):
+        while not rospy.is_shutdown():          # Loop over the replans from a gate pose change
+            target_pose = self.adjust_gate_pose(
+                self.cur_pose, \
+                self.start_gate_pose.pose, \
+                self.dist_behind, \
+                self.small_leg_left_side, \
+                self.leg_adjustment_meters)
+
+            if self.go_to_pose(target_pose, userdata.timeout_obj):
+                if userdata.timeout_obj.timed_out:
+                    userdata.outcome = "timed_out"
+                    return "timed_out"
+                else: # Replan has been requested loop again
+                    pass
+            else:
+                userdata.outcome = "success"
+                return "success"
 
     def execute(self, userdata):
         self.started = True
         rospy.loginfo("Executing Attack")
-        self.clear_abort()
-
-        self.configure_darknet_cameras([1,1,0,0,1,0])
-
-        target_pose = self.adjust_gate_pose(
-            self.cur_pose, \
-            self.start_gate_pose.pose, \
-            self.dist_behind, \
-            self.small_leg_left_side, \
-            self.leg_adjustment_meters)
-
+        self.configure_darknet_cameras([1,1,0,0,1,0])        
         if self.do_style:
-            style_pose = self.get_style_pose(self.cur_pose, \
-                target_pose, \
-                self.style_dist)
-            if self.go_to_pose(style_pose):
-                return 'aborted'
-            rospy.loginfo("...reached style pose")
-            self.enact_style()
-
-        if self.go_to_pose(target_pose):
-            return 'aborted'
-        return "success"
+            return self.do_gate_with_style(userdata)
+        else:
+            return self.do_gate_no_style(userdata)
 
     def enact_style(self):
         if self.current_yaw == None:

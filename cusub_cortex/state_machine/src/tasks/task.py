@@ -31,9 +31,13 @@ BACKUP_MODE = 3
 class Task(smach.StateMachine):
     __metaclass__ = ABCMeta
 
-    def __init__(self, outcomes):
-        rospy.Subscriber('kill_sm', Empty, self.kill_sm)
-        super(Task, self).__init__(outcomes=outcomes)
+    outcome = ["manager"]
+
+    def __init__(self):
+        super(Task, self).__init__(
+            outcomes=self.outcome,\
+            input_keys=['timeout_obj'],\
+            output_keys=['timeout_obj', 'outcome'])
 
     @abstractproperty
     def name(self):
@@ -52,12 +56,6 @@ class Task(smach.StateMachine):
         Link the objectives to the state machine
         """
         pass
-
-    def kill_sm(self, msg):
-        # perhaps loop through every state and abort it, or provide a method that each execute first checks to see if we've been compromised & exits, when you CTRL + C
-        cs = self.sm._current_state
-        print cs
-        self.sm._states[cs].request_abort()
 
     def get_prior_topic(self):
         """
@@ -97,7 +95,6 @@ class Objective(smach.State):
         """
         self.name = objtv_name
         rospy.Subscriber('cusub_common/odometry/filtered', Odometry, self.sub_pose_cb)
-        self._abort_requested = False
         self._replan_requested = False
         self.wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
         self.started = False
@@ -109,9 +106,11 @@ class Objective(smach.State):
         pose.position.y = 0
         pose.position.z = 0
         self.cur_pose = pose
-        self.cancel_goal = False
 
-        super(Objective, self).__init__(outcomes=outcomes)
+        super(Objective, self).__init__(
+            outcomes=outcomes,\
+            input_keys=['timeout_obj'],\
+            output_keys=['timeout_obj', 'outcome'])
 
     def configure_darknet_cameras(self, camera_bool_list):
         """
@@ -140,14 +139,30 @@ class Objective(smach.State):
             rospy.logerr("Darknet Camera Config Service call failed: %s"%e)
             return False
 
-    def go_to_pose(self, target_pose, move_mode="yaw"):
-        """ Traverse to the target_pose given
+    def go_to_pose(self, target_pose, timeout_obj, replan_enabled=True, move_mode="yaw"):
+        """ @brief traverses to the target_pose given, blocks until reached
+
+        Combination of go_to_pose_non_blocking() and block_on_reaching_pose()
+
+        Call like (if replanning is possible, surround w/ while loop):
+        if self.go_to_pose(target_pose, userdata.timeout_obj):
+            if userdata.timeout_obj.timed_out:
+                userdata.outcome = "timedout"
+                return "done"
+            else: # Replan has been requested loop again
+                pass
+        else: # Pose reached successfully!
+            pass or break # from while, in the case of replan
 
         Parameters
         ----------
         target_pose : Pose
-             The pose to navigate to
-             If None, the sub will stop where it currently is and wait to be aborted
+             The pose for the sub to navigate to
+             Passed by copy instead of reference (like self.target_pose) b/c replanning now allowed
+        timeout_obj : almost certainly this is userdata.timeout_obj
+        replan_enabled : bool
+            True for allowing replans to interrupt the mission
+            False for preventing replans from happening
         move_mode : str
              "yaw" : the waypoint navigtator will use yaw mode to navigate to the target pose
              "strafe" : use strafe-drive mode to the target pose
@@ -155,20 +170,18 @@ class Objective(smach.State):
 
         Returns
         -------
-        bool : success/aborted
-             1 aborted
-             0 success, waypoint reached
+        bool : 
+            0 success, waypoint reached
+            1 timedout or replan_requested, user must check the value of 
+                timeout_obj.timed_out when this result is returned to determine cause of failure
         """
-        if type(target_pose) == type(None):  # Wait where we currently are until being aborted
-            rospy.logwarn("Objective has instructed Sub to wait where it is until being aborted")
-            while not self.abort_requested():
-                rospy.sleep(0.5)
-            return "aborted"
-
         self.go_to_pose_non_blocking(target_pose, move_mode)
-        return self.block_on_reaching_pose(target_pose)
+        return self.block_on_reaching_pose(target_pose, timeout_obj, replan_enabled)
 
     def go_to_pose_non_blocking(self, target_pose, move_mode="yaw"):
+        """
+        @brief sends a pose to waypoint navigator and returns
+        """
         wpGoal = waypointGoal()
         wpGoal.goal_pose.pose.position = target_pose.position
         wpGoal.goal_pose.pose.orientation = target_pose.orientation
@@ -186,28 +199,37 @@ class Objective(smach.State):
         self.wayClient.send_goal(wpGoal)
         rospy.loginfo("---goal sent to waypointNav")
     
-    def cancel_wp_goal(self):
-        """ An alternative to abort for cancelling the current pose goal that prints a lot less """
-        self.cancel_goal = True
-    
-    def block_on_reaching_pose(self, target_pose):
+    def block_on_reaching_pose(self, target_pose, timeout_obj, replan_enabled=True):
+        """
+        @brief blocks on the already sent waypoint goal
+
+        Parameters
+        ----------
+        target_pose : Pose
+             The pose for the sub to navigate to
+        timeout_obj : almost certainly this is userdata.timeout_obj
+
+        Returns
+        -------
+        bool : 
+            0 success, waypoint reached
+            1 timedout or replan_requested, user must check the value of 
+                timeout_obj.timed_out when this result is returned to determine cause of failure
+        """
+        self.clear_replan()
         res = self.wayClient.get_result()
         while (res == None or not res.complete) and not rospy.is_shutdown():
             res = self.wayClient.get_result()
-
-            if self.abort_requested():
-                self.wayClient.cancel_goal()
-                rospy.loginfo("---waypoint quitting")
-                return True
-            elif self.get_distance(self.cur_pose.position, target_pose.position) < POSE_REACHED_THRESHOLD:
+            if self.get_distance(self.cur_pose.position, target_pose.position) < POSE_REACHED_THRESHOLD:
                 self.wayClient.cancel_goal()
                 return False
-            elif self.cancel_goal:
+            elif timeout_obj.timed_out:
                 self.wayClient.cancel_goal()
-                self.cancel_goal = False
+                return True
+            elif self.replan_requested() and replan_enabled:
+                self.wayClient.cancel_goal()
                 return True
             rospy.sleep(0.25)
-        rospy.loginfo("---reached pose")
         return False
 
     def sub_pose_cb(self, msg):
@@ -217,32 +239,18 @@ class Objective(smach.State):
         """ Get xy distance between 2 points """
         dx = point2.x - point1.x
         dy = point2.y - point1.y
-
-        xy_dist = math.sqrt(dx**2 + dy**2)
-        return xy_dist
-
+        return math.sqrt(dx**2 + dy**2)
 
     def get_distance(self, point1, point2):
         """ Get distance between 2 points """
         dx = point2.x - point1.x
         dy = point2.y - point1.y
         dz = point2.z - point1.z
-
-        dist = math.sqrt(dx**2 + dy**2 + dz**2)
-        return dist
-
-    def abort_requested(self):
-        return self._abort_requested
-    def request_abort(self):
-        rospy.loginfo("---requesting abort of " + self.name + " objective")
-        self._abort_requested = True
-    def clear_abort(self):
-        self._abort_requested = False
+        return math.sqrt(dx**2 + dy**2 + dz**2)
 
     def replan_requested(self):
-        return self._abort_requested
+        return self._replan_requested
     def request_replan(self):
-        rospy.loginfo("---requesting replan of " + self.name + " objective")
         self._replan_requested = True
     def clear_replan(self):
         self._replan_requested = False
@@ -355,3 +363,28 @@ class Objective(smach.State):
         target_pose.position.z = cur_pose.position.z
         target_pose.orientation = cur_pose.orientation
         return target_pose
+
+class Timeout():
+    """
+    @brief Timeout object for tasks
+    """
+    timer = None
+
+    def set_new_time(self, seconds):
+        """ In objectives reference like: userdata.timeout_obj.set_new_time(4) """
+        if self.timer != None:
+            self.timer.shutdown()
+        self.timed_out = False
+        if seconds != 0:
+            self.timer = rospy.Timer(rospy.Duration(seconds), self.timer_callback)
+        else:
+            rospy.logwarn("No timeout monitoring on next task")
+
+    def timer_callback(self, msg):
+        self.timer.shutdown()
+        rospy.logerr("Task Timed Out")
+        self.timed_out = True
+
+    def timed_out(self):
+        """ In objectives reference like: userdata.timeout_obj.timed_out """
+        return self.timed_out

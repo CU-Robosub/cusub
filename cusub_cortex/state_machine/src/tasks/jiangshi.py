@@ -21,10 +21,9 @@ from sensor_msgs.msg import Imu
 
 class Jiangshi(Task):
     name = "jiangshi"
-    outcomes = ['task_success','task_aborted']
 
     def __init__(self):
-        super(Jiangshi, self).__init__(self.outcomes)
+        super(Jiangshi, self).__init__()
         self.init_objectives()
         self.link_objectives()
 
@@ -34,14 +33,16 @@ class Jiangshi(Task):
 
     def link_objectives(self):
         with self:
-            smach.StateMachine.add('Search', self.search, transitions={'found':'Slay', 'not_found':'task_aborted'})
-            smach.StateMachine.add('Slay', self.slay, transitions={'success':'task_success', 'aborted':'task_aborted'})
+            smach.StateMachine.add('Search', self.search, transitions={'found':'Slay', 'not_found':'manager'}, \
+                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
+            smach.StateMachine.add('Slay', self.slay, transitions={'success':'manager', 'timed_out':'manager'}, \
+                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
 class Slay(Objective):
     """
     Go to a point in front of the bouy, slay jiangshi backwards, backup
     """
-    outcomes=['success','aborted']
+    outcomes=['success', 'timed_out'] # Need to change a ton of shit here...
 
     def __init__(self):
         super(Slay, self).__init__(self.outcomes, "Slay")
@@ -55,10 +56,9 @@ class Slay(Objective):
         self.use_buoys_yaw = rospy.get_param('tasks/jiangshi/use_buoys_yaw', True)
         self.jiangshi_pose = None
         self.monitor_imu = False
-        self.jiangshi_jump = False
 
     def imu_callback(self, msg):
-        if ( self.monitor_imu == False ) or self.abort_requested():
+        if ( self.monitor_imu == False ) or self.replan_requested():
             return
 
         hit_detected = False
@@ -66,24 +66,24 @@ class Slay(Objective):
         if self.imu_axis == 'x':
             if (self.jump_thresh < 0) and ( msg.linear_acceleration.x < self.jump_thresh ):
                 hit_detected = True
-                self.request_abort()
+                self.request_replan()
             elif (self.jump_thresh > 0) and ( msg.linear_acceleration.x > self.jump_thresh ):
                 hit_detected = True
-                self.request_abort()
+                self.request_replan()
         elif self.imu_axis == 'y':
             if (self.jump_thresh < 0) and ( msg.linear_acceleration.y < self.jump_thresh ):
                 hit_detected = True
-                self.request_abort()
+                self.request_replan()
             elif (self.jump_thresh > 0) and ( msg.linear_acceleration.y > self.jump_thresh ):
                 hit_detected = True
-                self.request_abort()
+                self.request_replan()
         elif self.imu_axis == 'z':
             if (self.jump_thresh < 0) and ( msg.linear_acceleration.z < self.jump_thresh ):
                 hit_detected = True
-                self.request_abort()
+                self.request_replan()
             elif (self.jump_thresh > 0) and ( msg.linear_acceleration.z > self.jump_thresh ):
                 hit_detected = True
-                self.request_abort()
+                self.request_replan()
         else:
             rospy.logerr("Unrecognized imu axis: " + str(self.imu_axis))
 
@@ -91,15 +91,14 @@ class Slay(Objective):
             rospy.loginfo_throttle(1, "Detected a buoy hit!")
 
     def jiangshi_callback(self, msg):
-        # Set the first pose and don't abort
+        # Set the first pose and don't replan
         if self.jiangshi_pose == None:
             self.jiangshi_pose = msg
             return
         change_in_pose = self.get_distance_xy(self.jiangshi_pose.pose.position, msg.pose.position)
-        if (change_in_pose > self.replan_threshold) and not self.jiangshi_jump:
+        if (change_in_pose > self.replan_threshold) and not self.replan_requested():
             self.jiangshi_pose = msg
-            self.cancel_wp_goal() # this will loop us back to execute
-            self.jiangshi_jump = True
+            self.request_replan()
 
     def get_slay_path(self):
         """
@@ -143,24 +142,23 @@ class Slay(Objective):
         return approach_pose, slay_pose
 
     def execute(self, userdata):
-        self.clear_abort()
         self.configure_darknet_cameras([1,1,0,0,1,0])
-        while not rospy.is_shutdown():          # Loop until we find a good SG pose
+        while not rospy.is_shutdown():          # Loop until we find a good task pose
             approach_pose, slay_pose = self.get_slay_path()
-            if self.go_to_pose(approach_pose):
-                if self.jiangshi_jump:  # Loop again and replan Jiangshi
-                    rospy.loginfo("...replanning")
-                    self.jiangshi_jump = False
-                else:
-                    return "aborted"
-            else:
+            if self.go_to_pose(approach_pose, userdata.timeout_obj):
+                if userdata.timeout_obj.timed_out:
+                    userdata.outcome = "timed_out"
+                    return "done"
+                else: # Loop, replan_requested() happened
+                    pass
+            else: # we've reached our pose!
                 break
                     
-        rospy.loginfo("---slaying buoy")
+        rospy.loginfo("...slaying buoy")
         rospy.sleep(2)
         self.monitor_imu = True
-        self.go_to_pose(slay_pose, move_mode="backup")
+        self.go_to_pose(slay_pose, userdata.timeout_obj, move_mode="backup")
         self.monitor_imu = False
-        self.clear_abort()
-        self.go_to_pose(approach_pose)
+        self.go_to_pose(approach_pose, userdata.timeout_obj, replan_enabled=False)
+        userdata.outcome = "success"
         return "success"
