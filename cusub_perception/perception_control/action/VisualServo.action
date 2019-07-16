@@ -1,0 +1,9 @@
+int32 PROPORTIONAL=0
+# int32 NUDGE=1
+string target_class
+string target_frame
+int32 visual_servo_type
+---
+bool success
+---
+bool centered
