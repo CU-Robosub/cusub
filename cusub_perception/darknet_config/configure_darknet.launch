@@ -3,7 +3,7 @@
     <arg name="use_tiny"            default="1"/>
     <arg name="detect_sleep_time"   default="0.0"/>
     <arg name="show_image"          default="false"/>
-    <arg name="detection_threshold" default="0.06"/>
+    <arg name="detection_threshold" default="0.30"/>
 
     <param name="detect_sleep_time"          value="$(arg detect_sleep_time)"/>
     <param name="show_image"                 value="$(arg show_image)" />
