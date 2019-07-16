@@ -126,6 +126,8 @@ endif()
 
 add_library( visual_servo
   src/visual_servo.cpp
+  src/bb_controller.cpp
+  src/bb_proportional.cpp
 )
 target_link_libraries(visual_servo ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
