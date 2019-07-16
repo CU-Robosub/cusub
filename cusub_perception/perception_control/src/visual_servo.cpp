@@ -6,7 +6,12 @@ namespace perception_control
     {
         NODELET_INFO("Visual Servo Server Starting up!");
         ros::NodeHandle& nh = getMTNodeHandle();
+
+        // Load controllers
+        proportional_controller = new BBProportional(nh);
+
         wayToggleClient = nh.serviceClient<waypoint_navigator::ToggleControl>("cusub_common/toggleWaypointControl");
+        controllingPids = false;
         darknetSub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &VisualServo::darknetCallback, this);
         server = new vsServer(nh, "visual_servo", boost::bind(&VisualServo::execute, this, _1), false);
         server->start();
