@@ -53,15 +53,23 @@ class Follow(Objective):
         rospy.loginfo("....found visual servo server")
         super(Follow, self).__init__(self.outcomes, "Follow")
 
+    def feedback_callback(self, feedback):
+        print("Received feedback")
+
     def execute(self, userdata):
         
         goal = VisualServoGoal()
         goal.target_class = "path"
-        goal.target_frame = rospy.get_param("~robotname") +"/cusub_common/downcam"
+        goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
         goal.visual_servo_type = goal.PROPORTIONAL
         rospy.loginfo("Sending Goal to Visual Servo Server")
-        self.client.send_goal(goal)
-        print(self.client.wait_for_result(rospy.Duration(180)))
+        self.client.send_goal(goal, feedback_cb=self.feedback_callback)
+        while not self.client.wait_for_result(rospy.Duration(1)) and not rospy.is_shutdown() :
+                if userdata.timeout_obj.timed_out:
+                    userdata.outcome = "timed_out"
+                    return "timed_out"
+
+        # Call align action server b/c we're over it
 
         userdata.outcome = "success"
         return "success"

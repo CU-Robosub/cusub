@@ -18,9 +18,25 @@ namespace perception_control
     }
     void VisualServo::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs)
     {
-        NODELET_INFO("Received bounding box");
         if( !controllingPids ) { return; }
-        current_controller->respond(0,0);
+        if (bbs->image_header.frame_id != target_frame)
+        { 
+            NODELET_WARN_THROTTLE(1, "Wrong frame for visual servoing:\nrecieved: %s\ninstead of: %s", bbs->image_header.frame_id.c_str(), target_frame.c_str());
+            return;
+        }
+        NODELET_INFO("...... header correct");
+        for(darknet_ros_msgs::BoundingBox box : bbs->bounding_boxes)
+        {
+            NODELET_INFO("......... looping");
+            if (box.Class == target_class)
+            {
+                // calculate diffs
+                current_controller->respond(0,0);
+                VisualServoFeedback feedback;
+                feedback.centered = true;
+                server->publishFeedback(feedback);
+            }
+        }
     }
     bool VisualServo::controlPids(const bool takeControl)
     {
@@ -46,6 +62,9 @@ namespace perception_control
         {
             NODELET_INFO("Selecting visual servo proportional");
             current_controller = proportional_controller;
+            target_class = goal->target_class;
+            target_frame = goal->target_frame;
+            std::cout << target_frame << std::endl;
             controlPids(true);
         } else {
             NODELET_ERROR("Unrecognized visual servo type: %d", goal->visual_servo_type);
@@ -54,8 +73,8 @@ namespace perception_control
             server->setSucceeded(result);
         }
         
-        ros::Duration(5).sleep();
-
+        ros::Duration(10).sleep();
+        NODELET_INFO("Setting Success.");
         VisualServoResult result;
         result.success = true;
         server->setSucceeded(result);

@@ -24,6 +24,7 @@ namespace perception_control
         void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
 
         perception_control::VisualServoGoalConstPtr activeGoal;
+        std::string target_frame, target_class;
         vsServer* server;
         ros::ServiceClient wayToggleClient; 
         bool controllingPids;
