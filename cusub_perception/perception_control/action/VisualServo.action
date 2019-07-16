@@ -1,8 +1,17 @@
+# Camera Center Pixels, NOTE DOWNCAM HAS BEEN RESIZED 752X480 IN MULTIPLEXER BEFORE GOING INTO DARKNET
+uint16 CAMERAS_CENTER_X=376
+uint16 CAMERAS_CENTER_Y=240
+
+# Controllers
 int32 PROPORTIONAL=0
 # int32 NUDGE=1
+
 string target_class
 string target_frame
-int32 visual_servo_type
+uint8 visual_servo_type
+uint16 target_pixel_x
+uint16 target_pixel_y
+uint16 target_pixel_threshold
 ---
 bool success
 ---

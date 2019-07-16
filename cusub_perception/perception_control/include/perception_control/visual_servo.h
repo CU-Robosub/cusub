@@ -29,6 +29,7 @@ namespace perception_control
         ros::ServiceClient wayToggleClient; 
         bool controllingPids;
         ros::Subscriber darknetSub;
+        int target_pixel_x, target_pixel_y, target_pixel_threshold;
 
         // Controllers
         BBController* current_controller;

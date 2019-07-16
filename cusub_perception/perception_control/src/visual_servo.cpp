@@ -24,17 +24,31 @@ namespace perception_control
             NODELET_WARN_THROTTLE(1, "Wrong frame for visual servoing:\nrecieved: %s\ninstead of: %s", bbs->image_header.frame_id.c_str(), target_frame.c_str());
             return;
         }
-        NODELET_INFO("...... header correct");
         for(darknet_ros_msgs::BoundingBox box : bbs->bounding_boxes)
         {
-            NODELET_INFO("......... looping");
             if (box.Class == target_class)
             {
-                // calculate diffs
-                current_controller->respond(0,0);
+                int center_x = (box.xmax + box.xmin) / 2;
+                int center_y = (box.ymax + box.ymin) / 2;
+                int error_x = center_x - target_pixel_x;
+                int error_y = center_y - target_pixel_y;
+                std::cout << "target_x " << target_pixel_x << std::endl;
+                std::cout << "target_y " << target_pixel_y << std::endl;
+                std::cout << "center_x " << center_x << std::endl;
+                std::cout << "center_y " << center_y << std::endl;
+                std::cout << "error_x " << error_x << std::endl;
+                std::cout << "error_y " << error_y << std::endl;
+                current_controller->respond(error_x,error_y);
+
                 VisualServoFeedback feedback;
-                feedback.centered = true;
+                if ( (std::abs(error_x) < target_pixel_threshold / 2) && (std::abs(error_y) < target_pixel_threshold) )
+                {
+                    feedback.centered = true;
+                } else {
+                    feedback.centered = false;
+                }
                 server->publishFeedback(feedback);
+                
             }
         }
     }
@@ -64,7 +78,9 @@ namespace perception_control
             current_controller = proportional_controller;
             target_class = goal->target_class;
             target_frame = goal->target_frame;
-            std::cout << target_frame << std::endl;
+            target_pixel_x = goal->target_pixel_x;
+            target_pixel_y = goal->target_pixel_y;
+            target_pixel_threshold = goal->target_pixel_threshold;
             controlPids(true);
         } else {
             NODELET_ERROR("Unrecognized visual servo type: %d", goal->visual_servo_type);
@@ -72,13 +88,19 @@ namespace perception_control
             result.success = false;
             server->setSucceeded(result);
         }
-        
-        ros::Duration(10).sleep();
-        NODELET_INFO("Setting Success.");
-        VisualServoResult result;
-        result.success = true;
-        server->setSucceeded(result);
-        ros::Duration(1.0).sleep(); // give the task code a second to update the waypoint nav
+        ros::Rate r(1);
+        while( ros::ok() )   // Loop until we've been preempted
+        {
+            if (server->isPreemptRequested() )
+            {
+                controlPids(false);
+                VisualServoResult result;
+                result.success = true;
+                server->setPreempted(result);
+                break;
+            }
+            r.sleep();
+        }
     }
 }
 PLUGINLIB_EXPORT_CLASS(perception_control::VisualServo, nodelet::Nodelet);
