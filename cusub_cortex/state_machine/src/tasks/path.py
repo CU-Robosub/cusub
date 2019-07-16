@@ -54,7 +54,7 @@ class Follow(Objective):
         super(Follow, self).__init__(self.outcomes, "Follow")
 
     def feedback_callback(self, feedback):
-        print("Received feedback")
+        print("Received feedback: " + str(feedback))
 
     def execute(self, userdata):
         
@@ -62,10 +62,14 @@ class Follow(Objective):
         goal.target_class = "path"
         goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
         goal.visual_servo_type = goal.PROPORTIONAL
+        goal.target_pixel_x = goal.CAMERAS_CENTER_X
+        goal.target_pixel_y = goal.CAMERAS_CENTER_Y
+        goal.target_pixel_threshold = 20        # If inside a 20x20 square around the target pixel we'll be considered centered
         rospy.loginfo("Sending Goal to Visual Servo Server")
         self.client.send_goal(goal, feedback_cb=self.feedback_callback)
         while not self.client.wait_for_result(rospy.Duration(1)) and not rospy.is_shutdown() :
                 if userdata.timeout_obj.timed_out:
+                    self.client.cancel_goal()
                     userdata.outcome = "timed_out"
                     return "timed_out"
 

@@ -1,5 +1,11 @@
 perception_control:
   bb_controllers:
+
+    # Success Thresholds
+    succeeded_x_pixel_dist: 10
+    succeeded_y_pixel_dist: 10
+
+    # Controllers
     proportional:
       downcam:
         drive:
