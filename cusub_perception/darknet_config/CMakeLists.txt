@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(darknet_cv)
+project(darknet_config)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,12 +8,6 @@ project(darknet_cv)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  darknet_ros
-  darknet_ros_msgs
-  geometry_msgs
-  nav_msgs
-  sensor_msgs
-  tf
 )
 
 ## System dependencies are found with CMake's conventions
