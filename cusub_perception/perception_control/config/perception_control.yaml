@@ -2,7 +2,9 @@ perception_control:
   bb_controllers:
     proportional:
       downcam:
-        drive_max_setpoint: 1.0
-        strafe_max_setpoint: 1.0
-        drive_maxout_pixel_dist: 200
-        strafe_maxout_pixel_dist: 200
+        drive:
+          max_setpoint: 1.0
+          maxout_pixel_dist: 200
+        strafe:
+          max_setpoint: 1.0
+          maxout_pixel_dist: 200
