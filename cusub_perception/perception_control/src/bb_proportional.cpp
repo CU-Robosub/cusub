@@ -5,11 +5,11 @@ namespace perception_control
     BBProportional::BBProportional(ros::NodeHandle& nh) : BBController(nh)
     {
         // load rosparams
-        std::cout << "loading BB Proportional" << std::endl;
+        ROS_INFO("loading BB Proportional");
     }
 
     void BBProportional::respond(int xdiff, int ydiff)
     {
-        ;
+        ROS_INFO("Respondin");
     }
 }

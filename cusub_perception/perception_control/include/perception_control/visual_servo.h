@@ -8,6 +8,7 @@
 #include <perception_control/VisualServoAction.h>
 #include <darknet_ros_msgs/BoundingBoxes.h>
 #include <perception_control/bb_proportional.h>
+#include <perception_control/bb_controller.h>
 
 namespace perception_control
 {
@@ -29,6 +30,7 @@ namespace perception_control
         ros::Subscriber darknetSub;
 
         // Controllers
+        BBController* current_controller;
         BBProportional* proportional_controller;
     };
 }

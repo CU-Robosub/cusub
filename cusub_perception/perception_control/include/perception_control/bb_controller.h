@@ -9,7 +9,6 @@ namespace perception_control
     class BBController
     {
     public:
-        bool controllingPids;
         virtual void respond(int xdiff, int ydiff) {;}
         BBController(ros::NodeHandle& nh);
     protected:
