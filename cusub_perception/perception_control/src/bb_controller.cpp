@@ -12,7 +12,6 @@ namespace perception_control
         strafePub = nh.advertise<std_msgs::Float64>("cusub_common/motor_controllers/pid/strafe/setpoint",1);
         yawPub = nh.advertise<std_msgs::Float64>("cusub_common/motor_controllers/pid/yaw/setpoint",1);
         depthPub = nh.advertise<std_msgs::Float64>("cusub_common/motor_controllers/pid/depth/setpoint",1);
-        std::cout << "loading BBController" << std::endl;
     }
 
     void BBController::driveCallback(const std_msgs::Float64ConstPtr state) { driveState = state->data; }
