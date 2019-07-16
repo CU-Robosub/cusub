@@ -5,10 +5,13 @@
 #include <nodelet/nodelet.h>
 #include <actionlib/server/simple_action_server.h>
 #include <waypoint_navigator/ToggleControl.h>
+#include <perception_control/VisualServoAction.h>
 #include <darknet_ros_msgs/BoundingBoxes.h>
 
 namespace perception_control
 {
+    typedef actionlib::SimpleActionServer<perception_control::VisualServoAction> vsServer;
+
     class VisualServo : public nodelet::Nodelet
     {
     public:
@@ -16,7 +19,10 @@ namespace perception_control
     private:
         bool controlPids(const bool takeControl);
         void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
+        void execute(const perception_control::VisualServoGoalConstPtr goal);
 
+        perception_control::VisualServoGoalConstPtr activeGoal;
+        vsServer* server;
         ros::ServiceClient wayToggleClient; 
         bool controllingPids;
         ros::Subscriber darknetSub;
