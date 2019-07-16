@@ -1,6 +1,5 @@
 <launch>
   <arg name="sub" default="leviathan" />
-  <arg name="show_image" default="false" />
   <arg name="fakeyolo" default="false"/> 
   
   <group ns="$(arg sub)">
