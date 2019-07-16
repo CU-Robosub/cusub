@@ -14,6 +14,12 @@ namespace perception_control
     public:
         virtual void onInit();
     private:
+        bool controlPids(const bool takeControl);
+        void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
+
+        ros::ServiceClient wayToggleClient; 
+        bool controllingPids;
+        ros::Subscriber darknetSub;
     };
 }
 
