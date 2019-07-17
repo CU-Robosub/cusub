@@ -9,6 +9,7 @@
 #include <darknet_ros_msgs/BoundingBoxes.h>
 #include <perception_control/bb_proportional.h>
 #include <perception_control/bb_controller.h>
+#include <std_msgs/Float64.h>
 
 namespace perception_control
 {
@@ -30,6 +31,8 @@ namespace perception_control
         bool controllingPids;
         ros::Subscriber darknetSub;
         int target_pixel_x, target_pixel_y, target_pixel_threshold;
+        std_msgs::Float64 frozen_x_set, frozen_y_set;
+        bool frozen_controls;
 
         // Controllers
         BBController* current_controller;

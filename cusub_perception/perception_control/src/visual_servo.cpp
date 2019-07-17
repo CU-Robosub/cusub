@@ -10,6 +10,7 @@ namespace perception_control
         // Load controllers
         proportional_controller = new BBProportional(nh);
 
+        frozen_controls = false;
         wayToggleClient = nh.serviceClient<waypoint_navigator::ToggleControl>("cusub_common/toggleWaypointControl");
         controllingPids = false;
         darknetSub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &VisualServo::darknetCallback, this);
@@ -32,23 +33,26 @@ namespace perception_control
                 int center_y = (box.ymax + box.ymin) / 2;
                 int error_x = center_x - target_pixel_x;
                 int error_y = center_y - target_pixel_y;
-                std::cout << "target_x " << target_pixel_x << std::endl;
-                std::cout << "target_y " << target_pixel_y << std::endl;
-                std::cout << "center_x " << center_x << std::endl;
-                std::cout << "center_y " << center_y << std::endl;
-                std::cout << "error_x " << error_x << std::endl;
-                std::cout << "error_y " << error_y << std::endl;
-                current_controller->respond(error_x,error_y);
 
                 VisualServoFeedback feedback;
-                if ( (std::abs(error_x) < target_pixel_threshold / 2) && (std::abs(error_y) < target_pixel_threshold) )
+                if ( (std::abs(error_x) < target_pixel_threshold / 2) && (std::abs(error_y) < target_pixel_threshold / 2) )
                 {
-                    feedback.centered = true;
-                } else {
+                    feedback.centered = true;   // think about logic to set our setpoint in the middle of the box instead of on the outside like this
+                    if ( !frozen_controls ) // we just hit our target
+                    {
+                        NODELET_INFO("Freezing controls.");
+                        frozen_x_set.data = *current_controller->x_state;
+                        frozen_y_set.data = *current_controller->y_state;
+                        frozen_controls = true;
+                    } 
+                    current_controller->x_pub->publish(frozen_x_set);
+                    current_controller->y_pub->publish(frozen_y_set);
+                } else { // Still need to center
+                    frozen_controls = false;
                     feedback.centered = false;
+                    current_controller->respond(error_x,error_y);
                 }
                 server->publishFeedback(feedback);
-                
             }
         }
     }
@@ -74,8 +78,17 @@ namespace perception_control
 
         if (goal->visual_servo_type == goal->PROPORTIONAL)
         {
-            NODELET_INFO("Selecting visual servo proportional");
-            current_controller = proportional_controller;
+            NODELET_INFO("Selecting visual servo: PROPORTIONAL");
+            if (goal->camera != goal->OCCAM && goal->camera != goal->DOWNCAM)
+            {
+                NODELET_ERROR("Unrecognized camera: %s", goal->camera.c_str());
+                abort();
+            }
+            proportional_controller->configureByCamera(goal->camera);
+            current_controller = proportional_controller;            
+            
+            // TODO read which axes to configure and adjust
+            current_controller->configureAxes(STRAFE_AXIS, DRIVE_AXIS);
             target_class = goal->target_class;
             target_frame = goal->target_frame;
             target_pixel_x = goal->target_pixel_x;
