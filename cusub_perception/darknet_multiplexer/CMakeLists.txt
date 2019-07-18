@@ -61,6 +61,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
 add_service_files(
    FILES
+   DarknetClasses.srv
    DarknetCameras.srv
 )
 
@@ -218,4 +219,12 @@ add_library( drawer
 target_link_libraries(drawer ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(drawer ${catkin_EXPORTED_LIBRARIES})
+endif()
+
+add_library( get_classes
+  src/get_classes.cpp
+)
+target_link_libraries(get_classes ${catkin_LIBRARIES})
+if(catkin_EXPORTED_LIBRARIES)
+  add_dependencies(get_classes ${catkin_EXPORTED_LIBRARIES})
 endif()
