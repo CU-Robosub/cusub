@@ -220,7 +220,7 @@ class Objective(smach.State):
         res = self.wayClient.get_result()
         while (res == None or not res.complete) and not rospy.is_shutdown():
             res = self.wayClient.get_result()
-            if self.get_distance(self.cur_pose.position, target_pose.position) < POSE_REACHED_THRESHOLD:
+            if self.check_reached_pose(target_pose):
                 self.wayClient.cancel_goal()
                 return False
             elif timeout_obj.timed_out:
@@ -231,6 +231,9 @@ class Objective(smach.State):
                 return True
             rospy.sleep(0.25)
         return False
+
+    def check_reached_pose(self, target_pose):
+        return self.get_distance(self.cur_pose.position, target_pose.position) < POSE_REACHED_THRESHOLD
 
     def sub_pose_cb(self, msg):
         self.cur_pose = msg.pose.pose # store the pose part of the odom msg
