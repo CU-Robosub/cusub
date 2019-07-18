@@ -3,5 +3,6 @@
     <rosparam command="load" file="$(find darknet_multiplexer)/config/darknet_multiplexer.yaml"/>
     <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
     <!-- <node pkg="nodelet" type="nodelet" name="darknet_multiplexer" args="load darknet_multiplexer/Multiplexer standalone_nodelet" output="screen"/> -->
-    <node pkg="nodelet" type="nodelet" name="darknet_drawer" args="load darknet_multiplexer/DarknetDrawer standalone_nodelet" output="screen"/>
+    <!-- <node pkg="nodelet" type="nodelet" name="darknet_drawer" args="load darknet_multiplexer/DarknetDrawer standalone_nodelet" output="screen"/> -->
+    <node pkg="nodelet" type="nodelet" name="darknet_get_classes" args="load darknet_multiplexer/GetClasses standalone_nodelet" output="screen"/>
 </launch>
