@@ -120,7 +120,7 @@ class WaypointNavigator(object):
                 # start driving the distance to the target
                 if(abs(math.degrees(dyaw)) < 7.5):
                     drive_f64 = Float64()
-                    drive_f64.data = self.currentDrive + min(xy_dist, 3.0)
+                    drive_f64.data = self.currentDrive + min(xy_dist, self.carrot_drive)
                     self.drive_pub.publish(drive_f64)
                     # rospy.logdebug(xy_dist)
 
@@ -204,6 +204,8 @@ class WaypointNavigator(object):
         self.currentDepth = data.data
 
     def run(self):
+
+        self.carrot_drive = rospy.get_param("waypoint_navigator/carrot_drive", 3.0)
 
         self.yawFreeze = None
         self.driveFreeze = None

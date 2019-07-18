@@ -13,13 +13,13 @@ System Packages
     :hidden:
 
     cusub_perception_bringup
-    darknet_cv
+    darknet_config
     darknet_ros
     localizer
 
 :doc:`cusub_perception_bringup <cusub_perception_bringup>`
 
-:doc:`darknet CV <darknet_cv>`
+:doc:`darknet CV <darknet_config>`
 
 :doc:`darknet ros <darknet_ros>`
 
