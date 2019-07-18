@@ -6,6 +6,8 @@
 #include <ros/ros.h>
 #include <darknet_ros_msgs/BoundingBoxes.h>
 #include <vector>
+#include <darknet_multiplexer/DarknetClasses.h>
+#include <iostream>
 
 namespace darknet_get_classes_ns
 {
@@ -15,7 +17,11 @@ namespace darknet_get_classes_ns
         virtual void onInit();
     private:
         void darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs);
+        bool handle(darknet_multiplexer::DarknetClasses::Request& request, darknet_multiplexer::DarknetClasses::Response& response);
         std::vector<std::string> classes;
+        ros::ServiceServer service;
+        ros::Subscriber darknetSub;
+        bool recording;
     };
 }
 
