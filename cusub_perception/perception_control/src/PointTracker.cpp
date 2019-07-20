@@ -7,7 +7,7 @@ bool PointTracker::isValid()
     return m_currentPoints.size() > 2;
 }
 
-std::vector<cv::Point2f> PointTracker::currentPoints()
+std::vector<cv::Point2f> PointTracker::currentPoints() const
 {
     return m_currentPoints;
 }

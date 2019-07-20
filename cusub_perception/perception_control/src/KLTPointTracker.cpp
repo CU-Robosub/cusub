@@ -32,7 +32,7 @@ PointTracker::Result KLTPointTracker::initialize(const cv::Mat &image, const Bou
 PointTracker::Result KLTPointTracker::trackPoints(const cv::Mat &image)
 {
     cv::Mat imageGray;
-    std::vector<cv::Point2f> newPoints, foundNewPoints;
+    std::vector<cv::Point2f> newPoints, foundNewPoints, foundOldPoints;
     std::vector<uchar> pointStatus;
     std::vector<float> err;
 
@@ -47,10 +47,12 @@ PointTracker::Result KLTPointTracker::trackPoints(const cv::Mat &image)
         if(pointStatus[i] == 1)
         {
             foundNewPoints.push_back(newPoints[i]);
+            foundOldPoints.push_back(m_currentPoints[i]);
         }
     }
     
-    AffineTransform transform = AffineTransform(m_currentPoints, foundNewPoints);
+    // claculate the transform
+    AffineTransform transform = AffineTransform(foundOldPoints, foundNewPoints);
 
     // Now update the previous frame and previous points
     m_currentImg = imageGray.clone();
