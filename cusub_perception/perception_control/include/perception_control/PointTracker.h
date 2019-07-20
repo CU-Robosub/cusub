@@ -18,19 +18,19 @@ public:
 
     struct Result
     {
-        STATUS result;
+        STATUS status;
         AffineTransform transform;
         std::string message;
 
         Result() {};
-        Result(STATUS _result, AffineTransform _transform, std::string _message) :
-            result(_result),
+        Result(STATUS _status, AffineTransform _transform, std::string _message) :
+            status(_status),
             transform(_transform),
             message(_message) {};
     };
 
     bool isValid();
-    std::vector<cv::Point2f> currentPoints();
+    std::vector<cv::Point2f> currentPoints() const;
 
 
     virtual Result initialize(const cv::Mat &image, const BoundingBox &roi) = 0;

@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   nodelet
   waypoint_navigator
   OpenCV
+  cv_bridge
 )
 
 ################################################
@@ -222,6 +223,7 @@ add_library( tracking
   src/PointTracker.cpp
   src/KLTPointTracker.cpp
   src/BoundingBox.cpp
+  src/ObjectTracker.cpp
 )
 target_link_libraries(tracking ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
@@ -240,6 +242,7 @@ add_executable(tracker_unit
   src/PointTracker.cpp
   src/KLTPointTracker.cpp
   src/BoundingBox.cpp
+  src/ObjectTracker.cpp
 )
 
 target_link_libraries(tracker_unit ${catkin_LIBRARIES})

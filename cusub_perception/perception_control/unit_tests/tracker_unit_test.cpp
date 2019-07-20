@@ -45,38 +45,61 @@ int main(int argc, char ** argv)
     perception_control::KLTPointTracker * tracker = new perception_control::KLTPointTracker();
     tracker->initialize(image, bbox);
 
-    std::vector<cv::Point2f> points = tracker->currentPoints();
-    for (cv::Point pt : points)
-    {
-        cv::circle(image, pt, 2, cv::Scalar(0,0,255), -1);
-    }
-
-    cv::imshow("Shi-Tomasi Points", image);
-    cv::waitKey(0);
+    perception_control::Tracking * tracking = new perception_control::Tracking();
+    tracking->objectDetected("vampire_fathead", bbox, image);
 
     while(1)
     {
         cap >> image;
+        
         if (image.empty())
         {
             break;
         }
+        
+        tracking->newImage(image);
 
-        perception_control::PointTracker::Result result = tracker->trackPoints(image);
-
-        result.transform.transformBox(bbox);
+        perception_control::BoundingBox bbox = tracking->getBox("vampire_fathead");
 
         cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,0,255), 2);
-
-        std::vector<cv::Point2f> points = tracker->currentPoints();
-        for (cv::Point pt : points)
-        {
-            cv::circle(image, pt, 2, cv::Scalar(0,0,255), -1);
-        }
 
         cv::imshow("video", image);
         cv::waitKey(0);
     }
+    // std::vector<cv::Point2f> points = tracker->currentPoints();
+    // for (cv::Point pt : points)
+    // {
+    //     cv::circle(image, pt, 2, cv::Scalar(0,0,255), -1);
+    // }
+    // cv::imshow("Shi-Tomasi Points", image);
+    // cv::waitKey(0);
+
+    // perception_control::PointTracker::Result result;
+    // while(1)
+    // {
+    //     cap >> image;
+        
+    //     if (image.empty())
+    //     {
+    //         break;
+    //     }
+    //     result = tracker->trackPoints(image);
+
+    //     result.transform.transformBox(bbox, image);
+    //     bbox.fixBox(tracker->currentPoints());
+
+    //     cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,0,255), 2);
+
+    //     std::vector<cv::Point2f> points = tracker->currentPoints();
+    //     for (cv::Point pt : points)
+    //     {
+    //         cv::circle(image, pt, 2, cv::Scalar(0,255,0), -1);
+    //     }
+
+    //     cv::imshow("video", image);
+    //     cv::waitKey(0);
+    // }
+    
 
     delete tracker;
 
