@@ -5,8 +5,7 @@ using namespace perception_control;
 ObjectTracker::ObjectTracker(BoundingBox &box, const cv::Mat &image) :
     m_pointTracker(new KLTPointTracker()),
     m_boundingBox(box),
-    m_valid(false),
-    m_fixPoints(true)
+    m_valid(false)
 {
     initialize(box, image);
 }
@@ -34,11 +33,7 @@ void ObjectTracker::updateImage(const cv::Mat &image)
 
     if (result.status == PointTracker::STATUS::Success)
     {
-        result.transform.transformBox(m_boundingBox);
-        if (m_fixPoints)
-        {
-            m_boundingBox.fixBox(m_pointTracker->currentPoints());
-        }
+        m_boundingBox.setTransform(result.transform);
         m_valid = true;
     }
     else

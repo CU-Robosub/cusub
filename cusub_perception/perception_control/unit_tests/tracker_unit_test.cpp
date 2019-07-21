@@ -8,26 +8,19 @@
 
 int main(int argc, char ** argv)
 {
-    // std::string imageName = "/home/soroush/robosub/ws/src/cusub/cusub_perception/perception_control/unit_tests/images/jiangshi_real_close.jpg";
-    // int xmin = 327;
-    // int xmax = 526;
-    // int ymin = 12;
-    // int ymax = 330;
-    // perception_control::BoundingBox bbox(xmin, ymin, xmax, ymax);
-    // cv::Mat image = cv::imread(imageName);
-    // cv::Mat imageCopy;
-    // cv::cvtColor(image, imageCopy, CV_BGR2GRAY);
-    // cv::imshow("Image", image);
-    // cv::waitKey(0);
-    // cv::imshow("Cropped", image(bbox.roiRect()));
-    // cv::waitKey(0);
     std::string videoName = "/home/soroush/robosub/ws/src/cusub/cusub_perception/perception_control/unit_tests/videos/out.mp4";
-    cv::VideoCapture cap(videoName);
     int xmin = 520;
     int xmax = 626;
     int ymin = 230;
     int ymax = 410;
+    // std::string videoName = "/home/soroush/robosub/ws/src/cusub/cusub_perception/perception_control/unit_tests/videos/jiangshi_slay.mp4";
+    // int xmin = 240;
+    // int xmax = 305;
+    // int ymin = 140;
+    // int ymax = 270;
+
     perception_control::BoundingBox bbox(xmin, ymin, xmax, ymax);
+    cv::VideoCapture cap(videoName);
 
     if (!cap.isOpened())
     {
@@ -48,57 +41,86 @@ int main(int argc, char ** argv)
     perception_control::Tracking * tracking = new perception_control::Tracking();
     tracking->objectDetected("vampire_fathead", bbox, image);
 
-    while(1)
+    // full test with tracking object
+    if (tracking != nullptr)
     {
-        cap >> image;
-        
-        if (image.empty())
+        while(1)
         {
-            break;
+            cap >> image;
+            
+            if (image.empty())
+            {
+                break;
+            }
+            
+            tracking->newImage(image);
+
+            perception_control::BoundingBox bbox = tracking->getBox("vampire_fathead");
+
+            cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,0,255), 2);
+
+            cv::imshow("Tracked Object", image);
+            cv::waitKey(0);
         }
-        
-        tracking->newImage(image);
-
-        perception_control::BoundingBox bbox = tracking->getBox("vampire_fathead");
-
-        cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,0,255), 2);
-
-        cv::imshow("video", image);
-        cv::waitKey(0);
     }
-    // std::vector<cv::Point2f> points = tracker->currentPoints();
-    // for (cv::Point pt : points)
-    // {
-    //     cv::circle(image, pt, 2, cv::Scalar(0,0,255), -1);
-    // }
-    // cv::imshow("Shi-Tomasi Points", image);
-    // cv::waitKey(0);
 
-    // perception_control::PointTracker::Result result;
-    // while(1)
-    // {
-    //     cap >> image;
-        
-    //     if (image.empty())
-    //     {
-    //         break;
-    //     }
-    //     result = tracker->trackPoints(image);
+    // more in depth debugging shown
+    if (tracker != nullptr)
+    {
+        cap = cv::VideoCapture(videoName);
+        cap >> image;
 
-    //     result.transform.transformBox(bbox, image);
-    //     bbox.fixBox(tracker->currentPoints());
+        std::vector<cv::Point2f> points = tracker->currentPoints();
+        for (cv::Point pt : points)
+        {
+            cv::circle(image, pt, 2, cv::Scalar(0,0,255), -1);
+        }
+        cv::imshow("Shi-Tomasi Points", image);
+        cv::waitKey(0);
 
-    //     cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,0,255), 2);
+        std::vector<cv::Point2f> bboxDebugPoints = bbox.cornerPoints();
 
-    //     std::vector<cv::Point2f> points = tracker->currentPoints();
-    //     for (cv::Point pt : points)
-    //     {
-    //         cv::circle(image, pt, 2, cv::Scalar(0,255,0), -1);
-    //     }
+        bool first = true;
+        perception_control::PointTracker::Result result;
+        while(1)
+        {
+            if (first == false)
+            {
+                std::vector<cv::Point2f> oldPoints = tracker->currentPoints();
+                for (cv::Point2f pt : oldPoints)
+                {
+                    cv::circle(image, pt, 2, cv::Scalar(255,255,255), -1);
+                }
+                result.transform.transformPoints(oldPoints);
+                for (cv::Point2f pt : oldPoints)
+                {
+                    cv::circle(image, pt, 2, cv::Scalar(0,0,255), -1);
+                }
+                result.transform.transformPoints(bboxDebugPoints);
+                for (cv::Point2f pt : bboxDebugPoints)
+                {
+                    cv::circle(image, pt, 5, cv::Scalar(0,0,255), -1);
+                }
 
-    //     cv::imshow("video", image);
-    //     cv::waitKey(0);
-    // }
+                cv::imshow("Transformed points", image);
+                cv::waitKey(0);
+            }
+            first = false;
+
+            cap >> image;
+            
+            if (image.empty())
+            {
+                break;
+            }
+
+            result = tracker->trackPoints(image);
+
+            bbox.setTransform(result.transform);
+
+            cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,0,255), 2);
+        }
+    }
     
 
     delete tracker;

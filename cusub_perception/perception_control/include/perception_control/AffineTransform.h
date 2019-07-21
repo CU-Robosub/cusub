@@ -6,8 +6,6 @@
 #include <opencv2/video.hpp>
 #include <opencv2/calib3d.hpp>
 
-#include "BoundingBox.h"
-
 namespace perception_control
 {
 
@@ -18,8 +16,7 @@ public:
     AffineTransform(const AffineTransform &other);
     AffineTransform(const std::vector<cv::Point2f> &fromPts, const std::vector<cv::Point2f> &toPts);
     
-    void transformPoints(std::vector<cv::Point2f> &pts);
-    void transformBox(BoundingBox &box);
+    void transformPoints(std::vector<cv::Point2f> &pts) const;
 
 private:
     cv::Mat m_transform;

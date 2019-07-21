@@ -1,6 +1,5 @@
 #include "perception_control/AffineTransform.h"
 
-
 using namespace perception_control;
 
 AffineTransform::AffineTransform()
@@ -17,14 +16,7 @@ AffineTransform::AffineTransform(const std::vector<cv::Point2f> &fromPts, const 
     m_transform = cv::findHomography(fromPts, toPts, CV_RANSAC);
 }
 
-void AffineTransform::transformPoints(std::vector<cv::Point2f> &pts)
+void AffineTransform::transformPoints(std::vector<cv::Point2f> &pts) const
 {
     cv::perspectiveTransform(pts, pts, m_transform);
-}
-
-void AffineTransform::transformBox(BoundingBox &box)
-{
-    std::vector<cv::Point2f> pts = box.cornerPoints();
-    transformPoints(pts);
-    box.setPoints(pts);
 }

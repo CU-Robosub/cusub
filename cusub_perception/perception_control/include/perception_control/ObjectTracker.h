@@ -23,8 +23,6 @@ private:
     BoundingBox m_boundingBox;
 
     bool m_valid;
-    bool m_fixPoints;
-
 };
 
 }; // namespace perception_control
