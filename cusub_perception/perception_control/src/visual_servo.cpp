@@ -35,16 +35,16 @@ namespace perception_control
                 int error_y = center_y - target_pixel_y;
 
                 VisualServoFeedback feedback;
-                if ( (std::abs(error_x) < target_pixel_threshold / 2) && (std::abs(error_y) < target_pixel_threshold / 2) )
+                if ( (std::abs(error_x) < target_pixel_threshold / 2) && (std::abs(error_y) < target_pixel_threshold / 2) ) // we're centered
                 {
-                    feedback.centered = true;   // think about logic to set our setpoint in the middle of the box instead of on the outside like this
-                    if ( !frozen_controls ) // we just hit our target
+                    feedback.centered = true; 
+                    if ( !frozen_controls ) // we just centered on our target
                     {
                         NODELET_INFO("Freezing controls.");
                         frozen_x_set.data = *current_controller->x_state;
                         frozen_y_set.data = *current_controller->y_state;
                         frozen_controls = true;
-                    } 
+                    } // else we've been centered on the target
                     current_controller->x_pub->publish(frozen_x_set);
                     current_controller->y_pub->publish(frozen_y_set);
                 } else { // Still need to center

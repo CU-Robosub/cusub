@@ -10,7 +10,7 @@ perception_control:
       downcam:
         drive:
           max_setpoint: 1.0
-          maxout_pixel_dist: 200
+          maxout_pixel_dist: 50
         strafe:
           max_setpoint: 1.0
-          maxout_pixel_dist: 200
+          maxout_pixel_dist: 50

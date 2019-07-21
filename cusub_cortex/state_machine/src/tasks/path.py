@@ -16,6 +16,7 @@ import rospy
 import smach
 import smach_ros
 from perception_control.msg import VisualServoAction, VisualServoGoal, VisualServoFeedback
+from perception_control.msg import PathOrientAction, PathOrientGoal, PathOrientResult
 import actionlib
 from actuator.srv import ActivateActuator
 
@@ -47,50 +48,68 @@ class Follow(Objective):
 
     def __init__(self, path_num_str):
         self.path_num_str = path_num_str
-        self.client = actionlib.SimpleActionClient('visual_servo', VisualServoAction)
+        self.vs_client = actionlib.SimpleActionClient('visual_servo', VisualServoAction)
         rospy.loginfo("...waiting for visual_servo server")
-        self.client.wait_for_server()
+        self.vs_client.wait_for_server()
         rospy.loginfo("....found visual servo server")
         self.centering_time = rospy.get_param("tasks/path"+path_num_str+"/centering_time")
         self.do_orientation = rospy.get_param("tasks/path"+path_num_str+"/do_orientation")
+        if self.do_orientation:
+            self.ori_client = actionlib.SimpleActionClient('path_orient', PathOrientAction)
+            rospy.loginfo("...waiting for path_orient server")
+            self.ori_client.wait_for_server()
+            rospy.loginfo("....found path_orient server")
+            self.orientation_result = None
         self.feedback = False
         self.was_centered = False
         super(Follow, self).__init__(self.outcomes, "Follow")
 
-    def feedback_callback(self, feedback):
+    def orientation_result_callback(self, state, result):
+        self.orientation_result = result.oriented
+
+    def vs_feedback_callback(self, feedback):
         self.feedback = feedback.centered
 
     def execute(self, userdata):
-        goal = VisualServoGoal()
-        goal.target_class = "path"
-        goal.camera = goal.DOWNCAM
-        goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
-        goal.visual_servo_type = goal.PROPORTIONAL
-        goal.target_pixel_x = goal.CAMERAS_CENTER_X
-        goal.target_pixel_y = goal.CAMERAS_CENTER_Y
-        goal.target_pixel_threshold = 10        # If inside a 20x20 square around the target pixel we'll be considered centered
-        rospy.loginfo("...centering over path marker")
-        self.client.send_goal(goal, feedback_cb=self.feedback_callback)
+        # goal = VisualServoGoal()
+        # goal.target_class = "path"
+        # goal.camera = goal.DOWNCAM
+        # goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
+        # goal.visual_servo_type = goal.PROPORTIONAL
+        # goal.target_pixel_x = goal.CAMERAS_CENTER_X
+        # goal.target_pixel_y = goal.CAMERAS_CENTER_Y
+        # goal.target_pixel_threshold = 10        # If inside a 20x20 square around the target pixel we'll be considered centered
+        # rospy.loginfo("...centering over path marker")
+        # self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)
         
-        while not rospy.is_shutdown() :
-            if userdata.timeout_obj.timed_out:
-                self.client.cancel_goal()
-                userdata.outcome = "timed_out"
-                return "timed_out"
-            if self.feedback:
-                if self.was_centered:
-                    break
-                else:
-                    rospy.sleep(self.centering_time)
-                    self.was_centered = True
-            else:
-                self.was_centered = False
-            rospy.sleep(1)
-        rospy.loginfo("...centered over path marker")
+        # while not rospy.is_shutdown() :
+        #     if userdata.timeout_obj.timed_out:
+        #         self.vs_client.cancel_goal()
+        #         userdata.outcome = "timed_out"
+        #         return "timed_out"
+        #     if self.feedback:
+        #         if self.was_centered:
+        #             break
+        #         else:
+        #             rospy.sleep(self.centering_time)
+        #             self.was_centered = True
+        #     else:
+        #         self.was_centered = False
+        #     rospy.sleep(1)
+        # rospy.loginfo("...centered over path marker")
 
         if self.do_orientation:
             # call to orientation server
-            pass
+            ori_goal = PathOrientGoal()
+            rospy.loginfo("...orienting with path marker")
+            self.ori_client.send_goal(ori_goal, done_cb=self.orientation_result_callback)
+            r = rospy.Rate(1)
+            while not rospy.is_shutdown() and self.orientation_result == None:
+                if userdata.timeout_obj.timed_out:
+                    self.ori_client.cancel_goal()
+                    userdata.outcome = "timed_out"
+                    return "timed_out"
+                r.sleep()
         else:
             rospy.logwarn("...skipping orientation")
         

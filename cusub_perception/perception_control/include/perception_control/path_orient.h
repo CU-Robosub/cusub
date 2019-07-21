@@ -11,15 +11,23 @@
 
 namespace perception_control
 {
-    // typedef actionlib::SimpleActionServer<perception_control::OrbitBuoyAction> orbitServer;
+    typedef actionlib::SimpleActionServer<perception_control::PathOrientAction> pathServer;
 
     class PathOrient : public nodelet::Nodelet
     {
         public:
             virtual void onInit();
-        // private:
-        //     void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
-        //     float yawState;
+        private:
+            void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
+            void yawCallback(const std_msgs::Float64ConstPtr state);
+            bool controlPids(const bool takeControl);
+            void execute(const perception_control::PathOrientGoalConstPtr goal);
+            float yawState;
+            ros::Publisher yawPub;
+            ros::Subscriber darknetSub, yawSub;
+            ros::ServiceClient wayToggleClient;
+            bool controllingPids, orientedWithPath;
+            pathServer* server;
     };
 }
 
