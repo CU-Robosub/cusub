@@ -12,4 +12,12 @@
         Visual Servos on a bounding box
     </description>
   </class>
+</library>
+
+<library path="lib/libpath_orient">
+  <class name="perception_control/PathOrient" type="perception_control::PathOrient" base_class_type="nodelet::Nodelet">
+    <description>
+        Orients with a path marker
+    </description>
+  </class>
 </library>  
