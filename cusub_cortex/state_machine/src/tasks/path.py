@@ -29,7 +29,7 @@ class Path(Task):
         self.link_objectives()
 
     def init_objectives(self, path_num_str):
-        self.search = Search.from_bounding_box(self.get_prior_topic(), "path", [0,0,0,0,0,1])
+        self.search = Search.from_bounding_box(self.get_prior_param(), "path", [0,0,0,0,0,1])
         self.follow = Follow(path_num_str)
 
     def link_objectives(self):
@@ -51,12 +51,14 @@ class Follow(Objective):
         rospy.loginfo("...waiting for visual_servo server")
         self.client.wait_for_server()
         rospy.loginfo("....found visual servo server")
+        self.centering_time = rospy.get_param("tasks/path"+path_num_str+"/centering_time")
+        self.do_orientation = rospy.get_param("tasks/path"+path_num_str+"/do_orientation")
         self.feedback = False
+        self.was_centered = False
         super(Follow, self).__init__(self.outcomes, "Follow")
 
     def feedback_callback(self, feedback):
-        print("Received feedback: " + str(feedback))
-    #     self.feedback = feedback
+        self.feedback = feedback.centered
 
     def execute(self, userdata):
         goal = VisualServoGoal()
@@ -67,17 +69,30 @@ class Follow(Objective):
         goal.target_pixel_x = goal.CAMERAS_CENTER_X
         goal.target_pixel_y = goal.CAMERAS_CENTER_Y
         goal.target_pixel_threshold = 10        # If inside a 20x20 square around the target pixel we'll be considered centered
-        rospy.loginfo("Sending Goal to Visual Servo Server")
+        rospy.loginfo("...centering over path marker")
         self.client.send_goal(goal, feedback_cb=self.feedback_callback)
         
-        while not self.feedback and not rospy.is_shutdown() :
+        while not rospy.is_shutdown() :
             if userdata.timeout_obj.timed_out:
                 self.client.cancel_goal()
                 userdata.outcome = "timed_out"
                 return "timed_out"
+            if self.feedback:
+                if self.was_centered:
+                    break
+                else:
+                    rospy.sleep(self.centering_time)
+                    self.was_centered = True
+            else:
+                self.was_centered = False
             rospy.sleep(1)
-        
-        # Align with the path marker
+        rospy.loginfo("...centered over path marker")
 
+        if self.do_orientation:
+            # call to orientation server
+            pass
+        else:
+            rospy.logwarn("...skipping orientation")
+        
         userdata.outcome = "success"
         return "success"

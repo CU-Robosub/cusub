@@ -100,7 +100,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 
-add_action_files(DIRECTORY action FILES OrbitBuoy.action VisualServo.action)
+add_action_files(DIRECTORY action FILES OrbitBuoy.action VisualServo.action PathOrient.action)
 generate_messages(DEPENDENCIES actionlib_msgs geometry_msgs)
 
 catkin_package(
@@ -115,6 +115,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+# ORBIT SERVER
 include_directories(include ${catkin_INCLUDE_DIRS})
 add_library( orbit
   src/orbit.cpp
@@ -124,6 +125,8 @@ if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(orbit ${catkin_EXPORTED_LIBRARIES})
 endif()
 
+
+## VISUAL SERVO
 add_library( visual_servo
   src/visual_servo.cpp
   src/bb_controller.cpp
@@ -132,4 +135,14 @@ add_library( visual_servo
 target_link_libraries(visual_servo ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(visual_servo ${catkin_EXPORTED_LIBRARIES})
+endif()
+
+
+# PATH ORIENTATION
+add_library( path_orient
+  src/path_orient.cpp
+)
+target_link_libraries(path_orient ${catkin_LIBRARIES})
+if(catkin_EXPORTED_LIBRARIES)
+  add_dependencies(path_orient ${catkin_EXPORTED_LIBRARIES})
 endif()

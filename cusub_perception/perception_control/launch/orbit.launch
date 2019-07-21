@@ -3,4 +3,5 @@
     <!-- <node pkg="nodelet" type="nodelet" name="orbit" args="load perception_control/Orbit standalone_nodelet" output="screen"/> -->
     <rosparam command="load" file="$(find perception_control)/config/perception_control.yaml"/>
     <node pkg="nodelet" type="nodelet" name="visualservo" args="load perception_control/VisualServo standalone_nodelet2" output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="path_orient" args="load perception_control/PathOrient standalone_nodelet2" output="screen"/>
 </launch>
