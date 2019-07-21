@@ -29,10 +29,12 @@ tasks:
 
  path0:
   manager_info:
-    timeout_secs: 1
+    timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  prior: [8.0,0,-1.5, "world"] # Won't matter much b/c we'll almost immediately see it after the SG
+  prior: [-2.5,2.0,-1.5, "world"] # Won't matter much b/c we'll almost immediately see it after the SG
+  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
+  do_orientation: true
 
  jiangshi:
   manager_info:

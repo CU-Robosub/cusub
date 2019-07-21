@@ -28,7 +28,7 @@ class Jiangshi(Task):
         self.link_objectives()
 
     def init_objectives(self):
-        self.search = Search(self.get_prior_topic(), "cusub_cortex/mapper_out/jiangshi")
+        self.search = Search(self.get_prior_param(), "cusub_cortex/mapper_out/jiangshi")
         self.slay = Slay()
 
     def link_objectives(self):

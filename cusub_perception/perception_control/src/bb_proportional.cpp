@@ -23,7 +23,7 @@ namespace perception_control
 
     void BBProportional::respond(int xdiff, int ydiff)
     {
-        ydiff = - ydiff;
+        ydiff = - ydiff;            // y needs to be flipped to match with how we integrate drive
         std_msgs::Float64 x_set, y_set;
         // X movement calc
         float x_slope = x_max_setpoint / ( (float)x_maxout_pixel_dist );

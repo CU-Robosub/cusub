@@ -88,12 +88,14 @@ class Search(Objective):
         # Ask the server for available bounding box classes and check if our target_class is among those
         while self.target_class not in self.service(rospy.Duration(1)).classes and not rospy.is_shutdown():
             if userdata.timeout_obj.timed_out:
+                self.cancel_way_client_goal()
                 userdata.outcome = "timed_out"
                 return "not_found"
             elif self.check_reached_pose(prior):
                 rospy.logerr("Search unable to find task.")
                 userdata.outcome = "not_found"
                 return "not_found"
+        self.cancel_way_client_goal()
         return "found"
 
     def execute(self, userdata):
