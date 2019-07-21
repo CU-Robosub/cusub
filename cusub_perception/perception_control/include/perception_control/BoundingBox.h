@@ -2,6 +2,7 @@
 #define BOUNDINGBOX_H
 
 #include <opencv2/core.hpp>
+#include "AffineTransform.h"
 
 namespace perception_control
 {
@@ -13,25 +14,24 @@ public:
     BoundingBox();
     BoundingBox(const int &xmin, const int &ymin, const int &xmax, const int &ymax);
 
-    void setPoints(const std::vector<cv::Point2f> &points);
-    void fixBox(const std::vector<cv::Point2f> &points);
-
+    void setTransform(const AffineTransform &tform);
+    
     int xmin() const;
     int ymin() const;
     int xmax() const;
     int ymax() const;
-
-    bool valid();
+    bool valid() const;
     std::vector<cv::Point2f> cornerPoints() const;
     cv::Rect roiRect() const;
 
 private:
-    int m_xmin;
-    int m_ymin;
-    int m_xmax;
-    int m_ymax;
-
+    std::vector<cv::Point2f> m_points;
     bool m_valid;
+
+    int m_xmin;
+    int m_xmax;
+    int m_ymin;
+    int m_ymax;
 
 };
     
