@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(perception_control)
-
-## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
+set(OpenCV_DIR /usr/share/OpenCV)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  OpenCV
   actionlib
   actionlib_msgs
   darknet_ros_msgs
@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   nodelet
   waypoint_navigator
+  cv_bridge
 )
 
 ################################################
@@ -146,3 +147,9 @@ target_link_libraries(path_orient ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(path_orient ${catkin_EXPORTED_LIBRARIES})
 endif()
+
+add_executable( path_unit 
+  unit_tests/path_orientation_test.cpp
+  src/path_orient.cpp
+)
+target_link_libraries(path_unit ${catkin_LIBRARIES})
