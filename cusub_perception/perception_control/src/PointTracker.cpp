@@ -11,3 +11,8 @@ std::vector<cv::Point2f> PointTracker::currentPoints() const
 {
     return m_currentPoints;
 }
+
+cv::Mat PointTracker::currentImage() const
+{
+    return m_currentImg;
+}

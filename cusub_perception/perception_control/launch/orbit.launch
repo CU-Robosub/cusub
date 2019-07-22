@@ -1,4 +1,8 @@
+// todo SK: better launch name
 <launch>
-    <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
-    <node pkg="nodelet" type="nodelet" name="orbit" args="load perception_control/Orbit standalone_nodelet" output="screen"/>
+    <group ns="leviathan">
+        <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
+        <node pkg="nodelet" type="nodelet" name="orbit" args="load perception_control/Orbit standalone_nodelet" output="screen"/>
+        <node pkg="nodelet" type="nodelet" name="tracking" args="load perception_control/Tracking standalone_nodelet" output="screen"/>
+    </group>
 </launch>

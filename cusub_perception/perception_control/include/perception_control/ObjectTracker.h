@@ -11,11 +11,13 @@ class ObjectTracker
 {
 public:
     ObjectTracker(BoundingBox &box, const cv::Mat &image);
+    ~ObjectTracker();
 
     void initialize(BoundingBox &box, const cv::Mat &image);
     void updateImage(const cv::Mat &image);
 
-    BoundingBox getCurrentBox() const;
+    BoundingBox currentBox() const;
+    cv::Mat currentImage() const;
     bool isValid();
 
 private:
