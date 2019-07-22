@@ -10,6 +10,11 @@ ObjectTracker::ObjectTracker(BoundingBox &box, const cv::Mat &image) :
     initialize(box, image);
 }
 
+ObjectTracker::~ObjectTracker()
+{
+    delete m_pointTracker;
+}
+
 void ObjectTracker::initialize(BoundingBox &box, const cv::Mat &image)
 {
     PointTracker::Result result = m_pointTracker->initialize(image, box);
@@ -17,9 +22,14 @@ void ObjectTracker::initialize(BoundingBox &box, const cv::Mat &image)
     m_boundingBox = box;
 }
 
-BoundingBox ObjectTracker::getCurrentBox() const
+BoundingBox ObjectTracker::currentBox() const
 {
     return m_boundingBox;
+}
+
+cv::Mat ObjectTracker::currentImage() const
+{
+    return m_pointTracker->currentImage();
 }
 
 bool ObjectTracker::isValid()

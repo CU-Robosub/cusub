@@ -31,6 +31,7 @@ public:
 
     bool isValid();
     std::vector<cv::Point2f> currentPoints() const;
+    cv::Mat currentImage() const;
 
 
     virtual Result initialize(const cv::Mat &image, const BoundingBox &roi) = 0;
