@@ -20,11 +20,18 @@ public:
     int ymin() const;
     int xmax() const;
     int ymax() const;
-    bool valid() const;
+    bool isValid() const;
+    
     std::vector<cv::Point2f> cornerPoints() const;
     cv::Rect roiRect() const;
+    int area() const;
+    int overlapArea(const BoundingBox &other) const;
 
 private:
+    static const int LOW_THRESHOLD;
+    static const int HIGH_THRESHOLD;
+    static const int AREA_THRESHOLD;
+
     std::vector<cv::Point2f> m_points;
     bool m_valid;
 
@@ -33,6 +40,7 @@ private:
     int m_ymin;
     int m_ymax;
 
+    bool checkBox();
 };
     
 }; // namespace perception_control

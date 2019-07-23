@@ -47,15 +47,17 @@ private:
     sensor_msgs::Image cvImagetoROS(const cv::Mat &image);
 
     ros::NodeHandle m_nh;
+    std::string m_imageTopicName;
     ros::Subscriber m_imageSubscriber;
-    ros::Subscriber m_darknetSubscriber;
+    std::string m_detectionTopicName;
+    ros::Subscriber m_detectionSubscriber;
     ros::Publisher m_debugPublisher;
+
+    bool m_debugMode;
+    uint m_frameCount;
 
     std::map<std::string, ObjectTracker *> m_objectMap;
 
-    bool m_debugMode;
-
-    uint m_frameCount;
 };
 
 }; // namespace perception_control

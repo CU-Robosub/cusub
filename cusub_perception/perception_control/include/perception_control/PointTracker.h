@@ -23,6 +23,10 @@ public:
         std::string message;
 
         Result() {};
+        Result(STATUS _status, std::string _message) :
+            status(_status),
+            transform(AffineTransform()),
+            message(_message) {};
         Result(STATUS _status, AffineTransform _transform, std::string _message) :
             status(_status),
             transform(_transform),
