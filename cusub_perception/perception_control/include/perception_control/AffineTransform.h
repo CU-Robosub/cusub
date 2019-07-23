@@ -14,7 +14,7 @@ class AffineTransform
 public:
     AffineTransform();
     AffineTransform(const AffineTransform &other);
-    AffineTransform(const std::vector<cv::Point2f> &fromPts, const std::vector<cv::Point2f> &toPts);
+    AffineTransform(const std::vector<cv::Point2f> &fromPts, const std::vector<cv::Point2f> &toPts, bool &success);
     
     void transformPoints(std::vector<cv::Point2f> &pts) const;
 

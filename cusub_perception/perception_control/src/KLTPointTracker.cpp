@@ -26,7 +26,19 @@ PointTracker::Result KLTPointTracker::initialize(const cv::Mat &image, const Bou
 
     m_currentImg = imageCopy;
 
-    return PointTracker::Result();
+    Result result;
+    if (m_currentPoints.size() > 2)
+    {
+        result.message = "Successfuly initialized KLT Point Tracker";
+        result.status = STATUS::Success;
+    }
+    else
+    {
+        result.message = "Not enough points to initialize KLT Point Tracker: " + std::to_string(m_currentPoints.size());
+        result.status = STATUS::Fail;
+    }
+    
+    return result;
 }
 
 PointTracker::Result KLTPointTracker::trackPoints(const cv::Mat &image)
@@ -51,17 +63,38 @@ PointTracker::Result KLTPointTracker::trackPoints(const cv::Mat &image)
         }
     }
     
-    // claculate the transform
-    AffineTransform transform = AffineTransform(foundOldPoints, foundNewPoints);
 
-    // Now update the previous frame and previous points
-    m_currentImg = imageGray.clone();
-    m_currentPoints = foundNewPoints;
+    Result result;
+    if (foundNewPoints.size() > 2 && (foundNewPoints.size() == foundOldPoints.size()))
+    {
+        // claculate the transform
+        bool success;
+        AffineTransform transform = AffineTransform(foundOldPoints, foundNewPoints, success);
 
-    PointTracker::STATUS status = PointTracker::STATUS::Success;
-    std::string message = "Succeeded with " + std::to_string(foundNewPoints.size()) + " points";
+        if (success)
+        {
 
-    return PointTracker::Result(status, transform, message);
+            // Now update the previous frame and previous points
+            m_currentImg = imageGray.clone();
+            m_currentPoints = foundNewPoints;
+
+            result.status = STATUS::Success;
+            result.transform = transform;
+            result.message = "Succeeded with " + std::to_string(foundNewPoints.size()) + " points";
+        }
+        else
+        {
+            result.status = STATUS::Fail;
+            result.message = "RANSAC failed to find a match";
+        }
+    }
+    else
+    {
+        result.status = STATUS::Fail;
+        result.message = "Not enough points found";
+    }
+    
+    return result;
 }
 
 void KLTPointTracker::reset()

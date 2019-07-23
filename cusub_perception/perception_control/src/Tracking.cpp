@@ -2,9 +2,20 @@
 
 using namespace perception_control;
 
+#include <iostream>
+
 void Tracking::onInit()
 {
-    m_debugMode = true; // todo SK: read from param
+    ros::NodeHandle nhPrivate = getPrivateNodeHandle();
+    nhPrivate.getParam("debug_mode", m_debugMode);
+    nhPrivate.getParam("image_topic", m_imageTopicName);
+    nhPrivate.getParam("detection_topic", m_detectionTopicName);
+
+    NODELET_INFO(m_imageTopicName.c_str());
+    NODELET_INFO(m_detectionTopicName.c_str());
+    if(m_debugMode) NODELET_INFO("true");
+    else NODELET_INFO("false");
+
     m_frameCount = 0;
 
     m_nh = getNodeHandle();
@@ -28,9 +39,8 @@ void Tracking::setupPublishers()
 }
 void Tracking::setupSubscribers()
 {
-    // todo SK: ns issues
-    m_imageSubscriber = m_nh.subscribe("/leviathan/cusub_common/occam/image0", 1, &Tracking::imageCallback, this);
-    m_darknetSubscriber = m_nh.subscribe("/leviathan/cusub_perception/darknet_ros/bounding_boxes", 1, &Tracking::darknetCallback, this);
+    m_imageSubscriber = m_nh.subscribe(m_imageTopicName, 1, &Tracking::imageCallback, this);
+    m_detectionSubscriber = m_nh.subscribe(m_detectionTopicName, 1, &Tracking::darknetCallback, this);
 }
 
 BoundingBox Tracking::getBox(const std::string &classname)
@@ -72,11 +82,25 @@ void Tracking::objectDetected(const std::string &classname, BoundingBox &box, co
 {
     if (m_objectMap.count(classname) != 0)
     {
-        // option to reinitialize. Maybe only for high probability?
+        ObjectTracker * objectTracker = m_objectMap[classname];
+        if (objectTracker->isValid() == false)
+        {
+            objectTracker->initialize(box, image);
+        }
+        else
+        {
+            // the detection box and the tracking box don't overlap at all, reset
+            if (objectTracker->currentBox().overlapArea(box) < 0)
+            {
+                std::cout << "No overlap for class: " << classname << std::endl;
+                objectTracker->initialize(box, image);
+            }
+        }
     }
-    // first detection, initialize tracker here
+    // first detection, initialize the tracker here
     else
     {
+        std::cout << "New tracker for class: " << classname << std::endl;
         m_objectMap.insert(std::make_pair(classname, new ObjectTracker(box, image)));
     }
 }
@@ -96,21 +120,30 @@ void Tracking::newImage(const cv::Mat &image)
 
 // todo SK: custom message and publish out
 void Tracking::publishBoxes()
-{}
+{
+    for (std::pair<std::string, ObjectTracker *> iter : m_objectMap)
+    {
+        // check if boxes overlap by too much, make invalid
+        // need to check all permutations
+    }
+}
 
 void Tracking::publishDebugBoxes()
 {
     cv::Mat image = cv::Mat();
     for (std::pair<std::string, ObjectTracker *> iter : m_objectMap)
     {
-        if (image.empty())
+        if (iter.second->isValid())
         {
-            image = iter.second->currentImage();
-            cv::cvtColor(image, image, CV_GRAY2BGR);
+            if (image.empty())
+            {
+                image = iter.second->currentImage();
+                cv::cvtColor(image, image, CV_GRAY2BGR);
+            }
+            // get and draw the most recent box
+            BoundingBox bbox = iter.second->currentBox();
+            cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,0,255), 2);
         }
-        // get and draw the most recent box
-        BoundingBox bbox = iter.second->currentBox();
-        cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,0,255), 2);
     }
 
     sensor_msgs::Image imageMsg = cvImagetoROS(image);

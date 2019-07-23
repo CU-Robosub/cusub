@@ -39,16 +39,18 @@ bool ObjectTracker::isValid()
 
 void ObjectTracker::updateImage(const cv::Mat &image)
 {
-    PointTracker::Result result = m_pointTracker->trackPoints(image);
-
-    if (result.status == PointTracker::STATUS::Success)
+    if (m_valid)
     {
-        m_boundingBox.setTransform(result.transform);
-        m_valid = true;
-    }
-    else
-    {
-        m_valid = false;
-    }
+        PointTracker::Result result = m_pointTracker->trackPoints(image);
 
+        if (result.status == PointTracker::STATUS::Success)
+        {
+            m_boundingBox.setTransform(result.transform);
+            m_valid = m_boundingBox.isValid();
+        }
+        else
+        {
+            m_valid = false;
+        }
+    }
 }
