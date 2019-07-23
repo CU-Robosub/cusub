@@ -11,23 +11,24 @@
   <url type="website">http://occamvisiongroup.com</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-
+  
   <build_depend>image_transport</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>camera_info_manager</build_depend>
   <build_depend>sensor_msgs</build_depend>
-
+  <build_depend>nodelet</build_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>camera_info_manager</run_depend>
   <run_depend>sensor_msgs</run_depend>
-
+  <run_depend>nodelet</run_depend>
 
   <export>
     <cpp lflags="-L${prefix}/lib" cflags="-I${prefix}/include -I${prefix}/msg/cpp"/>
+    <nodelet plugin="${prefix}/nodelet_plugins.xml" />
   </export>
 </package>

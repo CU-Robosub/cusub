@@ -1,0 +1,44 @@
+<launch>
+
+    <arg name="namespace" default="leviathan/cusub_common"/> <!-- Which sub are we controlling -->
+
+    <group ns="$(arg namespace)">
+
+        <arg name="setpoint" default="true"/>       <!-- Use setpoints for controlling, if false we publish directly to control efforts -->
+        <arg name="controller" default="ps4"/>      <!-- Controller type: ps4, xbox -->
+
+        <arg name="start_joy" default="false"/> <!-- autolaunch joy node.  This should be launched remotely if running on sub, locally if for sim -->
+
+        <!-- joystic device path for joy node - Special case for ps4 we default to js1 -->
+        <arg name="joy_device" default="/dev/input/js0" unless="$(eval arg('controller')=='ps4')" />
+        <arg name="joy_device" default="/dev/input/js1" if="$(eval arg('controller')=='ps4')" />
+
+        <!-- Use playstation 4 controller mapping -->
+        <!-- NOTE: Playstation 4 controller usualy maps imu to js0 and actual controls to j1  -->
+        <group if="$(eval arg('controller')=='ps4')">
+
+            <node name="joy_teleop" pkg="leviathan_control" type="joy_teleop.py">
+
+                <param name="strafe_axes" value="2" />
+                <param name="drive_axes" value="1" />
+                <param name="yaw_axes" value="0" />
+                <param name="depth_axes" value="5" />
+                <param name="pitch_axes" value="10" />
+                <param name="roll_axes" value="9" />
+
+                <param name="default_depth" value="0" />
+
+                <param name="setpoint" value="$(arg setpoint)" />
+
+            </node>
+
+        </group>
+
+        <!-- by default we do not launch the joy node, should be remote on sub, but this is here for sim use -->
+        <node name="joy" pkg="joy" type="joy_node" if="$(arg start_joy)">
+            <param name="dev" value="$(arg joy_device)"/>
+        </node>
+
+    </group>
+
+</launch>

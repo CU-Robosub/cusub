@@ -1,0 +1,65 @@
+<launch>
+
+  <arg name="TASK_x" default="7.4"/>
+  <arg name="TASK_y" default="4.6"/>
+  <arg name="TASK_z" default="-0.5"/>
+  <arg name="TASK_yaw" default="2.2" />
+
+  <!-- Start the a underwater world simulation scenario -->
+  <include file="$(find robosub_descriptions)/launch/divewell.launch"/>
+
+  <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="StartGate"/>
+      <arg name="x" default="$(arg TASK_x)"/>
+      <arg name="y" default="$(arg TASK_y)"/>
+      <arg name="z" default="$(arg TASK_z)"/>
+      <arg name="yaw" default="$(arg TASK_yaw)"/>
+  </include> -->
+
+    <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="buoy_jiangshi"/>
+      <arg name="x" default="$(arg TASK_x)"/>
+      <arg name="y" default="$(arg TASK_y)"/>
+      <arg name="z" default="$(arg TASK_z)"/>
+      <arg name="yaw" default="$(arg TASK_yaw)"/>
+  </include>
+
+    <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="triangular_buoy"/>
+      <arg name="x" default="$(arg TASK_x)"/>
+      <arg name="y" default="$(arg TASK_y)"/>
+      <arg name="z" default="$(arg TASK_z)"/>
+      <arg name="yaw" default="$(arg TASK_yaw)"/>
+  </include> -->
+  <!-- <rosparam file="$(find robosub_descriptions)/config/triangular_bouy_control.yaml" command="load"/>
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+	   output="screen" ns="/triangular_buoy_1" args="joint_state_controller buoy_velocity_controller"/>
+  <node pkg="rostopic" type="rostopic" name="bouy_speed" args="pub /triangular_buoy_1/buoy_velocity_controller/command std_msgs/Float64 &quot;data: 0.4&quot;"/> -->
+
+  <node name="publish_world_models"
+        pkg="uuv_assistants"
+        type="publish_world_models.py"
+        output="screen">
+        <rosparam subst_value="true">
+            <!-- meshes:
+              StartGate_1:
+                mesh: package://robosub_descriptions/models/StartGate/StartGate.dae
+                pose:
+                  position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
+                  orientation: [0, 0, $(arg TASK_yaw)] -->
+            meshes:
+              Jiangshi_1:
+                mesh: package://robosub_descriptions/models/buoy_jiangshi/buoy.dae
+                pose:
+                  position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
+                  orientation: [0, 0, $(arg TASK_yaw)]
+            <!-- meshes:
+              TriangleBuoy_1:
+                mesh: package://robosub_descriptions/models/triangular_buoy/triangular_buoy.dae
+                pose:
+                  position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
+                  orientation: [0, 0, $(arg TASK_yaw)] -->
+        </rosparam>
+  </node>
+
+</launch>

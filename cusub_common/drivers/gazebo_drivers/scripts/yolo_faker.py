@@ -432,7 +432,7 @@ class YOLOFaker(object):
             # check that we are not beyond viewing distance
             self.listener.waitForTransform(camera.frame, obj.frame_id, time, rospy.Duration(1))
             (obj_trans, obj_rot) = self.listener.lookupTransform(camera.frame, obj.frame_id, time)
-            if np.linalg.norm(obj_trans) > rospy.get_param('~visibility', 14.0):
+            if np.linalg.norm(obj_trans) > rospy.get_param('yolo_faker/visibility', 14.0):
                 continue
 
             new_pts = []
@@ -535,11 +535,11 @@ class YOLOFaker(object):
         self.bridge = CvBridge()
 
         # Topic to publish fake detections to
-        bouding_boxes_topic = rospy.get_param('~bounding_boxes_topic')
-        sub_pose_topic = rospy.get_param('~sub_pose_topic')
+        bouding_boxes_topic = rospy.get_param('yolo_faker/bounding_boxes_topic')
+        sub_pose_topic = rospy.get_param('yolo_faker/sub_pose_topic')
 
         # Parameter for smallest width/height allowed for bounding box in pixels
-        self.min_pixel_size = rospy.get_param('~min_pixel_size', 15)
+        self.min_pixel_size = rospy.get_param('yolo_faker/min_pixel_size', 15)
 
         # Shows bounding volume points for debugging
         self.show_points = rospy.get_param('~show_points', False)
@@ -553,7 +553,7 @@ class YOLOFaker(object):
 
         # Setup cameras node will generate detections for
         self.cameras = {}
-        cameras = rospy.get_param('~cameras')
+        cameras = rospy.get_param('yolo_faker/cameras')
         for cameraname, camera in cameras.iteritems():
 
             # We get camera info from the camera parameters publisher.
@@ -578,7 +578,7 @@ class YOLOFaker(object):
 
         # Setup objects that will generate bounding boxes
         self.objects = {}
-        objects = rospy.get_param('~objects')
+        objects = rospy.get_param('yolo_faker/objects')
         for objectname, obj in objects.iteritems():
 
             # Objects are defined as a set of classes each with a set of

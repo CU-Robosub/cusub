@@ -1,15 +1,22 @@
 <launch>
 
     <arg name="truth_data" default="false" />
+    <arg name="sub_name" default="leviathan" />
 
 <group if="$(arg truth_data)" >
     <rosparam command="load" file="$(find mapper)/config/sim_truth.yaml" />
     <node name="sim_truth_pub" pkg="mapper" type="sim_truth_pub.py" output="screen" />
     <node name="gazebo_truth_pub" pkg="waypoint_navigator" type="gazebo_gt_localizer.py" />
+    <node name="odom_faker" pkg="mapper" type="odom_faker.py" output="screen">
+        <param name="xpos" value="4.0" />
+        <param name="ypos" value="0.0" />
+        <param name="zpos" value="-1.5" />
+    </node>
 </group>
 
+    <rosparam command="load" file="$(find mapper)/config/mapper.yaml" />
     <node name="mapper" pkg="mapper" type="mapper.py" output="screen">
-        <param name="namespace_odom" value="leviathan/description"/>
+        <param name="sub_name" value="$(arg sub_name)"/>
     </node>
 
 </launch>

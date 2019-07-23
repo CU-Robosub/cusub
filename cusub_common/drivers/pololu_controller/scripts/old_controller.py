@@ -36,7 +36,7 @@ class Controller():
         self.sub = rospy.Subscriber('motor_controllers/pololu_control/command', Float64MultiArray, self.command_callback, queue_size=40)
 
     def command_callback(self,msg):
-	# order: [front, frontright, frontleft, backright, backleft, back, left, right]
+	    # order: [front, frontright, frontleft, backright, backleft, back, left, right]
         #arr = [msg.data[0],msg.data[2],msg.data[1],msg.data[3],msg.data[6],msg.data[7],msg.data[4],msg.data[5],0,0]
         arr = []
         for i in range(10):

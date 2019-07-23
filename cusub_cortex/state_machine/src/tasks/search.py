@@ -1,131 +1,93 @@
 """
 Searching Algorithms
 
-We have a prior but are not sufficiently confident on an object's location. Let's approach the prior in a manner that let's us angle our view to get a better pose estimate of the object.
+Approach a prior for a task, once we get a few yolo hits on search_topic quit out
 
-SEARCH TYPES:
-simple | brief: go straight to the prior pose
-zigzag | brief: make a zigzag motion to the prior pose
 halfhalf
 
 """
-from abc import ABCMeta, abstractmethod
+from tasks.task import Objective
 import smach
 from geometry_msgs.msg import Point, PoseStamped, Pose
 import rospy
-from tasks.task import Objective
-from geometry_msgs.msg import PoseStamped
+import tf
 
 POSE_INDEX = 0
 WAIT_INDEX = 1
 
 class Search(Objective):
     """ Search state that implements an indicated search algorithm """
-    outcomes = ['success','aborted']
-    def __init__(self, searchAlg, priorPose, searchTopic, numQuitPoses=5):
+    
+    outcomes = ['found','not_found'] # We found task or timed out
+
+    def __init__(self, prior_pose_param, exit_topic, num_exit_msgs=5, darknet_cameras=[1,1,0,0,1,0]):
         """
         Search objective initialization function
-        
+
         Parameters
         ---------
-        searchAlg : str
-             Search algorithm to navigate to the prior
-             'simple' is the only currently supported
-        priorPose : Pose
-             Prior pose of the task
-        searchTopic : str
-             Topic name to listen for task poses
-        numQuitPoses : int
-             Number of poses to receive before aborting and transitioning
+        prior_pose_param : str
+             Param name of the prior for the task
+        exit_topic : str
+             Topic to listen to and quit out after num_exit_msgs have arrived
+        num_exit_msgs : int
+             Number of msgs from exit_topic to receive before exiting/quitting the search
+        darknet_cameras : bool list, len 6
+            Darknet cameras to use
         """
-        
-        rospy.loginfo("---Search objective initializing")
-        self._loadSearchAlg(searchAlg)
-        self.prior = priorPose
-        rospy.Subscriber(searchTopic, PoseStamped, self.exit_callback)
-        self.numQuitPoses = numQuitPoses
-        self.numPosesReceived = 0
-        
+        self.listener = tf.TransformListener() # Transform prior into odom
+        self.prior_pose_param = prior_pose_param
+        self.num_exit_msgs = num_exit_msgs
+        self.num_exit_msgs_received = 0
+        rospy.Subscriber(exit_topic, PoseStamped, self.exit_callback)
+        self.darknet_config = darknet_cameras
         super(Search, self).__init__(self.outcomes, "Search")
-        
+
     def exit_callback(self, msg): # Abort on the first publishing
-        self.numPosesReceived += 1
-        if not self.abort_requested() and self.numPosesReceived > self.numQuitPoses:
-            self.request_abort()
-        
-    def _loadSearchAlg(self, searchAlg):
-        
-        if searchAlg.lower() == 'simple':
-            rospy.loginfo("---simple search")
-            self.search = SimpleSearch()
-        elif searchAlg.lower() == 'zigzag':
-            rospy.loginfo("---zigzag search")
-            self.search = ZigZagSearch()
-        elif searchAlg.lower() == 'halfhalf':
-            rospy.loginfo("---halfhalf search")
-            self.search = HalfHalfSearch()
+        self.num_exit_msgs_received += 1
+        if not self.replan_requested() and self.num_exit_msgs_received > self.num_exit_msgs:
+            rospy.loginfo("Task Found!")
+            self.request_replan()
+
+    def execute(self, userdata):
+        rospy.loginfo("---Executing Search")
+        prior = self.get_odom_prior(self.prior_pose_param)
+
+        self.configure_darknet_cameras(self.darknet_config)
+        rospy.sleep(1) # in case we span in the spot of the prior, leave time to gather a few object poses
+        if self.go_to_pose(prior, userdata.timeout_obj):
+            if userdata.timeout_obj.timed_out:
+                userdata.outcome = "timed_out"
+                return "not_found"
+            else:
+                return "found"
         else:
-            raise(Exception("Unrecognized search algorithm"))
-        
-    def execute(self, ueserdata):
-        rospy.loginfo("---Executing Search")        
-        if self.abort_requested():
-            return "aborted"
-        
-        path = self.search.get_path(self.curPose, self.prior)
-        for pose_and_wait in path: # path includes both a pose to reach and the waiting time
-            pose = pose_and_wait[POSE_INDEX]
-            wait_secs = pose_and_wait[WAIT_INDEX]
-            pose_stamped = PoseStamped()
-            pose_stamped.header.frame_id = 'leviathan/description/map'
-            pose_stamped.pose = pose
-            if self.goToPose(pose_stamped):
-                rospy.loginfo("---"+self.name+" aborted")
-                return "aborted"
-            rospy.sleep(wait_secs) # wait at our destination this many seconds
-        return "success" # we should get preempted before this, if not we should loop on this task until finding our task object
+            rospy.logerr("Search unable to find task.")
+            userdata.outcome = "not_found"
+            return "not_found"
 
-class SearchAlg(object):
-    __metaclass__ = ABCMeta
+    def get_odom_prior(self, rosparam_str):
+        if not rospy.has_param(rosparam_str):
+            raise(Exception("Could not locate rosparam: " + rosparam_str))
+            
+        xyzframe_list = rospy.get_param(rosparam_str)
+        p = PoseStamped()
+        p.pose.position.x = xyzframe_list[0]
+        p.pose.position.y = xyzframe_list[1]
+        p.pose.position.z = xyzframe_list[2]
+        if len(xyzframe_list) == 4:     # prior needs to be transformed
+            rospy.loginfo("...transforming prior pose to odom")
+            p.header.frame_id = xyzframe_list[3]
+            p.header.stamp = rospy.Time()
+            if not rospy.has_param("~robotname"):
+                raise("Launch file must specify private param 'robotname'")
+            try:
+                odom_frame = '/'+ rospy.get_param("~robotname") + '/description/odom'
+                rospy.loginfo("...waiting for transform: " + odom_frame + " -> /" + xyzframe_list[3])
+                self.listener.waitForTransform(p.header.frame_id, odom_frame, p.header.stamp, rospy.Duration(5))
+                rospy.loginfo("...found transform")
+                p = self.listener.transformPose(odom_frame, p)
+            except (tf.ExtrapolationException, tf.ConnectivityException, tf.LookupException) as e:
+                rospy.logerr(e)
+        return p.pose
 
-    @abstractmethod
-    def get_path(self, cur_pose, target_pose):
-        """
-        Returns a list of goal poses along with wait times upon reaching each pose in the form
-        [ [ pose1, waitSecs1 ] , [ pose2, waitSecs2 ], [ pose3, waitSecs3 ], [ pose4, waitSecs4 ] ]
-        """
-        pass
-
-
-class SimpleSearch(SearchAlg):
-    """
-    Goes straight to the target pose
-    Returns the target_pose with some waiting time
-    NOTE: If [None, self.wait_time] will wait in place
-    """
-    wait_time = 3
-    def get_path(self, cur_pose, target_pose):
-        return [ [ target_pose, self.wait_time ] ]
-
-class ZigZagSearch(SearchAlg):
-    """
-    Does a zigzag pattern upon approaching the goal
-    """
-    def __init__(self):
-        pass
-    def get_path(self, cur_pose, target_pose): # TODO
-        pass
-
-class HalfHalfSearch(SearchAlg):
-    """
-    1) Goes 1/2 the distance to the target_pose
-    2) Waits 2s
-    3) Goes 3/4 the distance
-    4) Waits 2s
-    5) Reaches the point
-    6) Reverses back to reach cur_pose (ideally we stop searching before this step)
-    """
-    def __init__(self):
-        pass
-    def get_path(self, cur_pose, target_pose): # TODO
-        pass

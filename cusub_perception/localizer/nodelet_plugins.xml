@@ -1,0 +1,8 @@
+<library path="lib/liblocalizer">
+  <class name="localizer/Localizer" type="localizer_ns::Localizer" base_class_type="nodelet::Nodelet">
+    <description>
+      Passes darknet bounding boxes to appropriate pose generator class
+      Publishes a detection message to mapper class
+    </description>
+  </class>
+</library>

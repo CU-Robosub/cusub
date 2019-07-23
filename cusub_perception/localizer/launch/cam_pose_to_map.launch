@@ -1,3 +1,0 @@
-<launch>
-    <node name="map_pose_broadcaster" pkg="localizer" type="camera_pose_to_map.py" respawn="false" output="screen"/>
-</launch>
