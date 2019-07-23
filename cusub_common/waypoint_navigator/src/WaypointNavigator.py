@@ -8,11 +8,12 @@ from enum import Enum
 
 from waypoint_navigator.srv import *
 
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64, Bool
 from nav_msgs.msg import Odometry
 
 YAW_MODE = 1
 STRAFE_MODE = 2
+BACKUP_MODE = 3
 
 REACHED_THRESHOLD = 0.25
 
@@ -36,6 +37,44 @@ class WaypointNavigator(object):
             self.waypoint = self.waypointlist[0]
 
         return []
+    
+    def toggleControl(self, req):
+        rospy.logwarn("Waypoint toggling control. Waypoint controlling: " + str(req.waypoint_controlling))
+        self.controlling_pids = req.waypoint_controlling
+        return True
+
+    def publish_controlling_pids(self, msg):
+        """
+        Publish whether the waypoint nav is currently controlling the pid loops
+        """
+        msg = Bool()
+        msg.data = self.controlling_pids
+        self.control_pub.publish(msg)
+
+    def freeze_controls(self):
+
+        if self.yawFreeze == None:
+            return
+
+        # YAW
+        yaw_f64 = Float64()
+        yaw_f64.data = self.yawFreeze
+        self.yaw_pub.publish(yaw_f64)
+
+        # STRAFE
+        msg = Float64()
+        msg.data = self.strafeFreeze
+        self.strafe_pub.publish(msg)
+
+        # DRIVE
+        msg = Float64()
+        msg.data = self.driveFreeze
+        self.drive_pub.publish(msg)
+
+        # DEPTH
+        msg = Float64()
+        msg.data = self.depthFreeze
+        self.depth_pub.publish(msg)
 
     def advance_waypoint(self):
         rospy.loginfo("Waypoint Reached!")
@@ -49,7 +88,7 @@ class WaypointNavigator(object):
 
         (roll, pitch, yaw) = tf.transformations.euler_from_quaternion([orientation.x, orientation.y,orientation.z,orientation.w])
 
-        if(self.waypoint is not None):
+        if(self.waypoint is not None and self.controlling_pids):
 
             currentwaypoint = self.waypoint
 
@@ -81,7 +120,7 @@ class WaypointNavigator(object):
                 # start driving the distance to the target
                 if(abs(math.degrees(dyaw)) < 7.5):
                     drive_f64 = Float64()
-                    drive_f64.data = self.currentDrive + min(xy_dist, 3.0)
+                    drive_f64.data = self.currentDrive + min(xy_dist, self.carrot_drive)
                     self.drive_pub.publish(drive_f64)
                     # rospy.logdebug(xy_dist)
 
@@ -118,11 +157,39 @@ class WaypointNavigator(object):
                         self.advance_waypoint()
                     else:
                         rospy.loginfo("distance: " + str(dist))
+                        
+            if self.movement_mode == BACKUP_MODE:
+                # point toward waypoint
+                targetyaw = math.atan2(dy, dx) + math.pi
+                # rospy.logdebug("dx, dy: %f %f" % (dx, dy))
+                # rospy.logdebug("Yaw, Target Yaw: %f %f" % (yaw, targetyaw))
+                yaw_f64 = Float64()
+                yaw_f64.data = targetyaw
+                self.yaw_pub.publish(yaw_f64)
+
+                # normalize change in yaw
+                dyaw = yaw - targetyaw
+                while(dyaw > math.pi):
+                    dyaw = dyaw - 2*math.pi
+                while(dyaw < -math.pi):
+                    dyaw = dyaw + 2*math.pi
+
+                # If we are pointing in about the right direction
+                # start driving the distance to the target
+                if(abs(math.degrees(dyaw)) < 7.5):
+                    drive_f64 = Float64()
+                    drive_f64.data = self.currentDrive - min(xy_dist, 3.0)
+                    self.drive_pub.publish(drive_f64)
+                    # rospy.logdebug(xy_dist)
 
             # Set target depth
             depth_f64 = Float64()
             depth_f64.data = currentwaypoint.z
             self.depth_pub.publish(depth_f64)
+
+        elif self.controlling_pids:
+            self.freeze_controls()
+
 
     def driveStateCallback(self, data):
         self.currentDrive = data.data
@@ -130,8 +197,20 @@ class WaypointNavigator(object):
     def strafeStateCallback(self, data):
         self.currentStrafe = data.data
 
+    def yawStateCallback(self, data):
+        self.currentYaw = data.data
+
+    def depthStateCallback(self, data):
+        self.currentDepth = data.data
+
     def run(self):
 
+        self.carrot_drive = rospy.get_param("waypoint_navigator/carrot_drive", 3.0)
+
+        self.yawFreeze = None
+        self.driveFreeze = None
+        self.strafeFreeze = None
+        self.depthFreeze = None
 
         # setpoints to control sub motion
         self.depth_pub = rospy.Publisher("motor_controllers/pid/depth/setpoint", Float64, queue_size=10)
@@ -139,15 +218,27 @@ class WaypointNavigator(object):
         self.strafe_pub = rospy.Publisher("motor_controllers/pid/strafe/setpoint", Float64, queue_size=10)
         self.yaw_pub = rospy.Publisher("motor_controllers/pid/yaw/setpoint", Float64, queue_size=10)
 
-        # get current accumulated strafe and drive to use for adjustments
+        # get current accumulated strafe and drive to use for adjustments. (Depth and Yaw just used for freezing the sub)
         self.drive_state_sub = rospy.Subscriber("motor_controllers/pid/drive/state", Float64, self.driveStateCallback)
         self.strafe_state_sub = rospy.Subscriber("motor_controllers/pid/strafe/state", Float64, self.strafeStateCallback)
+        self.yaw_state_sub = rospy.Subscriber("motor_controllers/pid/yaw/state", Float64, self.yawStateCallback)
+        self.depth_state_sub = rospy.Subscriber("motor_controllers/pid/depth/state", Float64, self.depthStateCallback)
+
+        rospy.wait_for_message("motor_controllers/pid/drive/state", Float64)
+        rospy.wait_for_message("motor_controllers/pid/depth/state", Float64)
+        rospy.wait_for_message("motor_controllers/pid/yaw/state", Float64)
+        rospy.wait_for_message("motor_controllers/pid/strafe/state", Float64)
 
         # get current sub position to figure out how to get where we want
         self.pose_sub = rospy.Subscriber("odometry/filtered", Odometry, self.odometryCallback)
 
         # service to add waypoints to drive to
         s = rospy.Service('addWaypoint', AddWaypoint, self.addWaypoint)
+
+        self.controlling_pids = True
+        s2 = rospy.Service('toggleWaypointControl', ToggleControl, self.toggleControl)
+        self.control_pub = rospy.Publisher("waypoint_controlling_pids", Bool, queue_size=10)
+        control_pub_timer = rospy.Timer(rospy.Duration(0.1), self.publish_controlling_pids)
 
         rospy.spin()
 

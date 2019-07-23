@@ -1,0 +1,8 @@
+<launch>
+    <group ns="leviathan">
+        <node pkg="nodelet" type="nodelet" name="standalone_nodelet1" args="manager" output="screen"/>
+        <node pkg="nodelet" type="nodelet" name="occam1" args="load ros_indigosdk/occam standalone_nodelet1" output="screen">
+            <param name="frame_id" value="leviathan/description/occam"/>
+        </node>
+    </group>
+</launch>

@@ -1,0 +1,19 @@
+<!-- Sim launch with the typical configurations
+state_machine's config file: mission_config_sim.yaml
+using_darknet = false
+namespace leviathan 
+-->
+
+<launch>
+  <arg name="sub" default="leviathan" />
+  <arg name="using_darknet" default="false"/>
+  <arg name="config_filename" default="mission_config_sim.yaml"/>
+  <group ns="$(arg sub)">
+    <include file="$(find mapper)/launch/mapper.launch"/>
+    <include file="$(find state_machine)/launch/state_machine.launch" >
+      <arg name="sub" value="$(arg sub)" />
+      <arg name="using_darknet" value="$(arg using_darknet)" />
+      <arg name="config_filename" value="$(arg config_filename)" />
+    </include>
+  </group>
+</launch>

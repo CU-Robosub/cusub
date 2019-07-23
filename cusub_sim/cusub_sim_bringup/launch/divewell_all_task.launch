@@ -2,11 +2,11 @@
   <!-- Obstacle positions -->
   <arg name="D1_x" default="-1.75"/>
   <arg name="D1_y" default="2.75"/>
-  <arg name="D1_z" default="-1"/>
-  <arg name="D1_yaw" default="-0.25"/>
+  <arg name="D1_z" default="-1.3"/>
+  <arg name="D1_yaw" default="2.6"/>
 
   <arg name="D2_x" default="-1.0"/>
-  <arg name="D2_y" default="3.5"/>
+  <arg name="D2_y" default="4.5"/>
   <arg name="D2_z" default="-1"/>
   <arg name="D2_yaw" default="-0.2"/>
 
@@ -52,7 +52,7 @@
   </include>
 
   <include file="$(find robosub_descriptions)/launch/upload.launch">
-      <arg name="obstacle" default="Dice1"/>
+      <arg name="obstacle" default="buoy_jiangshi"/>
       <arg name="x" default="$(arg D1_x)"/>
       <arg name="y" default="$(arg D1_y)"/>
       <arg name="z" default="$(arg D1_z)"/>
@@ -60,28 +60,17 @@
   </include>
 
   <include file="$(find robosub_descriptions)/launch/upload.launch">
-      <arg name="obstacle" default="Dice2"/>
+      <arg name="obstacle" default="triangular_buoy"/>
       <arg name="x" default="$(arg D2_x)"/>
       <arg name="y" default="$(arg D2_y)"/>
       <arg name="z" default="$(arg D2_z)"/>
       <arg name="yaw" default="$(arg D2_yaw)"/>
   </include>
 
-  <include file="$(find robosub_descriptions)/launch/upload.launch">
-      <arg name="obstacle" default="Dice5"/>
-      <arg name="x" default="$(arg D5_x)"/>
-      <arg name="y" default="$(arg D5_y)"/>
-      <arg name="z" default="$(arg D5_z)"/>
-      <arg name="yaw" default="$(arg D5_yaw)"/>
-  </include>
-
-  <include file="$(find robosub_descriptions)/launch/upload.launch">
-      <arg name="obstacle" default="Dice6"/>
-      <arg name="x" default="$(arg D6_x)"/>
-      <arg name="y" default="$(arg D6_y)"/>
-      <arg name="z" default="$(arg D6_z)"/>
-      <arg name="yaw" default="$(arg D6_yaw)"/>
-  </include>
+  <rosparam file="$(find robosub_descriptions)/config/triangular_bouy_control.yaml" command="load"/>
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+	   output="screen" ns="/triangular_buoy_1" args="joint_state_controller buoy_velocity_controller"/>
+  <node pkg="rostopic" type="rostopic" name="bouy_speed" args="pub /triangular_buoy_1/buoy_velocity_controller/command std_msgs/Float64 &quot;data: 0.4&quot;"/>
 
   <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="PathMarker"/>

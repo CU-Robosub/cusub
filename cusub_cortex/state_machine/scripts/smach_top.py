@@ -14,19 +14,23 @@ from waypoint_navigator.msg import waypointAction, waypointGoal
 import actionlib
 from tasks.dice import Dice
 from tasks.start_gate import StartGate
-from tasks.visit_task import VisitTask
 from tasks.bangbang_dice_task import BangBangDiceTask
 from tasks.bangbang_roulette_task import BangBangRouletteTask
 from tasks.naive_visual_servo_objective import NaiveVisualServoTask
-from tasks.dropper_task import DropperTask
+# from tasks.dropper_task import DropperTask
 # from tasks.bangbang_roulette_task import BangBangRouletteTask
+from tasks.jiangshi import Jiangshi
+from tasks.triangle_buoy import Triangle_Buoy
+from tasks.manager import Manager
+from tasks.task import Timeout
 
-def genPoseMsg(list_xyz):
-    pose = Pose()
-    pose.position.x = list_xyz[0]
-    pose.position.y = list_xyz[1]
-    pose.position.z = list_xyz[2]
-    return pose
+def createTransitionsForManager(task_list, final_outcome):
+    transition_dict = {}
+    for task in task_list:
+        transition_dict[task] = task
+    transition_dict[final_outcome] = final_outcome
+    return transition_dict
+
 
 def loadStateMachines(task_list):
     """
@@ -39,30 +43,10 @@ def loadStateMachines(task_list):
         task_sm = None
         rospy.loginfo("Loading " + task + " state machine")
 
-        visit = False
-        # Check for just visiting a task
-        if "visit" in task:
-            task = task[6:] # trim "visit_"
-            visit = True
-
-        # load params common to all tasks
-        prior = genPoseMsg(rospy.get_param("tasks/" + task + "/prior"))
-        search_alg = rospy.get_param("tasks/" + task + "/search_alg")
-
-        if visit == True:
-            task_sm = VisitTask(prior, search_alg)
-        elif task == "start_gate":
+        if task == "start_gate":
             task_sm = StartGate()
-        elif task == "dice":
-            task_sm = Dice()
-        elif task == "bangbang_dice":
-            task_sm = BangBangDiceTask(prior, search_alg)
-        elif task == "bangbang_roulette":
-            task_sm = BangBangRouletteTask(prior, search_alg)
-        elif task == "dropper":
-            task_sm = DropperTask(prior, search_alg)
-        elif task == "naive_visual_servo_objective":
-            task_sm = NaiveVisualServoTask(prior)
+        elif task == "jiangshi":
+            task_sm = Jiangshi()
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 
@@ -76,59 +60,52 @@ def loadStateMachines(task_list):
 
 def main():
     """
-    Search rosparameter for the configuration of our state machine
-    Initialize all statemachines
-    Loop through the statemachines in order and link them
+    Initialize all statemachines to be interconnected
+    All state transition logic is in the manager
     """
-    rospy.init_node('smach_top')
-
+    rospy.init_node('state_machine')
+    
     # All Objectives depend on the waypoint server so let's wait for it to initalize here
-    wayClient = actionlib.SimpleActionClient('cusub_common/waypoint', waypointAction)
-    rospy.loginfo("Waiting for waypoint server")
-    wayClient.wait_for_server()
-    rospy.loginfo("---connected to server")
+    # wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
+    # rospy.loginfo("Waiting for waypoint server")
+    # wayClient.wait_for_server()
+    # rospy.loginfo("---connected to server")
 
-    sm_top = smach.StateMachine(['success', 'aborted'])
+    if rospy.get_param('~using_darknet'):
+        rospy.loginfo("Waiting for darknet multiplexer server")
+        rospy.wait_for_service("cusub_perception/darknet_multiplexer/configure_active_cameras")
+        rospy.loginfo("---connected to server")
+    else:
+        rospy.logwarn("SM not using darknet configuration service.")
 
     # initialize all of the state machines
     rospy.loginfo("Waiting for rosparams")
     while not rospy.has_param("mission_tasks") and not rospy.is_shutdown():
-        pass
+        rospy.sleep(1)
     rospy.loginfo("--rosparams found")
 
     task_list = rospy.get_param("mission_tasks")
     sm_list = loadStateMachines(task_list)
 
-    # Trim visit from any names
-    for i in range(len(task_list)):
-        if "visit" in task_list[i]:
-            task_list[i] = task_list[i][6:] # 6 chars to trim "visit_"
+    final_outcome = "mission_completed"
+    sm_top = smach.StateMachine(outcomes=[final_outcome])
+    sm_top.userdata.previous_outcome = "starting"
+    sm_top.userdata.timeout_obj = Timeout()
 
     # Load all statemachines
     with sm_top:
-        last_index = len(task_list) - 1
-        for index in range( len(task_list) ): # loop through all of the tasks
+        manager_transitions = createTransitionsForManager(task_list, final_outcome)
+        smach.StateMachine.add('manager', Manager(task_list, final_outcome), \
+            transitions=manager_transitions, \
+            remapping={"timeout_obj":"timeout_obj", "previous_outcome":"previous_outcome"})
+        for index in range(len(task_list)):
             sm_name = task_list[ index ]
             sm = sm_list[ index ]
-
-            # find task success transition
-            if index == last_index: # check if we're the last task
-                success_transition = "success"
-            else: # link to next task
-                success_transition = task_list[ index + 1 ]
-
-            # find task aborted transition
-            if rospy.get_param('tasks/'+sm_name+'/failed_repeat'):
-                aborted_transition = sm_name # loop back on this task if aborted
-            else:
-                aborted_transition = success_transition # increment
-
-
-            smach.StateMachine.add(sm_name, sm, transitions={'task_aborted' : aborted_transition, 'task_success':success_transition})
-
-
+            smach.StateMachine.add(sm_name, sm, \
+                transitions={'manager':'manager'},\
+                remapping={'outcome':'previous_outcome'}) # all states will transition to the manager) # all states will transition to the manager
     try:
-        outcome = sm_top.execute() # does this allow us to receive messages in the states?
+        outcome = sm_top.execute()
     except rospy.ROSInterruptException:
         sys.exit()
 

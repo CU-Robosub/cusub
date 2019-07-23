@@ -15,7 +15,7 @@ Launching
 Structure and Functionality
 ###########################
 
-In this section, when we say "localizer" we are referring to the localizer client. Upon receiving a BoundingBoxes.msg from darknet_cv the localizer loops through each box. It does a lookup in the rosparameter server to determine which  servers it can use to localize a particular class. It creates requests for all of these servers. If 2+ classes indicate they use the same server, it will combine their requests into one request.
+In this section, when we say "localizer" we are referring to the localizer client. Upon receiving a BoundingBoxes.msg from darknet_ros the localizer loops through each box. It does a lookup in the rosparameter server to determine which  servers it can use to localize a particular class. It creates requests for all of these servers. If 2+ classes indicate they use the same server, it will combine their requests into one request.
 
 It will then send these requests to each rosserver. If multiple servers are provided for a particular class, it will send each request in the order listed in the mission_config.yaml file. The rosservers will take in the image and the bounding box(es) and attempt via classical cv methods to create a relative pose of the object.
 

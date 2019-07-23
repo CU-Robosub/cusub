@@ -1,7 +1,11 @@
 <launch>
   <arg name="sub" default="leviathan" />
-  <group ns="$(arg sub)/cusub_cortex">
+  <arg name="using_darknet" default="true"/>
+  <group ns="$(arg sub)">
     <include file="$(find mapper)/launch/mapper.launch"/>
-    <include file="$(find state_machine)/launch/state_machine.launch"/>
+    <include file="$(find state_machine)/launch/state_machine.launch" >
+      <arg name="sub" value="$(arg sub)" />
+      <arg name="using_darknet" value="$(arg using_darknet)" />
+    </include>
   </group>
 </launch>
