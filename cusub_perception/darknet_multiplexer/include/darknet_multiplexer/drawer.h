@@ -16,7 +16,7 @@ namespace darknet_drawer_ns
     public:
         virtual void onInit();
     private:
-        void darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs);
+        void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
         ros::Subscriber m_darknetSub;
         ros::Publisher m_pub;
 

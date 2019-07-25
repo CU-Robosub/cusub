@@ -105,7 +105,7 @@ if __name__ == '__main__':
 
     #Digital compass heading offset in degree
     # D_Compass_offset = rospy.get_param('~offset',0.)
-    D_Compass_declination = rospy.get_param('/declination',-7.462777777777778)* (math.pi/180.0)
+    D_Compass_declination = rospy.get_param('/declination',76)* (math.pi/180.0)
     # By defaule IMU use Megnatic North as zero degree in Quaternion
     # If we want to use it directly with GPS-UTM x,y as Global Heading, East is our zero
     D_Compass_UseEastAsZero = rospy.get_param('/UseEastAsZero',True)
