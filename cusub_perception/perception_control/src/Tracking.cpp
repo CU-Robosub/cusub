@@ -3,13 +3,19 @@
 using namespace perception_control;
 
 #include <iostream>
+#include <opencv2/highgui.hpp>
+
+Tracking::Tracking() :
+    m_debugMode(false)
+{}
 
 void Tracking::onInit()
 {
     ros::NodeHandle nhPrivate = getPrivateNodeHandle();
-    nhPrivate.getParam("debug_mode", m_debugMode);
     nhPrivate.getParam("image_topic", m_imageTopicName);
     nhPrivate.getParam("detection_topic", m_detectionTopicName);
+    nhPrivate.getParam("detection_thresh", m_detectionThresh);
+    nhPrivate.getParam("debug_mode", m_debugMode);
 
     NODELET_INFO(m_imageTopicName.c_str());
     NODELET_INFO(m_detectionTopicName.c_str());
@@ -59,26 +65,27 @@ BoundingBox Tracking::getBox(const std::string &classname)
 
 void Tracking::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr &bbs)
 {
-    // todo SK: convert sensor_msgs::Image to ConstPtr
-    cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(bbs->image, sensor_msgs::image_encodings::RGB8);
-    cv::Mat image = cv_ptr->image;
+    ImageData image = ImageData(bbs->image);
     for(darknet_ros_msgs::BoundingBox box : bbs->bounding_boxes)
     {
-        std::string classname = box.Class;
-        BoundingBox bbox(box.xmin, box.ymin, box.xmax, box.ymax);
-        objectDetected(classname, bbox, image);
+        if (box.probability > m_detectionThresh)
+        {
+            std::string classname = box.Class;
+            BoundingBox bbox(box.xmin, box.ymin, box.xmax, box.ymax);
+            objectDetected(classname, bbox, image);
+        }
     }
 }
 
-void Tracking::imageCallback(const sensor_msgs::Image::ConstPtr &image)
+void Tracking::imageCallback(const sensor_msgs::Image::ConstPtr &rosImage)
 {
-    cv::Mat cvImage = rosImageToCV(image);
-    newImage(cvImage);
+    ImageData image(rosImage);
+    newImage(image);
     
     m_frameCount++;
 }
 
-void Tracking::objectDetected(const std::string &classname, BoundingBox &box, const cv::Mat &image)
+void Tracking::objectDetected(const std::string &classname, BoundingBox &box, const ImageData &image)
 {
     if (m_objectMap.count(classname) != 0)
     {
@@ -105,7 +112,7 @@ void Tracking::objectDetected(const std::string &classname, BoundingBox &box, co
     }
 }
 
-void Tracking::newImage(const cv::Mat &image)
+void Tracking::newImage(const ImageData &image)
 {
     for (std::pair<std::string, ObjectTracker *> iter : m_objectMap)
     {
@@ -123,6 +130,7 @@ void Tracking::publishBoxes()
 {
     for (std::pair<std::string, ObjectTracker *> iter : m_objectMap)
     {
+        // todo SK
         // check if boxes overlap by too much, make invalid
         // need to check all permutations
     }
@@ -137,8 +145,9 @@ void Tracking::publishDebugBoxes()
         {
             if (image.empty())
             {
-                image = iter.second->currentImage();
-                cv::cvtColor(image, image, CV_GRAY2BGR);
+                image = iter.second->currentImage().cvImage();
+                cv::waitKey(10);
+                cv::cvtColor(image, image, CV_RGB2BGR);
             }
             // get and draw the most recent box
             BoundingBox bbox = iter.second->currentBox();
@@ -146,32 +155,8 @@ void Tracking::publishDebugBoxes()
         }
     }
 
-    sensor_msgs::Image imageMsg = cvImagetoROS(image);
+    sensor_msgs::Image imageMsg = ImageData::cvImagetoROS(image);
     m_debugPublisher.publish(imageMsg);
-}
-
-cv::Mat Tracking::rosImageToCV(const sensor_msgs::Image::ConstPtr &image)
-{
-    cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::RGB8);
-
-    return cv_ptr->image;
-}
-
-sensor_msgs::Image Tracking::cvImagetoROS(const cv::Mat &image)
-{
-    // create header
-    std_msgs::Header header;
-    header.seq = m_frameCount;
-    header.stamp = ros::Time::now();
-
-    // setup bridge
-    cv_bridge::CvImage imgBridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, image);
-    
-    // convert
-    sensor_msgs::Image imgMsg;
-    imgBridge.toImageMsg(imgMsg);
-
-    return imgMsg;
 }
 
 PLUGINLIB_EXPORT_CLASS(perception_control::Tracking, nodelet::Nodelet);

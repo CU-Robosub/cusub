@@ -1,3 +1,9 @@
+/**
+ * @file PointTracker.h
+ * @author Soroush Khadem (soroush.khadem@colorado.edu)
+ * @brief Base class for tracking
+ * 
+ */
 #ifndef POINTTRACKER
 #define POINTTRACKER
 

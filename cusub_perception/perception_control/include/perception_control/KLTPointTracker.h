@@ -1,3 +1,9 @@
+/**
+ * @file KLTPointTracker.h
+ * @author Soroush Khadem (soroush.khadem@colorado.edu)
+ * @brief Implements a Kandas-Lucas-Tomasi tracking algorithm
+ * 
+ */
 #ifndef KLTPOINTTRACKER_H
 #define KLTPOINTTRACKER_H
 
