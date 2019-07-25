@@ -2,6 +2,8 @@
 import serial
 import time
 import rospy
+import crc8
+import struct
 
 from actuator.srv import ActivateActuator
 
@@ -26,13 +28,17 @@ class ActuatorService():
         #cmd_str = ""#str(pin)+str(timeOn)
         #self.ser.write(cmd_str.encode())
 
-	rospy.loginfo("Fire")
-	if pin == 2:
-		rospy.loginfo("2")
-		self.ser.write("\x33".encode())
-	elif pin == 3:
-		rospy.loginfo("3")
-		self.ser.write("D")
+	actuator = (pin + 1) | ((pin + 1) << 4)
+
+	time = int(timeOn * (60.0/1000.0))
+
+	hash = crc8.crc8()
+	msg = struct.pack("BB", actuator, time)
+	hash.update(msg)
+	framed = b"\xC0" + msg + hash.digest() + "\xC0"
+	print(framed.encode("hex"))
+	self.ser.write(framed)
+
 
 	return []
 

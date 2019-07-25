@@ -16,9 +16,11 @@ namespace darknet_drawer_ns
             loadClassNames(detectionClasses);
         }
     }
-    void DarknetDrawer::darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs)
+    void DarknetDrawer::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs)
     {
+
         cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(bbs->image, sensor_msgs::image_encodings::RGB8);
+
         for(darknet_ros_msgs::BoundingBox box : bbs->bounding_boxes)
         {
             // Check class and adjust color

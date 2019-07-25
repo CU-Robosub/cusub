@@ -90,15 +90,15 @@ class JoyTeleop(object):
         activate_actuator(num, time)
 
     def actuate_dropper(self, _):
-        self.actuate(1, 100)
+        self.actuate(1, 500)
         self.dropper_avail = True
 
     def actuate_left_torpedo(self, _):
-        self.actuate(2, 100)
+        self.actuate(2, 500)
         self.left_torpedo_avail = True
 
     def actuate_right_torpedo(self, _):
-        self.actuate(3, 100)
+        self.actuate(3, 500)
         self.right_torpedo_avail = True
 
     def joy_teleop(self):
