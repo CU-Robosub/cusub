@@ -224,6 +224,7 @@ add_library( tracking
   src/KLTPointTracker.cpp
   src/BoundingBox.cpp
   src/ObjectTracker.cpp
+  src/ImageData.cpp
 )
 target_link_libraries(tracking ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
@@ -243,6 +244,7 @@ add_executable(tracker_unit
   src/KLTPointTracker.cpp
   src/BoundingBox.cpp
   src/ObjectTracker.cpp
+  src/ImageData.cpp
 )
 
 target_link_libraries(tracker_unit ${catkin_LIBRARIES})

@@ -2,7 +2,7 @@
 
 using namespace perception_control;
 
-ObjectTracker::ObjectTracker(BoundingBox &box, const cv::Mat &image) :
+ObjectTracker::ObjectTracker(BoundingBox &box, const ImageData &image) :
     m_pointTracker(new KLTPointTracker()),
     m_boundingBox(box),
     m_valid(false)
@@ -15,11 +15,12 @@ ObjectTracker::~ObjectTracker()
     delete m_pointTracker;
 }
 
-void ObjectTracker::initialize(BoundingBox &box, const cv::Mat &image)
+void ObjectTracker::initialize(BoundingBox &box, const ImageData &image)
 {
-    PointTracker::Result result = m_pointTracker->initialize(image, box);
+    PointTracker::Result result = m_pointTracker->initialize(image.cvImage(), box);
     m_valid = result.status == PointTracker::STATUS::Success;
     m_boundingBox = box;
+    m_currentImage = image;
 }
 
 BoundingBox ObjectTracker::currentBox() const
@@ -27,9 +28,9 @@ BoundingBox ObjectTracker::currentBox() const
     return m_boundingBox;
 }
 
-cv::Mat ObjectTracker::currentImage() const
+ImageData ObjectTracker::currentImage() const
 {
-    return m_pointTracker->currentImage();
+    return m_currentImage;
 }
 
 bool ObjectTracker::isValid()
@@ -37,11 +38,12 @@ bool ObjectTracker::isValid()
     return m_valid;
 }
 
-void ObjectTracker::updateImage(const cv::Mat &image)
+void ObjectTracker::updateImage(const ImageData &image)
 {
+    m_currentImage = image;
     if (m_valid)
     {
-        PointTracker::Result result = m_pointTracker->trackPoints(image);
+        PointTracker::Result result = m_pointTracker->trackPoints(image.cvImage());
 
         if (result.status == PointTracker::STATUS::Success)
         {

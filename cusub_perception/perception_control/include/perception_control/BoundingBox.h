@@ -1,3 +1,9 @@
+/**
+ * @file BoundingBox.h
+ * @author Soroush Khadem (soroush.khadem@colorado.edu)
+ * @brief Holds a bounding box object
+ * 
+ */
 #ifndef BOUNDINGBOX_H
 #define BOUNDINGBOX_H
 

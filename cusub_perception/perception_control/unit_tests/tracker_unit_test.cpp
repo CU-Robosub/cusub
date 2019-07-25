@@ -6,8 +6,11 @@
 
 #include <stdio.h>
 
+std::shared_ptr<perception_control::Tracking> tracking;
 int main(int argc, char ** argv)
 {
+    ros::init(std::vector<std::pair<std::string, std::string> >{}, "unit_test");
+
     std::string videoName = "/home/soroush/robosub/ws/src/cusub/cusub_perception/perception_control/unit_tests/videos/out.mp4";
     int xmin = 520;
     int xmax = 626;
@@ -35,11 +38,14 @@ int main(int argc, char ** argv)
     cv::imshow("initial", image);
     cv::waitKey(0);
     
+    perception_control::ImageData imageData;
+
     perception_control::KLTPointTracker * tracker = new perception_control::KLTPointTracker();
     tracker->initialize(image, bbox);
 
-    perception_control::Tracking * tracking = new perception_control::Tracking();
-    tracking->objectDetected("vampire_fathead", bbox, image);
+    tracking.reset(new perception_control::Tracking());
+    imageData.setImage(image);
+    tracking->objectDetected("vampire_fathead", bbox, imageData);
 
     // full test with tracking object
     if (tracking != nullptr)
@@ -53,7 +59,8 @@ int main(int argc, char ** argv)
                 break;
             }
             
-            tracking->newImage(image);
+            imageData.setImage(image);
+            tracking->newImage(imageData);
 
             perception_control::BoundingBox bbox = tracking->getBox("vampire_fathead");
 

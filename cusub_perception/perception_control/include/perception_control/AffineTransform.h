@@ -1,3 +1,9 @@
+/**
+ * @file AffineTransform.h
+ * @author Soroush Khadem (soroush.khadem@colorado.edu)
+ * @brief Handles transforms between points
+ * 
+ */
 #ifndef AFFINETRANSFORM_H
 #define AFFINETRANSFORM_H
 

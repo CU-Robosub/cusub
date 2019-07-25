@@ -1,8 +1,8 @@
 /**
  * @file tracking.cpp
  * @author Soroush Khadem (soroush.khadem@colorado.edu)
- * @brief 
- * @date 2019-07-17
+ * @brief Node to track objects
+ * 
  */
 
 #ifndef TRACKING_H
@@ -23,28 +23,26 @@ namespace perception_control
 class Tracking : public nodelet::Nodelet
 {
 public:
+    explicit Tracking();
     virtual void onInit();
 
     BoundingBox getBox(const std::string &classname);
 
     void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr& bbs);
-    void imageCallback(const sensor_msgs::Image::ConstPtr &image);
+    void imageCallback(const sensor_msgs::Image::ConstPtr &rosImage);
 
-    void objectDetected(const std::string &classname, BoundingBox &box, const cv::Mat &image);
-    void newImage(const cv::Mat &image);
+    void objectDetected(const std::string &classname, BoundingBox &box, const ImageData &image);
+    void newImage(const ImageData &image);
 
 
-private:
     ~Tracking();
+private:
 
     void setupPublishers();
     void setupSubscribers();
     
     void publishBoxes();
     void publishDebugBoxes();
-
-    cv::Mat rosImageToCV(const sensor_msgs::Image::ConstPtr &image);
-    sensor_msgs::Image cvImagetoROS(const cv::Mat &image);
 
     ros::NodeHandle m_nh;
     std::string m_imageTopicName;
@@ -55,6 +53,7 @@ private:
 
     bool m_debugMode;
     uint m_frameCount;
+    float m_detectionThresh;
 
     std::map<std::string, ObjectTracker *> m_objectMap;
 
