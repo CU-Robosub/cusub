@@ -38,7 +38,8 @@ void draw_on_image(Mat& image)
 
 void publish_bb(bool * stop)
 {
-    string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/perception_control/unit_tests/images/path_pair_sim.jpg";
+    // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/perception_control/unit_tests/images/path_pair_sim.jpg";
+    string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/perception_control/unit_tests/images/path_sim0.jpg";
     Mat image = imread(image_name, CV_LOAD_IMAGE_COLOR);
     // draw_on_image(image);
     // imshow("Path Window", image);
@@ -47,19 +48,28 @@ void publish_bb(bool * stop)
 
     darknet_ros_msgs::BoundingBoxes bbs;
     darknet_ros_msgs::BoundingBox pathbox1, pathbox2;
+    // pathbox1.Class = "path";
+    // pathbox1.probability = 1.0;
+    // pathbox1.xmin = 700;
+    // pathbox1.ymin = 25;
+    // pathbox1.xmax = 775;
+    // pathbox1.ymax = 160;
+    // pathbox2.Class = "path";
+    // pathbox2.probability = 1.0;
+    // pathbox2.xmin = 490;
+    // pathbox2.ymin = 700;
+    // pathbox2.xmax = 590;
+    // pathbox2.ymax = 790;
+    // -------- image 2
     pathbox1.Class = "path";
     pathbox1.probability = 1.0;
-    pathbox1.xmin = 700;
-    pathbox1.ymin = 25;
-    pathbox1.xmax = 775;
-    pathbox1.ymax = 160;
-    pathbox2.Class = "path";
-    pathbox2.probability = 1.0;
-    pathbox2.xmin = 490;
-    pathbox2.ymin = 680;
-    pathbox2.xmax = 590;
-    pathbox2.ymax = 790;
+    pathbox1.xmin = 590;
+    pathbox1.xmax = 680;
+    pathbox1.ymin = 470;
+    pathbox1.ymax = 550;
+    // ---------
     bbs.bounding_boxes.push_back(pathbox1);
+    // bbs.bounding_boxes.push_back(pathbox2);
     cv_bridge::CvImage img_bridge = cv_bridge::CvImage(bbs.image_header, sensor_msgs::image_encodings::RGB8, image);
     img_bridge.toImageMsg(bbs.image);
 
@@ -81,6 +91,20 @@ int main(int argc, char ** argv)
 {
     ros::init(argc, argv, "path_orient_test");
     cout << "Starting Path Orientation Testing" << endl;
+
+    // string image_name = "/home/luke/ros/robosub_ws/src/cusub/cusub_perception/perception_control/unit_tests/images/path_sim0.jpg";
+    // Mat image = imread(image_name, CV_LOAD_IMAGE_COLOR);
+    // draw_on_image(image);
+    
+    //  darknet_ros_msgs::BoundingBox box;
+    //  box.xmin = 590;
+    //  box.xmax = 680;
+    //  box.ymin = 470;
+    //  box.ymax = 550;
+    // rectangle(image, Point(box.xmin,box.ymin), Point(box.xmax, box.ymax), Scalar(0,0,255));
+    // imshow("image", image);
+    // waitKey(0);
+    // return 0;
     
     // bbs.push_back(pathbox2);
 

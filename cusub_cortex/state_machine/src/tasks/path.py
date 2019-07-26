@@ -19,6 +19,7 @@ from perception_control.msg import VisualServoAction, VisualServoGoal, VisualSer
 from perception_control.msg import PathOrientAction, PathOrientGoal, PathOrientResult
 import actionlib
 from actuator.srv import ActivateActuator
+from std_msgs.msg import Float64
 
 class Path(Task):
     name = "path"
@@ -62,6 +63,8 @@ class Follow(Objective):
             self.orientation_result = None
         self.feedback = False
         self.was_centered = False
+        self.depth_pub = rospy.Publisher("cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
+        self.depth_msg = Float64(); self.depth_msg.data = rospy.get_param("tasks/path"+path_num_str+"/depth")
         super(Follow, self).__init__(self.outcomes, "Follow")
 
     def orientation_result_callback(self, state, result):
@@ -71,32 +74,33 @@ class Follow(Objective):
         self.feedback = feedback.centered
 
     def execute(self, userdata):
-        # goal = VisualServoGoal()
-        # goal.target_class = "path"
-        # goal.camera = goal.DOWNCAM
-        # goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
-        # goal.visual_servo_type = goal.PROPORTIONAL
-        # goal.target_pixel_x = goal.CAMERAS_CENTER_X
-        # goal.target_pixel_y = goal.CAMERAS_CENTER_Y
-        # goal.target_pixel_threshold = 10        # If inside a 20x20 square around the target pixel we'll be considered centered
-        # rospy.loginfo("...centering over path marker")
-        # self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)
+        goal = VisualServoGoal()
+        goal.target_class = "path"
+        goal.camera = goal.DOWNCAM
+        goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
+        goal.visual_servo_type = goal.PROPORTIONAL
+        goal.target_pixel_x = goal.CAMERAS_CENTER_X
+        goal.target_pixel_y = goal.CAMERAS_CENTER_Y
+        goal.target_pixel_threshold = 10        # If inside a 20x20 square around the target pixel we'll be considered centered
+        rospy.loginfo("...centering over path marker")
+        self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)
         
-        # while not rospy.is_shutdown() :
-        #     if userdata.timeout_obj.timed_out:
-        #         self.vs_client.cancel_goal()
-        #         userdata.outcome = "timed_out"
-        #         return "timed_out"
-        #     if self.feedback:
-        #         if self.was_centered:
-        #             break
-        #         else:
-        #             rospy.sleep(self.centering_time)
-        #             self.was_centered = True
-        #     else:
-        #         self.was_centered = False
-        #     rospy.sleep(1)
-        # rospy.loginfo("...centered over path marker")
+        while not rospy.is_shutdown() :
+            self.depth_pub.publish(self.depth_msg)
+            if userdata.timeout_obj.timed_out:
+                self.vs_client.cancel_goal()
+                userdata.outcome = "timed_out"
+                return "timed_out"
+            if self.feedback:
+                if self.was_centered:
+                    break
+                else:
+                    rospy.sleep(self.centering_time)
+                    self.was_centered = True
+            else:
+                self.was_centered = False
+            rospy.sleep(0.25)
+        rospy.loginfo("...centered over path marker")
 
         if self.do_orientation:
             # call to orientation server
@@ -105,7 +109,9 @@ class Follow(Objective):
             self.ori_client.send_goal(ori_goal, done_cb=self.orientation_result_callback)
             r = rospy.Rate(1)
             while not rospy.is_shutdown() and self.orientation_result == None:
+                self.depth_pub.publish(self.depth_msg)
                 if userdata.timeout_obj.timed_out:
+                    self.vs_client.cancel_goal()
                     self.ori_client.cancel_goal()
                     userdata.outcome = "timed_out"
                     return "timed_out"
@@ -113,5 +119,6 @@ class Follow(Objective):
         else:
             rospy.logwarn("...skipping orientation")
         
+        self.vs_client.cancel_goal()  # Tell VS to stop servoing
         userdata.outcome = "success"
         return "success"

@@ -8,6 +8,13 @@
 #include <actionlib/server/simple_action_server.h>
 #include <waypoint_navigator/ToggleControl.h>
 #include <std_msgs/Float64.h>
+#include <cv_bridge/cv_bridge.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/video/background_segm.hpp>
+#include <opencv2/bgsegm.hpp>
 
 namespace perception_control
 {
@@ -20,11 +27,11 @@ namespace perception_control
         private:
             void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
             void yawCallback(const std_msgs::Float64ConstPtr state);
-            bool controlPids(const bool takeControl);
             void execute(const perception_control::PathOrientGoalConstPtr goal);
+            ros::NodeHandle* nh;
+            float deadZone, yawCarrot;
             float yawState;
             ros::Publisher yawPub;
-            ros::Subscriber darknetSub, yawSub;
             ros::ServiceClient wayToggleClient;
             bool controllingPids, orientedWithPath;
             pathServer* server;
