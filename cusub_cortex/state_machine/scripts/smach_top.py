@@ -71,15 +71,15 @@ def main():
     rospy.init_node('state_machine')
     
     # All Objectives depend on the waypoint server so let's wait for it to initalize here
-    # wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
-    # rospy.loginfo("Waiting for waypoint server")
-    # wayClient.wait_for_server()
-    # rospy.loginfo("---connected to server")
+    wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
+    rospy.loginfo("Waiting for waypoint server")
+    wayClient.wait_for_server()
+    rospy.loginfo("\tconnected to server")
 
     if rospy.get_param('~using_darknet'):
         rospy.loginfo("Waiting for darknet multiplexer server")
         rospy.wait_for_service("cusub_perception/darknet_multiplexer/configure_active_cameras")
-        rospy.loginfo("---connected to server")
+        rospy.loginfo("\tconnected to server")
     else:
         rospy.logwarn("SM not using darknet configuration service.")
 
@@ -87,7 +87,7 @@ def main():
     rospy.loginfo("Waiting for rosparams")
     while not rospy.has_param("mission_tasks") and not rospy.is_shutdown():
         rospy.sleep(1)
-    rospy.loginfo("--rosparams found")
+    rospy.loginfo("\trosparams found")
 
     final_outcome = "mission_completed"
     sm_top = smach.StateMachine(outcomes=[final_outcome])

@@ -16,6 +16,8 @@
 #include <opencv2/video/background_segm.hpp>
 #include <opencv2/bgsegm.hpp>
 
+using namespace cv;
+
 namespace perception_control
 {
     typedef actionlib::SimpleActionServer<perception_control::PathOrientAction> pathServer;
@@ -28,6 +30,7 @@ namespace perception_control
             void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
             void yawCallback(const std_msgs::Float64ConstPtr state);
             void execute(const perception_control::PathOrientGoalConstPtr goal);
+            bool firstNonzeroPixelLeftSide(Mat& image);
             ros::NodeHandle* nh;
             float deadZone, yawCarrot;
             float yawState;
