@@ -1,4 +1,18 @@
 <launch>
-    <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
-    <node pkg="nodelet" type="nodelet" name="orbit" args="load perception_control/Orbit standalone_nodelet" output="screen"/>
+    <arg name="detection_topic" default="cusub_perception/darknet_ros/bounding_boxes" />
+    <arg name="image_topic" default="cusub_common/occam/image0" />
+    <arg name="detection_thresh" default="0.8" />
+    <arg name="debug_mode" default="true" />
+    
+    <group ns="leviathan">
+        <node pkg="nodelet" type="nodelet" name="orbit_standalone_nodelet" args="manager" output="screen"/>
+        <node pkg="nodelet" type="nodelet" name="orbit" args="load perception_control/Orbit orbit_standalone_nodelet" output="screen"/>
+        <node pkg="nodelet" type="nodelet" name="tracking" args="load perception_control/Tracking orbit_standalone_nodelet" output="screen">
+            <param name="detection_topic" value="$(arg detection_topic)"/>
+            <param name="image_topic" value="$(arg image_topic)"/>
+            <param name="detection_thresh" value="$(arg detection_thresh)"/>
+            <param name="debug_mode" value="$(arg debug_mode)"/>
+        </node>
+    </group>
+
 </launch>
