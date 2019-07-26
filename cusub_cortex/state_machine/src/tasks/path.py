@@ -122,7 +122,7 @@ class Follow(Objective):
             else:
                 self.was_centered = False
             rospy.sleep(0.25)
-        rospy.loginfo("...centered over path marker")
+        rospy.loginfo("\tcentered")
 
         if self.do_orientation:
             # call to orientation server
@@ -138,7 +138,7 @@ class Follow(Objective):
                     userdata.outcome = "timed_out"
                     return "timed_out"
                 r.sleep()
-            rospy.loginfo("...oriented with path marker")
+            rospy.loginfo("\toriented")
         else:
             rospy.logwarn("...skipping orientation")
         

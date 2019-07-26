@@ -44,43 +44,56 @@ namespace perception_control
         }
     }
 
+    /*
+        Determines whether the first nonzero pixel from the top of the image is on the left or right side
+        Returns 1 for left side
+                0 for right side
+     */
+    bool PathOrient::firstNonzeroPixelLeftSide(Mat& image)
+    {
+        uint8_t* pixels = image.data;
+        int stride = image.step; //in case cols != strides
+        for( int i=0; i<image.rows; i++)
+        {
+            for( int j=0; j<image.cols; j++)
+            {
+                if( pixels[i * stride + j] )   // pointer access faster than opencv's at<>()
+                {
+                    if (j < image.cols / 2)
+                        return true;
+                    else
+                        return false;
+                }
+            }
+        }
+    }
+
     void PathOrient::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs)
     {
-        NODELET_INFO_THROTTLE(1, "Path Orienting");
+        NODELET_INFO_THROTTLE(1, "...orienting");
         cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(bbs->image, sensor_msgs::image_encodings::RGB8);
         Mat cropped, gray, blurred, binary, morphed, morphed2, markers, borders;
-        // circle(cv_ptr->image, Point(cv_ptr->image.cols/2, cv_ptr->image.rows/2),10, Scalar(0,0,255), -1);
-        //imshow("img", cv_ptr->image);
-        //waitKey(0);
         Rect rect(bbs->bounding_boxes[0].xmin, bbs->bounding_boxes[0].ymin,bbs->bounding_boxes[0].xmax-bbs->bounding_boxes[0].xmin,bbs->bounding_boxes[0].ymax-bbs->bounding_boxes[0].ymin);
         cropped = cv_ptr->image(rect);
         cvtColor(cropped, gray, COLOR_BGR2GRAY);
-        //imshow("gray", gray);
-        //waitKey(0);
         blur(gray, blurred, Size(3,3));
-        //imshow("blurred", blurred);
-        //waitKey(0);
         threshold(blurred, binary, 0, 255, THRESH_BINARY_INV + THRESH_OTSU);
-        //imshow("binary", binary);
-        //waitKey(0);
-        // Count nonzero, whichever is smaller means we should go one way or the other
-        // int count = countNonZero(borders);
-        int num_iters = 2;
+
+        // TODO COUNT NONZERO
+        // use the percentage of nonzero pixels in the image to determine the num iterations of dilating / eroding
+        // int nonzero = countNonZero(binary);
+        // cout << "Area: " << binary.cols * binary.rows << "\t\tNonzero: " << nonzero << endl;
+        int num_iters = 2; // 2 is roughly 25% of the image, 4 is roughly 33% of the image
         if( countNonZero(binary) > ( binary.total() / 2) )
         {
             dilate(binary, morphed2, Mat(), Point(-1,-1), num_iters);
             bitwise_not(morphed2, morphed);
-            // erode(morphed, morphed2, Mat(), Point(-1,-1), 1);
-            // cout << "dilated" << endl;
         } else {
             erode(binary, morphed, Mat(), Point(-1,-1), num_iters);
-            // dilate(morphed, morphed2, Mat(), Point(-1,-1), 1);
-            // cout << "erode" << endl;
         }
         cv::connectedComponents(morphed, markers);
         double min, max;
         minMaxLoc(markers, &min, &max);
-        // cout << max << endl;
         int count;
         int maxCount = 0;
         int maxMarker;
@@ -95,23 +108,31 @@ namespace perception_control
             }
         }
         compare(markers, Scalar(maxMarker), borders, cv::CMP_EQ);
-        //imshow("borders", borders);
-        //waitKey(0);
 
-        // TODO do some sort of recursive, we want x percentage of the image to be white, then we'll apply hough
-        // split image according to aspect ratio
-        Rect rect2(0,0, borders.cols, borders.rows / 2); // split image vertically
-        Mat split_image = borders(rect2);
-        //imshow("splitted", split_image);
-        //waitKey(0);
+        // split image so that we only look at one half of the image and ideally one straight segment of the path marker
+        // assume that the path marker segment that's more forward (higher in our image) is the one we should align with
+        // split according to aspect ratio
+        Mat split_image;
+        if (borders.cols > borders.rows) // wide image, split so we have either the right or left side
+        {   
+            if ( firstNonzeroPixelLeftSide(borders) ) // left side
+            {
+                Rect rect2(0,0, borders.cols / 2, borders.rows);
+                split_image = borders(rect2);
+            } else {                                  // right side
+                Rect rect2(borders.cols / 2, 0, borders.cols / 2, borders.rows);
+                split_image = borders(rect2);
+            }
+        } else {
+            Rect rect2(0,0, borders.cols, borders.rows / 2); // use upper half of image
+            split_image = borders(rect2);
+        }
 
-        Mat color;
-        cv::cvtColor(split_image, color, COLOR_GRAY2BGR);
         vector<Vec4i> lines;
         HoughLinesP(split_image, lines, 1, CV_PI/180, 10, split_image.rows / 3, 0);
         if ( lines.size() < 1)
         {
-            // NODELET_INFO("No lines");
+            NODELET_WARN_THROTTLE(2, "No lines detected in hough algorithm"); // IF NOT WORKING, GO TO "TODO COUNT NONZERO"
             // imshow("cropped", cropped);
             // imshow("blurred", blurred);
             // imshow("binary", binary);
@@ -119,7 +140,7 @@ namespace perception_control
             // waitKey(0);
             // imshow("cropped", cropped);
             return;
-        } // No suitable lines found
+        }
         // NODELET_INFO("Number of lines: %d", (int) lines.size());
         Point bottom_pt = Point(0,0);
         Point top_pt = Point(0,split_image.rows);
@@ -158,7 +179,7 @@ namespace perception_control
         //waitKey(0);
 
         float slope = ( (float) bottom_pt.y - top_pt.y) / ( (float) bottom_pt.x - top_pt.x);
-        cout << slope << endl;
+        // cout << slope << endl;
         std_msgs::Float64 msg;
         if (abs(slope) >= deadZone)
         {
