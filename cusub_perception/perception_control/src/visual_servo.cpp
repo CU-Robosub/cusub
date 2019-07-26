@@ -48,6 +48,7 @@ namespace perception_control
                     current_controller->x_pub->publish(frozen_x_set);
                     current_controller->y_pub->publish(frozen_y_set);
                 } else { // Still need to center
+                    NODELET_INFO_THROTTLE(1, "Servoing x_error: %d\ty_error: %d", error_x, error_y);
                     frozen_controls = false;
                     feedback.centered = false;
                     current_controller->respond(error_x,error_y);
