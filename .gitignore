@@ -13,3 +13,5 @@ cusub_perception/usbcam_ws/build
 
 # vscode
 .vscode
+
+.idea
