@@ -89,18 +89,19 @@ def main():
         rospy.sleep(1)
     rospy.loginfo("--rosparams found")
 
-    task_list = rospy.get_param("mission_tasks")
-    sm_list = loadStateMachines(task_list)
-
     final_outcome = "mission_completed"
     sm_top = smach.StateMachine(outcomes=[final_outcome])
     sm_top.userdata.previous_outcome = "starting"
     sm_top.userdata.timeout_obj = Timeout()
 
+    task_list = rospy.get_param("mission_tasks")
+    manager = Manager(task_list, final_outcome)
+    sm_list = loadStateMachines(task_list)
+
     # Load all statemachines
     with sm_top:
         manager_transitions = createTransitionsForManager(task_list, final_outcome)
-        smach.StateMachine.add('manager', Manager(task_list, final_outcome), \
+        smach.StateMachine.add('manager', manager, \
             transitions=manager_transitions, \
             remapping={"timeout_obj":"timeout_obj", "previous_outcome":"previous_outcome"})
         for index in range(len(task_list)):
