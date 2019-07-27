@@ -6,7 +6,6 @@
     
     <group ns="leviathan">
         <node pkg="nodelet" type="nodelet" name="orbit_standalone_nodelet" args="manager" output="screen"/>
-        <node pkg="nodelet" type="nodelet" name="orbit" args="load perception_control/Orbit orbit_standalone_nodelet" output="screen"/>
         <node pkg="nodelet" type="nodelet" name="tracking" args="load perception_control/Tracking orbit_standalone_nodelet" output="screen">
             <param name="detection_topic" value="$(arg detection_topic)"/>
             <param name="image_topic" value="$(arg image_topic)"/>

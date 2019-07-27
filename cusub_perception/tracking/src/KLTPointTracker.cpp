@@ -1,4 +1,4 @@
-#include "perception_control/KLTPointTracker.h"
+#include "tracking/KLTPointTracker.h"
 
 using namespace perception_control;
 
@@ -41,14 +41,12 @@ PointTracker::Result KLTPointTracker::initialize(const cv::Mat &image, const Bou
     return result;
 }
 
-PointTracker::Result KLTPointTracker::trackPoints(const cv::Mat &image)
+PointTracker::Result KLTPointTracker::trackPoints(const cv::Mat &imageGray)
 {
-    cv::Mat imageGray;
     std::vector<cv::Point2f> newPoints, foundNewPoints, foundOldPoints;
     std::vector<uchar> pointStatus;
     std::vector<float> err;
 
-    cv::cvtColor(image, imageGray, cv::COLOR_BGR2GRAY);
     cv::TermCriteria criteria = cv::TermCriteria((cv::TermCriteria::COUNT) + (cv::TermCriteria::EPS), 10, 0.03);
 
     cv::calcOpticalFlowPyrLK(m_currentImg, imageGray, m_currentPoints, newPoints, pointStatus, err, cv::Size(15,15), 2, criteria);
