@@ -153,12 +153,11 @@ class Slay(Objective):
                     pass
             else: # we've reached our pose!
                 break
-                    
         rospy.loginfo("...slaying buoy")
         rospy.sleep(2)
         self.monitor_imu = True
-        self.go_to_pose(slay_pose, userdata.timeout_obj, move_mode="backup")
+        self.go_to_pose(slay_pose, userdata.timeout_obj)
         self.monitor_imu = False
-        self.go_to_pose(approach_pose, userdata.timeout_obj, replan_enabled=False)
+        self.go_to_pose(approach_pose, userdata.timeout_obj, replan_enabled=False, move_mode="backup")
         userdata.outcome = "success"
         return "success"

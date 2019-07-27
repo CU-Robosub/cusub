@@ -19,6 +19,7 @@
     <run_depend>pololu_controller</run_depend>
     <run_depend>sparton_imu</run_depend>
     <run_depend>gazebo_drivers</run_depend>
+    <run_depend>jetson_csi_cam</run_depend>
 
     <!-- debugging packages -->
     <run_depend>console</run_depend>
