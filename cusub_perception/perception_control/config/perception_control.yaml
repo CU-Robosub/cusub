@@ -1,0 +1,19 @@
+perception_control:
+  bb_controllers:
+
+    # Success Thresholds
+    succeeded_x_pixel_dist: 10
+    succeeded_y_pixel_dist: 10
+
+    # Controllers
+    proportional:
+      downcam:
+        drive:
+          max_setpoint: 1.0
+          maxout_pixel_dist: 50
+        strafe:
+          max_setpoint: 1.0
+          maxout_pixel_dist: 50
+  path_orient:
+    yaw_setpoint_carrot: 0.5
+    bang_bang_deadzone: 10.0    # Absolute value of hough lines slope before entering deadzone

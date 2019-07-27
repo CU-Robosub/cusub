@@ -57,7 +57,7 @@ class Task(smach.StateMachine):
         """
         pass
 
-    def get_prior_topic(self):
+    def get_prior_param(self):
         """
         Get the prior for the task from the rosparameter server
 
@@ -220,17 +220,23 @@ class Objective(smach.State):
         res = self.wayClient.get_result()
         while (res == None or not res.complete) and not rospy.is_shutdown():
             res = self.wayClient.get_result()
-            if self.get_distance(self.cur_pose.position, target_pose.position) < POSE_REACHED_THRESHOLD:
-                self.wayClient.cancel_goal()
+            if self.check_reached_pose(target_pose):
+                self.cancel_way_client_goal()
                 return False
             elif timeout_obj.timed_out:
-                self.wayClient.cancel_goal()
+                self.cancel_way_client_goal()
                 return True
             elif self.replan_requested() and replan_enabled:
-                self.wayClient.cancel_goal()
+                self.cancel_way_client_goal()
                 return True
             rospy.sleep(0.25)
         return False
+
+    def cancel_way_client_goal(self):
+        self.wayClient.cancel_goal()
+
+    def check_reached_pose(self, target_pose):
+        return self.get_distance(self.cur_pose.position, target_pose.position) < POSE_REACHED_THRESHOLD
 
     def sub_pose_cb(self, msg):
         self.cur_pose = msg.pose.pose # store the pose part of the odom msg

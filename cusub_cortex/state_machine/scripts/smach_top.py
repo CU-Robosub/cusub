@@ -23,6 +23,7 @@ from tasks.jiangshi import Jiangshi
 from tasks.triangle_buoy import Triangle_Buoy
 from tasks.manager import Manager
 from tasks.task import Timeout
+from tasks.path import Path
 
 def createTransitionsForManager(task_list, final_outcome):
     transition_dict = {}
@@ -47,6 +48,10 @@ def loadStateMachines(task_list):
             task_sm = StartGate()
         elif task == "jiangshi":
             task_sm = Jiangshi()
+        elif task == "path0":
+            task_sm = Path("0")
+        elif task == "path1":
+            task_sm = Path("1")
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 
@@ -66,15 +71,15 @@ def main():
     rospy.init_node('state_machine')
     
     # All Objectives depend on the waypoint server so let's wait for it to initalize here
-    # wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
-    # rospy.loginfo("Waiting for waypoint server")
-    # wayClient.wait_for_server()
-    # rospy.loginfo("---connected to server")
+    wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
+    rospy.loginfo("Waiting for waypoint server")
+    wayClient.wait_for_server()
+    rospy.loginfo("\tconnected to server")
 
     if rospy.get_param('~using_darknet'):
         rospy.loginfo("Waiting for darknet multiplexer server")
         rospy.wait_for_service("cusub_perception/darknet_multiplexer/configure_active_cameras")
-        rospy.loginfo("---connected to server")
+        rospy.loginfo("\tconnected to server")
     else:
         rospy.logwarn("SM not using darknet configuration service.")
 
@@ -82,20 +87,21 @@ def main():
     rospy.loginfo("Waiting for rosparams")
     while not rospy.has_param("mission_tasks") and not rospy.is_shutdown():
         rospy.sleep(1)
-    rospy.loginfo("--rosparams found")
-
-    task_list = rospy.get_param("mission_tasks")
-    sm_list = loadStateMachines(task_list)
+    rospy.loginfo("\trosparams found")
 
     final_outcome = "mission_completed"
     sm_top = smach.StateMachine(outcomes=[final_outcome])
     sm_top.userdata.previous_outcome = "starting"
     sm_top.userdata.timeout_obj = Timeout()
 
+    task_list = rospy.get_param("mission_tasks")
+    manager = Manager(task_list, final_outcome)
+    sm_list = loadStateMachines(task_list)
+
     # Load all statemachines
     with sm_top:
         manager_transitions = createTransitionsForManager(task_list, final_outcome)
-        smach.StateMachine.add('manager', Manager(task_list, final_outcome), \
+        smach.StateMachine.add('manager', manager, \
             transitions=manager_transitions, \
             remapping={"timeout_obj":"timeout_obj", "previous_outcome":"previous_outcome"})
         for index in range(len(task_list)):
