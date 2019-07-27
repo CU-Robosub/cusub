@@ -33,7 +33,7 @@ class Dropper(Task):
         self.link_objectives()
 
     def init_objectives(self):
-        self.search = Dropper.from_bounding_box(self.get_prior_param(), "vampire_cute", [0,0,0,0,0,1])
+        self.search = Search.from_bounding_box(self.get_prior_param(), "path", [0,0,0,0,0,1])
         self.drop = Drop()
 
     def link_objectives(self):
@@ -51,8 +51,7 @@ class Drop(Objective):
     """
     outcomes=['success', 'timed_out']
 
-    def __init__(self, path_num_str):
-        self.path_num_str = path_num_str
+    def __init__(self):
         self.vs_client = actionlib.SimpleActionClient('visual_servo', VisualServoAction)
         rospy.loginfo("...waiting for visual_servo server")
         self.vs_client.wait_for_server()
@@ -69,9 +68,9 @@ class Drop(Objective):
         self.drop_thresh = rospy.get_param("tasks/dropper/drop_thresh")
         self.target_pixel_box = rospy.get_param("tasks/dropper/target_pixel_threshold")
         # todo SK namespace
-        self.actuator_service = rospy.ServiceProxy('activateActuator', ActivateActuator)
+        self.actuator_service = rospy.ServiceProxy('cusub_common/activateActuator', ActivateActuator)
 
-        super(Drop, self).__init__(self.outcomes, "Drop")
+        super(Drop, self).__init__(self.outcomes, "drop")
 
     def vs_feedback_callback(self, feedback):
         self.feedback = feedback.centered
@@ -81,9 +80,10 @@ class Drop(Objective):
 
     def execute(self, userdata):
         goal = VisualServoGoal()
-        goal.target_class = "vampire_cute" # todo SK
+        goal.target_class = "path" # todo SK
         goal.camera = goal.DOWNCAM
         goal.target_frame = rospy.get_param("~robotname") +"/camera"
+        goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
         goal.visual_servo_type = goal.PROPORTIONAL
         goal.target_pixel_x = goal.CAMERAS_CENTER_X
         goal.target_pixel_y = goal.CAMERAS_CENTER_Y
@@ -107,15 +107,14 @@ class Drop(Objective):
                 self.was_centered = False
             rospy.sleep(0.25)
         rospy.loginfo("\tcentered")
-        
-        
-        self.depth_msg.data = self.drop_depth        
-
+    
         # keep pubbing until we get there
+        self.depth_msg.data = self.drop_depth
         while abs(self.last_depth.data - self.depth_msg.data) > self.drop_thresh:
             self.depth_pub.publish(self.depth_msg)
             rospy.sleep(0.25)
 
+        rospy.loginfo("...centering over path marker")
         while not rospy.is_shutdown() :
             self.depth_pub.publish(self.depth_msg)
             if userdata.timeout_obj.timed_out:
@@ -132,12 +131,9 @@ class Drop(Objective):
                 self.was_centered = False
             rospy.sleep(0.25)
         rospy.loginfo("\tcentered (again)")
-
-        rospy.loginfo("\tAbout to drop my load ;)")
-        
+        rospy.loginfo("...about to drop my load ;)")
         self.actuator_service(1, 500)
-        
-        rospy.loginfo("\tDropped")
+        rospy.loginfo("\tdropped")
 
 
         self.vs_client.cancel_goal()  # Tell VS to stop servoing

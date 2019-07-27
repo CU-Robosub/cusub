@@ -53,6 +53,28 @@ tasks:
   jump_thresh: 0.5
   use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
 
+ dropper:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'skip'
+  prior: [-2.5,2.0,-1.5, "world"] # Won't matter much b/c we'll almost immediately see it after the SG
+  target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
+  search_depth: -0.5
+  drop_depth: -1.5
+  drop_thresh: 0.5
+
+ torpedos:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'skip'
+  prior: [-2.5,2.0,-1.5, "world"] # Won't matter much b/c we'll almost immediately see it after the SG
+  target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
+
+
  triangle_buoy:
   prior: [4,0,-2]
   approach_dist: 2.0
@@ -83,11 +105,7 @@ tasks:
     dice2: dice_box
     dice5: dice_box
     dice6: dice_box
- dropper:
-  prior: [-7,-4.5,-1]
-  object_localizers:
-    roulette: roulette_watershed
 
 mission_tasks: # Tasks To Do In Order
-  - path0
+  - dropper
   
