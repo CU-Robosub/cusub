@@ -5,6 +5,7 @@ localizer:
     vampire_walking : ignore
     vampire_fathead : ignore
     vampire_flying : ignore
+    path : ignore
   hough:
     three_legs : False  # true, false
   jiangshi_watershed:

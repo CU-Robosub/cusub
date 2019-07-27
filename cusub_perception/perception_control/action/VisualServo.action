@@ -1,0 +1,23 @@
+# Cameras
+string OCCAM="occam"
+string DOWNCAM="downcam"
+
+# Camera Center Pixels, NOTE DOWNCAM HAS BEEN RESIZED 752X480 IN MULTIPLEXER BEFORE GOING INTO DARKNET
+uint16 CAMERAS_CENTER_X=376
+uint16 CAMERAS_CENTER_Y=240
+
+# Controllers
+uint8 PROPORTIONAL=0
+# uint8 NUDGE=1
+
+string target_class
+string target_frame
+uint8 visual_servo_type
+uint16 target_pixel_x
+uint16 target_pixel_y
+uint16 target_pixel_threshold   # if inside this square around target pixel, we've succeeded
+string camera
+---
+bool success
+---
+bool centered

@@ -142,7 +142,7 @@ class Slay(Objective):
         goal.orbit_left = self.orbit_left
         goal.orbit_radius = self.approach_dist
 
-        rospy.loginfo("Sendinig Goal to Buoy Orbitter")
+        rospy.loginfo("Sending Goal to Buoy Orbitter")
         self.client.send_goal(goal)
         self.client.wait_for_result(rospy.Duration(180))
 
