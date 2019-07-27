@@ -1,6 +1,6 @@
 /*
     Multiplexes occam and downcam camera frames into a single topic for darknet.
-    Dynamically configurable via service TODO service name
+    Dynamically configurable via service: cusub_perception/darknet_multiplexer/out
     Update rate configurable via config/darknet_multiplexer.yaml
  */
 
