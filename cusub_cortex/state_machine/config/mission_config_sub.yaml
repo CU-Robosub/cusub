@@ -2,6 +2,7 @@
 # ALL UNITS IN M
 
 using_sim_params : False
+manager_task_status_pub_rate: 1
 
 tasks:
  start_gate:
@@ -12,12 +13,17 @@ tasks:
   replan_thresh: 1.0
 
  jiangshi:
-  prior: [2.0,0,-1.5]
+  manager_info:
+   timeout_secs: 0
+   outcome_not_found: 'skip'
+   outcome_timed_out: 'skip'
+  prior: [0.0,-3.0,-1.5]
   approach_dist: 2.0
-  slay_dist: 0.0
-  replan_thresh: 2.0
-  imu_axis: 'x'
-  jump_thresh: -0.05
+  slay_dist: 0.5
+  replan_thresh: 1.0
+  imu_axis: 'y'
+  jump_thresh: 1.0
+  use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
 
  dice:
   prior: [3,0,-2.3]

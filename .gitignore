@@ -10,3 +10,8 @@ cusub_perception/usbcam_ws/build
 # yolo
 *.weights
 # emacs
+
+# vscode
+.vscode
+
+.idea
