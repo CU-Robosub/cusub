@@ -28,7 +28,7 @@ class Jiangshi(Task):
         self.link_objectives()
 
     def init_objectives(self):
-        self.search = Search(self.get_prior_topic(), "cusub_cortex/mapper_out/jiangshi", darknet_cameras=[1,0,0,0,0,0])
+        self.search = Search(self.get_prior_param(), "cusub_cortex/mapper_out/jiangshi")
         self.slay = Slay()
 
     def link_objectives(self):
@@ -42,7 +42,7 @@ class Slay(Objective):
     """
     Go to a point in front of the bouy, slay jiangshi backwards, backup
     """
-    outcomes=['success', 'timed_out'] # Need to change a ton of shit here...
+    outcomes=['success', 'timed_out']
 
     def __init__(self):
         super(Slay, self).__init__(self.outcomes, "Slay")

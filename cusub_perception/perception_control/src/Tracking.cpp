@@ -17,8 +17,8 @@ void Tracking::onInit()
     nhPrivate.getParam("detection_thresh", m_detectionThresh);
     nhPrivate.getParam("debug_mode", m_debugMode);
 
-    NODELET_INFO(m_imageTopicName.c_str());
-    NODELET_INFO(m_detectionTopicName.c_str());
+    NODELET_INFO("%s", m_imageTopicName.c_str());
+    NODELET_INFO("%s", m_detectionTopicName.c_str());
     if(m_debugMode) NODELET_INFO("true");
     else NODELET_INFO("false");
 

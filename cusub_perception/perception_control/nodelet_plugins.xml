@@ -6,6 +6,22 @@
   </class>
 </library>
 
+<library path="lib/libvisual_servo">
+  <class name="perception_control/VisualServo" type="perception_control::VisualServo" base_class_type="nodelet::Nodelet">
+    <description>
+        Visual Servos on a bounding box
+    </description>
+  </class>
+</library>
+
+<library path="lib/libpath_orient">
+  <class name="perception_control/PathOrient" type="perception_control::PathOrient" base_class_type="nodelet::Nodelet">
+    <description>
+        Orients with a path marker
+    </description>
+  </class>
+</library>  
+
 <library path="lib/libtracking">
   <class name="perception_control/Tracking" type="perception_control::Tracking" base_class_type="nodelet::Nodelet">
     <description>
