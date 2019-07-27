@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(perception_control)
+project(tracking)
 
 
 set(OpenCV_DIR /usr/share/OpenCV)
@@ -11,15 +11,12 @@ set(OpenCV_DIR /usr/share/OpenCV)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  actionlib
-  actionlib_msgs
   darknet_ros_msgs
   roscpp
   sensor_msgs
   std_msgs
   nav_msgs
   nodelet
-  waypoint_navigator
   OpenCV
   cv_bridge
 )
@@ -200,22 +197,6 @@ include_directories(
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
-
-
-
-include_directories(include ${catkin_INCLUDE_DIRS})
-add_library( orbit
-  src/orbit.cpp
-)
-target_link_libraries(orbit ${catkin_LIBRARIES})
-if(catkin_EXPORTED_LIBRARIES)
-  add_dependencies(orbit ${catkin_EXPORTED_LIBRARIES})
-endif()
-
-add_dependencies(
-  orbit
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-)
 
 add_library( tracking
   src/Tracking.cpp

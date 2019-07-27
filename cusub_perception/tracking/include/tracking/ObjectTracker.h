@@ -10,6 +10,7 @@
 #include "BoundingBox.h"
 #include "KLTPointTracker.h"
 #include "ImageData.h"
+#include "ImageTools.h"
 
 namespace perception_control
 {
@@ -33,6 +34,8 @@ private:
 
     bool m_valid;
     ImageData m_currentImage;
+    ImageTools::Preprocessing m_preprocessSteps;
+
 };
 
 }; // namespace perception_control
