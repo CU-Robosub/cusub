@@ -17,7 +17,7 @@
 #include "ObjectTracker.h"
 
 
-namespace perception_control
+namespace tracking
 {
 
 class Tracking : public nodelet::Nodelet
@@ -59,6 +59,6 @@ private:
 
 };
 
-}; // namespace perception_control
+}; // namespace tracking
 
 #endif // TRACKING_H

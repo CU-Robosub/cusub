@@ -1,6 +1,6 @@
 #include "tracking/BoundingBox.h"
 
-using namespace perception_control;
+using namespace tracking;
 
 // in pixels
 const int BoundingBox::AREA_THRESHOLD = 100;

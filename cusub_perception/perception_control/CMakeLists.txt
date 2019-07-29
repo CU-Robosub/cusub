@@ -216,37 +216,3 @@ add_dependencies(
   orbit
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
-
-add_library( tracking
-  src/Tracking.cpp
-  src/AffineTransform.cpp
-  src/PointTracker.cpp
-  src/KLTPointTracker.cpp
-  src/BoundingBox.cpp
-  src/ObjectTracker.cpp
-  src/ImageData.cpp
-  src/ImageTools.cpp
-)
-target_link_libraries(tracking ${catkin_LIBRARIES})
-if(catkin_EXPORTED_LIBRARIES)
-  add_dependencies(tracking ${catkin_EXPORTED_LIBRARIES})
-endif()
-
-add_dependencies(
-  tracking
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-)
-
-add_executable(tracker_unit
-  unit_tests/tracker_unit_test.cpp
-  src/Tracking.cpp
-  src/AffineTransform.cpp
-  src/PointTracker.cpp
-  src/KLTPointTracker.cpp
-  src/BoundingBox.cpp
-  src/ObjectTracker.cpp
-  src/ImageData.cpp
-  src/ImageTools.cpp
-)
-
-target_link_libraries(tracker_unit ${catkin_LIBRARIES})

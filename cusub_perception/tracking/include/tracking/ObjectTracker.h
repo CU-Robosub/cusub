@@ -12,7 +12,7 @@
 #include "ImageData.h"
 #include "ImageTools.h"
 
-namespace perception_control
+namespace tracking
 {
 
 class ObjectTracker
@@ -38,6 +38,6 @@ private:
 
 };
 
-}; // namespace perception_control
+}; // namespace tracking
 
 #endif // OBJECTTRACKER_H

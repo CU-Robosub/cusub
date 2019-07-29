@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-std::shared_ptr<perception_control::Tracking> tracking;
+std::shared_ptr<tracking::Tracking> trackingPtr;
 int main(int argc, char ** argv)
 {
     ros::init(std::vector<std::pair<std::string, std::string> >{}, "unit_test");
@@ -22,7 +22,7 @@ int main(int argc, char ** argv)
     // int ymin = 140;
     // int ymax = 270;
 
-    perception_control::BoundingBox bbox(xmin, ymin, xmax, ymax);
+    tracking::BoundingBox bbox(xmin, ymin, xmax, ymax);
     cv::VideoCapture cap(videoName);
 
     if (!cap.isOpened())
@@ -38,17 +38,17 @@ int main(int argc, char ** argv)
     cv::imshow("initial", image);
     cv::waitKey(0);
     
-    perception_control::ImageData imageData;
+    tracking::ImageData imageData;
 
-    perception_control::KLTPointTracker * tracker = new perception_control::KLTPointTracker();
+    tracking::KLTPointTracker * tracker = new tracking::KLTPointTracker();
     tracker->initialize(image, bbox);
 
-    tracking.reset(new perception_control::Tracking());
+    trackingPtr.reset(new tracking::Tracking());
     imageData.setImage(image);
-    tracking->objectDetected("vampire_fathead", bbox, imageData);
+    trackingPtr->objectDetected("vampire_fathead", bbox, imageData);
 
     // full test with tracking object
-    if (tracking != nullptr)
+    if (trackingPtr != nullptr)
     {
         while(1)
         {
@@ -60,9 +60,9 @@ int main(int argc, char ** argv)
             }
             
             imageData.setImage(image);
-            tracking->newImage(imageData);
+            trackingPtr->newImage(imageData);
 
-            perception_control::BoundingBox bbox = tracking->getBox("vampire_fathead");
+            tracking::BoundingBox bbox = trackingPtr->getBox("vampire_fathead");
 
             cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,0,255), 2);
 
@@ -88,7 +88,7 @@ int main(int argc, char ** argv)
         std::vector<cv::Point2f> bboxDebugPoints = bbox.cornerPoints();
 
         bool first = true;
-        perception_control::PointTracker::Result result;
+        tracking::PointTracker::Result result;
         while(1)
         {
             if (first == false)
