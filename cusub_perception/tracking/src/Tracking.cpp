@@ -1,6 +1,6 @@
 #include "tracking/Tracking.h"
 
-using namespace perception_control;
+using namespace tracking;
 
 #include <iostream>
 #include <opencv2/highgui.hpp>
@@ -159,4 +159,4 @@ void Tracking::publishDebugBoxes()
     m_debugPublisher.publish(imageMsg);
 }
 
-PLUGINLIB_EXPORT_CLASS(perception_control::Tracking, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(tracking::Tracking, nodelet::Nodelet);

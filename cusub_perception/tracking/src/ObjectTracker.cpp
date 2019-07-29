@@ -1,6 +1,6 @@
 #include "tracking/ObjectTracker.h"
 
-using namespace perception_control;
+using namespace tracking;
 
 ObjectTracker::ObjectTracker(BoundingBox &box, const ImageData &image) :
     m_pointTracker(new KLTPointTracker()),

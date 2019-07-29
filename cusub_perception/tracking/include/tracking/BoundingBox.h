@@ -10,7 +10,7 @@
 #include <opencv2/core.hpp>
 #include "AffineTransform.h"
 
-namespace perception_control
+namespace tracking
 {
 
 class BoundingBox
@@ -49,7 +49,7 @@ private:
     bool checkBox();
 };
     
-}; // namespace perception_control
+}; // namespace tracking
 
 
 #endif // BOUNDINGBOX_H

@@ -1,6 +1,6 @@
 #include "tracking/KLTPointTracker.h"
 
-using namespace perception_control;
+using namespace tracking;
 
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>

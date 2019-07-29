@@ -1,6 +1,6 @@
 #include "tracking/PointTracker.h"
 
-using namespace perception_control;
+using namespace tracking;
 
 bool PointTracker::isValid()
 {
