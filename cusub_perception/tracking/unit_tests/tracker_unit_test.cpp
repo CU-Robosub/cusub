@@ -78,7 +78,6 @@ int main(int argc, char ** argv)
         cap >> image;
 
         std::vector<cv::Point2f> points = tracker->currentPoints();
-
         for (cv::Point pt : points)
         {
             cv::circle(image, pt, 2, cv::Scalar(0,0,255), -1);
