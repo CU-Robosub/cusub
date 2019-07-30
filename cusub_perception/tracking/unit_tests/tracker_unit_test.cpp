@@ -74,10 +74,11 @@ int main(int argc, char ** argv)
     // more in depth debugging shown
     if (tracker != nullptr)
     {
-        cap = cv::VideoCapture(videoName);
+        cap = cv::VideoCapture(videoName); // reset cap
         cap >> image;
 
         std::vector<cv::Point2f> points = tracker->currentPoints();
+
         for (cv::Point pt : points)
         {
             cv::circle(image, pt, 2, cv::Scalar(0,0,255), -1);
@@ -121,6 +122,7 @@ int main(int argc, char ** argv)
                 break;
             }
 
+            cv::cvtColor(image, image, CV_BGR2GRAY);
             result = tracker->trackPoints(image);
 
             bbox.setTransform(result.transform);
