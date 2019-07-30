@@ -16,3 +16,6 @@ cusub_perception/usbcam_ws/build
 
 .idea
 .Trash-1000
+
+# atom
+.tags
