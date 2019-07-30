@@ -19,7 +19,7 @@ tasks:
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'uh_oh'
 #  prior: [-11,25,-1.5, "world"] # TRANSDEC, DIVEWELL 8,0,-1.5
-  prior: [8.0,0,-1.5, "world"] # TRANSDEC, DIVEWELL 8,0,-1.5  
+  prior: [-12,26,-1.5, "world"] # TRANSDEC, DIVEWELL 8,0,-1.5  
   dist_behind_gate: 1.0
   third_leg_adjustment: 0.75
   replan_thresh: 1.0
@@ -29,14 +29,13 @@ tasks:
 
  path0:
   manager_info:
-    timeout_secs: 0
+    timeout_secs: 30
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  prior: [-2.5,2.0,-1.5, "world"] # Won't matter much b/c we'll almost immediately see it after the SG
+  prior: [-13,25,-4.5, "world"] # Won't matter much b/c we'll almost immediately see it after the SG
   target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
-  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
+  centering_time: 0            # Time between first centered feedback & when we check if we're centered again
   do_orientation: true
-  depth: -0.5
   prior_adjustment_dist: 3     # Set to false to not affect the next prior
 
  jiangshi:
@@ -45,13 +44,14 @@ tasks:
     outcome_not_found: 'skip'
     outcome_timed_out: 'skip'
   # prior: [7.0,4.3,-1.5, "world"] # DIVEWELL
-  prior: [5.0,0.0,-1.5, "world"]
-  approach_dist: 2.5
-  slay_dist: 0.5
-  replan_thresh: 3.0
+  prior: [-19,23,-1.5, "world"]
+  approach_dist: 2.0
+  slay_dist: 0.0
+  replan_thresh: 1.0
   imu_axis: 'y'
   jump_thresh: 0.5
   use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
+  slay_timeout: 5
 
  dropper:
   manager_info:
@@ -107,5 +107,7 @@ tasks:
     dice6: dice_box
 
 mission_tasks: # Tasks To Do In Order
-  - dropper
+  - start_gate
+  - path0
+  - jiangshi
   

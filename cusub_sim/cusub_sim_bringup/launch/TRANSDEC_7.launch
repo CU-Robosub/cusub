@@ -6,15 +6,15 @@
   <arg name="SG_z" default="-1"/>
   <arg name="SG_yaw" default="-1.28"/>
 
-  <arg name="PM1_x" default="18.8"/>
-  <arg name="PM1_y" default="22.3"/>
+  <arg name="PM1_x" default="-13"/>
+  <arg name="PM1_y" default="25.1"/>
   <arg name="PM1_z" default="-4.55"/>
-  <arg name="PM1_yaw" default="2.2"/>
+  <arg name="PM1_yaw" default="2.733"/>
 
-  <arg name="PM2_x" default="28.8"/>
-  <arg name="PM2_y" default="14.5"/>
-  <arg name="PM2_z" default="-4.55"/>
-  <arg name="PM2_yaw" default="5.2"/>
+  <arg name="JIAN_x" default="-19"/>
+  <arg name="JIAN_y" default="23"/>
+  <arg name="JIAN_z" default="-1.5"/>
+  <arg name="JIAN_yaw" default="-1.056"/>
 
   <!-- Start the a underwater world simulation scenario -->
   <include file="$(find robosub_descriptions)/launch/TRANSDEC.launch"/>
@@ -27,7 +27,7 @@
       <arg name="yaw" default="$(arg SG_yaw)"/>
   </include>
 
-  <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="PathMarker"/>
       <arg name="x" default="$(arg PM1_x)"/>
       <arg name="y" default="$(arg PM1_y)"/>
@@ -35,7 +35,7 @@
       <arg name="yaw" default="$(arg PM1_yaw)"/>
   </include>
 
-  <include file="$(find robosub_descriptions)/launch/upload.launch">
+<!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="PathMarker"/>
       <arg name="postfix" default="_2"/>
       <arg name="x" default="$(arg PM2_x)"/>
@@ -43,6 +43,14 @@
       <arg name="z" default="$(arg PM2_z)"/>
       <arg name="yaw" default="$(arg PM2_yaw)"/>
   </include> -->
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="buoy_jiangshi"/>
+      <arg name="x" default="$(arg JIAN_x)"/>
+      <arg name="y" default="$(arg JIAN_y)"/>
+      <arg name="z" default="$(arg JIAN_z)"/>
+      <arg name="yaw" default="$(arg JIAN_yaw)"/>
+  </include>
 
 
   <!-- TODO Figure out how to make these dynamicly update from Gazebo simulatino data
@@ -61,12 +69,17 @@
                 pose:
                   position: [$(arg SG_x), $(arg SG_y), $(arg SG_z)]
                   orientation: [0, 0, $(arg SG_yaw)]
-              <!-- PathMarker_1:
+              PathMarker_1:
                 mesh: package://robosub_descriptions/models/PathMarker/PathMarker.dae
                 pose:
                   position: [$(arg PM1_x), $(arg PM1_y), $(arg PM1_z)]
                   orientation: [1.57, 0, $(arg PM1_yaw)]
-              PathMarker_2:
+              Jiangshi_1:
+                mesh: package://robosub_descriptions/models/buoy_jiangshi/buoy.dae
+                pose:
+                  position: [$(arg JIAN_x), $(arg JIAN_y), $(arg JIAN_z)]
+                  orientation: [0, 0, $(arg JIAN_yaw)]
+              <!-- PathMarker_2:
                 mesh: package://robosub_descriptions/models/PathMarker/PathMarker.dae
                 pose:
                   position: [$(arg PM2_x), $(arg PM2_y), $(arg PM2_z)]
