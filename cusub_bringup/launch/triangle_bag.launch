@@ -1,0 +1,8 @@
+<launch>
+
+  <node pkg="rosbag" type="record" name="triangle_bag"
+    args="record -o /home/leviathan/bags/triangle/
+      /levathan/cusub_common/occam/image0"
+      />
+
+</launch>
