@@ -5,10 +5,13 @@ using namespace tracking;
 #include <iostream>
 #include <opencv2/highgui.hpp>
 
+// called from unit test
 Tracking::Tracking() :
-    m_debugMode(false)
+    m_debugMode(false),
+    m_publishBoxes(false)
 {}
 
+// called from nodelet
 void Tracking::onInit()
 {
     ros::NodeHandle nhPrivate = getPrivateNodeHandle();
@@ -22,9 +25,10 @@ void Tracking::onInit()
     if(m_debugMode) NODELET_INFO("true");
     else NODELET_INFO("false");
 
-    m_frameCount = 0;
-
+    // initialize member variables
     m_nh = getNodeHandle();
+    m_publishBoxes = true;
+    m_frameCount = 0;
     setupPublishers();
     setupSubscribers();
 
@@ -42,6 +46,7 @@ Tracking::~Tracking()
 void Tracking::setupPublishers()
 {
     m_debugPublisher = m_nh.advertise<sensor_msgs::Image>("tracking_debug", 1);
+    m_bboxPublisher = m_nh.advertise<darknet_ros_msgs::BoundingBoxes>("tracking_boxes", 1);
 }
 void Tracking::setupSubscribers()
 {
@@ -119,21 +124,46 @@ void Tracking::newImage(const ImageData &image)
         iter.second->updateImage(image);
     }
 
+    if (m_publishBoxes)
+    {
+        publishBoxes();
+    }
+
     if (m_debugMode)
     {
         publishDebugBoxes();
     }
 }
 
-// todo SK: custom message and publish out
+// todo SK
+// check if boxes overlap by too much, make invalid
+// need to check all permutations ?
 void Tracking::publishBoxes()
 {
     for (std::pair<std::string, ObjectTracker *> iter : m_objectMap)
     {
-        // todo SK
-        // check if boxes overlap by too much, make invalid
-        // need to check all permutations
+        if (iter.second->isValid())
+        {
+            darknet_ros_msgs::BoundingBoxes boundingBoxes;//(new darknet_ros_msgs::BoundingBoxes);
+            boundingBoxes.image = *iter.second->currentImage().rosImage().get();
+            boundingBoxes.image_header = iter.second->currentImage().rosImage()->header;
+            boundingBoxes.header = boundingBoxes.image_header;
+            darknet_ros_msgs::BoundingBox darknetBox;
+            
+            BoundingBox bbox = iter.second->currentBox();
+            darknetBox.Class = iter.first;
+            darknetBox.probability = -1;
+            darknetBox.xmin = bbox.xmin();
+            darknetBox.xmax = bbox.xmax();
+            darknetBox.ymin = bbox.ymin();
+            darknetBox.ymax = bbox.ymax();
+
+            boundingBoxes.bounding_boxes.push_back(darknetBox);
+            
+            m_bboxPublisher.publish(boundingBoxes);
+        }
     }
+
 }
 
 void Tracking::publishDebugBoxes()
