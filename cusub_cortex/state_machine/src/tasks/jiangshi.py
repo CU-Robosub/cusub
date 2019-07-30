@@ -156,8 +156,12 @@ class Slay(Objective):
         rospy.loginfo("...slaying buoy")
         rospy.sleep(2)
         self.monitor_imu = True
+        if rospy.get_param("tasks/jiangshi/slay_timeout"):
+            userdata.timeout_obj.set_new_time(rospy.get_param("tasks/jiangshi/slay_timeout"))
         self.go_to_pose(slay_pose, userdata.timeout_obj)
         self.monitor_imu = False
+        
+        userdata.timeout_obj.timed_out = False
         self.go_to_pose(approach_pose, userdata.timeout_obj, replan_enabled=False, move_mode="backup")
         userdata.outcome = "success"
         return "success"

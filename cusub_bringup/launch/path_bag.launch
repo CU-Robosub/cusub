@@ -1,0 +1,8 @@
+<launch>
+
+  <node pkg="rosbag" type="record" name="path_bag"
+    args="record -o /home/leviathan/bags/path/
+      /downcam/image_raw"
+      />
+
+</launch>

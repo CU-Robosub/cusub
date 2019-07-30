@@ -20,7 +20,7 @@ class ServoAxisConfig():
         ----------
         axis : str
              The desired axis to control
-             'yaw', 'drive', 'strafe', or 'depth'
+             'yaw', 'drive', 'strafe', or 'depth'  
         frame : str
              The frame expected for the bounding box
              'occam0', or 'downcam'

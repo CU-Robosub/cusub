@@ -1,0 +1,6 @@
+occam:
+  range_lo: 500.0
+  range_hi: 2000.0
+
+  num_updates: 10.0
+  update_period: 12.0
