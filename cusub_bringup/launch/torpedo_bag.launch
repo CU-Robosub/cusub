@@ -1,0 +1,9 @@
+<launch>
+
+  <node pkg="rosbag" type="record" name="torpedo_bag"
+    args="record -o /home/leviathan/bags/torpedo/
+      /levathan/cusub_common/occam/image0
+      /torpedo/image_raw"
+      />
+
+</launch>

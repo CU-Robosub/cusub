@@ -1,0 +1,8 @@
+<launch>
+
+  <node pkg="rosbag" type="record" name="startgate_bag"
+    args="record -o /home/leviathan/bags/startgate/
+      /levathan/cusub_common/occam/image0"
+      />
+
+</launch>

@@ -1,0 +1,8 @@
+<launch>
+
+  <node pkg="rosbag" type="record" name="droppers_bag"
+    args="record -o /home/leviathan/bags/droppers/
+      /downcam/image_raw"
+      />
+
+</launch>

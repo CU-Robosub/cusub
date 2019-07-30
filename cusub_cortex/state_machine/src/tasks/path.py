@@ -70,8 +70,8 @@ class Follow(Objective):
             rospy.loginfo("\tfound get_next_task server")
         self.feedback = False
         self.was_centered = False
-        self.depth_pub = rospy.Publisher("cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
-        self.depth_msg = Float64(); self.depth_msg.data = rospy.get_param("tasks/path"+path_num_str+"/depth")
+        # self.depth_pub = rospy.Publisher("cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
+        # self.depth_msg = Float64(); self.depth_msg.data = rospy.get_param("tasks/path"+path_num_str+"/depth")
         self.target_pixel_box = rospy.get_param("tasks/path"+path_num_str+"/target_pixel_threshold")
         
         super(Follow, self).__init__(self.outcomes, "Follow")
@@ -96,6 +96,7 @@ class Follow(Objective):
             rospy.set_param("tasks/"+res.next_task+"/prior", new_prior)
 
     def execute(self, userdata):
+        self.configure_darknet_cameras([0,0,0,0,0,1])
         goal = VisualServoGoal()
         goal.target_class = "path"
         goal.camera = goal.DOWNCAM
@@ -108,7 +109,7 @@ class Follow(Objective):
         self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)
         
         while not rospy.is_shutdown() :
-            self.depth_pub.publish(self.depth_msg)
+            # self.depth_pub.publish(self.depth_msg)
             if userdata.timeout_obj.timed_out:
                 self.vs_client.cancel_goal()
                 userdata.outcome = "timed_out"
@@ -131,7 +132,7 @@ class Follow(Objective):
             self.ori_client.send_goal(ori_goal, done_cb=self.orientation_result_callback)
             r = rospy.Rate(1)
             while not rospy.is_shutdown() and self.orientation_result == None:
-                self.depth_pub.publish(self.depth_msg)
+                # self.depth_pub.publish(self.depth_msg)
                 if userdata.timeout_obj.timed_out:
                     self.vs_client.cancel_goal()
                     self.ori_client.cancel_goal()
