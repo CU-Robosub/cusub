@@ -100,6 +100,8 @@ class Follow(Objective):
         goal = VisualServoGoal()
         goal.target_class = "path"
         goal.camera = goal.DOWNCAM
+        goal.x_axis = goal.STRAFE_AXIS
+        goal.y_axis = goal.DRIVE_AXIS
         goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
         goal.visual_servo_type = goal.PROPORTIONAL
         goal.target_pixel_x = goal.CAMERAS_CENTER_X

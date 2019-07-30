@@ -20,11 +20,6 @@ namespace perception_control
     void VisualServo::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs)
     {
         if( !controllingPids ) { return; }
-        if (bbs->image_header.frame_id != target_frame)
-        { 
-            NODELET_WARN_THROTTLE(1, "Wrong frame for visual servoing:\nrecieved: %s\ninstead of: %s", bbs->image_header.frame_id.c_str(), target_frame.c_str());
-            return;
-        }
 
         // Locate target box if in image
         darknet_ros_msgs::BoundingBox target_box;
@@ -56,6 +51,11 @@ namespace perception_control
 
         if (box_found)
         {
+            if (bbs->image_header.frame_id != target_frame) // Check that the box was in our target frame
+            { 
+                NODELET_WARN_THROTTLE(1, "Wrong frame for visual servoing:\nrecieved: %s\ninstead of: %s", bbs->image_header.frame_id.c_str(), target_frame.c_str());
+                return;
+            }
             int center_x = (target_box.xmax + target_box.xmin) / 2;
             int center_y = (target_box.ymax + target_box.ymin) / 2;
             int error_x = center_x - target_pixel_x;
@@ -118,7 +118,7 @@ namespace perception_control
             current_controller = proportional_controller;            
             
             // TODO read which axes to configure and adjust
-            current_controller->configureAxes(STRAFE_AXIS, DRIVE_AXIS);
+            current_controller->configureAxes( (AxisConfig) goal->x_axis, (AxisConfig) goal->y_axis);
             target_class = goal->target_class;
             target_frame = goal->target_frame;
             target_pixel_x = goal->target_pixel_x;

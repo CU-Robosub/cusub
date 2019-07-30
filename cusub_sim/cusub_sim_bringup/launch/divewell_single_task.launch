@@ -28,14 +28,14 @@
       <arg name="z" default="$(arg TASK_z)"/>
       <arg name="yaw" default="$(arg TASK_yaw)"/>
   </include> -->
-<!-- 
+
     <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="buoy_jiangshi"/>
       <arg name="x" default="$(arg TASK_x)"/>
       <arg name="y" default="$(arg TASK_y)"/>
       <arg name="z" default="$(arg TASK_z)"/>
       <arg name="yaw" default="$(arg TASK_yaw)"/>
-  </include> -->
+  </include>
 
     <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="triangular_buoy"/>
@@ -60,14 +60,13 @@
                 pose:
                   position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
                   orientation: [0, 0, $(arg TASK_yaw)] -->
-            <!-- meshes:
+            meshes:
               Jiangshi_1:
                 mesh: package://robosub_descriptions/models/buoy_jiangshi/buoy.dae
                 pose:
                   position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
-                  orientation: [0, 0, $(arg TASK_yaw)] -->
-            <!-- meshes:
-              TriangleBuoy_1:
+                  orientation: [0, 0, $(arg TASK_yaw)]
+              <!-- TriangleBuoy_1:
                 mesh: package://robosub_descriptions/models/triangular_buoy/triangular_buoy.dae
                 pose:
                   position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
