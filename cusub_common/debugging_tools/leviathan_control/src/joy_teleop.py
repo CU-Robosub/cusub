@@ -103,8 +103,11 @@ class JoyTeleop(object):
 
     @staticmethod
     def actuate(num, time):
-        activate_actuator = rospy.ServiceProxy('activateActuator', ActivateActuator)
-        activate_actuator(num, time)
+        try:
+            activate_actuator = rospy.ServiceProxy('activateActuator', ActivateActuator)
+            activate_actuator(num, time)
+        except e:
+            print "Actuation Failed"
 
     def actuate_dropper(self, _):
         self.actuate(1, 500)
