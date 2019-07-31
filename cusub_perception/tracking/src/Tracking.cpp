@@ -137,7 +137,6 @@ void Tracking::newImage(const ImageData &image)
 
 // todo SK
 // check if boxes overlap by too much, make invalid
-// need to check all permutations ?
 void Tracking::publishBoxes()
 {
     for (std::pair<std::string, ObjectTracker *> iter : m_objectMap)
@@ -181,7 +180,16 @@ void Tracking::publishDebugBoxes()
             }
             // get and draw the most recent box
             BoundingBox bbox = iter.second->currentBox();
-            cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,0,255), 2);
+            if (bbox.xmax() - bbox.xmin() > image.size().width &&
+                bbox.ymax() - bbox.ymin() > image.size().height)
+                // collision detection example
+            {
+                cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,255,0), -1);
+            }
+            else
+            {
+                cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,0,255), 2);
+            }
         }
     }
 

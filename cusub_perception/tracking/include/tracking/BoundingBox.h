@@ -31,6 +31,8 @@ public:
     std::vector<cv::Point2f> cornerPoints() const;
     cv::Rect roiRect() const;
     int area() const;
+    cv::Point2f center() const;
+    bool doesOverlap(const BoundingBox &other) const;
     int overlapArea(const BoundingBox &other) const;
 
 private:
