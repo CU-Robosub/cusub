@@ -47,7 +47,7 @@ class Slay(Objective):
     def __init__(self):
         super(Slay, self).__init__(self.outcomes, "Slay")
         rospy.Subscriber("cusub_cortex/mapper_out/jiangshi", PoseStamped, self.jiangshi_callback)
-        rospy.Subscriber("cusub_common/imu", Imu, self.imu_callback)
+#        rospy.Subscriber("cusub_common/imu", Imu, self.imu_callback)
         self.imu_axis = rospy.get_param("tasks/jiangshi/imu_axis")
         self.jump_thresh = rospy.get_param("tasks/jiangshi/jump_thresh")
         self.approach_dist = rospy.get_param('tasks/jiangshi/approach_dist', 2.0)
