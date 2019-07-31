@@ -56,7 +56,7 @@ class Drop(Objective):
         rospy.loginfo("...waiting for visual_servo server")
         self.vs_client.wait_for_server()
         rospy.loginfo("\tfound visual servo server")
-        self.centering_time = rospy.get_param("tasks/dropper/centering_time")
+#        self.centering_time = rospy.get_param("tasks/dropper/centering_time")
         self.feedback = False
         self.was_centered = False
         self.depth_pub = rospy.Publisher("cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
@@ -80,7 +80,7 @@ class Drop(Objective):
 
     def execute(self, userdata):
         goal = VisualServoGoal()
-        goal.target_class = "path" # todo SK
+        goal.target_class = "dropper_cover" # todo SK
         goal.camera = goal.DOWNCAM
         goal.target_frame = rospy.get_param("~robotname") +"/camera"
         goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
@@ -125,7 +125,7 @@ class Drop(Objective):
                 if self.was_centered:
                     break
                 else:
-                    rospy.sleep(self.centering_time)
+                    rospy.sleep(5)
                     self.was_centered = True
             else:
                 self.was_centered = False

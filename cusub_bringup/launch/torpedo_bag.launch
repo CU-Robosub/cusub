@@ -2,8 +2,10 @@
 
   <node pkg="rosbag" type="record" name="torpedo_bag"
     args="record -o /home/leviathan/bags/torpedo/
-      /levathan/cusub_common/occam/image0
-      /torpedo/image_raw"
+      /leviathan/cusub_common/occam/image0
+      /leviathan/cusub_common/occam/image1
+      /leviathan/cusub_common/occam/image4
+      /cv_camera/image_raw"
       />
 
 </launch>
