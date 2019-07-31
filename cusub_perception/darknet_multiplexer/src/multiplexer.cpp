@@ -1,6 +1,6 @@
 /*
     Multiplexes occam and downcam camera frames into a single topic for darknet.
-    Dynamically configurable via service TODO service name
+    Dynamically configurable via service: cusub_perception/darknet_multiplexer/out
     Update rate configurable via config/darknet_multiplexer.yaml
  */
 
@@ -31,7 +31,7 @@
          subs.push_back( nh.subscribe("cusub_common/occam/image2", 1, &Multiplexer::occamCallback2, this) );
          subs.push_back( nh.subscribe("cusub_common/occam/image3", 1, &Multiplexer::occamCallback3, this) );
          subs.push_back( nh.subscribe("cusub_common/occam/image4", 1, &Multiplexer::occamCallback4, this) );
-         subs.push_back( nh.subscribe("cusub_common/downcam", 1, &Multiplexer::downcamCallback, this) );
+         subs.push_back( nh.subscribe("/camera/image_raw", 1, &Multiplexer::downcamCallback, this) );
 
          // Start configuration service
          service = nh.advertiseService("cusub_perception/darknet_multiplexer/configure_active_cameras", &Multiplexer::configureActives, this);

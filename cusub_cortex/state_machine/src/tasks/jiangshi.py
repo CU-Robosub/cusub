@@ -28,7 +28,7 @@ class Jiangshi(Task):
         self.link_objectives()
 
     def init_objectives(self):
-        self.search = Search(self.get_prior_topic(), "cusub_cortex/mapper_out/jiangshi")
+        self.search = Search(self.get_prior_param(), "cusub_cortex/mapper_out/jiangshi")
         self.slay = Slay()
 
     def link_objectives(self):
@@ -42,7 +42,7 @@ class Slay(Objective):
     """
     Go to a point in front of the bouy, slay jiangshi backwards, backup
     """
-    outcomes=['success', 'timed_out'] # Need to change a ton of shit here...
+    outcomes=['success', 'timed_out']
 
     def __init__(self):
         super(Slay, self).__init__(self.outcomes, "Slay")
@@ -153,12 +153,15 @@ class Slay(Objective):
                     pass
             else: # we've reached our pose!
                 break
-                    
         rospy.loginfo("...slaying buoy")
         rospy.sleep(2)
         self.monitor_imu = True
-        self.go_to_pose(slay_pose, userdata.timeout_obj, move_mode="backup")
+        if rospy.get_param("tasks/jiangshi/slay_timeout"):
+            userdata.timeout_obj.set_new_time(rospy.get_param("tasks/jiangshi/slay_timeout"))
+        self.go_to_pose(slay_pose, userdata.timeout_obj)
         self.monitor_imu = False
-        self.go_to_pose(approach_pose, userdata.timeout_obj, replan_enabled=False)
+        
+        userdata.timeout_obj.timed_out = False
+        self.go_to_pose(approach_pose, userdata.timeout_obj, replan_enabled=False, move_mode="backup")
         userdata.outcome = "success"
         return "success"

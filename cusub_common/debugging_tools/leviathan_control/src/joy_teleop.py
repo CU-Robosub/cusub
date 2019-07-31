@@ -11,6 +11,7 @@ from std_msgs.msg import Float64
 from sensor_msgs.msg import Joy
 
 from actuator.srv import ActivateActuator
+from waypoint_navigator.srv import ToggleControl
 
 class JoyTeleop(object):
 
@@ -55,6 +56,19 @@ class JoyTeleop(object):
     current_drive_updated = False
     current_strafe_updated = False
 
+    joystick_in_control = True
+
+    def toggle_waypoint_navigator(self):
+
+        toggle_waypoint = rospy.ServiceProxy('toggleWaypointControl', ToggleControl)
+
+        if self.joystick_in_control:
+            toggle_waypoint(True)
+            self.joystick_in_control = False
+        else:
+            toggle_waypoint(False)
+            self.joystick_in_control = True
+
     def joystick_state(self, data):
         """Gets joystick data to figure out what to have the sub do
         """
@@ -65,6 +79,9 @@ class JoyTeleop(object):
             self.left_torpedo_triggered = True
         if data.buttons[5] and self.right_torpedo_avail:
             self.right_torpedo_triggered = True
+
+        if data.buttons[2]:
+            self.toggle_waypoint_navigator()
 
         self.strafe_val  = data.axes[self.strafe_axes]
         self.drive_val = data.axes[self.drive_axes]
@@ -90,15 +107,15 @@ class JoyTeleop(object):
         activate_actuator(num, time)
 
     def actuate_dropper(self, _):
-        self.actuate(1, 100)
+        self.actuate(1, 500)
         self.dropper_avail = True
 
     def actuate_left_torpedo(self, _):
-        self.actuate(2, 100)
+        self.actuate(2, 500)
         self.left_torpedo_avail = True
 
     def actuate_right_torpedo(self, _):
-        self.actuate(3, 100)
+        self.actuate(3, 500)
         self.right_torpedo_avail = True
 
     def joy_teleop(self):

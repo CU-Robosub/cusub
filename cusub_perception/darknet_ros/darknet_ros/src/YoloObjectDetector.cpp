@@ -31,6 +31,7 @@ char **detectionNames;
 
 ::std_msgs::Header headers[3];
 ::std_msgs::Header curr_header;
+::std_msgs::Header final_header;
 
 void YoloObjectDetector::onInit()
 {
@@ -208,7 +209,6 @@ void YoloObjectDetector::cameraCallback(const sensor_msgs::ImageConstPtr& msg)
 
   try {
     cam_image = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-    imageHeader_ = msg->header;
   } catch (cv_bridge::Exception& e) {
     ROS_ERROR("cv_bridge exception: %s", e.what());
     return;
@@ -218,6 +218,7 @@ void YoloObjectDetector::cameraCallback(const sensor_msgs::ImageConstPtr& msg)
     {
       boost::unique_lock<boost::shared_mutex> lockImageCallback(mutexImageCallback_);
       camImageCopy_ = cam_image->image.clone();
+      imageHeader_ = msg->header;
     }
     {
       boost::unique_lock<boost::shared_mutex> lockImageStatus(mutexImageStatus_);
@@ -393,8 +394,6 @@ void *YoloObjectDetector::detectInThread()
 
   std::this_thread::sleep_for(std::chrono::milliseconds((int)(detectSleepTime_*1000.0)));
 
-  memcpy(&curr_header, &headers[(buffIndex_ + 2) % 3], sizeof(::std_msgs::Header));
-
   rememberNetwork(net_);
   detection *dets = 0;
   int nboxes = 0;
@@ -405,6 +404,7 @@ void *YoloObjectDetector::detectInThread()
   if (enableConsoleOutput_) {
     //printf("\033[2J");
     //printf("\033[1;1H");
+    //printf("%s", headers[(buffIndex_+2) % 3].frame_id.c_str());
     printf("\nFPS:%.1f\n",fps_);
     printf("Objects:\n\n");
   }
@@ -413,6 +413,7 @@ void *YoloObjectDetector::detectInThread()
   draw_detections(display, dets, nboxes, demoThresh_, demoNames_, demoAlphabet_, demoClasses_);
 
   // extract the bounding boxes and send them to ROS
+  final_header = headers[(buffIndex_ + 2) % 3];
   int i, j;
   int count = 0;
   for (i = 0; i < nboxes; ++i) {
@@ -480,7 +481,7 @@ void *YoloObjectDetector::fetchInThread()
   rgbgr_image(buff_[buffIndex_]);
   letterbox_image_into(buff_[buffIndex_], net_->w, net_->h, buffLetter_[buffIndex_]);
 
-  memcpy(&headers[buffIndex_], &imageHeader_, sizeof(::std_msgs::Header));
+  headers[buffIndex_] = curr_header;
 
   return 0;
 }
@@ -604,6 +605,8 @@ void YoloObjectDetector::yolo()
         displayInThread(0);
       }
       publishInThread();
+      //fetchInThread();
+      //detectInThread();
     } else {
       char name[256];
       sprintf(name, "%s_%08d", demoPrefix_, count);
@@ -623,6 +626,7 @@ IplImage* YoloObjectDetector::getIplImage()
 {
   boost::shared_lock<boost::shared_mutex> lock(mutexImageCallback_);
   IplImage* ROS_img = new IplImage(camImageCopy_);
+  curr_header = imageHeader_;
   return ROS_img;
 }
 
@@ -694,7 +698,7 @@ void *YoloObjectDetector::publishInThread()
       }
     }
 
-    boundingBoxesResults_->image_header = curr_header;
+    boundingBoxesResults_->image_header = final_header;
 
     boundingBoxesResults_->header.stamp = ros::Time::now();
     boundingBoxesResults_->header.frame_id = "detection";

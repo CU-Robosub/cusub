@@ -89,8 +89,6 @@ class Depth_Sensor():
             # self.kill_pub.publish(killed)
         except Exception as e:
             print e
-            print a
-            pass
 
     def publish_depth(self):
         r = rospy.Rate(100)

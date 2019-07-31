@@ -60,11 +60,9 @@ class Controller():
         binary_string = binascii.unhexlify(b'A1')
         self.port.write(binary_string)
         self.port.flush()
-	print "Done"
         if(self.port.in_waiting > 0):
             s = self.port.read(2)
             out = struct.unpack('<H',s)
-            print out[0]
     def kill_all(self):
         print("Killing all Motors")
         arr = [1500,1500,1500,1500,1500,1500,1500,1500,1500,1500]
@@ -86,7 +84,6 @@ class Controller():
         if(self.port.in_waiting > 0):
             s = self.port.read(2)
             out = struct.unpack('<H',s)
-                #print out[0]
 
 m = Controller()
 

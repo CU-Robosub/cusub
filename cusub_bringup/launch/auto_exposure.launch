@@ -1,0 +1,5 @@
+<launch>
+  <node name="auto_exposure" pkg="ros_indigosdk" type="auto_exposure.py" output='screen' />
+  <rosparam command="load" file="$(find cusub_bringup)/config/occam_exposure.yaml" />
+
+</launch>

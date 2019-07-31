@@ -15,3 +15,8 @@ cusub_perception/usbcam_ws/build
 .vscode
 
 .idea
+.Trash-1000
+
+# atom
+.tags
+.tags_swap
