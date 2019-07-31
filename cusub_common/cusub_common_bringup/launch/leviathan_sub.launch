@@ -30,6 +30,8 @@
         <include file="$(find pololu_controller)/launch/pololu_sub.launch"/>
         <include file="$(find sparton_imu)/launch/AHRS-8.launch"/>
 
+	<node pkg="actuator" type="ActuatorService.py" name="actuator" ns="cusub_common" />
+
         <include file="$(find waypoint_navigator)/launch/waypoint_navigator.launch"/>
 
         <group ns="cusub_common">
