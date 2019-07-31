@@ -54,6 +54,8 @@ private:
     bool m_debugMode;
     uint m_frameCount;
     float m_detectionThresh;
+    float m_reseedThresh;
+
 
     std::map<std::string, ObjectTracker *> m_objectMap;
 
