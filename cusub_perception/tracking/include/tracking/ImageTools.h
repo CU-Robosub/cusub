@@ -4,7 +4,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 
-namespace perception_control
+namespace tracking
 {
 
 class ImageTools

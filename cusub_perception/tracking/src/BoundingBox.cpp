@@ -1,6 +1,6 @@
 #include "tracking/BoundingBox.h"
 
-using namespace perception_control;
+using namespace tracking;
 
 // in pixels
 const int BoundingBox::AREA_THRESHOLD = 100;
@@ -117,22 +117,48 @@ int BoundingBox::area() const
     return roiRect().area();
 }
 
+cv::Point2f BoundingBox::center() const
+{
+    return cv::Point2f((m_xmax + m_xmin) / 2, (m_ymax + m_ymin) / 2);
+}
+
 int BoundingBox::overlapArea(const BoundingBox &other) const
 {
-    int area;
+    int overlapArea;
+
+    if (doesOverlap(other) == false)
+    {
+        overlapArea = -1;
+    }
+    else
+    {   
+        int left = std::max(m_xmin, other.xmin());
+        int right = std::min(m_xmax, other.xmax());   
+        int bottom = std::max(m_ymin, other.ymin());
+        int top = std::min(m_ymax, other.ymax());
+
+        overlapArea = std::max(0, right - left) * std::max(0, top - bottom);
+    }
+
+    return overlapArea;
+}
+
+bool BoundingBox::doesOverlap(const BoundingBox &other) const
+{
+    bool overlap;
     if (m_xmin > other.xmax() || m_xmax < other.xmin())
     {
-        area = -1;
+        overlap = false;
     }
     else if (m_ymin > other.ymax() || m_ymax < other.ymin())
     {
-        area = -1;
+        overlap = false;
     }
     // do intersect
     else
     {
-        area = 1;
+        overlap = true;
     }
 
-    return area;
+    return overlap;
 }

@@ -1,5 +1,5 @@
 <library path="lib/libtracking">
-  <class name="tracking/Tracking" type="perception_control::Tracking" base_class_type="nodelet::Nodelet">
+  <class name="tracking/Tracking" type="tracking::Tracking" base_class_type="nodelet::Nodelet">
     <description>
         Tracks points inside a darknet bounding box.
     </description>

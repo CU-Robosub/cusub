@@ -17,7 +17,7 @@
 #include "ObjectTracker.h"
 
 
-namespace perception_control
+namespace tracking
 {
 
 class Tracking : public nodelet::Nodelet
@@ -34,8 +34,8 @@ public:
     void objectDetected(const std::string &classname, BoundingBox &box, const ImageData &image);
     void newImage(const ImageData &image);
 
-
     ~Tracking();
+
 private:
 
     void setupPublishers();
@@ -45,12 +45,14 @@ private:
     void publishDebugBoxes();
 
     ros::NodeHandle m_nh;
+    ros::Publisher m_bboxPublisher;
     std::string m_imageTopicName;
     ros::Subscriber m_imageSubscriber;
     std::string m_detectionTopicName;
     ros::Subscriber m_detectionSubscriber;
     ros::Publisher m_debugPublisher;
 
+    bool m_publishBoxes;
     bool m_debugMode;
     uint m_frameCount;
     float m_detectionThresh;
@@ -61,6 +63,6 @@ private:
 
 };
 
-}; // namespace perception_control
+}; // namespace tracking
 
 #endif // TRACKING_H

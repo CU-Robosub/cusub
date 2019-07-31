@@ -1,8 +1,6 @@
 #include "tracking/ImageTools.h"
 
-#include <iostream>
-
-using namespace perception_control;
+using namespace tracking;
 
 void ImageTools::processImage(const cv::Mat &in, cv::Mat &out, const ImageTools::Preprocessing &steps)
 {

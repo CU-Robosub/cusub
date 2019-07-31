@@ -10,7 +10,7 @@
 #include <opencv2/core.hpp>
 #include "AffineTransform.h"
 
-namespace perception_control
+namespace tracking
 {
 
 class BoundingBox
@@ -33,6 +33,8 @@ public:
     std::vector<cv::Point2f> cornerPoints() const;
     cv::Rect roiRect() const;
     int area() const;
+    cv::Point2f center() const;
+    bool doesOverlap(const BoundingBox &other) const;
     int overlapArea(const BoundingBox &other) const;
 
 private:
@@ -52,7 +54,7 @@ private:
     bool checkBox();
 };
     
-}; // namespace perception_control
+}; // namespace tracking
 
 
 #endif // BOUNDINGBOX_H

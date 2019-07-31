@@ -82,3 +82,7 @@ catkin_package(
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS})
+add_dependencies(
+  orbit
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+)

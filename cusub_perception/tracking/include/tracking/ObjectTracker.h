@@ -12,7 +12,7 @@
 #include "ImageData.h"
 #include "ImageTools.h"
 
-namespace perception_control
+namespace tracking
 {
 
 class ObjectTracker
@@ -26,6 +26,7 @@ public:
 
     BoundingBox currentBox() const;
     cv::Mat currentImage() const;
+    ImageData currentImageData() const;
     bool isValid();
 
 private:
@@ -38,6 +39,6 @@ private:
 
 };
 
-}; // namespace perception_control
+}; // namespace tracking
 
 #endif // OBJECTTRACKER_H
