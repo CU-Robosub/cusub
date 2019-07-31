@@ -24,7 +24,7 @@ from tasks.triangle_buoy import Triangle_Buoy
 from tasks.manager import Manager
 from tasks.task import Timeout
 from tasks.path import Path
-from tasks.droppers import Dropper
+from tasks.dropper import Dropper
 
 def createTransitionsForManager(task_list, final_outcome):
     transition_dict = {}

@@ -60,7 +60,7 @@ class Depth_Sensor():
             #kswitch, adepth = a.split(",",1)
 
             pressure_mbar = float(a[1:])
-            depth_m = -1*(pressure_mbar-797.11)*100/(1030*9.8)
+            depth_m = -1*(pressure_mbar-797.11)*100/(1030*9.8) + 2.5
 
             #kswitch = int(kswitch)
 

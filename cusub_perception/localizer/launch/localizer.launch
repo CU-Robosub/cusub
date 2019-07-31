@@ -1,6 +1,6 @@
 <!-- Typically don't want to launch the localizer by itself, defeats purpose of nodeleting -->
 <launch>
     <rosparam command="load" file="$(find localizer)/config/localizer_config.yaml"/>
-    <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
-    <node pkg="nodelet" type="nodelet" name="localizer" args="load localizer/Localizer standalone_nodelet" output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="standalone_nodelet1" args="manager" output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="localizer" args="load localizer/Localizer standalone_nodelet1" output="screen"/>
 </launch>
