@@ -20,12 +20,4 @@
         Orients with a path marker
     </description>
   </class>
-</library>  
-
-<library path="lib/libtracking">
-  <class name="perception_control/Tracking" type="perception_control::Tracking" base_class_type="nodelet::Nodelet">
-    <description>
-        Tracks points inside a darknet bounding box.
-    </description>
-  </class>
-</library>
+</library> 

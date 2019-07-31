@@ -24,7 +24,7 @@ from tasks.triangle_buoy import Triangle_Buoy
 from tasks.manager import Manager
 from tasks.task import Timeout
 from tasks.path import Path
-# from tasks.droppers import Dropper
+from tasks.dropper import Dropper
 
 def createTransitionsForManager(task_list, final_outcome):
     transition_dict = {}
@@ -53,8 +53,8 @@ def loadStateMachines(task_list):
             task_sm = Path("0")
         elif task == "path1":
             task_sm = Path("1")
-        # elif task == "dropper":
-        #     task_sm = Dropper()
+        elif task == "dropper":
+            task_sm = Dropper()
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 

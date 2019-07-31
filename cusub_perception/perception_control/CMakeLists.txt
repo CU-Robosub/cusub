@@ -71,34 +71,6 @@ add_executable( path_unit
 add_dependencies(path_unit perception_control_generate_messages_cpp)
 target_link_libraries(path_unit ${catkin_LIBRARIES})
 
-# TRACKING
-add_library( tracking
-  src/Tracking.cpp
-  src/AffineTransform.cpp
-  src/PointTracker.cpp
-  src/KLTPointTracker.cpp
-  src/BoundingBox.cpp
-  src/ObjectTracker.cpp
-  src/ImageData.cpp
-)
-target_link_libraries(tracking ${catkin_LIBRARIES})
-if(catkin_EXPORTED_LIBRARIES)
-  add_dependencies(tracking ${catkin_EXPORTED_LIBRARIES} ${PROJECT_NAME}_EXPORTED_TARGETS)
-endif()
-
-add_executable(tracker_unit
-  unit_tests/tracker_unit_test.cpp
-  src/Tracking.cpp
-  src/AffineTransform.cpp
-  src/PointTracker.cpp
-  src/KLTPointTracker.cpp
-  src/BoundingBox.cpp
-  src/ObjectTracker.cpp
-  src/ImageData.cpp
-)
-
-target_link_libraries(tracker_unit ${catkin_LIBRARIES})
-
 
 generate_messages(DEPENDENCIES actionlib_msgs geometry_msgs std_msgs)
 

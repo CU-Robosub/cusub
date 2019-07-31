@@ -2,7 +2,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
-#include "perception_control/Tracking.h"
+#include "tracking/Tracking.h"
 
 #include <stdio.h>
 
@@ -11,12 +11,12 @@ int main(int argc, char ** argv)
 {
     ros::init(std::vector<std::pair<std::string, std::string> >{}, "unit_test");
 
-    std::string videoName = "/home/soroush/robosub/ws/src/cusub/cusub_perception/perception_control/unit_tests/videos/out.mp4";
+    std::string videoName = "/home/soroush/robosub/ws/src/cusub/cusub_perception/tracking/unit_tests/videos/out.mp4";
     int xmin = 520;
     int xmax = 626;
     int ymin = 230;
     int ymax = 410;
-    // std::string videoName = "/home/soroush/robosub/ws/src/cusub/cusub_perception/perception_control/unit_tests/videos/jiangshi_slay.mp4";
+    // std::string videoName = "/home/soroush/robosub/ws/src/cusub/cusub_perception/tracking/unit_tests/videos/jiangshi_slay.mp4";
     // int xmin = 240;
     // int xmax = 305;
     // int ymin = 140;
