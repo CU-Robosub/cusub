@@ -19,6 +19,7 @@ class BoundingBox
 public:
     BoundingBox();
     BoundingBox(const int &xmin, const int &ymin, const int &xmax, const int &ymax);
+    BoundingBox(const int &xmin, const int &ymin, const int &xmax, const int &ymax, const float &probability);
 
     void setTransform(const AffineTransform &tform);
     
@@ -26,6 +27,7 @@ public:
     int ymin() const;
     int xmax() const;
     int ymax() const;
+    float probability() const;
     bool isValid() const;
     
     std::vector<cv::Point2f> cornerPoints() const;
@@ -45,6 +47,7 @@ private:
     int m_xmax;
     int m_ymin;
     int m_ymax;
+    float m_probability; 
 
     bool checkBox();
 };

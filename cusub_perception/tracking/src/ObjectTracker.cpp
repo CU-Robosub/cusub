@@ -1,5 +1,7 @@
 #include "tracking/ObjectTracker.h"
 
+#include <iostream>
+
 using namespace perception_control;
 
 ObjectTracker::ObjectTracker(BoundingBox &box, const ImageData &image) :
@@ -33,9 +35,11 @@ BoundingBox ObjectTracker::currentBox() const
     return m_boundingBox;
 }
 
-ImageData ObjectTracker::currentImage() const
+cv::Mat ObjectTracker::currentImage() const
 {
-    return m_currentImage;
+    cv::Mat imgOut;
+    ImageTools::processImage(m_currentImage.cvImage(), imgOut, m_preprocessSteps);
+    return imgOut;
 }
 
 bool ObjectTracker::isValid()

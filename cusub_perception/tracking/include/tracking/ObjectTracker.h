@@ -25,7 +25,7 @@ public:
     void updateImage(const ImageData &image);
 
     BoundingBox currentBox() const;
-    ImageData currentImage() const;
+    cv::Mat currentImage() const;
     bool isValid();
 
 private:

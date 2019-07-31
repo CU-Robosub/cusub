@@ -15,6 +15,7 @@ void Tracking::onInit()
     nhPrivate.getParam("image_topic", m_imageTopicName);
     nhPrivate.getParam("detection_topic", m_detectionTopicName);
     nhPrivate.getParam("detection_thresh", m_detectionThresh);
+    nhPrivate.getParam("reseed_thresh", m_reseedThresh);
     nhPrivate.getParam("debug_mode", m_debugMode);
 
     NODELET_INFO("%s", m_imageTopicName.c_str());
@@ -27,7 +28,6 @@ void Tracking::onInit()
     m_nh = getNodeHandle();
     setupPublishers();
     setupSubscribers();
-
     NODELET_INFO("Tracking initialized");
 }
 
@@ -71,7 +71,7 @@ void Tracking::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr &bb
         if (box.probability > m_detectionThresh)
         {
             std::string classname = box.Class;
-            BoundingBox bbox(box.xmin, box.ymin, box.xmax, box.ymax);
+            BoundingBox bbox(box.xmin, box.ymin, box.xmax, box.ymax, box.probability);
             objectDetected(classname, bbox, image);
         }
     }
@@ -97,7 +97,8 @@ void Tracking::objectDetected(const std::string &classname, BoundingBox &box, co
         else
         {
             // the detection box and the tracking box don't overlap at all, reset
-            if (objectTracker->currentBox().overlapArea(box) < 0)
+            if (objectTracker->currentBox().overlapArea(box) < 0 && 
+                box.probability() > m_reseedThresh)
             {
                 std::cout << "No overlap for class: " << classname << std::endl;
                 objectTracker->initialize(box, image);
@@ -145,9 +146,8 @@ void Tracking::publishDebugBoxes()
         {
             if (image.empty())
             {
-                image = iter.second->currentImage().cvImage();
-                cv::waitKey(10);
-                cv::cvtColor(image, image, CV_RGB2BGR);
+                image = iter.second->currentImage();
+                cv::cvtColor(image, image, CV_GRAY2BGR);
             }
             // get and draw the most recent box
             BoundingBox bbox = iter.second->currentBox();

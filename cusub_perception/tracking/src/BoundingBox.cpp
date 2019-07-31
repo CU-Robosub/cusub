@@ -16,6 +16,18 @@ BoundingBox::BoundingBox(const int &xmin, const int &ymin, const int &xmax, cons
     m_ymin(ymin),
     m_xmax(xmax),
     m_ymax(ymax),
+    m_probability(-1),
+    m_valid(true)
+{
+    m_points = cornerPoints();
+}
+
+BoundingBox::BoundingBox(const int &xmin, const int &ymin, const int &xmax, const int &ymax, const float &probability) :
+    m_xmin(xmin),
+    m_ymin(ymin),
+    m_xmax(xmax),
+    m_ymax(ymax),
+    m_probability(probability),
     m_valid(true)
 {
     m_points = cornerPoints();
@@ -56,6 +68,11 @@ int BoundingBox::xmax() const
 int BoundingBox::ymax() const
 {
     return m_ymax;
+}
+
+float BoundingBox::probability() const
+{
+    return m_probability;
 }
 
 cv::Rect BoundingBox::roiRect() const
