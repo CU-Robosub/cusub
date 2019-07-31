@@ -27,6 +27,7 @@ class WaypointServer(WaypointNavigator):
         """Called when waypoint reached"""
         rospy.loginfo("Waypoint Reached!!!")
         self.waypoint = None
+        self.do_freeze()
 
     def get_waypoint_in_odom(self, pose):
         """Transforms waypoint into the odom frame for navigation"""
@@ -74,11 +75,7 @@ class WaypointServer(WaypointNavigator):
                 result.complete = False
                 self.server.set_preempted(result)
                 self.waypoint = None
-                self.yawFreeze = self.currentYaw
-                self.driveFreeze = self.currentDrive
-                self.strafeFreeze = self.currentStrafe
-                self.depthFreeze = self.currentDepth
-                self.freeze_controls()
+                self.do_freeze()
 
                 return
 
