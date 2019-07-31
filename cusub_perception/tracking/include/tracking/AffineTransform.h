@@ -12,7 +12,7 @@
 #include <opencv2/video.hpp>
 #include <opencv2/calib3d.hpp>
 
-namespace perception_control
+namespace tracking
 {
 
 class AffineTransform
@@ -29,6 +29,6 @@ private:
 
 };
 
-}; // namespace perception_control
+}; // namespace tracking
 
 #endif // AFFINETRANSFORM_H

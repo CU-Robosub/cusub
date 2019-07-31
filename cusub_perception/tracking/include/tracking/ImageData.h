@@ -11,7 +11,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core.hpp>
 
-namespace perception_control
+namespace tracking
 {
 
 class ImageData
@@ -39,6 +39,6 @@ private:
 
 };
 
-}; // perception_control
+}; // tracking
 
 #endif // IMAGEDATA_H

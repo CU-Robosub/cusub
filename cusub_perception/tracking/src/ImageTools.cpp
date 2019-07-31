@@ -1,12 +1,13 @@
 #include "tracking/ImageTools.h"
 
-using namespace perception_control;
+using namespace tracking;
 
 void ImageTools::processImage(const cv::Mat &in, cv::Mat &out, const ImageTools::Preprocessing &steps)
 {
+    out = in;
     if (steps.actions.RESIZE)
     {
-        cv::resize(in, out, steps.size);
+        cv::resize(out, out, steps.size);
     }
 
     if (steps.actions.CVT_GRAY)
