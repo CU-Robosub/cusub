@@ -2,7 +2,8 @@
 
   <node pkg="rosbag" type="record" name="droppers_bag"
     args="record -o /home/leviathan/bags/droppers/
-      /downcam/image_raw"
+      /leviathan/cusub_common/occam/image0
+      /camera/image_color"
       />
 
 </launch>

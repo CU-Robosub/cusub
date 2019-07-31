@@ -10,7 +10,7 @@
     <arg name="use_tiny"            default="1"/>
     <arg name="detect_sleep_time"   default="0.0"/>
     <arg name="show_image"          default="false"/>
-    <arg name="detection_threshold" default="0.5"/>
+    <arg name="detection_threshold" default="0.2"/>
    
     <include ns="darknet_ros" file="$(find darknet_config)/launch/configure_darknet.launch">
       <arg name="use_tiny"            value="$(arg use_tiny)"/>
@@ -23,11 +23,7 @@
     <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
 
     <!-- Occam -->
-    <node pkg="nodelet" type="nodelet" name="occam" args="load ros_indigosdk/occam standalone_nodelet" output="screen">
-      <param name="frame_id" value="leviathan/description/occam"/>
-    </node>
     <!-- Localizer -->
-    <node pkg="nodelet" type="nodelet" name="localizer" args="load localizer/Localizer standalone_nodelet" output="screen"/>
     <!-- Camera Multiplexer -->
     <node pkg="nodelet" type="nodelet" name="darknet_multiplexer" args="load darknet_multiplexer/Multiplexer standalone_nodelet" output="screen"/>
     <!-- Get Darknet Classes Server -->

@@ -1,0 +1,29 @@
+<launch>
+
+	<arg name="subname" default="leviathan"/>
+
+	<group ns="$(arg subname)">
+
+		<!-- Power Monitoring -->
+
+		<!-- Perception Nodelet -->
+		<node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager"/>
+
+		<!-- Occam -->
+		<node pkg="nodelet" type="nodelet" name="occam" args="load ros_indigosdk/occam standalone_nodelet" output="screen">
+			<param name="frame_id" value="leviathan/description/occam"/>
+		</node>
+
+		<!-- Down Cam -->
+		<!-- <include file="$(find pointgrey_camera_driver)/launch/nodelet.launch">
+			<arg name="subname" value="$(arg subname)"/>
+		</include> -->
+
+		<!-- Torpedo Camera -->
+		<!--<node pkg="nodelet" type="nodelet" name="torpedo_cam" args="load libuvc_camera/driver /$(arg subname)/standalone_nodelet" ns="torpedo" output="screen" />-->
+
+		<!-- TODO Load/Unload scripts Nodelet crash debug -->
+
+	</group>
+
+</launch>

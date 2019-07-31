@@ -2,8 +2,10 @@
 
   <node pkg="rosbag" type="record" name="octagon_bag"
     args="record -o /home/leviathan/bags/octagon/
-      /levathan/cusub_common/occam/image0
-      /downcam/image_raw"
+      /leviathan/cusub_common/occam/image0
+      /leviathan/cusub_common/occam/image1
+      /leviathan/cusub_common/occam/image4
+      /camera/image_color"
       />
 
 </launch>

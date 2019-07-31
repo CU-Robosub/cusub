@@ -1,7 +1,7 @@
 <launch>
 
-  <node pkg="rosbag" type="record" name="startgate_bag"
-    args="record -o /home/leviathan/bags/startgate/
+  <node pkg="rosbag" type="record" name="buoy_bag"
+    args="record -o /home/leviathan/bags/buoys/
       /leviathan/cusub_common/occam/image0
       /leviathan/cusub_common/occam/image1
       /leviathan/cusub_common/occam/image4"
