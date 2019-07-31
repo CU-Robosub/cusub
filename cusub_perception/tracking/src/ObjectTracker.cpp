@@ -1,6 +1,10 @@
 #include "tracking/ObjectTracker.h"
 
-using namespace perception_control;
+#include <iostream>
+
+using namespace tracking;
+
+const int MOVEMENT_THRESH = 45; // in pixels
 
 ObjectTracker::ObjectTracker(BoundingBox &box, const ImageData &image) :
     m_pointTracker(new KLTPointTracker()),
@@ -33,7 +37,14 @@ BoundingBox ObjectTracker::currentBox() const
     return m_boundingBox;
 }
 
-ImageData ObjectTracker::currentImage() const
+cv::Mat ObjectTracker::currentImage() const
+{
+    cv::Mat imgOut;
+    ImageTools::processImage(m_currentImage.cvImage(), imgOut, m_preprocessSteps);
+    return imgOut;
+}
+
+ImageData ObjectTracker::currentImageData() const
 {
     return m_currentImage;
 }
@@ -54,8 +65,19 @@ void ObjectTracker::updateImage(const ImageData &image)
 
         if (result.status == PointTracker::STATUS::Success)
         {
+            cv::Point2f oldCenter = m_boundingBox.center();
             m_boundingBox.setTransform(result.transform);
-            m_valid = m_boundingBox.isValid();
+            cv::Point2f newCenter = m_boundingBox.center();
+
+            if (cv::norm(oldCenter - newCenter) > MOVEMENT_THRESH)
+            {
+                m_valid = false;
+                std::cout << "Too much movement: " << std::to_string(cv::norm(oldCenter - newCenter)) << std::endl;
+            }
+            else
+            {
+                m_valid = m_boundingBox.isValid();
+            }
         }
         else
         {

@@ -4,7 +4,7 @@
 
 #include <opencv2/highgui.hpp>
 
-using namespace perception_control;
+using namespace tracking;
 
 ImageData::ImageData() :
     m_empty(true)

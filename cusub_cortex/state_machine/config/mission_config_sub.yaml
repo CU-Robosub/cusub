@@ -47,24 +47,5 @@ tasks:
   drop_depth: -2.6
   drop_thresh: 0.5;
 
- dice:
-  prior: [3,0,-2.3]
-  targets: ['dice5', 'dice6']
-  replan_threshold: 1.0
-  approach_method: 'optimal' # optimal, twopoint, direct
-  approach_radius: 1.0
-  orbital_radius: 2.0
-  lockon_time: 5.0
-  carrot_dist: 2.0
-  backup_dist: 2.0
-  accel_spike_thresh: -0.15
-  accel_axis: 'x'
-  attack_timeout: 30
-  object_localizers:
-    dice1: dice_box
-    dice2: dice_box
-    dice5: dice_box
-    dice6: dice_box
-
 mission_tasks: # Tasks To Do In Order
  - dropper

@@ -10,7 +10,7 @@
 #include "PointTracker.h"
 #include <opencv2/imgproc.hpp>
 
-namespace perception_control
+namespace tracking
 {
 class KLTPointTracker : public PointTracker
 {
@@ -22,6 +22,6 @@ public:
 
 };
 
-}; // namespace perception_control
+}; // namespace tracking
 
 #endif // KLTPOINTTRACKER_H

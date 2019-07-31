@@ -1,9 +1,11 @@
 #include "tracking/KLTPointTracker.h"
 
-using namespace perception_control;
+using namespace tracking;
 
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
+
+const int MIN_POINTS_FOUND = 4;
 
 KLTPointTracker::KLTPointTracker()
 {}
@@ -63,7 +65,7 @@ PointTracker::Result KLTPointTracker::trackPoints(const cv::Mat &imageGray)
     
 
     Result result;
-    if (foundNewPoints.size() > 2 && (foundNewPoints.size() == foundOldPoints.size()))
+    if (foundNewPoints.size() > MIN_POINTS_FOUND && (foundNewPoints.size() == foundOldPoints.size()))
     {
         // claculate the transform
         bool success;
