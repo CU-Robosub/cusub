@@ -35,8 +35,8 @@ namespace darknet_drawer_ns
                 color = cv::Scalar(0,0,255);
             }
             
-            cv::rectangle(cv_ptr->image, cv::Point(box.xmin,box.ymin), cv::Point(box.xmax, box.ymax), color);\
-            cv::putText(cv_ptr->image, box.Class, cv::Point(box.xmin - 2, box.ymin - 2), cv::FONT_HERSHEY_SIMPLEX, 0.4, color);
+            cv::rectangle(cv_ptr->image, cv::Point(box.xmin,box.ymin), cv::Point(box.xmax, box.ymax), color, 2);\
+            cv::putText(cv_ptr->image, box.Class + ": " + std::to_string(box.probability), cv::Point(box.xmin - 2, box.ymin - 2), cv::FONT_HERSHEY_SIMPLEX, 0.4, color);
         }
         cv_bridge::CvImage bridge = cv_bridge::CvImage(bbs->image_header, sensor_msgs::image_encodings::RGB8, cv_ptr->image);
         m_pub.publish( bridge.toImageMsg() );

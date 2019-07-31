@@ -35,7 +35,7 @@
     <!-- Darknet -->
     <node pkg="nodelet" type="nodelet" name="darknet_ros" args="load darknet_ros/YoloObjectDetector standalone_nodelet" output="screen">
         <remap from="darknet_ros/bounding_boxes"          to="cusub_perception/darknet_ros/bounding_boxes" />
-        <remap from="/camera/rgb/image_raw"               to="cusub_perception/darknet_multiplexer/out"/>
+        <remap from="/camera/rgb/image_raw"               to="/leviathan/cusub_common/occam/image0"/>
     </node>
     <!-- Darknet Debug -->
     <node pkg="nodelet" type="nodelet" name="darknet_drawer" args="load darknet_multiplexer/DarknetDrawer standalone_nodelet" output="screen" if="$(arg debug_darknet)">
