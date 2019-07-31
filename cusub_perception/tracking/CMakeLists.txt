@@ -102,13 +102,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 
-add_action_files(DIRECTORY action FILES OrbitBuoy.action)
-generate_messages(DEPENDENCIES actionlib_msgs geometry_msgs)
-
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES perception_control
-  CATKIN_DEPENDS actionlib_msgs darknet_ros_msgs roscpp sensor_msgs
+  CATKIN_DEPENDS darknet_ros_msgs roscpp sensor_msgs
 #  DEPENDS system_lib
 )
 
@@ -198,6 +195,7 @@ include_directories(
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
+include_directories(include ${catkin_INCLUDE_DIRS})
 add_library( tracking
   src/Tracking.cpp
   src/AffineTransform.cpp
@@ -212,11 +210,6 @@ target_link_libraries(tracking ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(tracking ${catkin_EXPORTED_LIBRARIES})
 endif()
-
-add_dependencies(
-  tracking
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-)
 
 add_executable(tracker_unit
   unit_tests/tracker_unit_test.cpp
