@@ -41,6 +41,9 @@ class WaypointNavigator(object):
     def toggleControl(self, req):
         rospy.logwarn("Waypoint toggling control. Waypoint controlling: " + str(req.waypoint_controlling))
         self.controlling_pids = req.waypoint_controlling
+        if(req.waypoint_controlling):
+            self.waypoint = None
+            self.do_freeze()
         return True
 
     def publish_controlling_pids(self, msg):
@@ -50,6 +53,13 @@ class WaypointNavigator(object):
         msg = Bool()
         msg.data = self.controlling_pids
         self.control_pub.publish(msg)
+
+    def do_freeze(self):
+        self.yawFreeze = self.currentYaw
+        self.driveFreeze = self.currentDrive
+        self.strafeFreeze = self.currentStrafe
+        self.depthFreeze = self.currentDepth
+        self.freeze_controls()
 
     def freeze_controls(self):
 
@@ -189,7 +199,6 @@ class WaypointNavigator(object):
 
         elif self.controlling_pids:
             self.freeze_controls()
-
 
     def driveStateCallback(self, data):
         self.currentDrive = data.data
