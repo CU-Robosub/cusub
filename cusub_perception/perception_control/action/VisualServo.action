@@ -32,6 +32,7 @@ uint32 target_box_area=0        # 0 for don't use
 uint16 target_pixel_threshold   # if inside this square around target pixel, we've succeeded
 uint8 x_axis
 uint8 y_axis
+uint8 area_axis
 ---
 bool success
 ---

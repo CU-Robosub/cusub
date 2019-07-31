@@ -119,6 +119,7 @@ namespace perception_control
             
             // TODO read which axes to configure and adjust
             current_controller->configureAxes( (AxisConfig) goal->x_axis, (AxisConfig) goal->y_axis);
+            // current_controller->configureAxes( STRAFE_AXIS, DRIVE_AXIS );
             target_class = goal->target_class;
             target_frame = goal->target_frame;
             target_pixel_x = goal->target_pixel_x;
