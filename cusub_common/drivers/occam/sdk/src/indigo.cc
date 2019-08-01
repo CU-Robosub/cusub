@@ -35,6 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assert.h>
 #include <libusb.h>
 #include <string.h>
+#include <stdbool.h>
 #undef min
 #undef max
 
@@ -168,6 +169,10 @@ int occamFreeParamList(OccamParamList* param_list) {
   return OCCAM_API_SUCCESS;
 }
 
+int occamSetDeviceValueb(OccamDevice* device, OccamParam id, bool value) {
+  return ((OccamDeviceBase*)device)->setDeviceValueb(id, value);
+}
+
 int occamSetDeviceValuei(OccamDevice* device, OccamParam id, int value) {
   return ((OccamDeviceBase*)device)->setDeviceValuei(id, value);
 }
@@ -190,6 +195,10 @@ int occamSetDeviceValuerv(OccamDevice* device, OccamParam id, const double* valu
 
 int occamSetDeviceValuesv(OccamDevice* device, OccamParam id, char** values, int value_count) {
   return ((OccamDeviceBase*)device)->setDeviceValuesv(id, values, value_count);
+}
+
+int occamGetDeviceValueb(OccamDevice* device, OccamParam id, bool* value) {
+  return ((OccamDeviceBase*)device)->getDeviceValueb(id, value);
 }
 
 int occamGetDeviceValuei(OccamDevice* device, OccamParam id, int* value) {
