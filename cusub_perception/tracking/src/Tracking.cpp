@@ -112,7 +112,14 @@ void Tracking::objectDetected(const std::string &classname, BoundingBox &bbox, c
     else
     {
         // add the tracker
-        m_objectMap[image.frameId()].push_back(new ObjectTracker(bbox, image, classname));
+        if (classname == "coffin")
+        {
+            m_objectMap[image.frameId()].push_back(new ObjectTracker(bbox, image, classname));
+        }
+        else
+        {
+            m_objectMap[image.frameId()].push_back(new ObjectTracker(bbox, image, classname));
+        }
         std::cout << "new tracker for class: " << classname << std::endl;
     }
 }

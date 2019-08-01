@@ -2,9 +2,24 @@
 string OCCAM="occam"
 string DOWNCAM="downcam"
 
+# Axes, hardcoded in bb_controller.h
+uint8 DRIVE_AXIS=0
+uint8 STRAFE_AXIS=1
+uint8 YAW_AXIS=2
+uint8 DEPTH_AXIS=3
+uint8 NO_AXIS=4
+
 # Camera Center Pixels, NOTE DOWNCAM HAS BEEN RESIZED 752X480 IN MULTIPLEXER BEFORE GOING INTO DARKNET
 uint16 CAMERAS_CENTER_X=376
 uint16 CAMERAS_CENTER_Y=240
+
+# Area Percentages
+uint32 ONE_HUNDRED_PERCENT_IMAGE=360960
+uint32 SEVENTY_PERCENT_IMAGE=252672
+uint32 FIFTY_PERCENT_IMAGE=180480
+uint32 FORTY_PERCENT_IMAGE=144384
+uint32 TWENTY_PERCENT_IMAGE=72192
+uint32 AREA_NOT_USED=0
 
 # Controllers
 uint8 PROPORTIONAL=0
@@ -12,11 +27,15 @@ uint8 PROPORTIONAL=0
 
 string target_class
 string target_frame
+string camera
 uint8 visual_servo_type
 uint16 target_pixel_x
 uint16 target_pixel_y
+uint32 target_box_area          # 0 for don't use
 uint16 target_pixel_threshold   # if inside this square around target pixel, we've succeeded
-string camera
+uint8 x_axis
+uint8 y_axis
+uint8 area_axis
 ---
 bool success
 ---

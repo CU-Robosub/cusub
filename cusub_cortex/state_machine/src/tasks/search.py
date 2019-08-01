@@ -64,7 +64,7 @@ class Search(Objective):
 
     def exit_callback(self, msg): # Abort on the first publishing
         if not self.replan_requested():
-            rospy.loginfo("Task Found!")
+            rospy.loginfo("...Task Found!")
             self.request_replan()
 
     def execute_topic_exit(self, userdata):
