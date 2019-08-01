@@ -11,7 +11,7 @@
 #include "AffineTransform.h"
 #include "BoundingBox.h"
 
-namespace perception_control
+namespace tracking
 {
 class PointTracker
 {
@@ -54,6 +54,6 @@ protected:
 
 };
 
-}; // namespace perception_control
+}; // namespace tracking
 
 #endif // POINTTRACKER
