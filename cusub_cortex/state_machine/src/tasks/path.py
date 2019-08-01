@@ -107,6 +107,7 @@ class Follow(Objective):
         goal.visual_servo_type = goal.PROPORTIONAL
         goal.target_pixel_x = goal.CAMERAS_CENTER_X
         goal.target_pixel_y = goal.CAMERAS_CENTER_Y
+        goal.target_pixel_y = goal.CAMERAS_CENTER_Y
         goal.target_pixel_threshold = self.target_pixel_box
         rospy.loginfo("...centering over path marker")
         self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)

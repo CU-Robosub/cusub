@@ -19,6 +19,8 @@ import smach
 import smach_ros
 from sensor_msgs.msg import Imu
 import copy
+from perception_control.msg import VisualServoAction, VisualServoGoal, VisualServoFeedback
+import actionlib
 
 class Jiangshi(Task):
     name = "jiangshi"
@@ -59,6 +61,14 @@ class Slay(Objective):
         # SLAY: SETPOINT
         self.slay_dist = rospy.get_param('tasks/jiangshi/setpoint_slay/slay_dist', 0.5) 
 
+        # APPROACH/SLAY VISUAL SERVO
+        self.feedback = None
+        self.target_pixel_box = rospy.get_param("tasks/jiangshi/visual_servo/target_pixel_threshold")
+        self.vs_client = actionlib.SimpleActionClient('visual_servo', VisualServoAction)
+        rospy.loginfo("...waiting for visual_servo server")
+        self.vs_client.wait_for_server()
+        rospy.loginfo("\tfound visual servo server")
+
         # IMU
         self.monitor_imu = False
         rospy.Subscriber("cusub_common/imu", Imu, self.imu_callback)
@@ -66,14 +76,10 @@ class Slay(Objective):
         self.jump_thresh = rospy.get_param("tasks/jiangshi/jump_thresh")
 
     def print_configuration(self):
-        if rospy.get_param("tasks/jiangshi/approach_method") == "solvepnp":
-            rospy.loginfo("...approach method: SOLVEPNP")
+        if rospy.get_param("tasks/jiangshi/method") == "solvepnp":
+            rospy.loginfo("...method: SOLVEPNP")
         else:
-            rospy.loginfo("...approach method: VISUAL_SERVO")
-        if rospy.get_param("tasks/jiangshi/slay_method") == "setpoint":
-            rospy.loginfo("...slay method: SETPOINT")
-        else:
-            rospy.loginfo("...slay method: VISUAL_SERVO")
+            rospy.loginfo("...method: VISUAL_SERVO")
 
     def imu_callback(self, msg):
         if ( self.monitor_imu == False ) or self.replan_requested():
@@ -117,6 +123,9 @@ class Slay(Objective):
         if (change_in_pose > self.replan_threshold) and not self.replan_requested():
             self.jiangshi_pose = msg
             self.request_replan()
+
+    def vs_feedback_callback(self, feedback):
+        self.feedback = feedback.centered
     
     def get_approach_pose(self):
         approach_pose = Pose()
@@ -163,53 +172,136 @@ class Slay(Objective):
         else: # just draw a line from sub to buoy and hit it
             slay_pose = self.get_pose_behind(self.cur_pose, self.jiangshi_pose.pose, self.slay_dist)
         return slay_pose
+    
+    def solvepnp_method(self, userdata):
+        rospy.loginfo("...using solvepnp")
+        self.configure_darknet_cameras([1,1,0,0,1,0])
 
-    def approach(self, userdata):
-        # SOLVEPNP METHOD
-        if rospy.get_param("tasks/jiangshi/approach_method") == "solvepnp":
-            self.configure_darknet_cameras([1,1,0,0,1,0])
-            while not rospy.is_shutdown():          # Loop until we find a good task pose
-                approach_pose = self.get_approach_pose() #only use the approach part
-                if self.go_to_pose(approach_pose, userdata.timeout_obj):
-                    if userdata.timeout_obj.timed_out:
-                        userdata.outcome = "timed_out"
-                        return "done"
-                    else: # Loop, replan_requested() happened
-                        pass
-                else: # we've reached our pose!
-                    break
-        # VISUAL SERVO METHOD
-        else:
-            rospy.loginfo("...approach method: VISUAL_SERVO")
+        # Approach 
+        approach_pose = self.get_approach_pose() 
+        while not rospy.is_shutdown():          # Loop until we find a good task pose
+            approach_pose = self.get_approach_pose() #only use the approach part
+            if self.go_to_pose(approach_pose, userdata.timeout_obj):
+                if userdata.timeout_obj.timed_out:
+                    userdata.outcome = "timed_out"
+                    return "timed_out"
+                else: # Loop, replan_requested() happened
+                    pass
+            else: # we've reached our pose!
+                break
         
-        return "lead free solder" # any str that's not "done" will indicate success here
-
-    def slay(self, userdata):
-        rospy.loginfo("...slaying buoy")
-        approach_pose = copy.deepcopy(self.cur_pose) # don't want this value to be changed as self.cur_pose gets updated
+        # Slay
         if rospy.get_param("tasks/jiangshi/slay_timeout"):
             userdata.timeout_obj.set_new_time(rospy.get_param("tasks/jiangshi/slay_timeout"))
-        if rospy.get_param("tasks/jiangshi/slay_method") == "setpoint":
-            slay_pose = self.get_slay_pose() #only use the slay par
-            self.monitor_imu = True
-            self.go_to_pose(slay_pose, userdata.timeout_obj)
-            self.monitor_imu = False
-        else:
-            rospy.loginfo("...slay method: VISUAL_SERVO")
+        rospy.loginfo("...slaying jiangshi")
+        slay_pose = self.get_slay_pose()
+        self.monitor_imu = True
+        self.go_to_pose(slay_pose, userdata.timeout_obj)
+        rospy.loginfo("\tslayed")
+        self.monitor_imu = False
 
         # backup to our previous pose
+        userdata.timeout_obj.set_new_time(0)
         userdata.timeout_obj.timed_out = False
         rospy.loginfo("...disabling timeouts while backing up from slay")
-        userdata.timeout_obj.set_new_time(0)
         self.go_to_pose(approach_pose, userdata.timeout_obj, replan_enabled=False, move_mode="backup")
         userdata.outcome = "success"
         return "success"
 
+    def visual_servo_method(self, userdata):
+        rospy.loginfo("...using visual servoing approach")
+        goal = VisualServoGoal()
+        goal.target_class = "vampire_cute"
+        goal.camera = goal.OCCAM
+        goal.x_axis = goal.YAW_AXIS
+        goal.y_axis = goal.DEPTH_AXIS
+        goal.area_axis = goal.DRIVE_AXIS
+        goal.target_frame = rospy.get_param("~robotname") +"/description/occam0_frame_optical"
+        goal.visual_servo_type = goal.PROPORTIONAL
+        goal.target_pixel_x = goal.CAMERAS_CENTER_X
+        goal.target_pixel_y = goal.CAMERAS_CENTER_Y
+        goal.target_box_area = goal.FIFTY_PERCENT_IMAGE
+        goal.target_pixel_threshold = self.target_pixel_box
+        rospy.loginfo("...centering")
+        self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)
+
+        while not rospy.is_shutdown() :
+            if userdata.timeout_obj.timed_out:
+                self.vs_client.cancel_goal()
+                userdata.outcome = "timed_out"
+                return "timed_out"
+            if self.feedback:
+                break
+            rospy.sleep(0.25)
+        self.vs_client.cancel_goal()
+        rospy.loginfo("\tcentered")
+        self.vs_client.cancel_goal()
+        
+        # rospy.loginfo("...backing up")
+        # userdata.timeout_obj.set_new_time(0)
+        # userdata.timeout_obj.timed_out = False
+        # rospy.loginfo("...disabling timeouts while backing up from slay")
+        # self.vs_client.cancel_goal()
+
+        userdata.outcome = "success"
+        return "success"
+
+
+    # def approach(self, userdata):
+    #     # VISUAL SERVO METHOD
+    #     else:
+    #         
+        
+    #     return "lead free solder" # any str that's not "done" will indicate success here
+
+    # def slay(self, userdata):
+    #     rospy.loginfo("...slaying buoy")
+    #     approach_pose = copy.deepcopy(self.cur_pose) # don't want this value to be changed as self.cur_pose gets updated
+    #     if rospy.get_param("tasks/jiangshi/slay_timeout"):
+    #         userdata.timeout_obj.set_new_time(rospy.get_param("tasks/jiangshi/slay_timeout"))
+    #     if rospy.get_param("tasks/jiangshi/slay_method") == "setpoint":
+    #         rospy.loginfo("...using setpoint slay")
+    #         slay_pose = self.get_slay_pose() #only use the slay par
+    #         self.monitor_imu = True
+    #         self.go_to_pose(slay_pose, userdata.timeout_obj)
+    #         self.monitor_imu = False
+    #     else:
+    #         rospy.loginfo("...using visual servoing slay")
+    #         goal = VisualServoGoal()
+    #         goal.target_class = "vampire_cute"
+    #         goal.camera = goal.OCCAM
+    #         goal.x_axis = goal.YAW_AXIS
+    #         goal.y_axis = goal.DEPTH_AXIS
+    #         goal.area_axis = goal.DRIVE_AXIS
+    #         goal.target_frame = rospy.get_param("~robotname") +"/description/occam0_frame_optical"
+    #         goal.visual_servo_type = goal.PROPORTIONAL
+    #         goal.target_pixel_x = goal.CAMERAS_CENTER_X
+    #         goal.target_pixel_y = goal.CAMERAS_CENTER_Y
+    #         goal.target_box_area = goal.ONE_HUNDRED_PERCENT_IMAGE
+    #         goal.target_pixel_threshold = self.target_pixel_box
+    #         rospy.loginfo("...centering")
+    #         self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)
+ 
+    #         while not rospy.is_shutdown() :
+    #             if userdata.timeout_obj.timed_out:
+    #                 self.vs_client.cancel_goal()
+    #                 userdata.outcome = "timed_out"
+    #                 return "done"
+    #             if self.feedback:
+    #                 break
+    #             rospy.sleep(0.25)
+    #         self.vs_client.cancel_goal()
+    #         rospy.loginfo("\tcentered")
+
+        
+
     def execute(self, userdata):
-        if self.approach(userdata) == "done": # Check if we've returned "done"
-            return "done"
-        rospy.sleep(2)
-        return self.slay(userdata)
+        if rospy.get_param("tasks/jiangshi/method") == "vs": # Do visual servo
+            rospy.loginfo("...enacting visual servoing")
+            return self.visual_servo_method(userdata)
+        else:
+            rospy.loginfo("...using solvepnp")
+            return self.solvepnp_method(userdata)
 
 # WE SHOULD REHERSE OUR RUN ON ONE GREAT SIMULATOR, EVERYONE LAUNCHING EVERYTHING INDIVIDUALLY
 

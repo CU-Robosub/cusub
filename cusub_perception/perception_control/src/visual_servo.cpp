@@ -61,7 +61,7 @@ namespace perception_control
             float error_x = (float) ( center_x - target_pixel_x );
             float error_y = (float) ( center_y - target_pixel_y );
             float error_area = std::sqrt(target_box_area) - std::sqrt(box_area);
-            NODELET_INFO_THROTTLE(1, "Servoing x_error: %f\ty_error: %f\tarea_error: %f", error_x, error_y, error_area);
+            NODELET_INFO_THROTTLE(1, "Servoing x_error: %f\ty_error: %f\tarea_error: %f", error_x, error_y, std::sqrt(std::abs(error_area)));
 
             bool x_centered=false, y_centered=false, area_centered=false;
             // RESPOND X
