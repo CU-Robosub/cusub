@@ -100,9 +100,13 @@ class Follow(Objective):
         goal = VisualServoGoal()
         goal.target_class = "path"
         goal.camera = goal.DOWNCAM
+        goal.x_axis = goal.STRAFE_AXIS
+        goal.y_axis = goal.DRIVE_AXIS
+        goal.area_axis = goal.NO_AXIS
         goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
         goal.visual_servo_type = goal.PROPORTIONAL
         goal.target_pixel_x = goal.CAMERAS_CENTER_X
+        goal.target_pixel_y = goal.CAMERAS_CENTER_Y
         goal.target_pixel_y = goal.CAMERAS_CENTER_Y
         goal.target_pixel_threshold = self.target_pixel_box
         rospy.loginfo("...centering over path marker")
@@ -141,7 +145,7 @@ class Follow(Objective):
                 r.sleep()
             rospy.loginfo("\toriented")
         else:
-            rospy.logwarn("...skipping orientation")
+            rospy.logwarn("...skipping orpientation")
         
         self.vs_client.cancel_goal()  # Tell VS to stop servoing
 

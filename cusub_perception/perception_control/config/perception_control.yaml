@@ -14,6 +14,19 @@ perception_control:
         strafe:
           max_setpoint: 1.0
           maxout_pixel_dist: 50
+      occam:
+        drive:
+          max_setpoint: 0.5
+          maxout_pixel_dist: 50
+        strafe:
+          max_setpoint: 1.0
+          maxout_pixel_dist: 50
+        yaw:
+          max_setpoint: 0.75
+          maxout_pixel_dist: 100
+        depth:
+          max_setpoint: 0.2
+          maxout_pixel_dist: 70
   path_orient:
     yaw_setpoint_carrot: 0.5
     bang_bang_deadzone: 10.0    # Absolute value of hough lines slope before entering deadzone

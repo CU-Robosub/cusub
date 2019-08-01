@@ -10,16 +10,27 @@
 #include <perception_control/bb_proportional.h>
 #include <perception_control/bb_controller.h>
 #include <std_msgs/Float64.h>
+#include <cstdint>
 
 namespace perception_control
 {
     typedef actionlib::SimpleActionServer<perception_control::VisualServoAction> vsServer;
+
+    typedef enum ImageAxis_t{
+        X_AXIS=0,
+        Y_AXIS=1,
+        AREA_AXIS=2
+    } ImageAxis;
 
     class VisualServo : public nodelet::Nodelet
     {
     public:
         virtual void onInit();
     private:
+        bool respondError(ImageAxis axis, float error);
+        bool respondDowncamError(ImageAxis axis, float error);
+        bool respondOccamError(ImageAxis axis, float error);
+
         bool controlPids(const bool takeControl);
         void execute(const perception_control::VisualServoGoalConstPtr goal);
         void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
@@ -27,16 +38,26 @@ namespace perception_control
         perception_control::VisualServoGoalConstPtr activeGoal;
         std::string target_frame, target_class;
         vsServer* server;
+        ros::NodeHandle* nh;
         ros::ServiceClient wayToggleClient; 
         bool controllingPids;
-        ros::Subscriber darknetSub;
-        int target_pixel_x, target_pixel_y, target_pixel_threshold;
+        int target_pixel_x, target_pixel_y, target_box_area, target_pixel_threshold;
         std_msgs::Float64 frozen_x_set, frozen_y_set;
         bool frozen_controls;
+
+        std::string activeCamera;
+        ImageAxis x_map_axis, y_map_axis, area_map_axis;
 
         // Controllers
         BBController* current_controller;
         BBProportional* proportional_controller;
+
+        // Response Methods
+        void (BBController::*respondX)(float);
+        void (BBController::*respondY)(float);
+        void (BBController::*respondArea)(float);
+
+        bool xResponse, yResponse, areaResponse;
     };
 }
 
