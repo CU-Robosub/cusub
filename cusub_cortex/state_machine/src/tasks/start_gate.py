@@ -104,14 +104,14 @@ class Attack(Objective):
             self.request_replan() # this will loop us back to execute
 
     def do_gate_with_style(self, userdata):
-        while not rospy.is_shutdown():          # Loop over the replans from a gate pose change
-	    gate_pose = copy.deepcopy(self.start_gate_pose.pose)
-	    gate_pose.position.z = self.three_leg_depth
+        while not rospy.is_shutdown():          
+            gate_pose = copy.deepcopy(self.start_gate_pose.pose)
+            gate_pose.position.z = self.three_leg_depth
             target_pose = self.adjust_gate_pose(
                 self.cur_pose, \
                 gate_pose, \
                 self.dist_behind, \
-                self.small_leg_left_side if self.is_three_leg else None, \
+                self.small_leg_left_side, \
                 self.leg_adjustment_meters)
 		
             dist_in_front_of_gate = self.style_dist + self.dist_behind
@@ -124,7 +124,6 @@ class Attack(Objective):
                 else: # Replan has been requested loop again
                     pass
             else: # Pose reached successfully!
-                self.is_three_leg = True
                 break
 
         rospy.loginfo("...reached style pose")
@@ -138,14 +137,14 @@ class Attack(Objective):
             return "success"
 
     def do_gate_no_style(self, userdata):
-        gate_pose = copy.deepcopy(self.start_gate_pose.pose)
-	gate_pose.position.z = self.three_leg_depth
-        while not rospy.is_shutdown():          # Loop over the replans from a gate pose change
+        while not rospy.is_shutdown():       
+            gate_pose = copy.deepcopy(self.start_gate_pose.pose)
+            gate_pose.position.z = self.three_leg_depth
             target_pose = self.adjust_gate_pose(
                 self.cur_pose, \
                 self.start_gate_pose.pose, \
                 self.dist_behind, \
-                self.small_leg_left_side if self.is_three_leg else None, \
+                self.small_leg_left_side, \
                 self.leg_adjustment_meters)
             if self.go_to_pose(target_pose, userdata.timeout_obj):
                 if userdata.timeout_obj.timed_out:
@@ -282,7 +281,7 @@ class Attack(Objective):
         
         # Adjust the gate pose to go through small leg side
         if small_leg_left_side != None:
-	    rospy.logwarn("Can see third leg!")
+            rospy.logwarn("Can see third leg!")
             x = np.array([cur_pose.position.x, gate_pose.position.x])
             y = np.array([cur_pose.position.y, gate_pose.position.y])
             m, b = np.polyfit(x,y,1)
@@ -298,7 +297,7 @@ class Attack(Objective):
             x_new = gate_pose.position.x + x_hat
             y_new = x_new*perp_m + perp_b
         else:
-            rospy.logwarn("Start Gate SM ignoring 3rd leg side")
+            rospy.logwarn("Start Gate SM didn't catch 3rd leg side")
             x_new = gate_pose.position.x
             y_new = gate_pose.position.y
 
