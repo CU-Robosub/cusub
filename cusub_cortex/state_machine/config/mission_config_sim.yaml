@@ -29,26 +29,26 @@ tasks:
 
  path0:
   manager_info:
-    timeout_secs: 30
+    timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  prior: [-13,25,-4.5, "world"] # Won't matter much b/c we'll almost immediately see it after the SG
-  target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  # prior: [-13,25,-4.5, "world"] # Won't matter much b/c we'll almost immediately see it after the SG
+  prior: [4.0,0.0,-1.5, "world"] # DIVEWELL
+  target_pixel_threshold: 30   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   centering_time: 0            # Time between first centered feedback & when we check if we're centered again
-  do_orientation: true
-  prior_adjustment_dist: 3     # Set to false to not affect the next prior
+  do_orientation: false
+  prior_adjustment_dist: 0     # Set to false to not affect the next prior
 
  jiangshi:
   manager_info:
     timeout_secs: 0
     outcome_not_found: 'skip'
     outcome_timed_out: 'skip'
-  prior: [4.0,0.0,-1.5, "world"] # DIVEWELL
+  prior: [4.0,0.0,-2.5, "world"] # DIVEWELL
   # prior: [-19,23,-1.5, "world"]
-  approach_method: solvepnp        # solvepnp OR vs
-  slay_method: setpoint            # setpoint OR vs
+  method: vs        # solvepnp OR vs
   approach_dist: 2.0
-  slay_timeout: 5                  # How long the slay will last
+  slay_timeout: 0                  # How long the slay will last
   solvepnp_approach:
     use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
     replan_thresh: 1.0
@@ -114,4 +114,4 @@ tasks:
     dice6: dice_box
 
 mission_tasks: # Tasks To Do In Order
-  - jiangshi
+  - path0

@@ -88,6 +88,8 @@ class Drop(Objective):
         goal.target_pixel_x = goal.CAMERAS_CENTER_X
         goal.target_pixel_y = goal.CAMERAS_CENTER_Y
         goal.target_pixel_threshold = self.target_pixel_box
+        goal.x_axis = goal.STRAFE_AXIS
+        goal.y_axis = goal.DRIVE_AXIS
         rospy.loginfo("...centering over path marker")
         self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)
         

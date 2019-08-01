@@ -19,6 +19,7 @@ uint32 SEVENTY_PERCENT_IMAGE=252672
 uint32 FIFTY_PERCENT_IMAGE=180480
 uint32 FORTY_PERCENT_IMAGE=144384
 uint32 TWENTY_PERCENT_IMAGE=72192
+uint32 AREA_NOT_USED=0
 
 # Controllers
 uint8 PROPORTIONAL=0
@@ -30,7 +31,7 @@ string camera
 uint8 visual_servo_type
 uint16 target_pixel_x
 uint16 target_pixel_y
-uint32 target_box_area=0        # 0 for don't use
+uint32 target_box_area          # 0 for don't use
 uint16 target_pixel_threshold   # if inside this square around target pixel, we've succeeded
 uint8 x_axis
 uint8 y_axis

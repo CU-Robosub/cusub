@@ -25,9 +25,12 @@ namespace perception_control
         float strafe_max_setpoint, drive_max_setpoint;
         int strafe_maxout_pixel_dist, drive_maxout_pixel_dist;
 
-        // To be eliminated with pulling from the param server
-        float downcam_drive_max_setpoint, downcam_strafe_max_setpoint;
+        // Downcam params
+        float downcam_drive_max_setpoint, downcam_strafe_max_setpoint, downcam_yaw_max_setpoint, downcam_depth_max_setpoint;
         int downcam_drive_maxout_pixel_dist, downcam_strafe_maxout_pixel_dist;
+        // Occam params
+        float occam_drive_max_setpoint, occam_strafe_max_setpoint, occam_yaw_max_setpoint, occam_depth_max_setpoint;
+        int occam_drive_maxout_pixel_dist, occam_strafe_maxout_pixel_dist, occam_yaw_maxout_pixel_dist, occam_depth_maxout_pixel_dist;
     };
 }
 
