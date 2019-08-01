@@ -1,0 +1,139 @@
+<launch>
+
+  <!-- Obstacle positions -->
+  <arg name="SG_x" default="-33.77"/>
+  <arg name="SG_y" default="-8.43"/>
+  <arg name="SG_z" default="-.1"/>
+  <arg name="SG_yaw" default="-2.31"/>
+
+  <arg name="PM_x" default="-30.98"/>
+  <arg name="PM_y" default="-10.36"/>
+  <arg name="PM_z" default="-4.54"/>
+  <arg name="PM_yaw" default="1.72"/>
+
+  <arg name="BJ_x" default="-28.40"/>
+  <arg name="BJ_y" default="-14.66"/>
+  <arg name="BJ_z" default="-2"/>
+  <arg name="BJ_yaw" default="0.77"/>
+
+  <arg name="BT_x" default="-30.67"/>
+  <arg name="BT_y" default="-16.78"/>
+  <arg name="BT_z" default="-4.83"/>
+  <arg name="BT_yaw" default="-1.85"/>
+
+  <arg name="TO_x" default="-20.88"/>
+  <arg name="TO_y" default="-16.78"/>
+  <arg name="TO_z" default="-3.32"/>
+  <arg name="TO_yaw" default="-1.79"/>
+
+  <arg name="DR_x" default="-23.19"/>
+  <arg name="DR_y" default="-21.75"/>
+  <arg name="DR_z" default="-4.27"/>
+  <arg name="DR_yaw" default="-2.27"/>
+
+<!--  <arg name="OC_x" default="-3.6"/>
+  <arg name="OC_y" default="2.3"/>
+  <arg name="OC_z" default="-3.5"/>
+  <arg name="OC_yaw" default="-2.7"/> -->
+
+  <!--  <arg name="CO_x" default="-3.6"/>
+  <arg name="CO_y" default="2.3"/>
+  <arg name="CO_z" default="-3.5"/>
+  <arg name="CO_yaw" default="-2.7"/> -->
+
+
+<include file="$(find robosub_descriptions)/launch/TRANSDEC.launch"/>
+
+<include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="StartGate"/>
+      <arg name="x" default="$(arg SG_x)"/>
+      <arg name="y" default="$(arg SG_y)"/>
+      <arg name="z" default="$(arg SG_z)"/>
+      <arg name="yaw" default="$(arg SG_yaw)"/>
+  </include>
+
+<include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="PathMarker"/>
+      <arg name="x" default="$(arg PM_x)"/>
+      <arg name="y" default="$(arg PM_y)"/>
+      <arg name="z" default="$(arg PM_z)"/>
+      <arg name="yaw" default="$(arg PM_yaw)"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="buoy_jiangshi"/>
+      <arg name="x" default="$(arg BJ_x)"/>
+      <arg name="y" default="$(arg BJ_y)"/>
+      <arg name="z" default="$(arg BJ_z)"/>
+      <arg name="yaw" default="$(arg BJ_yaw)"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="triangular_buoy"/>
+      <arg name="x" default="$(arg BT_x)"/>
+      <arg name="y" default="$(arg BT_y)"/>
+      <arg name="z" default="$(arg BT_z)"/>
+      <arg name="yaw" default="$(arg BT_yaw)"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="dropper_garlic"/>
+      <arg name="x" default="$(arg DR_x)"/>
+      <arg name="y" default="$(arg DR_y)"/>
+      <arg name="z" default="$(arg DR_z)"/>
+      <arg name="yaw" default="$(arg DR_yaw)"/>
+  </include>
+
+<!--  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="coffin"/>
+      <arg name="x" default="$(arg CO_x)"/>
+      <arg name="y" default="$(arg CO_y)"/>
+      <arg name="z" default="$(arg CO_z)"/>
+      <arg name="yaw" default="$(arg CO_yaw)"/>
+  </include> -->
+
+  <node name="publish_world_models"
+        pkg="uuv_assistants"
+        type="publish_world_models.py"
+        output="screen">
+        <rosparam subst_value="true">
+            meshes:
+              StartGate_1:
+                mesh: package://robosub_descriptions/models/StartGate/StartGate.dae
+                pose:
+                  position: [$(arg SG_x), $(arg SG_y), $(arg SG_z)]
+                  orientation: [0, 0, $(arg SG_yaw)]
+
+              PathMarker_1:
+                mesh: package://robosub_descriptions/models/PathMarker/PathMarker.dae
+                pose:
+                  position: [$(arg PM_x), $(arg PM_y), $(arg PM_z)]
+                  orientation: [1.57, 0, $(arg PM_yaw)]
+
+              Jiangshi_1:
+                mesh: package://robosub_descriptions/models/buoy_jiangshi/buoy.dae
+                pose:
+                  position: [$(arg BJ_x), $(arg BJ_y), $(arg BJ_z)]
+                  orientation: [0, 0, $(arg BJ_yaw)]
+
+              TriangleBuoy_1:
+                mesh: package://robosub_descriptions/models/triangular_buoy/triangular_buoy.dae
+                pose:
+                  position: [$(arg BT_x), $(arg BT_y), $(arg BT_z)]
+                  orientation: [0, 0, $(arg BT_yaw)]
+
+              DropperGarlic_1:
+                mesh: package://robosub_descriptions/models/dropper_garlic/dropper_garlic.dae
+                pose:
+                  position: [$(arg DR_x), $(arg DR_y), $(arg DR_z)]
+                  orientation: [1.57, 0, $(arg DR_yaw)]
+
+              <!-- coffin_1:
+                mesh: package://robosub_descriptions/models/coffin/coffin.dae
+                pose:
+                  position: [$(arg CO_x), $(arg CO_y), $(arg CO_z)]
+                  orientation: [1.57, 0, $(arg CO_yaw)] -->
+        </rosparam>
+  </node>
+
+</launch>
