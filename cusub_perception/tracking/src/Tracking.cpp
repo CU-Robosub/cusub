@@ -1,20 +1,24 @@
 #include "tracking/Tracking.h"
 
-using namespace perception_control;
+using namespace tracking;
 
 #include <iostream>
 #include <opencv2/highgui.hpp>
 
+// called from unit test
 Tracking::Tracking() :
-    m_debugMode(false)
+    m_debugMode(false),
+    m_publishBoxes(false)
 {}
 
+// called from nodelet
 void Tracking::onInit()
 {
     ros::NodeHandle nhPrivate = getPrivateNodeHandle();
     nhPrivate.getParam("image_topic", m_imageTopicName);
     nhPrivate.getParam("detection_topic", m_detectionTopicName);
     nhPrivate.getParam("detection_thresh", m_detectionThresh);
+    nhPrivate.getParam("reseed_thresh", m_reseedThresh);
     nhPrivate.getParam("debug_mode", m_debugMode);
 
     NODELET_INFO("%s", m_imageTopicName.c_str());
@@ -22,12 +26,12 @@ void Tracking::onInit()
     if(m_debugMode) NODELET_INFO("true");
     else NODELET_INFO("false");
 
-    m_frameCount = 0;
-
+    // initialize member variables
     m_nh = getNodeHandle();
+    m_publishBoxes = true;
+    m_frameCount = 0;
     setupPublishers();
     setupSubscribers();
-
     NODELET_INFO("Tracking initialized");
 }
 
@@ -42,6 +46,7 @@ Tracking::~Tracking()
 void Tracking::setupPublishers()
 {
     m_debugPublisher = m_nh.advertise<sensor_msgs::Image>("tracking_debug", 1);
+    m_bboxPublisher = m_nh.advertise<darknet_ros_msgs::BoundingBoxes>("tracking_boxes", 1);
 }
 void Tracking::setupSubscribers()
 {
@@ -71,7 +76,7 @@ void Tracking::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr &bb
         if (box.probability > m_detectionThresh)
         {
             std::string classname = box.Class;
-            BoundingBox bbox(box.xmin, box.ymin, box.xmax, box.ymax);
+            BoundingBox bbox(box.xmin, box.ymin, box.xmax, box.ymax, box.probability);
             objectDetected(classname, bbox, image);
         }
     }
@@ -97,7 +102,8 @@ void Tracking::objectDetected(const std::string &classname, BoundingBox &box, co
         else
         {
             // the detection box and the tracking box don't overlap at all, reset
-            if (objectTracker->currentBox().overlapArea(box) < 0)
+            if (objectTracker->currentBox().overlapArea(box) < 0 && 
+                box.probability() > m_reseedThresh)
             {
                 std::cout << "No overlap for class: " << classname << std::endl;
                 objectTracker->initialize(box, image);
@@ -119,21 +125,45 @@ void Tracking::newImage(const ImageData &image)
         iter.second->updateImage(image);
     }
 
+    if (m_publishBoxes)
+    {
+        publishBoxes();
+    }
+
     if (m_debugMode)
     {
         publishDebugBoxes();
     }
 }
 
-// todo SK: custom message and publish out
+// todo SK
+// check if boxes overlap by too much, make invalid
 void Tracking::publishBoxes()
 {
     for (std::pair<std::string, ObjectTracker *> iter : m_objectMap)
     {
-        // todo SK
-        // check if boxes overlap by too much, make invalid
-        // need to check all permutations
+        if (iter.second->isValid())
+        {
+            darknet_ros_msgs::BoundingBoxes boundingBoxes;//(new darknet_ros_msgs::BoundingBoxes);
+            boundingBoxes.image = *iter.second->currentImageData().rosImage().get();
+            boundingBoxes.image_header = iter.second->currentImageData().rosImage()->header;
+            boundingBoxes.header = boundingBoxes.image_header;
+            darknet_ros_msgs::BoundingBox darknetBox;
+            
+            BoundingBox bbox = iter.second->currentBox();
+            darknetBox.Class = iter.first;
+            darknetBox.probability = -1;
+            darknetBox.xmin = bbox.xmin();
+            darknetBox.xmax = bbox.xmax();
+            darknetBox.ymin = bbox.ymin();
+            darknetBox.ymax = bbox.ymax();
+
+            boundingBoxes.bounding_boxes.push_back(darknetBox);
+            
+            m_bboxPublisher.publish(boundingBoxes);
+        }
     }
+
 }
 
 void Tracking::publishDebugBoxes()
@@ -145,13 +175,21 @@ void Tracking::publishDebugBoxes()
         {
             if (image.empty())
             {
-                image = iter.second->currentImage().cvImage();
-                cv::waitKey(10);
-                cv::cvtColor(image, image, CV_RGB2BGR);
+                image = iter.second->currentImage();
+                cv::cvtColor(image, image, CV_GRAY2BGR);
             }
             // get and draw the most recent box
             BoundingBox bbox = iter.second->currentBox();
-            cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,0,255), 2);
+            if (bbox.xmax() - bbox.xmin() > image.size().width &&
+                bbox.ymax() - bbox.ymin() > image.size().height)
+                // collision detection example
+            {
+                cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,255,0), -1);
+            }
+            else
+            {
+                cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,0,255), 2);
+            }
         }
     }
 
@@ -159,4 +197,4 @@ void Tracking::publishDebugBoxes()
     m_debugPublisher.publish(imageMsg);
 }
 
-PLUGINLIB_EXPORT_CLASS(perception_control::Tracking, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(tracking::Tracking, nodelet::Nodelet);
