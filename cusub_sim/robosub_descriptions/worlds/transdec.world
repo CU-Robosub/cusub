@@ -68,10 +68,10 @@
       <!-- x y z r p y -->
     </include>
     <!-- <include>
-      <uri>model://octagon</uri>
-      <pose>0 0 -2.672 0 0 0</pose>
-    </include>
-    <include>
+      <uri>model://Octagon</uri>
+      <pose>0-20 -20 -2.672 0 0 0</pose>
+    </include> -->
+    <!-- <include>
       <uri>model://coffin</uri>
       <pose>0 0 -2.672 0 0 0</pose>
     </include> -->

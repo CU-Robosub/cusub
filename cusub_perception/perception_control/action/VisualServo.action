@@ -25,7 +25,7 @@ uint32 AREA_NOT_USED=0
 uint8 PROPORTIONAL=0
 # uint8 NUDGE=1
 
-string target_class
+string[] target_classes
 string target_frame
 string camera
 uint8 visual_servo_type
