@@ -1,35 +1,35 @@
 <launch>
 
   <!-- Obstacle positions -->
-  <arg name="SG_x" default="-1.75"/>
-  <arg name="SG_y" default="2.75"/>
-  <arg name="SG_z" default="-1.3"/>
-  <arg name="SG_yaw" default="2.6"/>
+  <arg name="SG_x" default="-33.77"/>
+  <arg name="SG_y" default="-8.43"/>
+  <arg name="SG_z" default="-.1"/>
+  <arg name="SG_yaw" default="-2.31"/>
 
-  <arg name="PM_x" default="-1.0"/>
-  <arg name="PM_y" default="4.5"/>
-  <arg name="PM_z" default="-1"/>
-  <arg name="PM_yaw" default="-0.2"/>
+  <arg name="PM_x" default="-30.98"/>
+  <arg name="PM_y" default="-10.36"/>
+  <arg name="PM_z" default="-4.54"/>
+  <arg name="PM_yaw" default="1.72"/>
 
-  <arg name="BJ_x" default="-1.0"/>
-  <arg name="BJ_y" default="2.5"/>
-  <arg name="BJ_z" default="-1"/>
-  <arg name="BJ_yaw" default="0.78"/>
+  <arg name="BJ_x" default="-28.40"/>
+  <arg name="BJ_y" default="-14.66"/>
+  <arg name="BJ_z" default="-2"/>
+  <arg name="BJ_yaw" default="0.77"/>
 
-  <arg name="BT_x" default="-1.75"/>
-  <arg name="BT_y" default="3.25"/>
-  <arg name="BT_z" default="-1"/>
-  <arg name="BT_yaw" default="0.4"/>
+  <arg name="BT_x" default="-30.67"/>
+  <arg name="BT_y" default="-16.78"/>
+  <arg name="BT_z" default="-4.83"/>
+  <arg name="BT_yaw" default="-1.85"/>
 
-  <arg name="TO_x" default="4.0"/>
-  <arg name="TO_y" default="0.0"/>
-  <arg name="TO_z" default="-0.5"/>
-  <arg name="TO_yaw" default="1.57"/>
+  <arg name="TO_x" default="-20.88"/>
+  <arg name="TO_y" default="-16.78"/>
+  <arg name="TO_z" default="-3.32"/>
+  <arg name="TO_yaw" default="-1.79"/>
 
-  <arg name="DR_x" default="2.0"/>
-  <arg name="DR_y" default="0.2"/>
-  <arg name="DR_z" default="-3.5"/>
-  <arg name="DR_yaw" default="-0.75"/>
+  <arg name="DR_x" default="-23.19"/>
+  <arg name="DR_y" default="-21.75"/>
+  <arg name="DR_z" default="-4.27"/>
+  <arg name="DR_yaw" default="-2.27"/>
 
 <!--  <arg name="OC_x" default="-3.6"/>
   <arg name="OC_y" default="2.3"/>
@@ -84,22 +84,6 @@
       <arg name="yaw" default="$(arg DR_yaw)"/>
   </include>
 
-  <!--<include file="$(find robosub_descriptions)/launch/upload.launch">
-      <arg name="obstacle" default="vampire_stake"/>
-      <arg name="x" default="$(arg TO_x)"/>
-      <arg name="y" default="$(arg TO_y)"/>
-      <arg name="z" default="$(arg TO_z)"/>
-      <arg name="yaw" default="$(arg TO_yaw)"/>
-  </include> -->
-
-    <!--  <include file="$(find robosub_descriptions)/launch/upload.launch">
-      <arg name="obstacle" default="octagon"/>
-      <arg name="x" default="$(arg OC_x)"/>
-      <arg name="y" default="$(arg OC_y)"/>
-      <arg name="z" default="$(arg OC_z)"/>
-      <arg name="yaw" default="$(arg OC_yaw)"/>
-  </include>-->
-
 <!--  <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="coffin"/>
       <arg name="x" default="$(arg CO_x)"/>
@@ -144,18 +128,7 @@
                   position: [$(arg DR_x), $(arg DR_y), $(arg DR_z)]
                   orientation: [1.57, 0, $(arg DR_yaw)]
 
-              <!--vampire_stake_1:
-                mesh: package://robosub_descriptions/models/vampire_stake/vampire_stake.dae
-                pose:
-                  position: [$(arg DR_x), $(arg TO_y), $(arg TO_z)]
-                  orientation: [1.57, 0, $(arg TO_yaw)] -->
-
-              <!-- Octagon_1:
-                mesh: package://robosub_descriptions/models/Octagon/octagon.dae
-                pose:
-                  position: [$(arg OC_x), $(arg OC_y), $(arg OC_z)]
-                  orientation: [1.57, 0, $(arg OC_yaw)]
-              coffin_1:
+              <!-- coffin_1:
                 mesh: package://robosub_descriptions/models/coffin/coffin.dae
                 pose:
                   position: [$(arg CO_x), $(arg CO_y), $(arg CO_z)]
