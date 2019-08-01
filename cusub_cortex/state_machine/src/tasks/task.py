@@ -128,12 +128,14 @@ class Objective(smach.State):
             1 success
             0 failed
         """
+        rospy.loginfo("...configuring darknet cameras")
         if not self.using_darknet:
             return False
         rospy.wait_for_service("cusub_perception/darknet_multiplexer/configure_active_cameras")
         try:
             darknet_config = rospy.ServiceProxy("cusub_perception/darknet_multiplexer/configure_active_cameras", DarknetCameras)
             resp1 = darknet_config(camera_bool_list)
+            rospy.loginfo("\tconfiguring")
             return True
         except rospy.ServiceException, e:
             rospy.logerr("Darknet Camera Config Service call failed: %s"%e)

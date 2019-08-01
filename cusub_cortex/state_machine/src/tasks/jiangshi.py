@@ -32,13 +32,13 @@ class Jiangshi(Task):
         self.link_objectives()
 
     def init_objectives(self):
-  #      self.search = Search.from_bounding_box(self.get_prior_param(), "vampire_cute", [1,0,0,0,0,0])
+        self.search = Search.from_bounding_box(self.get_prior_param(), "vampire_cute", [1,0,0,0,0,0])
         self.slay = Slay()
 
     def link_objectives(self):
         with self:
-#            smach.StateMachine.add('Search', self.search, transitions={'found':'Slay', 'not_found':'manager'}, \
- #               remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
+            smach.StateMachine.add('Search', self.search, transitions={'found':'Slay', 'not_found':'manager'}, \
+                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
             smach.StateMachine.add('Slay', self.slay, transitions={'success':'manager', 'timed_out':'manager'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
@@ -52,13 +52,13 @@ class Slay(Objective):
         super(Slay, self).__init__(self.outcomes, "Slay")
         self.jiangshi_pose = None
         rospy.Subscriber("cusub_cortex/mapper_out/jiangshi", PoseStamped, self.jiangshi_callback)
-        self.approach_dist = rospy.get_param('tasks/jiangshi/approach_dist', 2.0)
+        self.approach_dist = rospy.get_param('tasks/jiangshi/solvepnp/approach_dist', 2.0)
         self.print_configuration()
 
         # SOLVEPNP
-        self.replan_threshold = rospy.get_param('tasks/jiangshi/solvepnp_approach/replan_threshold', 0.5)
-        self.use_buoys_yaw = rospy.get_param('tasks/jiangshi/solvepnp_approach/use_buoys_yaw', True)
-        self.slay_dist = rospy.get_param('tasks/jiangshi/setpoint_slay/slay_dist', 0.5) 
+        self.replan_threshold = rospy.get_param('tasks/jiangshi/solvepnp/replan_threshold', 0.5)
+        self.use_buoys_yaw = rospy.get_param('tasks/jiangshi/solvepnp/use_buoys_yaw', True)
+        self.slay_dist = rospy.get_param('tasks/jiangshi/solvepnp/slay_dist', 0.5) 
 
         # VISUAL SERVO
         self.feedback = None
@@ -72,7 +72,10 @@ class Slay(Objective):
         rospy.Subscriber("cusub_common/motor_controllers/pid/drive/state", Float64, self.drive_callback)
         self.drive_pub = rospy.Publisher("cusub_common/motor_controllers/pid/drive/setpoint", Float64, queue_size=1)
 
+        rospy.loginfo("...waiting for toggle waypoint control")
+        rospy.wait_for_service('cusub_common/toggleWaypointControl')
         self.wayToggle = rospy.ServiceProxy('cusub_common/toggleWaypointControl', ToggleControl)
+        rospy.loginfo("\tfound toggle waypoint control")
 
     def drive_callback(self, msg):
         self.drive_state = msg.data
@@ -160,8 +163,8 @@ class Slay(Objective):
                 break
         
         # Slay
-        if rospy.get_param("tasks/jiangshi/slay_timeout"):
-            userdata.timeout_obj.set_new_time(rospy.get_param("tasks/jiangshi/slay_timeout"))
+        if rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"):
+            userdata.timeout_obj.set_new_time(rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"))
         rospy.loginfo("...slaying jiangshi")
         slay_pose = self.get_slay_pose()
         self.go_to_pose(slay_pose, userdata.timeout_obj)
@@ -176,7 +179,7 @@ class Slay(Objective):
         return "success"
 
     def visual_servo_method(self, userdata):
-   #     self.configure_darknet_cameras([1,0,0,0,0,0])
+        self.configure_darknet_cameras([1,0,0,0,0,0])
         rospy.loginfo("...using visual servoing approach")
         goal = VisualServoGoal()
         goal.target_class = ["vampire_cute"]
@@ -188,7 +191,7 @@ class Slay(Objective):
         goal.visual_servo_type = goal.PROPORTIONAL
         goal.target_pixel_x = goal.CAMERAS_CENTER_X
         goal.target_pixel_y = goal.CAMERAS_CENTER_Y
-        goal.target_box_area = goal.ONE_HUNDRED_PERCENT_IMAGE
+        goal.target_box_area = (int) ( goal.ONE_HUNDRED_PERCENT_IMAGE * rospy.get_param("tasks/jiangshi/visual_servo/goal_percentage_of_frame") )
         goal.target_pixel_threshold = self.target_pixel_box
         rospy.loginfo("...centering")
         self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)
@@ -198,26 +201,33 @@ class Slay(Objective):
                 self.vs_client.cancel_goal()
                 userdata.outcome = "timed_out"
                 return "timed_out"
-    #        if self.feedback:
-     #           break
+            if self.feedback:
+                break
             rospy.sleep(0.25)
         self.vs_client.cancel_goal()
         rospy.loginfo("\tcentered")
 
-
         # Slay the buoy
-        self.wayToggle(False)
+        rospy.sleep(2) # Wait for the vs client to release control to the waypoint nav for us to take it back again
+        rospy.loginfo("...slaying")
+        try:
+            res = self.wayToggle(False)
+            rospy.loginfo(res)
+        except rospy.ServiceException, e:
+            rospy.logwarn("Service call failed: %s", e)
         slay_set = Float64()
         original_set = copy.deepcopy(self.drive_state)
-        userdata.timeout_obj.set_new_time(rospy.get_param("tasks/jiangshi/slay_timeout"))
+        userdata.timeout_obj.set_new_time(rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"))
+        slay_carrot = rospy.get_param("tasks/jiangshi/visual_servo/slay_carrot")
         while not rospy.is_shutdown():
-            slay_set.data = self.drive_state + 0.5
+            slay_set.data = self.drive_state + slay_carrot
             self.drive_pub.publish(slay_set)
             if userdata.timeout_obj.timed_out:
                 break
             rospy.sleep(0.25)
 
-        userdata.timeout_obj.set_new_time(2* rospy.get_param("tasks/jiangshi/slay_timeout"))
+        rospy.loginfo("...slayed, backing up")
+        userdata.timeout_obj.set_new_time(2* rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"))
         slay_set.data = original_set
         while not rospy.is_shutdown():
             self.drive_pub.publish(slay_set)
@@ -236,12 +246,3 @@ class Slay(Objective):
         else:
             rospy.loginfo("...using solvepnp")
             return self.solvepnp_method(userdata)
-
-# WE SHOULD REHERSE OUR RUN ON ONE GREAT SIMULATOR, EVERYONE LAUNCHING EVERYTHING INDIVIDUALLY
-
-
-"""
-Exit cases for the VS is timeout OR success from the visual servoing b/c we reached our target box size
-OR
-setpoint exit case is reaching the setpoint OR timeout
-"""
