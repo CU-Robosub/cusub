@@ -84,13 +84,13 @@
       <arg name="yaw" default="$(arg DR_yaw)"/>
   </include>
 
-  <include file="$(find robosub_descriptions)/launch/upload.launch">
+  <!--<include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="vampire_stake"/>
       <arg name="x" default="$(arg TO_x)"/>
       <arg name="y" default="$(arg TO_y)"/>
       <arg name="z" default="$(arg TO_z)"/>
       <arg name="yaw" default="$(arg TO_yaw)"/>
-  </include>
+  </include> -->
 
     <!--  <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="octagon"/>
@@ -144,11 +144,11 @@
                   position: [$(arg DR_x), $(arg DR_y), $(arg DR_z)]
                   orientation: [1.57, 0, $(arg DR_yaw)]
 
-              vampire_stake_1:
+              <!--vampire_stake_1:
                 mesh: package://robosub_descriptions/models/vampire_stake/vampire_stake.dae
                 pose:
                   position: [$(arg DR_x), $(arg TO_y), $(arg TO_z)]
-                  orientation: [1.57, 0, $(arg TO_yaw)]
+                  orientation: [1.57, 0, $(arg TO_yaw)] -->
 
               <!-- Octagon_1:
                 mesh: package://robosub_descriptions/models/Octagon/octagon.dae
