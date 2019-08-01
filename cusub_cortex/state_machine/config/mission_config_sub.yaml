@@ -24,20 +24,21 @@ tasks:
 
  jiangshi:
   manager_info:
-   timeout_secs: 0
-   outcome_not_found: 'skip'
-   outcome_timed_out: 'skip'
-  prior: [-4,-1.0,-0.75]
-  method: vs  # solvepnp or vs
-  approach_dist: 2.0
-  slay_timeout: 10                  # How long the slay will last
-  solvepnp_approach:
+    timeout_secs: 0
+    outcome_not_found: 'skip'
+    outcome_timed_out: 'skip'
+  prior: [4.0,0.0,-1.5] # DIVEWELL
+  method: vs        # solvepnp OR vs
+  solvepnp:
     use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
     replan_thresh: 1.0
-  setpoint_slay:
     slay_dist: 0.0
+    approach_dist: 2.0
   visual_servo: # approach and slay
-    target_pixel_threshold: 50    # how close to our target do we need to be
+    goal_percentage_of_frame: 0.4    # Percentage of image for target class
+    slay_timeout: 10                 # How long the slay will last
+    slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
+    target_pixel_threshold: 50    # how close to our target do we need to be    
 
  dropper:
   manager_info:

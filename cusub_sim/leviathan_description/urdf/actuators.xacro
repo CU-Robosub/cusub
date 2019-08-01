@@ -57,7 +57,7 @@
     <origin xyz="-0.453136 -0.007874 -0.060706" rpy="0 0 -1.5707963" />
     </xacro:thruster_macro>
 
-  <link
+  <!-- <link
     name="${namespace}/gripper_link">
     <inertial>
       <origin
@@ -268,6 +268,6 @@
     <limit
       effort="0"
       velocity="0" />
-  </joint>
+  </joint> -->
 
 </robot>
