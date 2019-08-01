@@ -14,56 +14,6 @@ namespace perception_control
         depthPub = nh.advertise<std_msgs::Float64>("cusub_common/motor_controllers/pid/depth/setpoint",1);
     }
 
-    void BBController::configureAxes(AxisConfig x, AxisConfig y)
-    {
-        switch(x)
-        {
-            case DRIVE_AXIS:
-                x_state = &driveState;
-                x_pub = &drivePub;
-                break;
-            case STRAFE_AXIS:
-                x_state = &strafeState;
-                x_pub = &strafePub;
-                break;
-            case YAW_AXIS:
-                x_state = &yawState;
-                x_pub = &yawPub;
-                break;
-            case DEPTH_AXIS:
-                x_state = &depthState;
-                x_pub = &depthPub;
-                break;
-            default:
-                ROS_ERROR("Unrecognized AxisConfig!");
-                abort();
-        }
-
-        switch(y)
-        {
-            case DRIVE_AXIS:
-                y_state = &driveState;
-                y_pub = &drivePub;
-                break;
-            case STRAFE_AXIS:
-                y_state = &strafeState;
-                y_pub = &strafePub;
-                break;
-            case YAW_AXIS:
-                y_state = &yawState;
-                y_pub = &yawPub;
-                break;
-            case DEPTH_AXIS:
-                y_state = &depthState;
-                y_pub = &depthPub;
-                break;
-            default:
-                ROS_ERROR("Unrecognized AxisConfig!");
-                abort();
-        }
-        ROS_INFO("BBController axes configured!");
-    }
-
     void BBController::driveCallback(const std_msgs::Float64ConstPtr state) { driveState = state->data; }
     void BBController::strafeCallback(const std_msgs::Float64ConstPtr state) { strafeState = state->data; }
     void BBController::yawCallback(const std_msgs::Float64ConstPtr state) { yawState = state->data; }

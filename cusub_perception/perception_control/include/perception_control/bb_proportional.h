@@ -10,12 +10,20 @@ namespace perception_control
     class BBProportional : public BBController
     {
     public:
-        void configureByCamera(std::string camera);
-        void respond(int xdiff, int ydiff);
+        void respondDowncamDrive(float diff);
+        void respondDowncamStrafe(float diff);
+        void respondDowncamYaw(float diff);
+        void respondDowncamDepth(float diff);
+
+        void respondOccamDrive(float diff);
+        void respondOccamStrafe(float diff);
+        void respondOccamYaw(float diff);
+        void respondOccamDepth(float diff);
+
         BBProportional(ros::NodeHandle& nh);
     private:
-        float x_max_setpoint, y_max_setpoint;
-        int x_maxout_pixel_dist, y_maxout_pixel_dist;
+        float strafe_max_setpoint, drive_max_setpoint;
+        int strafe_maxout_pixel_dist, drive_maxout_pixel_dist;
 
         // To be eliminated with pulling from the param server
         float downcam_drive_max_setpoint, downcam_strafe_max_setpoint;

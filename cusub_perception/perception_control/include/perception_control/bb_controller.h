@@ -6,22 +6,20 @@
 
 namespace perception_control
 {
-    typedef enum AxisConfig_t
-    {
-        DRIVE_AXIS=0,
-        STRAFE_AXIS=1,
-        YAW_AXIS=2,
-        DEPTH_AXIS=3
-    }AxisConfig;
-
     class BBController
     {
     public:
-        void configureAxes(AxisConfig x, AxisConfig y);
-        virtual void respond(int xdiff, int ydiff) {;}
+        virtual void respondDowncamDrive(float diff) {;}
+        virtual void respondDowncamStrafe(float diff) {;}
+        virtual void respondDowncamYaw(float diff) {;}
+        virtual void respondDowncamDepth(float diff) {;}
+
+        virtual void respondOccamDrive(float diff) {;}
+        virtual void respondOccamStrafe(float diff) {;}
+        virtual void respondOccamYaw(float diff) {;}
+        virtual void respondOccamDepth(float diff) {;}
+
         BBController(ros::NodeHandle& nh);
-        float* x_state,* y_state;
-        ros::Publisher* x_pub,* y_pub;
     protected:
         float driveState, strafeState, yawState, depthState;
         ros::Publisher drivePub, strafePub, yawPub, depthPub;
