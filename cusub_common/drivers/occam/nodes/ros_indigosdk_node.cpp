@@ -499,10 +499,10 @@ public:
       device = 0;
       OCCAM_CHECK(occamInitialize());
       
-      int exposure = 0;
-      OCCAM_CHECK(occamSetDeviceValuei(device, OCCAM_AUTO_EXPOSURE, 1));
-      OCCAM_CHECK(occamGetDeviceValuei(device, OCCAM_AUTO_EXPOSURE, &exposure));
-      ROS_INFO("exposure is now %d", exposure);
+      // bool exposure = false;
+      // OCCAM_CHECK(occamSetDeviceValueb(device, OCCAM_AUTO_EXPOSURE, true));
+      // occamGetDeviceValueb(device, OCCAM_AUTO_EXPOSURE, &exposure);
+      // ROS_INFO("exposure is now %d", exposure);
 
       nh = getMTNodeHandle();
       nhp = getMTPrivateNodeHandle();
