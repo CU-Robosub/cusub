@@ -6,7 +6,7 @@ namespace darknet_drawer_ns
     {
         NODELET_INFO("Starting up Darknet Drawer");
         ros::NodeHandle& nh = getMTNodeHandle();
-        m_darknetSub = nh.subscribe("/leviathan/cusub_perception/darknet_ros/bounding_boxes", 1, &DarknetDrawer::darknetCallback, this);
+        m_darknetSub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &DarknetDrawer::darknetCallback, this);
         m_pub = nh.advertise<sensor_msgs::Image>("cusub_perception/darknet_drawer/out",1);
         // load the config
         std::vector<std::string> detectionClasses;
