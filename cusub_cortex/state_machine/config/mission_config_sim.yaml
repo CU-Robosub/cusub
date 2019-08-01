@@ -47,11 +47,11 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip'
     outcome_timed_out: 'skip'
-  prior: [4.0,0.0,-2.5, "world"] # DIVEWELL
+  prior: [4.0,0.0,-1.5, "world"] # DIVEWELL
   # prior: [-19,23,-1.5, "world"]
   method: vs        # solvepnp OR vs
   approach_dist: 2.0
-  slay_timeout: 0                  # How long the slay will last
+  slay_timeout: 10                  # How long the slay will last
   solvepnp_approach:
     use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
     replan_thresh: 1.0
@@ -59,9 +59,6 @@ tasks:
     slay_dist: 0.0
   visual_servo: # approach and slay
     target_pixel_threshold: 50    # how close to our target do we need to be
-
-  imu_axis: 'y'
-  jump_thresh: 0.5
 
  dropper:
   manager_info:
@@ -117,5 +114,5 @@ tasks:
     dice6: dice_box
 
 mission_tasks: # Tasks To Do In Order
-  - start_gate
+  - jiangshi
 
