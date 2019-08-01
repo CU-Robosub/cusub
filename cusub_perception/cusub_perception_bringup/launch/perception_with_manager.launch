@@ -36,6 +36,8 @@
     <!-- Darknet Debug -->
     <node pkg="nodelet" type="nodelet" name="darknet_drawer" args="load darknet_multiplexer/DarknetDrawer temp_standalone_nodelet" output="screen" if="$(arg debug_darknet)">
       <rosparam command="load" ns="class_names" file="$(find darknet_config)/yaml/class_names.txt"/>
+
+    <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
     </node>
 
 
