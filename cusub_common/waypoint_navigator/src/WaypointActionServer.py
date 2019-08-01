@@ -97,6 +97,7 @@ class WaypointServer(WaypointNavigator):
         super(WaypointServer, self).run()
 
 if __name__ == '__main__':
+    print("starting Action Server node")
     rospy.init_node('waypoint_action_server')
     WAYPOINT_SERVER = WaypointServer()
     try:

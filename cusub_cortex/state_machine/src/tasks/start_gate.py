@@ -21,7 +21,6 @@ import tf
 
 class StartGate(Task):
     name = "start_gate"
-    is_three_leg = False
 
     def __init__(self):
         super(StartGate, self).__init__() # become a state machine first
@@ -54,7 +53,8 @@ class Attack(Objective):
         self.leg_adjustment_meters = rospy.get_param('tasks/start_gate/third_leg_adjustment', 0.5)
         self.style_dist = rospy.get_param('tasks/start_gate/style_dist', 0.5)
         self.three_leg_dist = rospy.get_param('tasks/start_gate/three_leg_dist', 1.5)
-        self.three_leg_depth = rospy.get_param('tasks/start_gate/three_leg_depth', 1.0)
+        self.three_leg_depth = rospy.get_param('tasks/start_gate/three_leg_depth', -1.0)
+        self.is_three_leg = False
         self.do_style = rospy.get_param('tasks/start_gate/do_style', False)
         self.spin_carrot = rospy.get_param('tasks/start_gate/spin_carrot_rads', 0.3)
         self.first_pose_received = False
@@ -107,7 +107,7 @@ class Attack(Objective):
                 self.cur_pose, \
                 self.start_gate_pose.pose, \
                 self.dist_behind, \
-                self.small_leg_left_side, \
+                self.small_leg_left_side if self.is_three_leg else None, \
                 self.leg_adjustment_meters)
 
             dist_in_front_of_gate = self.style_dist + self.dist_behind
@@ -139,7 +139,7 @@ class Attack(Objective):
                 self.cur_pose, \
                 self.start_gate_pose.pose, \
                 self.dist_behind, \
-                self.small_leg_left_side, \
+                self.small_leg_left_side if self.is_three_leg else None, \
                 self.leg_adjustment_meters)
 
             #three leg pose is the same concept as style pose. Reusing funciton
@@ -153,8 +153,15 @@ class Attack(Objective):
             else:
                 self.is_three_leg = True
 
-            target_pose.position.z = self.three_leg_depth
+	    rospy.sleep(1)
+	    target_pose = self.adjust_gate_pose(
+                self.cur_pose, \
+                self.start_gate_pose.pose, \
+                self.dist_behind, \
+                self.small_leg_left_side if self.is_three_leg else None, \
+                self.leg_adjustment_meters)
 
+            target_pose.position.z = self.three_leg_depth
             if self.go_to_pose(target_pose, userdata.timeout_obj):
                 if userdata.timeout_obj.timed_out:
                     userdata.outcome = "timed_out"
@@ -287,29 +294,27 @@ class Attack(Objective):
         if ( round(cur_pose.position.y, 2) == round(gate_pose.position.y,2) ): # Avoid infinite slope in the polyfit
             gate_pose.position.y -= 0.1
 
-        if not self.is_three_leg:
-            return;
+        
+        # Adjust the gate pose to go through small leg side
+        if small_leg_left_side != None:
+            x = np.array([cur_pose.position.x, gate_pose.position.x])
+            y = np.array([cur_pose.position.y, gate_pose.position.y])
+            m, b = np.polyfit(x,y,1)
+            if m == 0:
+                m = 0.00001
+            perp_m = - 1 / m
+            perp_b = gate_pose.position.y - perp_m * gate_pose.position.x
+            x_hat = np.sqrt( ( third_leg_adjustment**2) / (perp_m**2 + 1) )
+            if (gate_pose.position.y > cur_pose.position.y) and small_leg_left_side:
+                x_hat = - x_hat
+            elif (gate_pose.position.y < cur_pose.position.y) and not small_leg_left_side:
+                x_hat = - x_hat
+            x_new = gate_pose.position.x + x_hat
+            y_new = x_new*perp_m + perp_b
         else:
-            # Adjust the gate pose to go through small leg side
-            if small_leg_left_side != None:
-                x = np.array([cur_pose.position.x, gate_pose.position.x])
-                y = np.array([cur_pose.position.y, gate_pose.position.y])
-                m, b = np.polyfit(x,y,1)
-                if m == 0:
-                    m = 0.00001
-                perp_m = - 1 / m
-                perp_b = gate_pose.position.y - perp_m * gate_pose.position.x
-                x_hat = np.sqrt( ( third_leg_adjustment**2) / (perp_m**2 + 1) )
-                if (gate_pose.position.y > cur_pose.position.y) and small_leg_left_side:
-                    x_hat = - x_hat
-                elif (gate_pose.position.y < cur_pose.position.y) and not small_leg_left_side:
-                    x_hat = - x_hat
-                x_new = gate_pose.position.x + x_hat
-                y_new = x_new*perp_m + perp_b
-            else:
-                rospy.logwarn("Start Gate SM didn't receive 3rd leg side")
-                x_new = gate_pose.position.x
-                y_new = gate_pose.position.y
+            rospy.logwarn("Start Gate SM ignoring 3rd leg side")
+            x_new = gate_pose.position.x
+            y_new = gate_pose.position.y
 
         # Adjust gate pose behind the gate
         x2 = np.array([cur_pose.position.x, x_new])
