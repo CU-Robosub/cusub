@@ -31,13 +31,13 @@ class Jiangshi(Task):
         self.link_objectives()
 
     def init_objectives(self):
-        self.search = Search(self.get_prior_param(), "cusub_cortex/mapper_out/jiangshi")
+  #      self.search = Search.from_bounding_box(self.get_prior_param(), "vampire_cute", [1,0,0,0,0,0])
         self.slay = Slay()
 
     def link_objectives(self):
         with self:
-            smach.StateMachine.add('Search', self.search, transitions={'found':'Slay', 'not_found':'manager'}, \
-                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
+#            smach.StateMachine.add('Search', self.search, transitions={'found':'Slay', 'not_found':'manager'}, \
+ #               remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
             smach.StateMachine.add('Slay', self.slay, transitions={'success':'manager', 'timed_out':'manager'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
@@ -173,19 +173,19 @@ class Slay(Objective):
         return "success"
 
     def visual_servo_method(self, userdata):
-        self.configure_darknet_cameras([1,0,0,0,0,0])
+   #     self.configure_darknet_cameras([1,0,0,0,0,0])
         rospy.loginfo("...using visual servoing approach")
         goal = VisualServoGoal()
         goal.target_class = "vampire_cute"
         goal.camera = goal.OCCAM
         goal.x_axis = goal.YAW_AXIS
         goal.y_axis = goal.DEPTH_AXIS
-        goal.area_axis = goal.NO_AXIS
+        goal.area_axis = goal.DRIVE_AXIS
         goal.target_frame = rospy.get_param("~robotname") +"/description/occam0_frame_optical"
         goal.visual_servo_type = goal.PROPORTIONAL
         goal.target_pixel_x = goal.CAMERAS_CENTER_X
         goal.target_pixel_y = goal.CAMERAS_CENTER_Y
-        goal.target_box_area = goal.FIFTY_PERCENT_IMAGE
+        goal.target_box_area = goal.ONE_HUNDRED_PERCENT_IMAGE
         goal.target_pixel_threshold = self.target_pixel_box
         rospy.loginfo("...centering")
         self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)
@@ -195,8 +195,8 @@ class Slay(Objective):
                 self.vs_client.cancel_goal()
                 userdata.outcome = "timed_out"
                 return "timed_out"
-            if self.feedback:
-                break
+    #        if self.feedback:
+     #           break
             rospy.sleep(0.25)
         self.vs_client.cancel_goal()
         rospy.loginfo("\tcentered")

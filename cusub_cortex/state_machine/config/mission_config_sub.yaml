@@ -4,7 +4,7 @@
 using_sim_params : False
 manager_task_status_pub_rate: 1
 
-startup_delay = 5
+startup_delay: 0
 
 tasks:
  start_gate:
@@ -13,12 +13,12 @@ tasks:
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'uh_oh'
   # prior: [0,-8.0,-1.5]
-  # prior: [11.5,7.5,-0.75]   A
-  prior: [-10,3,-0.75]
+  prior: [11.5,9,-0.75]
+  # prior: [-10,3,-0.75]
   dist_behind_gate: 1.0
-  third_leg_adjustment: 0.5
+  third_leg_adjustment: 0.75
   replan_thresh: 1.0
-  style_dist: 1.5
+  style_dist: 2.0
   do_style: True
   spin_carrot_rads: 0.7
 
