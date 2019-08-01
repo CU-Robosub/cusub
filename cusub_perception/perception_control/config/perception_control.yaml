@@ -22,7 +22,7 @@ perception_control:
           max_setpoint: 1.0
           maxout_pixel_dist: 50
         yaw:
-          max_setpoint: 0.75
+          max_setpoint: 0.3
           maxout_pixel_dist: 100
         depth:
           max_setpoint: 0.2
