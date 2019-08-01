@@ -28,13 +28,16 @@ tasks:
    outcome_not_found: 'skip'
    outcome_timed_out: 'skip'
   prior: [-4,-1.0,-0.75]
+  method: vs  # solvepnp or vs
   approach_dist: 2.0
-  slay_dist: 3.0
-  replan_thresh: 1.0
-  imu_axis: 'y'
-  jump_thresh: 1.0
-  slay_timeout: 0
-  use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
+  slay_timeout: 10                  # How long the slay will last
+  solvepnp_approach:
+    use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
+    replan_thresh: 1.0
+  setpoint_slay:
+    slay_dist: 0.0
+  visual_servo: # approach and slay
+    target_pixel_threshold: 50    # how close to our target do we need to be
 
  dropper:
   manager_info:
@@ -50,4 +53,4 @@ tasks:
   drop_thresh: 0.5;
 
 mission_tasks: # Tasks To Do In Order
- - path0
+ - jiangshi
