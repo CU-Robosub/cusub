@@ -38,10 +38,36 @@ void BoundingBox::setTransform(const AffineTransform &tform)
 {
     tform.transformPoints(m_points);
 
-    m_xmin = static_cast<int>(m_points.at(0).x);
-    m_ymin = static_cast<int>(m_points.at(0).y);
-    m_xmax = static_cast<int>(m_points.at(3).x);
-    m_ymax = static_cast<int>(m_points.at(3).y);
+    m_xmin = 1e09;
+    m_ymin = 1e09;
+    m_xmax = -1e09;
+    m_ymax = -1e09;
+
+    for (cv::Point2f point : m_points)
+    {
+        if (point.x < m_xmin)
+        {
+            m_xmin = point.x;
+        }
+        else if (point.x > m_xmax)
+        {
+            m_xmax = point.x;
+        }
+
+        if (point.y < m_ymin)
+        {
+            m_ymin = point.y;
+        }
+        else if (point.y > m_ymax)
+        {
+            m_ymax = point.y;
+        }
+    }
+
+    // m_xmin = static_cast<int>(m_points.at(0).x);
+    // m_ymin = static_cast<int>(m_points.at(0).y);
+    // m_xmax = static_cast<int>(m_points.at(3).x);
+    // m_ymax = static_cast<int>(m_points.at(3).y);
 
 }
 
