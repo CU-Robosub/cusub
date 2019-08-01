@@ -6,9 +6,10 @@ using namespace tracking;
 
 const int MOVEMENT_THRESH = INFINITY; // in pixels
 
-ObjectTracker::ObjectTracker(BoundingBox &box, const ImageData &image) :
+ObjectTracker::ObjectTracker(BoundingBox &box, const ImageData &image, const std::string &classname) :
     m_pointTracker(new KLTPointTracker()),
     m_boundingBox(box),
+    m_classname(classname),
     m_valid(false)
 {
     initialize(box, image);
@@ -30,6 +31,11 @@ void ObjectTracker::initialize(BoundingBox &box, const ImageData &image)
     actions.RESIZE = true;
     actions.CVT_GRAY = true;
     m_preprocessSteps = ImageTools::Preprocessing(actions, image.cvImage().size());
+}
+
+std::string ObjectTracker::classname() const
+{
+    return m_classname;
 }
 
 BoundingBox ObjectTracker::currentBox() const

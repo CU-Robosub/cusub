@@ -18,12 +18,13 @@ namespace tracking
 class ObjectTracker
 {
 public:
-    ObjectTracker(BoundingBox &box, const ImageData &image);
+    ObjectTracker(BoundingBox &box, const ImageData &image, const std::string &classname);
     ~ObjectTracker();
 
     void initialize(BoundingBox &box, const ImageData &image);
     void updateImage(const ImageData &image);
 
+    std::string classname() const;
     BoundingBox currentBox() const;
     cv::Mat currentImage() const;
     ImageData currentImageData() const;
@@ -33,10 +34,11 @@ private:
     PointTracker * m_pointTracker;
     BoundingBox m_boundingBox;
 
+    std::string m_classname;
     bool m_valid;
     ImageData m_currentImage;
     ImageTools::Preprocessing m_preprocessSteps;
-
+    
 };
 
 }; // namespace tracking

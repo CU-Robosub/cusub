@@ -206,7 +206,7 @@ add_library( tracking
   src/ImageData.cpp
   src/ImageTools.cpp
 )
-target_link_libraries(tracking ${catkin_LIBRARIES})
+# target_link_libraries(tracking ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(tracking ${catkin_EXPORTED_LIBRARIES})
 endif()
