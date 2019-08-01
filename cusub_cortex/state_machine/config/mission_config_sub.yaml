@@ -4,6 +4,8 @@
 using_sim_params : False
 manager_task_status_pub_rate: 1
 
+startup_delay = 5
+
 tasks:
  start_gate:
   manager_info:

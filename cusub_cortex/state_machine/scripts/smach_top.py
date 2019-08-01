@@ -12,7 +12,6 @@ from geometry_msgs.msg import Pose, Point
 from std_msgs.msg import Empty
 from waypoint_navigator.msg import waypointAction, waypointGoal
 import actionlib
-from tasks.dice import Dice
 from tasks.start_gate import StartGate
 from tasks.bangbang_dice_task import BangBangDiceTask
 from tasks.bangbang_roulette_task import BangBangRouletteTask
@@ -114,6 +113,9 @@ def main():
                 transitions={'manager':'manager'},\
                 remapping={'outcome':'previous_outcome'}) # all states will transition to the manager) # all states will transition to the manager
     try:
+        startup_delay = rospy.get_param("startup_delay")
+	rospy.loginfo("Sleeping....")
+        rospy.sleep(float(startup_delay))
         outcome = sm_top.execute()
     except rospy.ROSInterruptException:
         sys.exit()
