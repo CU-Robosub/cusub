@@ -4,7 +4,7 @@
 
 using namespace tracking;
 
-const int MOVEMENT_THRESH = 45; // in pixels
+const int MOVEMENT_THRESH = INFINITY; // in pixels
 
 ObjectTracker::ObjectTracker(BoundingBox &box, const ImageData &image) :
     m_pointTracker(new KLTPointTracker()),

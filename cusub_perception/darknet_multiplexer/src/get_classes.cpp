@@ -8,7 +8,8 @@ namespace darknet_get_classes_ns
         // Set up the rosservice & subscriber to darknet
         ros::NodeHandle& nh = getMTNodeHandle();
         recording = false;
-        darknetSub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &GetClasses::darknetCallback, this);
+        // darknetSub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &GetClasses::darknetCallback, this);
+        darknetSub = nh.subscribe("tracking_boxes", 1, &GetClasses::darknetCallback, this);
         service = nh.advertiseService("cusub_perception/darknet_multiplexer/get_classes", &GetClasses::handle, this);
         // service = nh.advertiseService("cusub_perception/darknet_multiplexer/configure_active_cameras", &Multiplexer::configureActives, this);
     }
