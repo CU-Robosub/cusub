@@ -2,6 +2,10 @@
   <arg name="sub" default="leviathan" />
 
   <group ns="$(arg sub)">
+
+    <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
+
+
     <!-- Configurations -->
     <rosparam command="load" file="$(find localizer)/config/localizer_config.yaml"/>
     <rosparam command="load" file="$(find darknet_multiplexer)/config/darknet_multiplexer.yaml"/>
