@@ -19,11 +19,13 @@ tasks:
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'uh_oh'
 #  prior: [-11,25,-1.5, "world"] # TRANSDEC, DIVEWELL 8,0,-1.5
-  prior: [-12,26,-1.5, "world"] # TRANSDEC, DIVEWELL 8,0,-1.5  
+  prior: [-12,26,-1.5, "world"] # TRANSDEC, DIVEWELL 8,0,-1.5
   dist_behind_gate: 1.0
   third_leg_adjustment: 0.75
   replan_thresh: 1.0
-  style_dist: 1.5
+  style_dist: 2.0
+  three_leg_dist: 2.0
+  three_leg_depth: 1.0
   do_style: True
   spin_carrot_rads: 0.7
 
@@ -110,4 +112,3 @@ mission_tasks: # Tasks To Do In Order
   - start_gate
   - path0
   - jiangshi
-  
