@@ -82,7 +82,7 @@ namespace pose_generator
         string& class_name
     ){
         class_name = "start_gate";
-        if ( three_legs && bbs.size() != 3 ) {return false;}
+        if ( three_legs && (bbs.size() < 2 || bbs.size() > 3) ) {return false;}
         if ( !three_legs && bbs.size() != 2) {return false;}
         sortBoxes(bbs);
         // Double check that its RGB8 not BGR8
@@ -111,7 +111,7 @@ namespace pose_generator
 
         // Get pose from image points using a solvepnp
         getPoseFromPoints(gate_truth_pts, img_points, pose); // inherited
-        if (three_legs) { publishLegSide(bbs); }
+        if (three_legs && bbs.size() == 3) { publishLegSide(bbs); }
         return true;
     }
 }

@@ -3,7 +3,8 @@ Panels:
     Help Height: 0
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /Pose1
       Splitter Ratio: 0.5
     Tree Height: 792
   - Class: rviz/Selection
@@ -24,7 +25,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: Image0
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -484,8 +485,23 @@ Visualization Manager:
       Marker Topic: /world_models
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
+      Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz/Pose
+      Color: 0; 202; 255
+      Enabled: true
+      Head Length: 0.5
+      Head Radius: 0.5
+      Name: Pose
+      Shaft Length: 1
+      Shaft Radius: 0.5
+      Shape: Arrow
+      Topic: /leviathan/cusub_cortex/mapper_out/start_gate
+      Unreliable: false
       Value: true
   Enabled: true
   Global Options:
