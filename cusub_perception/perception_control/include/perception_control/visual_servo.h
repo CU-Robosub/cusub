@@ -14,51 +14,55 @@
 
 namespace perception_control
 {
-    typedef actionlib::SimpleActionServer<perception_control::VisualServoAction> vsServer;
+typedef actionlib::SimpleActionServer<perception_control::VisualServoAction> vsServer;
 
-    typedef enum ImageAxis_t{
-        X_AXIS=0,
-        Y_AXIS=1,
-        AREA_AXIS=2
-    } ImageAxis;
+typedef enum ImageAxis_t{
+    X_AXIS=0,
+    Y_AXIS=1,
+    AREA_AXIS=2
+} ImageAxis;
 
-    class VisualServo : public nodelet::Nodelet
-    {
-    public:
-        virtual void onInit();
-    private:
-        bool respondError(ImageAxis axis, float error);
-        bool respondDowncamError(ImageAxis axis, float error);
-        bool respondOccamError(ImageAxis axis, float error);
+class VisualServo : public nodelet::Nodelet
+{
+public:
+    virtual void onInit();
+private:
+    bool respondError(ImageAxis axis, float error);
+    bool respondDowncamError(ImageAxis axis, float error);
+    bool respondOccamError(ImageAxis axis, float error);
 
-        bool controlPids(const bool takeControl);
-        void execute(const perception_control::VisualServoGoalConstPtr goal);
-        void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
+    bool controlPids(const bool takeControl);
+    void execute(const perception_control::VisualServoGoalConstPtr goal);
+    void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
 
-        perception_control::VisualServoGoalConstPtr activeGoal;
-        std::string target_frame, target_class;
-        vsServer* server;
-        ros::NodeHandle* nh;
-        ros::ServiceClient wayToggleClient; 
-        bool controllingPids;
-        int target_pixel_x, target_pixel_y, target_box_area, target_pixel_threshold;
-        std_msgs::Float64 frozen_x_set, frozen_y_set;
-        bool frozen_controls;
+    perception_control::VisualServoGoalConstPtr activeGoal;
+    std::string target_frame;
+    std::vector<std::string> target_classes;
+    vsServer* server;
+    ros::NodeHandle* nh;
+    ros::ServiceClient wayToggleClient; 
+    bool controllingPids;
+    int target_pixel_x, target_pixel_y, target_box_area, target_pixel_threshold;
+    std_msgs::Float64 frozen_x_set, frozen_y_set;
+    bool frozen_controls;
 
-        std::string activeCamera;
-        ImageAxis x_map_axis, y_map_axis, area_map_axis;
+    std::string activeCamera;
+    ImageAxis x_map_axis, y_map_axis, area_map_axis;
 
-        // Controllers
-        BBController* current_controller;
-        BBProportional* proportional_controller;
+    // Controllers
+    BBController* current_controller;
+    BBProportional* proportional_controller;
 
-        // Response Methods
-        void (BBController::*respondX)(float);
-        void (BBController::*respondY)(float);
-        void (BBController::*respondArea)(float);
+    // Response Methods
+    void (BBController::*respondX)(float);
+    void (BBController::*respondY)(float);
+    void (BBController::*respondArea)(float);
 
-        bool xResponse, yResponse, areaResponse;
-    };
-}
+    bool xResponse, yResponse, areaResponse;
 
-#endif
+private:
+    bool getTarget(const std::vector<darknet_ros_msgs::BoundingBox> &boxes, darknet_ros_msgs::BoundingBox &targetBox, int &xTarget, int &yTtarget);
+};
+}; // namespace perception_control
+
+#endif // VISUALSERVO_CLASS_SRC_VISUALSERVO_CLASS_H_
