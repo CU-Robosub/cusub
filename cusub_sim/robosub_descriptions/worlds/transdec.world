@@ -21,13 +21,13 @@
         </clouds>
       </sky>
       <shadows>1</shadows>
-      <fog>
+      <!-- <fog>
         <color>0.1 0.3 0.43 1.0</color>
         <type>linear</type>
         <density>1.0</density>
         <start>0.1</start>
         <end>14</end>
-      </fog>
+      </fog> -->
     </scene>
 
     <!-- TRANSDEC  -->
@@ -64,8 +64,17 @@
 
     <include>
       <uri>model://vampire_stake</uri>
+      <pose>-20.88 -16.78 -3.32 0 0 -1.79</pose>
+      <!-- x y z r p y -->
+    </include>
+    <!-- <include>
+      <uri>model://octagon</uri>
       <pose>0 0 -2.672 0 0 0</pose>
     </include>
+    <include>
+      <uri>model://coffin</uri>
+      <pose>0 0 -2.672 0 0 0</pose>
+    </include> -->
 
     <plugin name="underwater_current_plugin" filename="libuuv_underwater_current_ros_plugin.so">
       <namespace>hydrodynamics</namespace>
