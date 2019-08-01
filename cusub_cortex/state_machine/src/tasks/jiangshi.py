@@ -21,6 +21,7 @@ import copy
 from perception_control.msg import VisualServoAction, VisualServoGoal, VisualServoFeedback
 import actionlib
 from std_msgs.msg import Float64
+from waypoint_navigator.srv import *
 
 class Jiangshi(Task):
     name = "jiangshi"
@@ -67,12 +68,14 @@ class Slay(Objective):
         self.vs_client.wait_for_server()
         rospy.loginfo("\tfound visual servo server")
 
-    #     self.drive_state = None
-    #     rospy.Subscriber("cusub_common/motor_controllers/pid/drive/state", Float64, self.drive_callback)
-    #     self.drive_pub = rospy.Publisher("cusub_common/motor_controllers/pid/drive/setpoint", Float64, queue_size=1)
+        self.drive_state = None
+        rospy.Subscriber("cusub_common/motor_controllers/pid/drive/state", Float64, self.drive_callback)
+        self.drive_pub = rospy.Publisher("cusub_common/motor_controllers/pid/drive/setpoint", Float64, queue_size=1)
 
-    # def drive_callback(self, msg):
-    #     self.drive_state = msg.data
+        self.wayToggle = rospy.ServiceProxy('cusub_common/toggleWaypointControl', ToggleControl)
+
+    def drive_callback(self, msg):
+        self.drive_state = msg.data
 
     def print_configuration(self):
         if rospy.get_param("tasks/jiangshi/method") == "solvepnp":
@@ -201,16 +204,27 @@ class Slay(Objective):
         self.vs_client.cancel_goal()
         rospy.loginfo("\tcentered")
 
+
         # Slay the buoy
-        # adjust drive setpoint by 2m
-        # wait x amount of time
-        # adjust drive setpoint by -2m
-        
-        # rospy.loginfo("...backing up")
-        # userdata.timeout_obj.set_new_time(0)
-        # userdata.timeout_obj.timed_out = False
-        # rospy.loginfo("...disabling timeouts while backing up from slay")
-        # self.vs_client.cancel_goal()
+        self.wayToggle(False)
+        slay_set = Float64()
+        original_set = copy.deepcopy(self.drive_state)
+        userdata.timeout_obj.set_new_time(rospy.get_param("tasks/jiangshi/slay_timeout"))
+        while not rospy.is_shutdown():
+            slay_set.data = self.drive_state + 0.5
+            self.drive_pub.publish(slay_set)
+            if userdata.timeout_obj.timed_out:
+                break
+            rospy.sleep(0.25)
+
+        userdata.timeout_obj.set_new_time(2* rospy.get_param("tasks/jiangshi/slay_timeout"))
+        slay_set.data = original_set
+        while not rospy.is_shutdown():
+            self.drive_pub.publish(slay_set)
+            if userdata.timeout_obj.timed_out:
+                break
+            rospy.sleep(0.25)
+        self.wayToggle(True)
 
         userdata.outcome = "success"
         return "success"
