@@ -26,7 +26,7 @@ public:
     explicit Tracking();
     virtual void onInit();
 
-    BoundingBox getBox(const std::string &classname);
+    std::vector<BoundingBox> getBoxes(const std::string &classname);
 
     void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr& bbs);
     void imageCallback(const sensor_msgs::Image::ConstPtr &rosImage);
@@ -44,6 +44,9 @@ private:
     void publishBoxes();
     void publishDebugBoxes();
 
+    void updateTracker(ObjectTracker * objectTracker,const BoundingBox &bbox, const ImageData &image);
+    ObjectTracker * findTracker(const std::string &frameId, const std::string &classname, const BoundingBox &bbox);
+
     ros::NodeHandle m_nh;
     ros::Publisher m_bboxPublisher;
     std::string m_imageTopicName;
@@ -59,7 +62,7 @@ private:
     float m_reseedThresh;
 
 
-    std::map<std::string, ObjectTracker *> m_objectMap;
+    std::map <std::string, std::vector<ObjectTracker*> > m_objectMap;
 
 };
 

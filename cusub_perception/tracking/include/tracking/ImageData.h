@@ -23,7 +23,8 @@ public:
     ImageData(const ImageData &other);
     
     void setImage(const cv::Mat &image);
-    
+
+    std::string frameId() const;
     bool empty();
     cv::Mat cvImage() const;
     sensor_msgs::Image::ConstPtr rosImage() const;

@@ -30,7 +30,7 @@ void ImageData::setImage(const cv::Mat &image)
     std_msgs::Header header;
     header.seq = 0;
     header.stamp = ros::Time();
-
+    header.frame_id = "cv";
     // setup bridge
     cv_bridge::CvImage imgBridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, image);
     
@@ -40,6 +40,15 @@ void ImageData::setImage(const cv::Mat &image)
     m_image = sensor_msgs::ImageConstPtr(new sensor_msgs::Image(imgMsg));
 
     m_empty = false;
+}
+
+std::string ImageData::frameId() const
+{
+    if (m_empty)
+    {
+        return "empty";
+    }
+    return m_image->header.frame_id;
 }
 
 bool ImageData::empty()
