@@ -197,7 +197,7 @@ class Objective(smach.State):
         self.wayClient.cancel_all_goals()
         rospy.sleep(0.2)
         self.wayClient.send_goal(wpGoal)
-        rospy.loginfo("---goal sent to waypointNav")
+        rospy.loginfo("...goal sent to waypointNav")
     
     def block_on_reaching_pose(self, target_pose, timeout_obj, replan_enabled=True):
         """
