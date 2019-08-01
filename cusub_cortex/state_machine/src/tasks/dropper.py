@@ -68,8 +68,7 @@ class Drop(Objective):
         self.drop_depth = rospy.get_param("tasks/dropper/drop_depth")
         self.drop_thresh = rospy.get_param("tasks/dropper/drop_thresh")
         self.target_pixel_box = rospy.get_param("tasks/dropper/target_pixel_threshold")
-        # todo SK namespace
-        self.actuator_service = rospy.ServiceProxy('cusub_common/activateActuator', ActivateActuator)
+        self.actuator_service = rospy.ServiceProxy("cusub_common/activateActuator", ActivateActuator)
 
         super(Drop, self).__init__(self.outcomes, "drop")
 

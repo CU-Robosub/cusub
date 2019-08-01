@@ -4,7 +4,8 @@
 
 using namespace tracking;
 
-const int MOVEMENT_THRESH = INFINITY; // in pixels
+const int MOVEMENT_THRESH = 20000; // in pixels
+const int AREA_CHANGE_THRESH = 20000; // in pixels
 
 ObjectTracker::ObjectTracker(BoundingBox &box, const ImageData &image, const std::string &classname) :
     m_pointTracker(new KLTPointTracker()),
@@ -72,13 +73,21 @@ void ObjectTracker::updateImage(const ImageData &image)
         if (result.status == PointTracker::STATUS::Success)
         {
             cv::Point2f oldCenter = m_boundingBox.center();
+            int oldArea = m_boundingBox.area();
             m_boundingBox.setTransform(result.transform);
             cv::Point2f newCenter = m_boundingBox.center();
+            int newArea = m_boundingBox.area();
+
 
             if (cv::norm(oldCenter - newCenter) > MOVEMENT_THRESH)
             {
                 m_valid = false;
                 std::cout << "Too much movement: " << std::to_string(cv::norm(oldCenter - newCenter)) << std::endl;
+            }
+            else if (abs(oldArea - newArea) > AREA_CHANGE_THRESH)
+            {
+                m_valid = false;
+                std::cout << "Too much area change: " << std::to_string(abs(oldArea - newArea)) << std::endl;
             }
             else
             {

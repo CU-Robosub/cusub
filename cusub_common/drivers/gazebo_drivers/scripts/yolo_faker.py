@@ -542,7 +542,7 @@ class YOLOFaker(object):
         self.min_pixel_size = rospy.get_param('yolo_faker/min_pixel_size', 15)
 
         # Shows bounding volume points for debugging
-        self.show_points = rospy.get_param('~show_points', False)
+        self.show_points = rospy.get_param('yolo_faker/show_points', False)
 
         # Fake darknet YOLO
         self.darknet_detection_pub = rospy.Publisher(bouding_boxes_topic,

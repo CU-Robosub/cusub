@@ -700,8 +700,9 @@ void *YoloObjectDetector::publishInThread()
 
     boundingBoxesResults_->image_header = final_header;
 
-    boundingBoxesResults_->header.stamp = ros::Time::now();
-    boundingBoxesResults_->header.frame_id = "detection";
+    boundingBoxesResults_->header = final_header;
+    // boundingBoxesResults_->header.stamp = ros::Time::now();
+    // boundingBoxesResults_->header.frame_id = "detection";
 
     // We add publishing of image with header so we can keep it synced
     // for further classical processing to better pin down points in the
@@ -709,14 +710,15 @@ void *YoloObjectDetector::publishInThread()
     // TODO try using a segmenting neural network
 ;
     cv_bridge::CvImage cvImage;
-    cvImage.header.stamp = ros::Time::now();
-    cvImage.header.frame_id = "detection_image";
+    cvImage.header = final_header;
+    // cvImage.header.stamp = ros::Time::now();
+    // cvImage.header.frame_id = "detection_image";
     cvImage.encoding = sensor_msgs::image_encodings::BGR8;
     cvImage.image = cv::cvarrToMat(ipl2_);
     boundingBoxesResults_->image = *cvImage.toImageMsg();
 
     //boundingBoxesResults_.image_header = imageHeader_;
-    //boundingBoxesResults_.image_header.frame_id = curr_frame_id;
+    // boundingBoxesResults_.image_header.frame_id = curr_frame_id;
     boundingBoxesPublisher_.publish(boundingBoxesResults_);
   } else {
     std_msgs::Int8 msg;
