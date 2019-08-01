@@ -5,7 +5,7 @@
       /leviathan/cusub_common/occam/image0
       /leviathan/cusub_common/occam/image1
       /leviathan/cusub_common/occam/image4
-      /cv_camera/image_raw"
+      /leviathan/cusub_common/torpedocam/image_raw"
       />
 
 </launch>
