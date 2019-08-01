@@ -18,6 +18,7 @@ from std_msgs.msg import Empty, Bool, Float64
 import numpy as np
 from waypoint_navigator.srv import ToggleControl
 import tf
+import copy
 
 class StartGate(Task):
     name = "start_gate"
@@ -57,6 +58,7 @@ class Attack(Objective):
         self.first_pose_received = False
         self.start_gate_pose = None
         self.small_leg_left_side = None
+	self.three_leg_depth = rospy.get_param('tasks/start_gate/three_leg_dist', -1.0)
         self.started = False
         self.current_yaw = None
         self.yaw_pub = rospy.Publisher("cusub_common/motor_controllers/pid/yaw/setpoint", Float64, queue_size=10)
@@ -71,7 +73,7 @@ class Attack(Objective):
         self.current_yaw = msg.data
 
     def small_leg_callback(self, msg):
-        rospy.loginfo_throttle(0.0001, "Received left leg side.")
+        rospy.loginfo_once("Received left leg side.")
         if self.started and self.small_leg_left_side == None: # Receiving leg for the first time
             self.request_replan()
         elif self.started and self.small_leg_left_side != msg.data: # leg has switched sides!
@@ -93,13 +95,15 @@ class Attack(Objective):
 
     def do_gate_with_style(self, userdata):
         while not rospy.is_shutdown():          # Loop over the replans from a gate pose change
+	    gate_pose = copy.deepcopy(self.start_gate_pose.pose)
+	    gate_pose.position.z = self.three_leg_depth
             target_pose = self.adjust_gate_pose(
                 self.cur_pose, \
-                self.start_gate_pose.pose, \
+                gate_pose, \
                 self.dist_behind, \
                 self.small_leg_left_side, \
                 self.leg_adjustment_meters)
-
+		
             dist_in_front_of_gate = self.style_dist + self.dist_behind
             style_pose = self.get_style_pose(self.cur_pose, target_pose, dist_in_front_of_gate)
 
@@ -114,6 +118,7 @@ class Attack(Objective):
 
         rospy.loginfo("...reached style pose")
         self.enact_style()
+	
         if self.go_to_pose(target_pose, userdata.timeout_obj, replan_enabled=False):
             userdata.outcome = "timed_out"
             return "timed_out"
@@ -122,6 +127,8 @@ class Attack(Objective):
             return "success"
 
     def do_gate_no_style(self, userdata):
+        gate_pose = copy.deepcopy(self.start_gate_pose.pose)
+	gate_pose.position.z = self.three_leg_depth
         while not rospy.is_shutdown():          # Loop over the replans from a gate pose change
             target_pose = self.adjust_gate_pose(
                 self.cur_pose, \
@@ -129,7 +136,6 @@ class Attack(Objective):
                 self.dist_behind, \
                 self.small_leg_left_side, \
                 self.leg_adjustment_meters)
-
             if self.go_to_pose(target_pose, userdata.timeout_obj):
                 if userdata.timeout_obj.timed_out:
                     userdata.outcome = "timed_out"
@@ -245,6 +251,7 @@ class Attack(Objective):
 
         # Adjust the gate pose to go through small leg side
         if small_leg_left_side != None:
+	    rospy.logwarn("Can see third leg!")
             x = np.array([cur_pose.position.x, gate_pose.position.x])
             y = np.array([cur_pose.position.y, gate_pose.position.y])
             m, b = np.polyfit(x,y,1)
