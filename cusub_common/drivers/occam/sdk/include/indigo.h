@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif // _WIN32
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /*! Initialize the SDK.
   This function must be called before any other APIs.
@@ -500,6 +501,14 @@ OCCAM_API int occamFreeParamList(OccamParamList* param_list);
   @param the new value of the parameter.
   @return OCCAM_API_SUCCESS on success, OCCAM_API_INVALID_PARAMETER if the parameter is not supported by the device, OCCAM_API_GENERIC_ERROR or a more specific error if there is a failure communicating with the hardware.
  */
+OCCAM_API int occamSetDeviceValueb(OccamDevice* device, OccamParam id, bool value);
+/*!
+  Set an integer parameter.
+  @param device the device to set the parameter on.
+  @param id the parameter to set.
+  @param the new value of the parameter.
+  @return OCCAM_API_SUCCESS on success, OCCAM_API_INVALID_PARAMETER if the parameter is not supported by the device, OCCAM_API_GENERIC_ERROR or a more specific error if there is a failure communicating with the hardware.
+ */
 OCCAM_API int occamSetDeviceValuei(OccamDevice* device, OccamParam id, int value);
 /*!
   Set an double parameter.
@@ -541,8 +550,10 @@ OCCAM_API int occamSetDeviceValuerv(OccamDevice* device, OccamParam id, const do
   @return OCCAM_API_SUCCESS on success, OCCAM_API_INVALID_PARAMETER if the parameter is not supported by the device, OCCAM_API_INVALID_COUNT if the size of the array is incorrect, OCCAM_API_GENERIC_ERROR or a more specific error if there is a failure communicating with the hardware.
  */
 OCCAM_API int occamSetDeviceValuesv(OccamDevice* device, OccamParam id, char** values, int value_count);
+
+OCCAM_API int occamGetDeviceValueb(OccamDevice* device, OccamParam id, bool* value);
 /*!
-  Get an integer parameter.
+  Get an bool parameter.
   @param device the device to set the parameter on.
   @param id the parameter to get.
   @param pointer to value to be assigned.
