@@ -20,7 +20,6 @@
     </include>
 
     <!-- Nodelets -->
-    <node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" output="screen"/>
 
     <!-- Camera Multiplexer -->
     <node pkg="nodelet" type="nodelet" name="darknet_multiplexer" args="load darknet_multiplexer/Multiplexer standalone_nodelet" output="screen"/>

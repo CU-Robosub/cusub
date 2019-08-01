@@ -62,9 +62,12 @@ int main(int argc, char ** argv)
             imageData.setImage(image);
             trackingPtr->newImage(imageData);
 
-            tracking::BoundingBox bbox = trackingPtr->getBox("vampire_fathead");
+            std::vector<tracking::BoundingBox> bboxs = trackingPtr->getBoxes(imageData.frameId());
 
-            cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,0,255), 2);
+            for (tracking::BoundingBox box : bboxs)
+            {
+                cv::rectangle(image, box.roiRect(), cv::Scalar(0,0,255), 2);
+            } 
 
             cv::imshow("Tracked Object", image);
             cv::waitKey(0);

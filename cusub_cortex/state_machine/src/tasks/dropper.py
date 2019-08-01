@@ -16,12 +16,13 @@ import rospy
 import smach
 import smach_ros
 from perception_control.msg import VisualServoAction, VisualServoGoal, VisualServoFeedback
-from perception_control.msg import PathOrientAction, PathOrientGoal, PathOrientResult
 import actionlib
 from actuator.srv import ActivateActuator
 from std_msgs.msg import Float64
 from state_machine.srv import *
 import tf
+
+TARGET_CLASS = "coffin"
 
 class Dropper(Task):
     name = "dropper"
@@ -33,7 +34,7 @@ class Dropper(Task):
         self.link_objectives()
 
     def init_objectives(self):
-        self.search = Search.from_bounding_box(self.get_prior_param(), "path", [0,0,0,0,0,1])
+        self.search = Search.from_bounding_box(self.get_prior_param(), TARGET_CLASS, [0,0,0,0,0,1])
         self.drop = Drop()
 
     def link_objectives(self):
@@ -56,7 +57,7 @@ class Drop(Objective):
         rospy.loginfo("...waiting for visual_servo server")
         self.vs_client.wait_for_server()
         rospy.loginfo("\tfound visual servo server")
-#        self.centering_time = rospy.get_param("tasks/dropper/centering_time")
+        self.centering_time = rospy.get_param("tasks/dropper/centering_time", 1.0)
         self.feedback = False
         self.was_centered = False
         self.depth_pub = rospy.Publisher("cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
@@ -80,7 +81,7 @@ class Drop(Objective):
 
     def execute(self, userdata):
         goal = VisualServoGoal()
-        goal.target_class = "dropper_cover" # todo SK
+        goal.target_class = TARGET_CLASS # todo SK
         goal.camera = goal.DOWNCAM
         goal.target_frame = rospy.get_param("~robotname") +"/camera"
         goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
