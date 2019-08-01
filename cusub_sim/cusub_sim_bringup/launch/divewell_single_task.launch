@@ -1,9 +1,9 @@
 <launch>
 
-  <arg name="TASK_x" default="4.0"/>
+  <arg name="TASK_x" default="0.0"/>
   <arg name="TASK_y" default="0.0"/>
-  <arg name="TASK_z" default="-0.5"/>
-  <arg name="TASK_yaw" default="1.57" />
+  <arg name="TASK_z" default="-3.3"/>
+  <arg name="TASK_yaw" default="0.0" />
 
   <arg name="PM1_x" default="-2.4"/>
   <arg name="PM1_y" default="1.8"/>
@@ -19,6 +19,14 @@
       <arg name="y" default="$(arg PM1_y)"/>
       <arg name="z" default="$(arg PM1_z)"/>
       <arg name="yaw" default="$(arg PM1_yaw)"/>
+  </include>
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
+      <arg name="obstacle" default="dropper_garlic"/>
+      <arg name="x" default="$(arg TASK_x)"/>
+      <arg name="y" default="$(arg TASK_y)"/>
+      <arg name="z" default="$(arg TASK_z)"/>
+      <arg name="yaw" default="$(arg TASK_yaw)"/>
   </include>
 
   <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
@@ -44,6 +52,7 @@
       <arg name="z" default="$(arg TASK_z)"/>
       <arg name="yaw" default="$(arg TASK_yaw)"/>
   </include> -->
+
   <!-- <rosparam file="$(find robosub_descriptions)/config/triangular_bouy_control.yaml" command="load"/>
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
 	   output="screen" ns="/triangular_buoy_1" args="joint_state_controller buoy_velocity_controller"/>
@@ -71,12 +80,18 @@
                 mesh: package://robosub_descriptions/models/triangular_buoy/triangular_buoy.dae
                 pose:
                   position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
-                  orientation: [0, 0, $(arg TASK_yaw)] -->
+                  orientation: [0, 0, $(arg TASK_yaw)] 
               PathMarker_1:
                 mesh: package://robosub_descriptions/models/PathMarker/PathMarker.dae
                 pose:
                   position: [$(arg PM1_x), $(arg PM1_y), $(arg PM1_z)]
-                  orientation: [1.57, 0, $(arg PM1_yaw)]
+                  orientation: [1.57, 0, $(arg PM1_yaw)]-->
+            meshes: 
+              DropperGarlic_1:
+                mesh: package://robosub_descriptions/models/dropper_garlic/dropper_garlic.dae
+                pose:
+                  position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
+                  orientation: [1.57, 0, $(arg TASK_yaw)]
         </rosparam>
   </node>
 

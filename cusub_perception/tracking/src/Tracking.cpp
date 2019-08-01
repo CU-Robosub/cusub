@@ -5,6 +5,9 @@ using namespace tracking;
 #include <iostream>
 #include <opencv2/highgui.hpp>
 
+
+const int OVERLAP_THRESH = 0.5; // in percent
+
 // called from unit test
 Tracking::Tracking() :
     m_debugMode(false),
@@ -20,6 +23,7 @@ void Tracking::onInit()
     nhPrivate.getParam("detection_thresh", m_detectionThresh);
     nhPrivate.getParam("reseed_thresh", m_reseedThresh);
     nhPrivate.getParam("debug_mode", m_debugMode);
+    
 
     NODELET_INFO("%s", m_imageTopicName.c_str());
     NODELET_INFO("%s", m_detectionTopicName.c_str());
@@ -109,6 +113,7 @@ void Tracking::objectDetected(const std::string &classname, BoundingBox &bbox, c
     {
         // add the tracker
         m_objectMap[image.frameId()].push_back(new ObjectTracker(bbox, image, classname));
+        std::cout << "new tracker for class: " << classname << std::endl;
     }
 }
 
@@ -155,7 +160,7 @@ void Tracking::updateTracker(ObjectTracker * objectTracker,const BoundingBox &bb
         if (objectTracker->currentBox().overlapArea(bbox) < 0 && 
             bbox.probability() > m_reseedThresh)
         {
-            std::cout << "No overlap for class: " << objectTracker->classname() << std::endl;
+            std::cout << "Overlap area for " << objectTracker->classname() << ": " << objectTracker->currentBox().overlapArea(bbox) << std::endl;
             BoundingBox box = bbox;
             objectTracker->initialize(box, image);
         }
@@ -164,13 +169,13 @@ void Tracking::updateTracker(ObjectTracker * objectTracker,const BoundingBox &bb
 
 void Tracking::newImage(const ImageData &image)
 {
-    for (std::pair<std::string, std::vector<ObjectTracker *> > iter : m_objectMap)
+    // for (std::pair<std::string, std::vector<ObjectTracker *> > iter : m_objectMap)
+    // {
+    for (ObjectTracker * tracker : m_objectMap[image.frameId()])
     {
-        for (ObjectTracker * tracker : iter.second)
-        {
-            tracker->updateImage(image);
-        }
+        tracker->updateImage(image);
     }
+    // }L
 
     if (m_publishBoxes)
     {
