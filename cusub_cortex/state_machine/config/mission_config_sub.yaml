@@ -56,9 +56,10 @@ tasks:
   centering_time: 5            # Time between first centered feedback & when we check if we're centered again
   target_pixel_threshold: 40   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   drop_timeout: 30
-  search_depth: -0.01
   drop_depth: -3.8
-  drop_thresh: 0.5
+  drop_depth_thresh: 0.3
+  approach_depth: -2.5
+  drive_carrot: 0.7
 
 mission_tasks: # Tasks To Do In Order
  - startup

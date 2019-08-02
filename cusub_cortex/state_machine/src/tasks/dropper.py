@@ -83,6 +83,7 @@ class Drop(Objective):
         self.drop_depth_thresh = rospy.get_param("tasks/dropper/drop_depth_thresh")
         self.target_pixel_threshold = rospy.get_param("tasks/dropper/target_pixel_threshold")
         self.drop_timeout = rospy.get_param("tasks/dropper/drop_timeout")
+        self.depth_carrot = rospy.get_param("tasks/dropper/depth_carrot")
 
         super(Drop, self).__init__(self.outcomes, "drop")
 
@@ -161,8 +162,8 @@ class Drop(Objective):
         goal.visual_servo_type = goal.PROPORTIONAL
         goal.target_classes = ["wolf", "bat"]
         goal.camera = goal.DOWNCAM
-        goal.target_pixel_x = goal.CAMERAS_CENTER_X
-        goal.target_pixel_y = goal.CAMERAS_CENTER_Y
+        goal.target_pixel_x = goal.DOWNCAM_FAKE_CENTER_X
+        goal.target_pixel_y = goal.DOWNCAM_FAKE_CENTER_Y
         goal.target_pixel_threshold = self.target_pixel_threshold
         goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
         goal.target_box_area = goal.AREA_NOT_USED
@@ -171,7 +172,8 @@ class Drop(Objective):
         goal.area_axis = goal.NO_AXIS
 
         # Drop down to low above the ground (get it low)
-        depth_set.data = self.drop_depth
+        # NEED THIS TO BE GRADUAL!
+        # depth_set.data = self.drop_depth
         
         self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)
         
@@ -189,9 +191,13 @@ class Drop(Objective):
 
                 # if count > 20:
                 #     break
+                
+                #self.depth_pub.publish(depth_set)
 
-                self.depth_pub.publish(depth_set)
-                if abs(self.last_depth - self.drop_depth) > self.drop_depth_thresh:
+                new_depth = max(self.last_depth - self.depth_carrot, self.drop_depth)
+                self.depth_pub.publish(new_depth)
+
+                if abs(self.last_depth - self.drop_depth) < self.drop_depth_thresh:
                     break
 
             rospy.sleep(0.25)

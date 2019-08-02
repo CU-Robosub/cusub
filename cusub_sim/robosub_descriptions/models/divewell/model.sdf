@@ -28,7 +28,7 @@
         </geometry>
       </collision>
 
-      <visual name="surface">
+      <!-- <visual name="surface">
         <cast_shadows>false</cast_shadows>
         <pose>0 0 0 0 0 0</pose>
         <geometry>
@@ -42,7 +42,7 @@
             <name>UUVSimulator/StaticDeepWater</name>
           </script>
         </material>
-      </visual>
+      </visual> -->
 
       <visual name="north">
         <cast_shadows>false</cast_shadows>

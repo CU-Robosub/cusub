@@ -70,16 +70,16 @@ yolo_faker:
   #   - name: 'vampire_flying'  
   #     debug_color: [200,0,200]
   #     points: [[-0.32,-0.23,3.12],[0.34,-0.22,3.12],[0.34,-0.22,1.86],[-0.32,-0.23,1.86]]
-  # dropper:
-  #  link: 'dropper_garlic_1/base_link'
-  #  odom_topic: '/dropper_garlic_1/pose_gt'
-  #  classes:
-  #   - name: 'dropper_cover'
-  #     debug_color: [255, 0, 0]
-  #     points: [[-0.05,.53,0.1],[.4,.53,0.1],[-0.05,1.1,0.1],[.4,1.1,0.1]]
-  #   - name: 'wolf'
-  #     debug_color: [0,0,255]
-  #     points: [[.72,.55,-0.1],[1,.55,-.1],[.72,1.09,-.1],[1,1.09,-0.1]]
+  dropper:
+   link: 'dropper_garlic_1/base_link'
+   odom_topic: '/dropper_garlic_1/pose_gt'
+   classes:
+    - name: 'dropper_cover'
+      debug_color: [255, 0, 0]
+      points: [[-0.05,.53,0.1],[.4,.53,0.1],[-0.05,1.1,0.1],[.4,1.1,0.1]]
+    - name: 'wolf'
+      debug_color: [0,0,255]
+      points: [[.72,.55,-0.1],[1,.55,-.1],[.72,1.09,-.1],[1,1.09,-0.1]]
   # torpedo:
   #  link: 'vampire_stake_1/base_link'
   #  odom_topic: '/vampire_stake_1/pose_gt'
