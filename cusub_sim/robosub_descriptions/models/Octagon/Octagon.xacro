@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro"
-  name="dropper_garlic">
+  name="octagon">
 
   <!-- Loading file with sensor macros -->
   <xacro:include filename="$(find uuv_sensor_ros_plugins)/urdf/sensor_snippets.xacro"/>
 
-  <xacro:macro name="dropper_garlic_base" params="namespace">
+  <xacro:macro name="octagon_base" params="namespace">
 
     <xacro:default_pose_3d namespace="${namespace}" parent_link="${namespace}/base_link" />
 
     <link name="${namespace}/base_link">
       <inertial>
         <origin
-          xyz="0.0 0.0 1.0"
-          rpy="0 1.57 0" />
+          xyz="0.0 0.0 0.0"
+          rpy="0 0 0" />
         <mass
           value="0.2" />
         <inertia
@@ -25,19 +25,13 @@
           izz="1.0E-5" />
       </inertial>
       <visual>
-        <origin
-          xyz="0 0.5 0"
-          rpy="1.57 0 0" />
         <geometry>
-          <mesh filename="model://dropper_garlic/dropper_garlic.dae" />
+          <mesh filename="model://Octagon/Octagon.dae"/>
         </geometry>
       </visual>
       <collision>
-        <origin
-          xyz="0 0.5 0"
-          rpy="1.57 0 0" />
         <geometry>
-          <mesh filename="model://dropper_garlic/dropper_garlic.dae" />
+          <mesh filename="model://Octagon/Octagon.dae"/>
         </geometry>
       </collision>
     </link>
@@ -48,6 +42,6 @@
 
   </xacro:macro>
 
-  <xacro:dropper_garlic_base namespace="$(arg namespace)"/>
+  <xacro:octagon_base namespace="$(arg namespace)"/>
 
 </robot>
