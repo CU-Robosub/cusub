@@ -36,8 +36,16 @@ class Dive(Objective):
 
     def execute(self, userdata):
         depth_msg = Float64()
+        depth_msg.data = 0.2
+        rospy.loginfo("...GET TO THE CHOPPA")
+        while not rospy.is_shutdown():
+            self.dive_pub.publish(depth_msg)
+            if userdata.timeout_obj.timed_out:
+                break
+            rospy.sleep(0.25)
         depth_msg.data = rospy.get_param("tasks/startup/depth")
         rospy.loginfo("...diving")
+        userdata.timeout_obj.set_new_time(rospy.get_param("tasks/startup/dive_time"))
         while not rospy.is_shutdown():
             self.dive_pub.publish(depth_msg)
             if userdata.timeout_obj.timed_out:
