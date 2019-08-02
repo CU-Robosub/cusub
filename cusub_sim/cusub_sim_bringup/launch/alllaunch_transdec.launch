@@ -31,10 +31,10 @@
   <arg name="DR_z" default="-4.27"/>
   <arg name="DR_yaw" default="-2.27"/>
 
-<!--  <arg name="OC_x" default="-3.6"/>
-  <arg name="OC_y" default="2.3"/>
-  <arg name="OC_z" default="-3.5"/>
-  <arg name="OC_yaw" default="-2.7"/> -->
+<!--  <arg name="OC_x" default="-13.11"/>
+  <arg name="OC_y" default="-25.13"/>
+  <arg name="OC_z" default="0.0"/>
+  <arg name="OC_yaw" default="0.0"/> -->
 
   <!--  <arg name="CO_x" default="-3.6"/>
   <arg name="CO_y" default="2.3"/>

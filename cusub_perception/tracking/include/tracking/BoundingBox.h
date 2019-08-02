@@ -29,6 +29,7 @@ public:
     int ymax() const;
     float probability() const;
     bool isValid() const;
+    void extendBox(const int &amnt);
     
     std::vector<cv::Point2f> cornerPoints() const;
     cv::Rect roiRect() const;

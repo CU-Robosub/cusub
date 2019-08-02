@@ -27,12 +27,13 @@ namespace darknet_multiplexer_ns
         void occamCallback3(const sensor_msgs::ImagePtr image);
         void occamCallback4(const sensor_msgs::ImagePtr image);
         void downcamCallback(const sensor_msgs::ImagePtr image);
+        void torpedoCallback(const sensor_msgs::ImagePtr image);
         ros::NodeHandle nh;
         ros::Timer timer;
         ros::ServiceServer service;
         std::vector<ros::Subscriber> subs;
         std::vector<sensor_msgs::ImagePtr> recent_images = std::vector<sensor_msgs::ImagePtr>(6);
-        std::vector<bool> image_received = std::vector<bool>(6);
+        std::vector<bool> image_received = std::vector<bool>(7);
         ros::Publisher darknet_pub;
         ros::Publisher actives_pub;
         std::vector<bool> activeCameras;

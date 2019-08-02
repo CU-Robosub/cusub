@@ -116,6 +116,14 @@ std::vector<cv::Point2f> BoundingBox::cornerPoints() const
     return std::vector<cv::Point2f>{topLeft, topRight, bottomLeft, bottomRight};
 }
 
+void BoundingBox::extendBox(const int &amnt)
+{
+    m_xmin -= amnt;
+    m_ymin -= amnt;
+    m_xmax += amnt;
+    m_ymax += amnt;
+}
+
 bool BoundingBox::checkBox()
 {
     bool retVal = true;
