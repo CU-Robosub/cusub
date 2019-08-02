@@ -19,6 +19,7 @@ tasks:
   manager_info:
     timeout_secs: 5
   depth: -1.5
+  dive_time: 3
 
  start_gate:
   manager_info:
@@ -119,5 +120,5 @@ tasks:
     dice6: dice_box
 
 mission_tasks: # Tasks To Do In Order
-  - startup
+  - jiangshi
 

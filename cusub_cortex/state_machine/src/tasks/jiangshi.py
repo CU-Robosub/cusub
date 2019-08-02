@@ -182,7 +182,7 @@ class Slay(Objective):
         self.configure_darknet_cameras([1,0,0,0,0,0])
         rospy.loginfo("...using visual servoing approach")
         goal = VisualServoGoal()
-        goal.target_class = ["vampire_cute"]
+        goal.target_classes = ["vampire_cute"]
         goal.camera = goal.OCCAM
         goal.x_axis = goal.YAW_AXIS
         goal.y_axis = goal.DEPTH_AXIS

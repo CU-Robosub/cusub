@@ -99,7 +99,7 @@ namespace perception_control
         {
             set.data = set.data > 0 ? occam_depth_max_setpoint : -occam_depth_max_setpoint;
         }
-        std::cout << "depth set: " << set.data << std::endl;
+        // std::cout << "depth set: " << set.data << std::endl;
         set.data += depthState;
         depthPub.publish(set);
     }
