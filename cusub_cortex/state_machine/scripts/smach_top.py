@@ -24,6 +24,7 @@ from tasks.manager import Manager
 from tasks.task import Timeout
 from tasks.path import Path
 from tasks.dropper import Dropper
+from tasks.startup_task import Startup
 
 def createTransitionsForManager(task_list, final_outcome):
     transition_dict = {}
@@ -54,6 +55,8 @@ def loadStateMachines(task_list):
             task_sm = Path("1")
         elif task == "dropper":
             task_sm = Dropper()
+        elif task == "startup":
+            task_sm = Startup()
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 

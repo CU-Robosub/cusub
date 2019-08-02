@@ -1,0 +1,21 @@
+<launch>
+    <arg name="sub_name" default="leviathan"/>
+    <arg name="detection_topic" default="cusub_perception/darknet_ros/bounding_boxes" />
+    <arg name="image_topic" default="cusub_perception/darknet_multiplexer/out" />
+    <arg name="detection_thresh" default="0.8" />
+    <arg name="reseed_thresh" default="0.9" />
+    <arg name="debug_mode" default="true" />
+    
+    
+    <group ns="$(arg sub_name)">
+        <node pkg="nodelet" type="nodelet" name="tracking_node" args="load tracking/Tracking standalone_nodelet" output="screen">
+            <rosparam command="load" ns="image_topics" file="$(find tracking)/cfg/image_topics.txt"/>
+            <param name="image_topic" value="$(arg image_topic)"/>
+            <param name="detection_topic" value="$(arg detection_topic)"/>
+            <param name="detection_thresh" value="$(arg detection_thresh)"/>
+            <param name="reseed_thresh" value="$(arg reseed_thresh)"/>
+            <param name="debug_mode" value="$(arg debug_mode)"/>
+        </node>
+    </group>
+
+</launch>
