@@ -110,7 +110,7 @@ class JoyTeleop(object):
         try:
             activate_actuator = rospy.ServiceProxy('activateActuator', ActivateActuator)
             activate_actuator(num, time)
-        except e:
+        except:
             print "Actuation Failed"
 
     def actuate_left_dropper(self, _):

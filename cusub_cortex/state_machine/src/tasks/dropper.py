@@ -72,72 +72,76 @@ class Drop(Objective):
 
         super(Drop, self).__init__(self.outcomes, "drop")
 
+    def actuate_dropper(self, _):
+        self.actuater_service(1, 500)
+
     def vs_feedback_callback(self, feedback):
         self.feedback = feedback.centered
     
     def depth_callback(self, depth):
         self.last_depth.data = depth.data
 
-    def execute(self, userdata):
+    def visual_servo_method(self, userdata):
+   #     self.configure_darknet_cameras([1,0,0,0,0,0])
+        rospy.loginfo("...using visual servoing approach")
         goal = VisualServoGoal()
-        goal.target_class = TARGET_CLASS # todo SK
-        goal.camera = goal.DOWNCAM
-        goal.target_frame = rospy.get_param("~robotname") +"/camera"
-        goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
+        goal.approach_target_class = ["wolf", "bat", "dropper_cover", "lever"]
+        goal.target_class = ["wolf", "bat"]
+        goal.camera = goal.OCCAM
+        goal.x_axis = goal.YAW_AXIS
+        goal.y_axis = goal.DEPTH_AXIS
+        goal.area_axis = goal.DRIVE_AXIS
+        goal.target_frame = rospy.get_param("~robotname") +"/description/occam0_frame_optical"
         goal.visual_servo_type = goal.PROPORTIONAL
         goal.target_pixel_x = goal.CAMERAS_CENTER_X
-        goal.target_pixel_y = goal.CAMERAS_CENTER_Y
+        goal.target_pixel_y = 0
+        goal.target_box_area = goal.FORTY_PERCENT_IMAGE
         goal.target_pixel_threshold = self.target_pixel_box
+        rospy.loginfo("...moving to box")
+        self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)
+
+        while not rospy.is_shutdown() :
+            if userdata.timeout_obj.timed_out:
+                self.vs_client.cancel_goal()
+                userdata.outcome = "timed_out"
+                return "timed_out"
+            rospy.sleep(0.25)
+        self.vs_client.cancel_goal()
+        rospy.loginfo("\tmoved to the dropper detections")
+
+        # wait for more downcam feedback?
+
+        # toggle to using the downcam to center
+        goal.camera = goal.DOWNCAM
+        goal.target_box_area = goal.TWENTY_PERCENT_IMAGE
+        goal.target_pixel_x = goal.CAMERAS_CENTER_X
+        goal.target_pixel_y = goal.CAMERAS_CENTER_Y
+        # todo MM: double check the downcam frame name
+        # She'll be 'right
+        goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
         goal.x_axis = goal.STRAFE_AXIS
         goal.y_axis = goal.DRIVE_AXIS
-        rospy.loginfo("...centering over path marker")
-        self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)
+        goal.area_axis = goal.NO_AXIS
+        goal.target_box_area = goal.AREA_NOT_USED
         
-        while not rospy.is_shutdown() :
-            self.depth_pub.publish(self.depth_msg)
+
+        # Drop down to low above the ground (get it low)
+        self.wayToggle(False)
+        depth_set = Float64()
+        drive_set.data = self.drop_depth
+        userdata.timeout_obj.set_new_time(rospy.get_param("tasks/dropper/drop_timeout"))
+        while not rospy.is_shutdown():
+            self.depth_pub.publish(depth_set)
             if userdata.timeout_obj.timed_out:
-                self.vs_client.cancel_goal()
-                userdata.outcome = "timed_out"
-                return "timed_out"
-            if self.feedback:
-                if self.was_centered:
-                    break
-                else:
-                    rospy.sleep(self.centering_time)
-                    self.was_centered = True
-            else:
-                self.was_centered = False
-            rospy.sleep(0.25)
-        rospy.loginfo("\tcentered")
-    
-        # keep pubbing until we get there
-        self.depth_msg.data = self.drop_depth
-        while abs(self.last_depth.data - self.depth_msg.data) > self.drop_thresh:
-            self.depth_pub.publish(self.depth_msg)
+                break # on a timeout, drop anyway, cause why not
             rospy.sleep(0.25)
 
-        rospy.loginfo("...centering over path marker")
-        while not rospy.is_shutdown() :
-            self.depth_pub.publish(self.depth_msg)
-            if userdata.timeout_obj.timed_out:
-                self.vs_client.cancel_goal()
-                userdata.outcome = "timed_out"
-                return "timed_out"
-            if self.feedback:
-                if self.was_centered:
-                    break
-                else:
-                    rospy.sleep(5)
-                    self.was_centered = True
-            else:
-                self.was_centered = False
-            rospy.sleep(0.25)
-        rospy.loginfo("\tcentered (again)")
-        rospy.loginfo("...about to drop my load ;)")
-        self.actuator_service(1, 500)
-        rospy.loginfo("\tdropped")
+        rospy.loginfo("About to drop!")
+        self.actuate_dropper()
 
-
-        self.vs_client.cancel_goal()  # Tell VS to stop servoing
+        self.wayToggle(True)
         userdata.outcome = "success"
         return "success"
+
+    def execute(self, userdata):
+        return self.visual_servo_method()
