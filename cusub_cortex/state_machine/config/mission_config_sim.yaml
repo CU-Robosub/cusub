@@ -26,8 +26,8 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'uh_oh'
-#  prior: [-11,25,-1.5, "world"] # TRANSDEC, DIVEWELL 8,0,-1.5
-  prior: [4, 0, -1.5, "world"] # TRANSDEC, DIVEWELL 8,0,-1.5  
+  prior: [-18,-22,-1.5, "world"] # TRANSDEC
+  # prior: [4, 0, -1.5, "world"] # TRANSDEC, DIVEWELL 8,0,-1.5  
   dist_behind_gate: 1.0
   third_leg_adjustment: 0.75
   replan_thresh: 1.0
@@ -53,8 +53,8 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip'
     outcome_timed_out: 'skip'
-  prior: [4.0,0.0,-1.5, "world"] # DIVEWELL
-  # prior: [-19,23,-1.5, "world"]
+  # prior: [4.0,0.0,-1.5, "world"] # DIVEWELL
+  prior: [-25,-16,-1.5, "world"] # TRANSDEC
   method: vs        # solvepnp OR vs
   solvepnp:
     use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
@@ -67,17 +67,22 @@ tasks:
     slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
     target_pixel_threshold: 50    # how close to our target do we need to be    
 
- triangle_bouy: # first implemented with just hit the buoy
+ triangle:
   manager_info:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  prior: [-2.5,2.0,-1.5]
+  prior: [4.0, 0.0, -1.5, "world"]
+  do_orbit: false
   visual_servo: # approach and slay
     goal_percentage_of_frame: 0.4    # Percentage of image for target class
     slay_timeout: 10                 # How long the slay will last
     slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
     target_pixel_threshold: 50    # how close to our target do we need to be    
+  mikes_method:
+    do: false
+    go_over_jiangshi_depth: -0.7
+    meters_fwd: 2.0
 
  torpedos:
   manager_info:
@@ -93,7 +98,8 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  prior: [4, 0.0, -1, "world"] # Won't matter much b/c we'll almost immediately see it after the SG
+  prior: [-33, -11, -2.0, "world"] # TRANSDEC
+  # prior: [4, 0.0, -1, "world"] # DIVEWELL
   centering_time: 5            # Time between first centered feedback & when we check if we're centered again
   target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   drop_timeout: 45
@@ -104,5 +110,8 @@ tasks:
   depth_carrot: 0.5
 
 mission_tasks: # Tasks To Do In Order
-  - dropper
+ - startup
+ - start_gate
+ - jiangshi
+ - dropper
 

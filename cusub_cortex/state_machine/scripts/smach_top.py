@@ -19,12 +19,12 @@ from tasks.naive_visual_servo_objective import NaiveVisualServoTask
 # from tasks.dropper_task import DropperTask
 # from tasks.bangbang_roulette_task import BangBangRouletteTask
 from tasks.jiangshi import Jiangshi
-from tasks.triangle_buoy import Triangle_Buoy
 from tasks.manager import Manager
 from tasks.task import Timeout
 from tasks.path import Path
 from tasks.dropper import Dropper
 from tasks.startup_task import Startup
+from tasks.triangle import Triangle
 
 def createTransitionsForManager(task_list, final_outcome):
     transition_dict = {}
@@ -57,6 +57,8 @@ def loadStateMachines(task_list):
             task_sm = Dropper()
         elif task == "startup":
             task_sm = Startup()
+        elif task == "triangle":
+            task_sm = Triangle()
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 

@@ -140,7 +140,6 @@ class Slay(Objective):
             slay_pose.position.x = self.jiangshi_pose.pose.position.x - self.slay_dist * np.cos(jiangshi_yaw)
             slay_pose.position.y = self.jiangshi_pose.pose.position.y - self.slay_dist * np.sin(jiangshi_yaw)
             slay_pose.position.z = self.jiangshi_pose.pose.position.z
-            slay_pose.orientation = approach_pose.orientation
         else: # just draw a line from sub to buoy and hit it
             slay_pose = self.get_pose_behind(self.cur_pose, self.jiangshi_pose.pose, self.slay_dist)
         return slay_pose
@@ -227,7 +226,7 @@ class Slay(Objective):
             rospy.sleep(0.25)
 
         rospy.loginfo("...slayed, backing up")
-        userdata.timeout_obj.set_new_time(2* rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"))
+        userdata.timeout_obj.set_new_time(6* rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"))
         slay_set.data = original_set
         while not rospy.is_shutdown():
             self.drive_pub.publish(slay_set)
