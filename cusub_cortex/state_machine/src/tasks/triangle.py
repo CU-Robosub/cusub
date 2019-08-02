@@ -119,9 +119,10 @@ class Slay(Objective):
             rospy.sleep(0.25)
 
         rospy.loginfo("...slayed, backing up")
-        userdata.timeout_obj.set_new_time(2* rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"))
-        slay_set.data = original_set
+        userdata.timeout_obj.set_new_time(3* rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"))
+        # slay_set.data = original_set
         while not rospy.is_shutdown():
+            slay_set.data = self.drive_state - slay_carrot
             self.drive_pub.publish(slay_set)
             if userdata.timeout_obj.timed_out:
                 break
@@ -129,15 +130,15 @@ class Slay(Objective):
         self.wayToggle(True)
 
         # go to pose convenient for droppers
-        userdata.timeout_obj.timed_out.set_new_time(30)
-        evasion_pose = Pose()
-        evasion_pose.position.x = 
-        evasion_pose.position.y = 
-        evasion_pose.position.z = 
-        if self.go_to_pose(evasion_pose, userdata.timeout_obj, replan_enabled=False):
-            if userdata.timeout_obj.timed_out:
-                userdata.outcome = "timed_out"
-                return "timed_out"
+        # userdata.timeout_obj.timed_out.set_new_time(30)
+        # evasion_pose = Pose()
+        # evasion_pose.position.x = -21.8
+        # evasion_pose.position.y = 6.6
+        # evasion_pose.position.z = -1.8
+        # if self.go_to_pose(evasion_pose, userdata.timeout_obj, replan_enabled=False):
+        #     if userdata.timeout_obj.timed_out:
+        #         userdata.outcome = "timed_out"
+        #         return "timed_out"
 
         userdata.outcome = "success"
         return "success"

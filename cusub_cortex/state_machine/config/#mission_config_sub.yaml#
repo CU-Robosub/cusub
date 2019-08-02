@@ -21,7 +21,7 @@ tasks:
   # prior: [0,-8.0,-1.5]
   # prior: [-9.5,-9.7,-0.75] D
   # prior: [11.5,9,-0.75]  A
-  prior: [-9, 2, -0.5] # B    KEEP IN MIND IF TOP IS ON SURFACE
+  prior: [-9, 2, -0.5] # C    KEEP IN MIND IF TOP IS ON SURFACE
   dist_behind_gate: 1.0
   third_leg_adjustment: 1.0
   replan_thresh: 1.0
