@@ -16,11 +16,16 @@ namespace darknet_get_classes_ns
     void GetClasses::darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs)
     {
         if ( !recording ) { return; }
-        for(darknet_ros_msgs::BoundingBox box : bbs->bounding_boxes)
+        // only check the frames passed in
+        if (std::find(frame_ids.begin(), frame_ids.end(), bbs->image.header.frame_id) != frame_ids.end())
         {
-            if (std::find(classes.begin(), classes.end(),box.Class) == classes.end()) // check if the class already exists in the vector
+            for(darknet_ros_msgs::BoundingBox box : bbs->bounding_boxes)
             {
-                classes.push_back(box.Class);
+                if (std::find(classes.begin(), classes.end(),box.Class) == classes.end()) // check if the class already exists in the vector
+                {
+                    std::cout << box.Class << "\n";
+                    classes.push_back(box.Class);
+                }
             }
         }
     }
@@ -29,7 +34,9 @@ namespace darknet_get_classes_ns
                             {
                                 NODELET_INFO("GetClasses received request");
                                 classes.clear();
+                                frame_ids.clear();
                                 recording = true;
+                                frame_ids = request.frame_ids;
                                 request.monitor_time.sleep();
                                 recording = false;
                                 response.classes = classes;
