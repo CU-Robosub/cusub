@@ -1,5 +1,7 @@
 #include <perception_control/visual_servo.h>
 
+#include <assert.h>
+
 namespace perception_control
 {
 void VisualServo::onInit()
@@ -17,7 +19,7 @@ void VisualServo::onInit()
     server->start();
 }
 
-bool VisualServo::getTarget(const std::vector<darknet_ros_msgs::BoundingBox> &boxes, darknet_ros_msgs::BoundingBox &targetBox, int &xTarget, int &yTarget)
+bool VisualServo::getTarget(const std::vector<darknet_ros_msgs::BoundingBox> &boxes, darknet_ros_msgs::BoundingBox &targetBox)
 {
     bool box_found = false;
     std::map<std::string, std::vector<darknet_ros_msgs::BoundingBox> > foundTargets;
@@ -57,25 +59,19 @@ bool VisualServo::getTarget(const std::vector<darknet_ros_msgs::BoundingBox> &bo
 
     bool foundBox = false;
 
-    xTarget = 0;
-    yTarget = 0;
-    int xmin = INFINITY, ymin = INFINITY;
-    int xmax = -INFINITY, ymax = -INFINITY;
-    int count = 0;
+    int xmin = 1e9, ymin = 1e9;
+    int xmax = -1e9, ymax = -1e9;
     for (auto iter : foundTargets)
     {
         for (darknet_ros_msgs::BoundingBox box : iter.second) // each will have 1
         {
             foundBox = true;
-            xTarget += (box.xmax + box.xmin) / 2;
-            yTarget += (box.ymax + box.ymin) / 2;
-            count++;
 
             if (box.xmax > xmax)
             {
                 xmax = box.xmax;
             }
-            if (box.xmin < box.xmin)
+            if (box.xmin < xmin)
             {
                 xmin = box.xmin;
             }
@@ -83,17 +79,11 @@ bool VisualServo::getTarget(const std::vector<darknet_ros_msgs::BoundingBox> &bo
             {
                 ymax = box.ymax;
             }
-            if (box.ymin < box.ymin)
+            if (box.ymin < ymin)
             {
                 ymin = box.ymin;
             }
         }
-    }
-
-    if (foundBox)
-    {
-        xTarget /= count;
-        yTarget /= count;
     }
 
     targetBox.xmin = xmin;
@@ -109,9 +99,8 @@ void VisualServo::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr 
     if( !controllingPids ) { return; }
 
     // Locate target box if in image
-    int target_pixel_x, target_pixel_y;
     darknet_ros_msgs::BoundingBox target_box;
-    bool box_found = getTarget(bbs->bounding_boxes, target_box, target_pixel_x, target_pixel_y);
+    bool box_found = getTarget(bbs->bounding_boxes, target_box);
 
     if (box_found)
     {

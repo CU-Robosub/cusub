@@ -27,6 +27,7 @@ class VisualServo : public nodelet::Nodelet
 public:
     virtual void onInit();
 private:
+    bool getTarget(const std::vector<darknet_ros_msgs::BoundingBox> &boxes, darknet_ros_msgs::BoundingBox &targetBox);
     bool respondError(ImageAxis axis, float error);
     bool respondDowncamError(ImageAxis axis, float error);
     bool respondOccamError(ImageAxis axis, float error);
@@ -59,9 +60,6 @@ private:
     void (BBController::*respondArea)(float);
 
     bool xResponse, yResponse, areaResponse;
-
-private:
-    bool getTarget(const std::vector<darknet_ros_msgs::BoundingBox> &boxes, darknet_ros_msgs::BoundingBox &targetBox, int &xTarget, int &yTtarget);
 };
 }; // namespace perception_control
 

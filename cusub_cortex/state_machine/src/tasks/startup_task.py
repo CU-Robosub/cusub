@@ -36,7 +36,7 @@ class Dive(Objective):
 
     def execute(self, userdata):
         depth_msg = Float64()
-        depth_msg.data = 0.2
+        depth_msg.data = 0.2 # experimentally determined from leviathan
         rospy.loginfo("...GET TO THE CHOPPA")
         while not rospy.is_shutdown():
             self.dive_pub.publish(depth_msg)
