@@ -15,6 +15,11 @@ manager_task_status_pub_rate: 1
 startup_delay: 0
 
 tasks:
+ startup:
+  manager_info:
+    timeout_secs: 5
+  depth: -1.5
+
  start_gate:
   manager_info:
     timeout_secs: 0
@@ -61,6 +66,18 @@ tasks:
     slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
     target_pixel_threshold: 50    # how close to our target do we need to be    
 
+ triangle_bouy: # first implemented with just hit the buoy
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'skip'
+  prior: [-2.5,2.0,-1.5]
+  visual_servo: # approach and slay
+    goal_percentage_of_frame: 0.4    # Percentage of image for target class
+    slay_timeout: 10                 # How long the slay will last
+    slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
+    target_pixel_threshold: 50    # how close to our target do we need to be    
+
  dropper:
   manager_info:
     timeout_secs: 0
@@ -82,19 +99,6 @@ tasks:
   target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   centering_time: 5            # Time between first centered feedback & when we check if we're centered again
 
-
- triangle_buoy:
-  prior: [4,0,-2]
-  approach_dist: 2.0
-  slay_dist: 0.0
-  replan_thresh: 3.0
-  imu_axis: 'y'
-  jump_thresh: 3.0
-  slay_class: 'vampire_flying'
-  orbital_direction: 'left'
-  strafe_setpoint: 0.5
-  number_solo_frames : 1
-
  dice:
   prior: [3,0,-2.3]
   targets: ['dice5', 'dice6']
@@ -115,5 +119,5 @@ tasks:
     dice6: dice_box
 
 mission_tasks: # Tasks To Do In Order
-  - jiangshi
+  - startup
 
