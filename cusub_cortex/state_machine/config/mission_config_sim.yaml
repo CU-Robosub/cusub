@@ -79,18 +79,6 @@ tasks:
     slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
     target_pixel_threshold: 50    # how close to our target do we need to be    
 
- dropper:
-  manager_info:
-    timeout_secs: 0
-    outcome_not_found: 'skip' # skip, later
-    outcome_timed_out: 'skip'
-  prior: [-2.5,2.0,-1.5, "world"] # Won't matter much b/c we'll almost immediately see it after the SG
-  target_pixel_threshold: 50   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
-  centering_time: 0            # Time between first centered feedback & when we check if we're centered again
-  search_depth: -0.5
-  drop_depth: -1.5
-  drop_thresh: 0.5
-
  torpedos:
   manager_info:
     timeout_secs: 0
@@ -100,25 +88,21 @@ tasks:
   target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   centering_time: 5            # Time between first centered feedback & when we check if we're centered again
 
- dice:
-  prior: [3,0,-2.3]
-  targets: ['dice5', 'dice6']
-  replan_threshold: 1.0
-  approach_method: 'optimal' # optimal, twopoint, direct
-  approach_radius: 1.0
-  orbital_radius: 2.0
-  lockon_time: 5.0
-  carrot_dist: 2.0
-  backup_dist: 2.0
-  accel_spike_thresh: -0.15
-  accel_axis: 'x'
-  attack_timeout: 30
-  object_localizers:
-    dice1: dice_box
-    dice2: dice_box
-    dice5: dice_box
-    dice6: dice_box
+ dropper:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'skip'
+  prior: [4, 0.0, -1, "world"] # Won't matter much b/c we'll almost immediately see it after the SG
+  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
+  target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  drop_timeout: 45
+  drop_depth: -2.5
+  drop_depth_thresh: 0.3
+  approach_depth: -1
+  drive_carrot: 2.0
+  depth_carrot: 0.5
 
 mission_tasks: # Tasks To Do In Order
-  - jiangshi
+  - dropper
 
