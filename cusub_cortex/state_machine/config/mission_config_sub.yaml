@@ -7,6 +7,11 @@ manager_task_status_pub_rate: 1
 startup_delay: 0
 
 tasks:
+ startup:
+  manager_info:
+    timeout_secs: 5
+  depth: -1.5
+  
  start_gate:
   manager_info:
     timeout_secs: 0
