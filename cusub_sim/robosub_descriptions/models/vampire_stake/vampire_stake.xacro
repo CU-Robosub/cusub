@@ -7,6 +7,8 @@
 
   <xacro:macro name="vampire_steak_base" params="namespace">
 
+    <xacro:default_pose_3d namespace="${namespace}" parent_link="${namespace}/base_link" />
+
     <link name="${namespace}/base_link">
       <inertial>
         <origin
@@ -102,8 +104,8 @@
     </link>
 
     <joint name="${namespace}/magic_base_joint" type="fixed">
-        <child link="${namespace}/base_link"/>
-        <parent link="${namespace}/magic_base_link"/>
+        <child link="${namespace}/magic_base_link"/>
+        <parent link="${namespace}/base_link"/>
     </joint>
 
     <gazebo>
