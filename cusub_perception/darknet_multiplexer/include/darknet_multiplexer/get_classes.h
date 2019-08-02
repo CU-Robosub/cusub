@@ -22,6 +22,7 @@ namespace darknet_get_classes_ns
         ros::ServiceServer service;
         ros::Subscriber darknetSub;
         bool recording;
+        std::vector<std::string> frame_ids;
     };
 }
 

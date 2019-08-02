@@ -91,8 +91,10 @@ namespace localizer_ns
       if( bb_map_it->first->generatePose(bbs->image, bb_map_it->second, det.pose.pose, det.class_id))
       {
         pub.publish(det);
-      } else {
-        NODELET_WARN_THROTTLE(1, "Localizer failed to localize %s", det.class_id.c_str());
+      }
+      else
+      {
+        // NODELET_WARN_THROTTLE(1, "Localizer failed to localize %s", det.class_id.c_str());
       }
     }
   }

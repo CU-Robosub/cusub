@@ -44,7 +44,7 @@ class Search(Objective):
         self.prior_pose_param = prior_pose_param
         self.target_classes = []
         self.target_frames = []
-        if target_class == None:                # Exit by subscribing to a topic
+        if target_classes == None:                # Exit by subscribing to a topic
             self.topic_exit = True
             rospy.Subscriber(exit_topic, PoseStamped, self.exit_callback)
         elif type(target_classes) == str:                                   # Exit by a bounding box with our target class being available
@@ -102,10 +102,16 @@ class Search(Objective):
 
         # Ask the server for available bounding box classes and check if our target_class is among those
         while not rospy.is_shutdown():
-            present_classes = self.service(rospy.Duration(1)).classes # TODO pass in our target frames
+            present_classes = self.service(rospy.Duration(1), self.target_frames).classes
+            
+            found = False
             for c in self.target_classes:
                 if c in present_classes:
-                    break
+                    found = True
+            
+            if found:
+                break
+
             if userdata.timeout_obj.timed_out:
                 self.cancel_way_client_goal()
                 userdata.outcome = "timed_out"
