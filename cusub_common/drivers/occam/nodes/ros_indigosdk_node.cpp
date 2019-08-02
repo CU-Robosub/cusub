@@ -498,11 +498,6 @@ public:
   void onInit() {
       device = 0;
       OCCAM_CHECK(occamInitialize());
-      
-      // bool exposure = false;
-      // OCCAM_CHECK(occamSetDeviceValueb(device, OCCAM_AUTO_EXPOSURE, true));
-      // occamGetDeviceValueb(device, OCCAM_AUTO_EXPOSURE, &exposure);
-      // ROS_INFO("exposure is now %d", exposure);
 
       nh = getMTNodeHandle();
       nhp = getMTPrivateNodeHandle();
@@ -567,7 +562,10 @@ public:
       wait_count_max = loop_freq;
       wait_count = 0;
       timer = nh.createTimer(ros::Duration(1 / loop_freq), &OccamNode::take_and_send_data, this);
-  }
+
+      // start in auto exposure mode	
+      occamSetDeviceValuei(device, OCCAM_AUTO_EXPOSURE, 1);
+}
 
   OccamNode() : device(0) {
       ;
@@ -584,12 +582,23 @@ public:
 
   // not occam stuff
   void exposure_callback(const std_msgs::Float64::ConstPtr& msg) {
+        int auto_exposure = 0;
         int exposure = 0;
+        if (msg->data == 1){
+          occamSetDeviceValuei(device, OCCAM_AUTO_EXPOSURE, 1);
 
-        OCCAM_CHECK(occamSetDeviceValuei(device, OCCAM_EXPOSURE, msg->data));
-        OCCAM_CHECK(occamGetDeviceValuei(device, OCCAM_EXPOSURE, &exposure));
-        ROS_INFO("exposure is now %d", exposure);
+          occamGetDeviceValuei(device, OCCAM_AUTO_EXPOSURE, &auto_exposure);          
+        }
+        else{
+          
+          occamSetDeviceValuei(device, OCCAM_AUTO_EXPOSURE, 0);
+          occamGetDeviceValuei(device, OCCAM_AUTO_EXPOSURE, &auto_exposure);
 
+          OCCAM_CHECK(occamSetDeviceValuei(device, OCCAM_EXPOSURE, msg->data));
+          OCCAM_CHECK(occamGetDeviceValuei(device, OCCAM_EXPOSURE, &exposure));
+          ROS_INFO("exposure is now %d", exposure);
+        }
+        ROS_INFO("auto_exposure is now %d", auto_exposure);
   }
 
   int wait_count_max;
