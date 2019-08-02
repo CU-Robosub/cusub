@@ -33,7 +33,8 @@ class Path(Task):
         self.link_objectives()
 
     def init_objectives(self, path_num_str):
-        self.search = Search.from_bounding_box(self.get_prior_param(), "path", [0,0,0,0,0,1])
+        frame = "leviathan/description/downcam_frame_optical"
+        self.search = Search.from_bounding_box(self.get_prior_param(), "path", frame, [0,0,0,0,0,1])
         self.follow = Follow(path_num_str)
 
     def link_objectives(self):
