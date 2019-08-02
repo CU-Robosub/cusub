@@ -162,8 +162,13 @@ class Drop(Objective):
         goal.visual_servo_type = goal.PROPORTIONAL
         goal.target_classes = ["wolf", "bat"]
         goal.camera = goal.DOWNCAM
-        goal.target_pixel_x = goal.DOWNCAM_FAKE_CENTER_X
-        goal.target_pixel_y = goal.DOWNCAM_FAKE_CENTER_Y
+
+        # in sim:
+        # goal.target_pixel_x = goal.DOWNCAM_FAKE_CENTER_X
+        # goal.target_pixel_y = goal.DOWNCAM_FAKE_CENTER_Y
+
+        goal.target_pixel_x = goal.CAMERAS_CENTER_X
+        goal.target_pixel_y = goal.CAMERAS_CENTER_Y
         goal.target_pixel_threshold = self.target_pixel_threshold
         goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
         goal.target_box_area = goal.AREA_NOT_USED
