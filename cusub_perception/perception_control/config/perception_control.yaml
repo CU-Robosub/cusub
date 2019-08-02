@@ -16,7 +16,7 @@ perception_control:
           maxout_pixel_dist: 50
       occam:
         drive:
-          max_setpoint: 0.5
+          max_setpoint: 3.0
           maxout_pixel_dist: 100
         strafe:
           max_setpoint: 1.0

@@ -7,10 +7,10 @@
 		<!-- Power Monitoring -->
 
 		<!-- Perception Nodelet -->
-		<node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager"/>
+		<node pkg="nodelet" type="nodelet" name="standalone_nodelet" args="manager" respawn="true"/>
 
 		<!-- Occam -->
-		<node pkg="nodelet" type="nodelet" name="occam" args="load ros_indigosdk/occam standalone_nodelet" output="screen">
+		<node pkg="nodelet" type="nodelet" name="occam" args="load ros_indigosdk/occam standalone_nodelet" output="screen" respawn="true">
 			<param name="frame_id" value="leviathan/description/occam"/>
 		</node>
 
@@ -18,7 +18,7 @@
 		<include file="$(find pointgrey_camera_driver)/launch/camera.launch" />
 
 		<!-- Torpedo Camera -->
-		<node pkg="nodelet" type="nodelet" name="torpedocam" args="load cv_camera/CvCameraNodelet /leviathan/standalone_nodelet" ns="cusub_common" />
+		<node pkg="nodelet" type="nodelet" name="torpedocam" args="load cv_camera/CvCameraNodelet /leviathan/standalone_nodelet" ns="cusub_common" respawn="true"/>
 		<!-- TODO Load/Unload scripts Nodelet crash debug -->
 
 	</group>

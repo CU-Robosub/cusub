@@ -30,30 +30,40 @@ bool VisualServo::getTarget(const std::vector<darknet_ros_msgs::BoundingBox> &bo
     for(const darknet_ros_msgs::BoundingBox &box : boxes)
     {
         bool is_target_class = std::find(target_classes.begin(), target_classes.end(), box.Class) != target_classes.end();
-        if (is_target_class && foundTargets[box.Class].size() == 0)
+        
+        if (is_target_class)
         {
-            foundTargets[box.Class].push_back(box);
-        }
-        // target_box was already found, take the average
-        else if (is_target_class)
-        {
-            targetBox = foundTargets[box.Class].at(0);
-            NODELET_WARN_THROTTLE(1, "Multiple Boxes of the target class given in the same image! Choosing the closest to our target goal");
-            int center_x1 = (box.xmax + box.xmin) / 2;
-            int center_y1 = (box.ymax + box.ymin) / 2;
-            int center_x2 = (targetBox.xmax + targetBox.xmin) / 2;
-            int center_y2 = (targetBox.ymax + targetBox.ymin) / 2;
-
-            int error_x1 = center_x1 - target_pixel_x;
-            int error_y1 = center_y1 - target_pixel_y;
-            int error_x2 = center_x2 - target_pixel_x;
-            int error_y2 = center_y2 - target_pixel_y;
-
-            if (std::abs(error_x1) + std::abs(error_y1) < std::abs(error_x2) + std::abs(error_y2)) // switch the target box
+            // first one
+            if (foundTargets[box.Class].size() == 0)
             {
-                foundTargets[box.Class].at(0) = box;
+                foundTargets[box.Class].push_back(box);
             }
-            // else don't switch the target_box
+            // coffin should have both boxes
+            else if (box.Class == "coffin")
+            {
+                foundTargets[box.Class].push_back(box);
+                std::cout << "Adding multiple coffins!" << std::endl;
+            }
+            else // we only want one class for everything else
+            {
+                targetBox = foundTargets[box.Class].at(0);
+                NODELET_WARN_THROTTLE(1, "Multiple Boxes of the target class given in the same image! Choosing the closest to our target goal");
+                int center_x1 = (box.xmax + box.xmin) / 2;
+                int center_y1 = (box.ymax + box.ymin) / 2;
+                int center_x2 = (targetBox.xmax + targetBox.xmin) / 2;
+                int center_y2 = (targetBox.ymax + targetBox.ymin) / 2;
+
+                int error_x1 = center_x1 - target_pixel_x;
+                int error_y1 = center_y1 - target_pixel_y;
+                int error_x2 = center_x2 - target_pixel_x;
+                int error_y2 = center_y2 - target_pixel_y;
+
+                if (std::abs(error_x1) + std::abs(error_y1) < std::abs(error_x2) + std::abs(error_y2)) // switch the target box
+                {
+                    foundTargets[box.Class].at(0) = box;
+                }
+                // else don't switch the target_box
+            }
         }
     }
 

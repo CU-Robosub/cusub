@@ -227,8 +227,9 @@ class Slay(Objective):
 
         rospy.loginfo("...slayed, backing up")
         userdata.timeout_obj.set_new_time(6* rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"))
-        slay_set.data = original_set
+        # slay_set.data = original_set
         while not rospy.is_shutdown():
+            slay_set.data = self.drive_state - slay_carrot
             self.drive_pub.publish(slay_set)
             if userdata.timeout_obj.timed_out:
                 break
