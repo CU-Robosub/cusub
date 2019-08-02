@@ -45,11 +45,13 @@ class JoyTeleop(object):
     strafe_sensitivity = 0.02
     depth_sensitivity = 0.01
 
-    dropper_triggered = False
+    left_dropper_triggered = False
+    right_dropper_triggered = False
     left_torpedo_triggered = False
     right_torpedo_triggered = False
 
-    dropper_avail = True
+    left_dropper_avail = True
+    right_dropper_avail = True
     left_torpedo_avail = True
     right_torpedo_avail = True
 
@@ -73,8 +75,10 @@ class JoyTeleop(object):
         """Gets joystick data to figure out what to have the sub do
         """
 
-        if data.buttons[0] and self.dropper_avail:
-            self.dropper_triggered = True
+        if data.buttons[0] and self.right_dropper_avail:
+            self.right_dropper_triggered = True
+        if data.buttons[1] and self.left_dropper_avail:
+            self.left_dropper_triggered = True
         if data.buttons[4] and self.left_torpedo_avail:
             self.left_torpedo_triggered = True
         if data.buttons[5] and self.right_torpedo_avail:
@@ -109,9 +113,13 @@ class JoyTeleop(object):
         except:
             print "Actuation Failed"
 
-    def actuate_dropper(self, _):
+    def actuate_left_dropper(self, _):
+        self.actuate(0, 500)
+        self.left_dropper_avail = True
+    
+    def actuate_right_dropper(self, _):
         self.actuate(1, 500)
-        self.dropper_avail = True
+        self.right_dropper_avail = True
 
     def actuate_left_torpedo(self, _):
         self.actuate(2, 500)
@@ -237,10 +245,14 @@ class JoyTeleop(object):
             gripper_inner_pub.publish(inner_f64)
 
             # timer used to run in another thread
-            if self.dropper_triggered:
-                self.dropper_triggered = False
-                self.dropper_avail = False
-                rospy.Timer(rospy.Duration(0.1), self.actuate_dropper, oneshot=True)
+            if self.left_dropper_triggered:
+                self.left_dropper_triggered = False
+                self.left_dropper_avail = False
+                rospy.Timer(rospy.Duration(0.1), self.actuate_left_dropper, oneshot=True)
+            if self.right_dropper_triggered:
+                self.right_dropper_triggered = False
+                self.right_dropper_avail = False
+                rospy.Timer(rospy.Duration(0.1), self.actuate_right_dropper, oneshot=True)
             if self.left_torpedo_triggered:
                 self.left_torpedo_triggered = False
                 self.left_torpedo_avail = False

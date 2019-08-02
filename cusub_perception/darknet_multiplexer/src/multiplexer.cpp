@@ -24,7 +24,7 @@
          nh.getParam("darknet_multiplexer/startup_configuration", activeCameras);
          for(int i=0; i<image_received.size(); i++) { image_received[i]=false; }
          current_pub_index = 0;
-         
+
          // Subscribe to all other images
          subs.push_back( nh.subscribe("cusub_common/occam/image0", 1, &Multiplexer::occamCallback0, this) );
          subs.push_back( nh.subscribe("cusub_common/occam/image1", 1, &Multiplexer::occamCallback1, this) );
@@ -32,9 +32,7 @@
          subs.push_back( nh.subscribe("cusub_common/occam/image3", 1, &Multiplexer::occamCallback3, this) );
          subs.push_back( nh.subscribe("cusub_common/occam/image4", 1, &Multiplexer::occamCallback4, this) );
          subs.push_back( nh.subscribe("cusub_common/downcam/image_color", 1, &Multiplexer::downcamCallback, this) );
-         subs.push_back( nh.subscribe("cusub_common/torpedocam/image", 1, &Multiplexer::torpedoCallback, this) );
-	 
-        //  subs.push_back( nh.subscribe("camera/image_color", 1, &Multiplexer::downcamCallback, this) );
+         // subs.push_back( nh.subscribe("cusub_common/torpedocam/image", 1, &Multiplexer::torpedoCallback, this) );
 
          // Start configuration service
          service = nh.advertiseService("cusub_perception/darknet_multiplexer/configure_active_cameras", &Multiplexer::configureActives, this);
