@@ -9,8 +9,9 @@ startup_delay: 0
 tasks:
  startup:
   manager_info:
-    timeout_secs: 5
-  depth: -1.5
+    timeout_secs: 10 # wait time at surface
+  depth: -0.5
+  dive_time: 3
   
  start_gate:
   manager_info:
@@ -60,5 +61,5 @@ tasks:
   drop_thresh: 0.5
 
 mission_tasks: # Tasks To Do In Order
+ - startup
  - start_gate
- - jiangshi
