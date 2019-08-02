@@ -115,13 +115,8 @@ def main():
             smach.StateMachine.add(sm_name, sm, \
                 transitions={'manager':'manager'},\
                 remapping={'outcome':'previous_outcome'}) # all states will transition to the manager) # all states will transition to the manager
-    try:
-        startup_delay = rospy.get_param("startup_delay")
-	rospy.loginfo("Sleeping....")
-        rospy.sleep(float(startup_delay))
+    
         outcome = sm_top.execute()
-    except rospy.ROSInterruptException:
-        sys.exit()
 
 if __name__ == '__main__':
     main()
