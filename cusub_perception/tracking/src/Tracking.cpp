@@ -7,6 +7,7 @@ using namespace tracking;
 
 
 const int OVERLAP_THRESH = 0.5; // in percent
+const int COFFIN_OVERLAP_AMNT = 100; // each side
 
 // called from unit test
 Tracking::Tracking() :
@@ -114,6 +115,8 @@ void Tracking::objectDetected(const std::string &classname, BoundingBox &bbox, c
         // add the tracker
         if (classname == "coffin")
         {
+            BoundingBox extendedBox = bbox;
+            extendedBox.extendBox(COFFIN_OVERLAP_AMNT);
             m_objectMap[image.frameId()].push_back(new ObjectTracker(bbox, image, classname));
         }
         else

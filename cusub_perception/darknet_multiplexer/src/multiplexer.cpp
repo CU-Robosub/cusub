@@ -31,9 +31,10 @@
          subs.push_back( nh.subscribe("cusub_common/occam/image2", 1, &Multiplexer::occamCallback2, this) );
          subs.push_back( nh.subscribe("cusub_common/occam/image3", 1, &Multiplexer::occamCallback3, this) );
          subs.push_back( nh.subscribe("cusub_common/occam/image4", 1, &Multiplexer::occamCallback4, this) );
-         //subs.push_back( nh.subscribe("cusub_common/downcam/image_color", 1, &Multiplexer::downcamCallback, this) );
+         subs.push_back( nh.subscribe("cusub_common/downcam/image_color", 1, &Multiplexer::downcamCallback, this) );
+         subs.push_back( nh.subscribe("cusub_common/torpedocam/image", 1, &Multiplexer::torpedoCallback, this) );
 	 
-         subs.push_back( nh.subscribe("camera/image_color", 1, &Multiplexer::downcamCallback, this) );
+        //  subs.push_back( nh.subscribe("camera/image_color", 1, &Multiplexer::downcamCallback, this) );
 
          // Start configuration service
          service = nh.advertiseService("cusub_perception/darknet_multiplexer/configure_active_cameras", &Multiplexer::configureActives, this);
@@ -56,6 +57,15 @@
          cv_bridge::CvImage bridge = cv_bridge::CvImage(image->header, sensor_msgs::image_encodings::RGB8, resized);
          recent_images[5] = bridge.toImageMsg();
          image_received[5] = true; 
+     }
+     void Multiplexer::torpedoCallback(const sensor_msgs::ImagePtr image) 
+     {
+         cv::Mat resized;
+         cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::RGB8);
+         cv::resize(cv_ptr->image, resized, cv::Size(752,480));
+         cv_bridge::CvImage bridge = cv_bridge::CvImage(image->header, sensor_msgs::image_encodings::RGB8, resized);
+         recent_images[6] = bridge.toImageMsg();
+         image_received[6] = true; 
      }
 
      bool Multiplexer::configureActives(darknet_multiplexer::DarknetCameras::Request& request,
