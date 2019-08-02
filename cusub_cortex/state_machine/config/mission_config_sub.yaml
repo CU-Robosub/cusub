@@ -13,7 +13,8 @@ tasks:
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'uh_oh'
   # prior: [0,-8.0,-1.5]
-  prior: [11.5,9,-0.75]
+  prior: [-9.5,-9.7,-0.75]
+  # prior: [11.5,9,-0.75]  A
   # prior: [-10,3,-0.75]
   dist_behind_gate: 1.0
   third_leg_adjustment: 0.75
@@ -27,7 +28,7 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip'
     outcome_timed_out: 'skip'
-  prior: [4.0,0.0,-1.5] # DIVEWELL
+  prior: [-17, -19,-1.8]
   method: vs        # solvepnp OR vs
   solvepnp:
     use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
@@ -54,4 +55,5 @@ tasks:
   drop_thresh: 0.5
 
 mission_tasks: # Tasks To Do In Order
+ - start_gate
  - jiangshi
