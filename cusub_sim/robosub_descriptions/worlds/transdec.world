@@ -62,15 +62,14 @@
       <pose>0 0 0 0 0 0</pose>
     </include>
 
-    <include>
+    <!--<include>
       <uri>model://vampire_stake</uri>
       <pose>-20.88 -16.78 -3.32 0 0 -1.79</pose>
-      <!-- x y z r p y -->
     </include>
     <include>
       <uri>model://Octagon</uri>
       <pose>-20 -20 0 0 0 0</pose>
-    </include>
+    </include>-->
     <!-- <include>
       <uri>model://coffin</uri>
       <pose>0 0 -2.672 0 0 0</pose>
