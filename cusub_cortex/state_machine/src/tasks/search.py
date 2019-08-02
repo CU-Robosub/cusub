@@ -22,7 +22,7 @@ class Search(Objective):
     
     outcomes = ['found','not_found'] # We found task or timed out
 
-    def __init__(self, prior_pose_param, exit_topic, target_class=None, darknet_cameras=DARKNET_CAMERAS_DEFAULT):
+    def __init__(self, prior_pose_param, exit_topic, target_classes=None, target_frames=None, darknet_cameras=DARKNET_CAMERAS_DEFAULT):
         """
         Search objective initialization function
 
@@ -32,22 +32,37 @@ class Search(Objective):
              Param name of the prior for the task
         exit_topic : str
              Topic to listen to and quit out after num_exit_msgs have arrived
-        target_class : str
-            class to check for when making a service request to check which bounding boxes are available
+        target_classes : str or list
+            darknet classes to quit out if they are exist
             if None will use the exit_topic
+        target_frames : str or list
+            frames to search for the target_classes in
         darknet_cameras : bool list, len 6
             Darknet cameras to use
         """
         self.listener = tf.TransformListener() # Transform prior into odom
         self.prior_pose_param = prior_pose_param
+        self.target_classes = []
+        self.target_frames = []
         if target_class == None:                # Exit by subscribing to a topic
             self.topic_exit = True
             rospy.Subscriber(exit_topic, PoseStamped, self.exit_callback)
-            
-        else:                                   # Exit by a bounding box with our target class being available
+        elif type(target_classes) == str:                                   # Exit by a bounding box with our target class being available
             self.topic_exit = False
-            self.target_class = target_class
+            self.target_classes.append(target_classes)
             self.service = rospy.ServiceProxy('cusub_perception/darknet_multiplexer/get_classes', DarknetClasses)
+            if type(target_frames) == str:
+                self.target_frames.append(target_frames)
+            else: # list
+                self.target_frames.extend(target_frames)
+        else: # target_classes is list
+            self.topic_exit = False
+            self.target_classes.extend(target_classes)
+            self.service = rospy.ServiceProxy('cusub_perception/darknet_multiplexer/get_classes', DarknetClasses)
+            if type(target_frames) == str:
+                self.target_frames.append(target_frames)
+            else: # list
+                self.target_frames.extend(target_frames)
             
         self.darknet_config = darknet_cameras
         super(Search, self).__init__(self.outcomes, "Search")
@@ -58,9 +73,9 @@ class Search(Objective):
         return self(prior_pose_param, exit_topic, darknet_cameras=darknet_cameras)
 
     @classmethod
-    def from_bounding_box(self, prior_pose_param, target_class, darknet_cameras=DARKNET_CAMERAS_DEFAULT):
+    def from_bounding_box(self, prior_pose_param, target_classes, target_frames, darknet_cameras=DARKNET_CAMERAS_DEFAULT):
         """ Allows the search to quit if darknet is publishing bounding box msgs of the target class at the current time """
-        return self(prior_pose_param, None, target_class, darknet_cameras=darknet_cameras)
+        return self(prior_pose_param, None, target_classes, target_frames, darknet_cameras=darknet_cameras)
 
     def exit_callback(self, msg): # Abort on the first publishing
         if not self.replan_requested():
@@ -86,7 +101,11 @@ class Search(Objective):
         self.go_to_pose_non_blocking(prior)
 
         # Ask the server for available bounding box classes and check if our target_class is among those
-        while self.target_class not in self.service(rospy.Duration(1)).classes and not rospy.is_shutdown():
+        while not rospy.is_shutdown():
+            present_classes = self.service(rospy.Duration(1)).classes # TODO pass in our target frames
+            for c in self.target_classes:
+                if c in present_classes:
+                    break
             if userdata.timeout_obj.timed_out:
                 self.cancel_way_client_goal()
                 userdata.outcome = "timed_out"
