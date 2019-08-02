@@ -50,29 +50,29 @@ yolo_faker:
   #   - name: 'vampire_cute'
   #     debug_color: [0, 255, 0]
   #     points: [ [-0.4048, -0.0508, 0.6096], [ 0.4048, -0.0508,  0.6096], [ -.4048,  0.0508,  0.6096], [ 0.4048,  0.0508,  0.6096], [-0.4048, -0.0508, -.6096], [ 0.4048, -0.0508,  -.6096], [ -.4048,  0.0508,  -.6096], [ 0.4048,  0.0508,  -.6096] ]
-  # triangle: #Points TODO
-  #   link: 'triangular_buoy_1/base_link'
-  #   odom_topic: '/triangular_buoy_1/pose_gt'
-  #   classes:
-  #     - name: 'vampire_flying'
-  #       debug_color: [200,200,0]
-  #       points: [[.5,0,2.5],[0,.5,1.8],[.5,0,1.8],[.5,.5,2.5]]
-  #     - name: 'vampire_fathead'
-  #       debug_color: [0,200,200]
-  #       points: [[-.5,0,1.5],[0,-.5,1.5],[-.5,-.5,1.5],[0,0,01.5]]
-  #     - name: 'vampire_no_torso'  
-  #       debug_color: [200,0,200]
-  #       points: [[.4,-.4,1.5],[0,-.4,1.5],[.4,0,1.5],[.4,.4,1.5]]  
-  dropper:
-   link: 'dropper_garlic_1/base_link'
-   odom_topic: '/dropper_garlic_1/pose_gt'
-   classes:
-    - name: 'dropper_cover'
-      debug_color: [255, 0, 0]
-      points: [[-0.05,.53,0.1],[.4,.53,0.1],[-0.05,1.1,0.1],[.4,1.1,0.1]]
-    - name: 'wolf'
-      debug_color: [0,0,255]
-      points: [[.72,.55,-0.1],[1,.55,-.1],[.72,1.09,-.1],[1,1.09,-0.1]]
+   triangle:
+     link: 'triangular_buoy_1/buoy_link'
+     odom_topic: '/triangular_buoy_1/pose_gt'
+     classes:
+       - name: 'vampire_no_torso'
+         debug_color: [200,200,0]
+         points: [[0.35,-0.19,3.12],[0.02,0.37,3.12],[0.02,0.37,1.86],[0.35,-0.19,1.86]]
+       - name: 'vampire_fathead'
+         debug_color: [0,200,200]
+         points: [[0.0,0.37,3.12],[-0.35,-0.18,3.12],[0.0,0.37,1.86],[-0.35,-0.18,1.86]]
+       - name: 'vampire_flying'  
+         debug_color: [200,0,200]
+         points: [[-0.32,-0.23,3.12],[0.34,-0.22,3.12],[0.34,-0.22,1.86],[-0.32,-0.23,1.86]]
+  #dropper:
+  # link: 'dropper_garlic_1/base_link'
+  # odom_topic: '/dropper_garlic_1/pose_gt'
+  # classes:
+  #  - name: 'dropper_cover'
+  #    debug_color: [255, 0, 0]
+  #    points: [[-0.05,.53,0.1],[.4,.53,0.1],[-0.05,1.1,0.1],[.4,1.1,0.1]]
+  #  - name: 'wolf'
+  #    debug_color: [0,0,255]
+  #    points: [[.72,.55,-0.1],[1,.55,-.1],[.72,1.09,-.1],[1,1.09,-0.1]]
   # torpedo: #Points TODO
   #  link: 'vampire_stake_1/base_link'
   #  odom_topic: '/vampire_stake_1/pose_gt'

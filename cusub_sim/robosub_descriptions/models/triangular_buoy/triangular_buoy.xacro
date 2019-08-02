@@ -7,7 +7,7 @@
 
   <xacro:macro name="triangular_buoy_base" params="namespace" >
 
-    <xacro:default_pose_3d namespace="${namespace}" parent_link="${namespace}/base_link" />
+    <xacro:default_pose_3d namespace="${namespace}" parent_link="${namespace}/buoy_link" />
 
     <link name="${namespace}/base_link">
       <inertial>
@@ -43,13 +43,13 @@
         <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1" />
       </inertial>
       <visual>
-        <origin xyz="0 0 0" rpy="0 0.0 0" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
           <mesh filename="package://robosub_descriptions/models/triangular_buoy/triangular_buoy.dae" />
         </geometry>
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="0 0.0 0" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
           <mesh filename="package://robosub_descriptions/models/triangular_buoy/triangular_buoy.dae" />
         </geometry>
