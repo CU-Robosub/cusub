@@ -107,6 +107,16 @@ tasks:
   drive_carrot: 2.0
   depth_carrot: 0.5
   drop_depth: -2.5
+  drop_depth_timeout: 60
+
+ debug:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'skip'
+  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
+  target_pixel_threshold: 30   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  drop_depth: -2.5
 
  octagon:
   manager_info:
@@ -124,9 +134,10 @@ tasks:
   finish_depth_thresh: 0.4
 
 mission_tasks: # Tasks To Do In Order
+ - debug
 #  - startup
 #  - start_gate # maybe do visual servoing on the gate?
 #  - octagon
- - dropper
- - triangle
- - jiangshi
+#  - dropper
+#  - triangle
+#  - jiangshi
