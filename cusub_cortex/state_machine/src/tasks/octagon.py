@@ -56,7 +56,8 @@ class Rise(Objective):
         
         # variables
         self.centering_time = rospy.get_param("tasks/octagon/centering_time", 1.0)
-        self.feedback = False
+        self.approach_feedback = False
+        self.dive_feedback = False
         self.was_centered = False
 
         self.depth_pub = rospy.Publisher("cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
@@ -72,13 +73,16 @@ class Rise(Objective):
         self.target_pixel_threshold = rospy.get_param("tasks/octagon/target_pixel_threshold")
         self.depth_carrot = rospy.get_param("tasks/octagon/depth_carrot")
         self.octagon_height = rospy.get_param("tasks/octagon/octagon_height")
-        self.finish_thresh = rospy.get_param("tasks/octagon/finish_thresh")
+        self.finish_depth_thresh = rospy.get_param("tasks/octagon/finish_depth_thresh")
         self.finish_depth = rospy.get_param("tasks/octagon/finish_depth")
 
         super(Rise, self).__init__(self.outcomes, "Rise")
 
-    def vs_feedback_callback(self, feedback):
-        self.feedback = feedback.centered
+    def vs_approach_feedback_callback(self, feedback):
+        self.approach_feedback = feedback.centered
+
+    def vs_dive_feedback_callback(self, feedback):
+        self.dive_feedback = feedback.centered
     
     def depth_callback(self, depth):
         self.last_depth = depth.data
@@ -96,25 +100,22 @@ class Rise(Objective):
         goal.target_classes = target_classes
         goal.camera = goal.OCCAM
         goal.x_axis = goal.YAW_AXIS
-        goal.y_axis = goal.NO_AXIS # Constant drive forward?
+        goal.y_axis = goal.NO_AXIS
         goal.area_axis = goal.NO_AXIS
         goal.target_frame = rospy.get_param("~robotname") +"/description/occam0_frame_optical"
         goal.visual_servo_type = goal.PROPORTIONAL
         goal.target_pixel_x = goal.CAMERAS_CENTER_X
-        goal.target_pixel_y = goal.NO_AXIS
         goal.target_box_area = goal.AREA_NOT_USED
         goal.target_pixel_threshold = self.target_pixel_threshold
         
         depth_set = Float64()
         depth_set.data = self.approach_depth
-
         drive_set = Float64()
-        
-        rospy.loginfo("...vs with occam")
-        self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)
+        rospy.loginfo("...vs on occam")
+        self.vs_client.send_goal(goal, feedback_cb=self.vs_approach_feedback_callback)
 
         while not rospy.is_shutdown() :
-             # pub out forward drive and depth
+            # pub out forward drive and depth
             drive_set.data = self.last_drive + self.drive_carrot
             self.drive_pub.publish(drive_set)
             self.depth_pub.publish(depth_set)
@@ -131,63 +132,61 @@ class Rise(Objective):
                 self.vs_client.cancel_goal()
                 userdata.outcome = "timed_out"
                 return "timed_out"
-
         self.vs_client.cancel_goal()
-        rospy.loginfo("...found coffin in downcam, centering...")
+        rospy.sleep(2) # wait for the previous goal to end before sending next goal
 
-        # toggle to using the downcam to center
+        # toggle to using the downcam to 
         self.configure_darknet_cameras([0,0,0,0,0,1])
         goal = VisualServoGoal()
         goal.visual_servo_type = goal.PROPORTIONAL
         goal.target_classes = ["coffin"]
         goal.camera = goal.DOWNCAM
-
-        # in sim:
-        goal.target_pixel_x = goal.DOWNCAM_FAKE_CENTER_X
-        goal.target_pixel_y = goal.DOWNCAM_FAKE_CENTER_Y
-
-        # goal.target_pixel_x = goal.CAMERAS_CENTER_X
-        # goal.target_pixel_y = goal.CAMERAS_CENTER_Y
         goal.target_pixel_threshold = self.target_pixel_threshold
         goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
-        goal.target_box_area = goal.AREA_NOT_USED
         goal.x_axis = goal.STRAFE_AXIS
         goal.y_axis = goal.DRIVE_AXIS
         goal.area_axis = goal.NO_AXIS
-
-        self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)
+        if rospy.get_param("using_sim_params"):
+            goal.target_pixel_x = goal.DOWNCAM_FAKE_CENTER_X
+            goal.target_pixel_y = goal.DOWNCAM_FAKE_CENTER_Y
+        else: # real sub
+            goal.target_pixel_x = goal.CAMERAS_CENTER_X
+            goal.target_pixel_y = goal.CAMERAS_CENTER_Y
+        goal.target_box_area = goal.AREA_NOT_USED
+        self.vs_client.send_goal(goal, feedback_cb=self.vs_dive_feedback_callback)
+        rospy.loginfo("...centering with downcam")
         
         depth_set = Float64()
-        rospy.loginfo("...rising")
+        depth_set.data = self.last_depth
         while not rospy.is_shutdown():
-            # only begin rising if centered in downcam
-            if self.feedback:
+            # begin rising if centered in downcam
+            if self.dive_feedback:
+                rospy.sleep(2)
                 rospy.loginfo_throttle(1, "...centered, adjusting depth")
-                rospy.sleep(0.2)
                 depth_set.data = self.last_depth + self.depth_carrot
             
             if self.last_depth > self.octagon_height:
-                rospy.loginfo("...surfaced")
-                depth_set.data = 0.0
+                depth_set.data = self.last_depth
                 self.depth_pub.publish(depth_set)
+                rospy.loginfo("...surfacing")
                 break
                 
             self.depth_pub.publish(depth_set)
-
+            rospy.sleep(0.25) # don't eat the core
         
-        rospy.sleep(5)
-        self.vs_client.cancel_goal()
-
+        rospy.sleep(5) # wait at top of octagon
         rospy.loginfo("...diving")
         while not rospy.is_shutdown():
             depth_set.data = self.finish_depth
-            if abs(self.last_depth - self.finish_depth) < self.finish_thresh:
+            if abs(self.last_depth - self.finish_depth) < self.finish_depth_thresh:
                 rospy.loginfo("...dove")
                 break
 
             self.depth_pub.publish(depth_set)
             rospy.sleep(0.25)
 
+        self.vs_client.cancel_goal()
+        rospy.sleep(3)
         userdata.outcome = "success"
         return "success"
    
