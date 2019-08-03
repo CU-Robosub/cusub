@@ -6,6 +6,7 @@ cusub_perception/usb_cam_ws/devel
 cusub_perception/usbcam_ws/build
 *.pyc
 *~
+\#*\#
 
 # yolo
 *.weights
