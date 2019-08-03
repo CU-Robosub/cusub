@@ -60,6 +60,7 @@ private:
     void (BBController::*respondArea)(float);
 
     bool xResponse, yResponse, areaResponse;
+    int requestNum;
 };
 }; // namespace perception_control
 
