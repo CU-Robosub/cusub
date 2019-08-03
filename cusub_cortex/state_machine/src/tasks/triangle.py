@@ -16,6 +16,7 @@ import actionlib
 from std_msgs.msg import Float64
 from waypoint_navigator.srv import *
 from geometry_msgs.msg import Pose
+from darknet_multiplexer.srv import DarknetClasses
 
 TRIANGLE_BOUY_CLASSES = ["vampire_fathead", "vampire_flying", "vampire_no_torso"]
 
@@ -58,14 +59,33 @@ class Slay(Objective):
         self.drive_state = None
         rospy.Subscriber("cusub_common/motor_controllers/pid/drive/state", Float64, self.drive_callback)
         self.drive_pub = rospy.Publisher("cusub_common/motor_controllers/pid/drive/setpoint", Float64, queue_size=1)
+        self.do_orbit = rospy.get_param("tasks/triangle/do_orbit")
+        self.target_vampire = rospy.get_param("tasks/triangle/target_vampire")
+
+        rospy.loginfo("...waiting for darknet get classes server")
+        rospy.wait_for_service("cusub_perception/darknet_multiplexer/get_classes")
+        self.get_classes_service = rospy.ServiceProxy('cusub_perception/darknet_multiplexer/get_classes', DarknetClasses)
+        rospy.loginfo("\tfound darkner get classes server")
+
+        # strafe info
+        self.orbit_right = rospy.get_param("tasks/triangle/orbit_right")
+        self.strafe_carrot = rospy.get_param("tasks/triangle/strafe_carrot")
+        self.strafe_state = None
+        rospy.Subscriber("cusub_common/motor_controllers/pid/strafe/setpoint", Float64, self.strafe_callback)
+        self.strafe_pub = rospy.Publisher("cusub_common/motor_controllers/pid/setpoint", Float64, queue_size=1)
 
         rospy.loginfo("...waiting for toggle waypoint control")
         rospy.wait_for_service('cusub_common/toggleWaypointControl')
         self.wayToggle = rospy.ServiceProxy('cusub_common/toggleWaypointControl', ToggleControl)
         rospy.loginfo("\tfound toggle waypoint control")
 
+        self.depth_pub = rospy.Publisher("cusub_common/motor_controllers/pid/strafe/setpoint", Float64, queue_size=10)
+
     def drive_callback(self, msg):
         self.drive_state = msg.data
+    
+    def strafe_callback(self, msg):
+        self.strafe_state = msg.data
 
     def vs_feedback_callback(self, feedback):
         self.feedback = feedback.centered
@@ -77,7 +97,10 @@ class Slay(Objective):
         goal.target_classes = TRIANGLE_BOUY_CLASSES
         goal.camera = goal.OCCAM
         goal.x_axis = goal.YAW_AXIS
-        goal.y_axis = goal.DEPTH_AXIS
+        if rospy.get_param("using_sim_params"):
+            goal.y_axis = goal.NO_AXIS
+        else:
+            goal.y_axis = goal.DEPTH_AXIS
         goal.area_axis = goal.DRIVE_AXIS
         goal.target_frame = rospy.get_param("~robotname") +"/description/occam0_frame_optical"
         goal.visual_servo_type = goal.PROPORTIONAL
@@ -95,10 +118,40 @@ class Slay(Objective):
                 return "timed_out"
             if self.feedback:
                 break
+            if rospy.get_param("using_sim_params"): # go to a constant depth
+                depth_msg = Float64()
+                depth_msg.data = -2.0
+                self.depth_pub.publish(depth_msg)
+                
             rospy.sleep(0.25)
-        self.vs_client.cancel_goal()
+        
         rospy.loginfo("\tcentered")
 
+        # Orbit
+        userdata.timeout_obj.set_new_time(30)
+        if self.do_orbit:
+            target_frame = ["leviathan/description/occam0_frame_optical"]
+            strafe_msg = Float64()
+            while not rospy.is_shutdown():
+                # Adjust strafe with carrot on current strafe
+                strafe_set = 0.0 if self.strafe_state is None else self.strafe_state
+                if self.orbit_right:
+                    strafe_msg.data = strafe_set - self.strafe_carrot
+                else:
+                    strafe_msg.data = strafe_set + self.strafe_carrot
+                
+                self.strafe_pub(strafe_msg)
+                # Check available darknet classes in occam0 frame, hang for 1 second
+                present_classes = self.get_classes_service(rospy.Duration(1), target_frame).classes
+                if len(present_classes) == 1 and self.target_vampire in present_classes:
+                    # found target vampire
+                    break
+                
+                if userdata.timeout_obj.timed_out:
+                    break
+
+        self.vs_client.cancel_goal()
+    
         # Slay the buoy
         rospy.sleep(2) # Wait for the vs client to release control to the waypoint nav for us to take it back again
         rospy.loginfo("...slaying")
@@ -128,17 +181,6 @@ class Slay(Objective):
                 break
             rospy.sleep(0.25)
         self.wayToggle(True)
-
-        # go to pose convenient for droppers
-        # userdata.timeout_obj.timed_out.set_new_time(30)
-        # evasion_pose = Pose()
-        # evasion_pose.position.x = -21.8
-        # evasion_pose.position.y = 6.6
-        # evasion_pose.position.z = -1.8
-        # if self.go_to_pose(evasion_pose, userdata.timeout_obj, replan_enabled=False):
-        #     if userdata.timeout_obj.timed_out:
-        #         userdata.outcome = "timed_out"
-        #         return "timed_out"
 
         userdata.outcome = "success"
         return "success"
@@ -179,8 +221,6 @@ class Slay(Objective):
     def execute(self, userdata):
         if rospy.get_param("tasks/triangle/mikes_method/do"):
             self.mikes_method(userdata)
-        elif rospy.get_param("tasks/triangle/do_orbit"):
-            pass
         else:
             return self.visual_servo_method(userdata)
         
