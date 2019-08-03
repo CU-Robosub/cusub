@@ -101,13 +101,12 @@ tasks:
   prior: [-33, -11, -2.0, "world"] # TRANSDEC
   # prior: [4, 0.0, -1, "world"] # DIVEWELL
   centering_time: 5            # Time between first centered feedback & when we check if we're centered again
-  target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
-  drop_timeout: 45
-  drop_depth: -2.5
-  drop_depth_thresh: 0.3
+  target_pixel_threshold: 30   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   approach_depth: -1
+  drop_timeout: 45
   drive_carrot: 2.0
   depth_carrot: 0.5
+  drop_depth: -2.5
 
  octagon:
   manager_info:
@@ -127,7 +126,7 @@ tasks:
 mission_tasks: # Tasks To Do In Order
 #  - startup
 #  - start_gate # maybe do visual servoing on the gate?
- - octagon
+#  - octagon
  - dropper
- - jiangshi
  - triangle
+ - jiangshi
