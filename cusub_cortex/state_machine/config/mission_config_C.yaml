@@ -26,8 +26,7 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'uh_oh'
-  prior: [-18,-22,-1.5, "world"] # TRANSDEC
-  # prior: [4, 0, -1.5, "world"] # TRANSDEC, DIVEWELL 8,0,-1.5  
+  prior: [-14, 7, -0.5, "world"] # TRANSDEC
   dist_behind_gate: 1.0
   third_leg_adjustment: 0.75
   replan_thresh: 1.0
@@ -36,25 +35,12 @@ tasks:
   do_style: True
   spin_carrot_rads: 0.7
 
- path0:
-  manager_info:
-    timeout_secs: 0
-    outcome_not_found: 'skip' # skip, later
-    outcome_timed_out: 'skip'
-  # prior: [-13,25,-4.5, "world"] # Won't matter much b/c we'll almost immediately see it after the SG
-  prior: [4.0,0.0,-1.5, "world"] # DIVEWELL
-  target_pixel_threshold: 30   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
-  centering_time: 0            # Time between first centered feedback & when we check if we're centered again
-  do_orientation: false
-  prior_adjustment_dist: 0     # Set to false to not affect the next prior
-
  jiangshi:
   manager_info:
     timeout_secs: 0
     outcome_not_found: 'skip'
     outcome_timed_out: 'skip'
-  prior: [4.0,0.0,-1.5, "world"] # DIVEWELL
-  # prior: [-33,-11,-2, "world"] # TRANSDEC
+  prior: [-16, 15, -1.8, "world"] # DIVEWELL
   method: vs        # solvepnp OR vs
   solvepnp:
     use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
@@ -62,7 +48,7 @@ tasks:
     slay_dist: 0.0
     approach_dist: 2.0
   visual_servo: # approach and slay
-    goal_percentage_of_frame: 0.4    # Percentage of image for target class
+    goal_percentage_of_frame: 0.3    # Percentage of image for target class
     slay_timeout: 10                 # How long the slay will last
     slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
     target_pixel_threshold: 50    # how close to our target do we need to be    
@@ -72,9 +58,7 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  # prior: [-29,-18, -2.5, "world"]
-  # prior: [4.0,0, -2.5, "world"] # DIVEWELL
-  prior: [-2.2, 0, -2, "world"] # DIVEWELL DEBUG VISUAL POINT
+  prior: [-19, 15, -1.8, "world"] # DIVEWELL
   do_orbit: true
   orbit_right: true
   strafe_carrot: 0.2
@@ -90,28 +74,33 @@ tasks:
     go_over_jiangshi_depth: -0.7
     meters_fwd: 2.0
 
- torpedos:
-  manager_info:
-    timeout_secs: 0
-    outcome_not_found: 'skip' # skip, later
-    outcome_timed_out: 'skip'
-  prior: [-2.5,2.0,-1.5, "world"] # Won't matter much b/c we'll almost immediately see it after the SG
-  target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
-
  dropper:
   manager_info:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  prior: [-33, -11, -2.0, "world"] # TRANSDEC
-  # prior: [4, 0.0, -1, "world"] # DIVEWELL
-  target_pixel_threshold: 30   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  prior: [-19, 17, -1.25, "world"] # TRANSDEC
+  target_pixel_threshold: 100   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   approach_depth: -1
-  drop_timeout: 45
+  drop_timeout: 90
   drive_carrot: 2.0
   depth_carrot: 0.5
   drop_depth: -2.5
   drop_depth_timeout: 60
+
+ octagon:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'skip'
+  prior: [-31, 23, -1.0, "world"] 
+  target_pixel_threshold: 100   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  approach_depth: -1
+  depth_carrot: 0.2
+  drive_carrot: 2.0
+  octagon_height: 0.0
+  finish_depth: -1.5
+  finish_depth_thresh: 0.4
 
  debug:
   manager_info:
@@ -122,24 +111,10 @@ tasks:
   target_pixel_threshold: 30   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   drop_depth: -2.5
 
- octagon:
-  manager_info:
-    timeout_secs: 0
-    outcome_not_found: 'skip' # skip, later
-    outcome_timed_out: 'skip'
-  prior: [-28.98, 1.16, -1, "world"] 
-  target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
-  approach_depth: -1
-  depth_carrot: 0.2
-  drive_carrot: 1.0
-  octagon_height: 0.0
-  finish_depth: -1.5
-  finish_depth_thresh: 0.4
-
 mission_tasks: # Tasks To Do In Order
-#  - startup
-#  - start_gate # maybe do visual servoing on the gate?
-#  - octagon
-#  - dropper
- - triangle
-#  - jiangshi
+  - startup
+  - start_gate # maybe do visual servoing on the gate?
+  - jiangshi
+  - triangle
+  - dropper
+  - octagon

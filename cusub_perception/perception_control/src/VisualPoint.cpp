@@ -8,25 +8,26 @@ const std::string occamNamespace = "perception_control/bb_controllers/proportion
 
 void VisualPoint::onInit()
 {
-
     NODELET_INFO("Visual Point Server Starting up!");
     m_nh = &(getMTNodeHandle());
-
-    initializeMovement(m_nh);
-    
-    m_nh->getParam(occamNamespace + "/rotational/timeout", m_timeoutFrames);
-    
+    yawPub = m_nh->advertise<std_msgs::Float64>("cusub_common/motor_controllers/pid/yaw/setpoint",1);
+    yawSub = m_nh->subscribe("cusub_common/motor_controllers/pid/yaw/state", 1, &VisualPoint::yawCallback, this);
+    NODELET_INFO("...waiting for yaw state");
+    ros::topic::waitForMessage<std_msgs::Float64>("cusub_common/motor_controllers/pid/yaw/state");
+    NODELET_INFO("\tgot yaw state");
     m_wayToggleClient = m_nh->serviceClient<waypoint_navigator::ToggleControl>("cusub_common/toggleWaypointControl");
+    m_nh->getParam(occamNamespace + "/rotational/timeout", m_timeoutFrames);
     m_requestNum = 0;
     m_server = new vpServer(*m_nh, "visual_point", boost::bind(&VisualPoint::execute, this, _1), false);
     m_server->start();
 }
 
-
 void VisualPoint::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs)
 {
     std::string foundFrame;
     darknet_ros_msgs::BoundingBox foundBox;
+
+    // Loop through boxes, find our target classes
     for(const darknet_ros_msgs::BoundingBox &box : bbs->bounding_boxes)
     {
         if (inVector(box.Class, m_activeGoal->target_classes))
@@ -38,58 +39,60 @@ void VisualPoint::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr 
     }
 
     VisualPointFeedback feedback;
-    // found the frame
-    if (foundFrame.empty() == false)
+    if ( !foundFrame.empty() )
     {
-        if (foundFrame == m_activeGoal->target_frame)
+        std_msgs::Float64 new_yaw;        
+        if (foundFrame == m_activeGoal->target_frame || foundFrame == "leviathan/description/downcam_frame_optical") // indicate if target class is in our target frame!
         {
             m_seenFrames++;
+            new_yaw.data = yawState;
         }
-        else
+        else // target class is not in target frame
         {
             std::string logMsg = "Visual point servo detected " + foundBox.Class + 
-                                 " in frame " + foundFrame + " taking control";
-            NODELET_INFO(logMsg.c_str());
+                                 " in frame " + foundFrame;
+            NODELET_INFO_THROTTLE(1, "%s", logMsg.c_str());
             controlPids(true);
-            m_targetYaw.active = true;
-            m_targetYaw.fromFrame = foundFrame;
-            m_targetYaw.value = m_currentController->getTargetYaw(bbs->image_header.frame_id);
+            std::cout << foundFrame << std::endl;
+            new_yaw.data = yawState + m_occamTransforms[foundFrame];
         }
+        yawPub.publish(new_yaw);
     }
-
-    if (m_targetYaw.active)
-    {
-        m_currentController->targetYaw(m_targetYaw.value);
-        m_targetYaw.attemptedFrames++;
-
-        if (m_targetYaw.attemptedFrames > m_timeoutFrames)
-        {
-            m_seenFrames = -1;
-            m_targetYaw = TargetYaw();
-            controlPids(false);
-        }
-    }
-
+    
     feedback.target_frame_count = m_seenFrames;
     m_server->publishFeedback(feedback);
 }
 
+bool VisualPoint::controlPids(const bool takeControl)
+{
+    bool success;
+    waypoint_navigator::ToggleControl toggle_srv;
+    toggle_srv.request.waypoint_controlling = !takeControl;
+    toggle_srv.response.success = false;
+    if( m_wayToggleClient.call(toggle_srv) )
+    {
+        success = true;
+    }
+    else
+    {
+        success = false;
+    }
+    m_controllingPids = takeControl;
+    success = toggle_srv.response.success;
+    return success;
+}
+
+void VisualPoint::yawCallback(const std_msgs::Float64ConstPtr state) { yawState = state->data; }
+
 void VisualPoint::execute(const perception_control::VisualPointGoalConstPtr goal)
 {
-    // error catching will come with better base class Impl.
-    m_requestNum += 1;
     NODELET_INFO("VisualPoint received request: %d", m_requestNum);
     m_activeGoal = goal;
-    // todo SK make more dyanmic
-    NODELET_INFO("Selecting visual control: ROTATIONAL");
-    m_currentController = m_rotationalController;
-
     m_seenFrames = 0;
-    m_targetYaw = TargetYaw();
-    
     // Subscribe to darknet with a local reference so that we unsubscribe when it goes out of scope
     ros::Subscriber darknetSub = m_nh->subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &VisualPoint::darknetCallback, this);
-
+    NODELET_INFO("Visual Point processing request: %d", m_requestNum);
+    m_requestNum += 1;
     ros::Rate r(1);
     while( ros::ok() )   // Loop until we've been preempted
     {

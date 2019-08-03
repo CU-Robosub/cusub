@@ -15,16 +15,18 @@ from geometry_msgs.msg import Point, PoseStamped, Pose
 import rospy
 import actionlib
 import tf
+import time
 from darknet_multiplexer.srv import DarknetClasses
 from perception_control.msg import VisualPointAction, VisualPointGoal, VisualPointFeedback
 
+DEFAULT_SEEN_FRAMES = 1
 DARKNET_CAMERAS_DEFAULT=[1,1,1,1,1,0]
 
 class Search(Objective):
     
     outcomes = ['found','not_found'] # We found task or timed out
 
-    def __init__(self, prior_pose_param, exit_topic, target_classes=None, target_frames=None, darknet_cameras=DARKNET_CAMERAS_DEFAULT):
+    def __init__(self, prior_pose_param, exit_topic, target_classes=None, target_frames=None,  min_seen_frames=DEFAULT_SEEN_FRAMES, darknet_cameras=DARKNET_CAMERAS_DEFAULT):
         """
         Search objective initialization function
 
@@ -39,6 +41,8 @@ class Search(Objective):
             if None will use the exit_topic
         target_frames : str or list
             frames to search for the target_classes in
+        min_seen_frames : int
+            Number of seen frames in occam 0 to quit the search
         darknet_cameras : bool list, len 6
             Darknet cameras to use
         """
@@ -69,6 +73,7 @@ class Search(Objective):
         self.num_frames_seen = 0
         self.vp_client = actionlib.SimpleActionClient('visual_point', VisualPointAction)
         self.darknet_config = darknet_cameras
+        self.min_seen_frames = min_seen_frames
         super(Search, self).__init__(self.outcomes, "Search")
     
     @classmethod
@@ -77,9 +82,9 @@ class Search(Objective):
         return self(prior_pose_param, exit_topic, darknet_cameras=darknet_cameras)
 
     @classmethod
-    def from_bounding_box(self, prior_pose_param, target_classes, target_frames, darknet_cameras=DARKNET_CAMERAS_DEFAULT):
+    def from_bounding_box(self, prior_pose_param, target_classes, target_frames):
         """ Allows the search to quit if darknet is publishing bounding box msgs of the target class at the current time """
-        return self(prior_pose_param, None, target_classes, target_frames, darknet_cameras=darknet_cameras)
+        return self(prior_pose_param, None, target_classes, target_frames)
 
     def exit_callback(self, msg): # Abort on the first publishing
         if not self.replan_requested():
@@ -104,31 +109,39 @@ class Search(Objective):
             return "not_found"
 
     def execute_bonding_box_exit(self, userdata):
-        prior = self.get_odom_prior(self.prior_pose_param)
-        self.go_to_pose_non_blocking(prior)
-
+        # launch the pointer search        
         goal = VisualPointGoal()
         goal.target_classes = self.target_classes
         goal.target_frame = "leviathan/description/occam0_frame_optical"
         self.vp_client.send_goal(goal, feedback_cb=self.vp_feedback_callback)
+        rospy.sleep(3)
+
+        # begin moving to prior
+        prior = self.get_odom_prior(self.prior_pose_param)
+        self.go_to_pose_non_blocking(prior) 
 
         while not rospy.is_shutdown():
-            if self.num_frames_seen > 3:
+            if self.num_frames_seen > self.min_seen_frames:
                 self.cancel_way_client_goal()
                 #probably gonn change later - not the best
-                rospy.loginfo("...found dat obj & pointed")
+                rospy.loginfo("...Found one of %s in one of %s, search success!"%(self.target_classes, self.target_frames))
+                self.vp_client.cancel_goal()
+                time.sleep(2)
                 return "found"
             elif self.num_frames_seen < 0:
-                self.cancel_way_client_goal() # throws error b/c wayToggle from vp???
+                self.cancel_way_client_goal() # todo LB
                 self.go_to_pose_non_blocking(prior)
-            #Total hack method. TODO @LB
             elif userdata.timeout_obj.timed_out:
                 self.cancel_way_client_goal()
                 userdata.outcome = "timed_out"
+                self.vp_client.cancel_goal()
+                time.sleep(2)
                 return "not_found"
             elif self.check_reached_pose(prior):
                 rospy.logerr("Search unable to find task.")
                 userdata.outcome = "not_found"
+                self.vp_client.cancel_goal()
+                time.sleep(2)
                 return "not_found"
             rospy.sleep(0.25)
 

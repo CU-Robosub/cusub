@@ -23,7 +23,7 @@
     <!-- Localizer -->
     <node pkg="nodelet" type="nodelet" name="localizer" args="load localizer/Localizer standalone_nodelet" output="screen"/>
     <!-- Multiplexer -->
-    <node pkg="nodelet" type="nodelet" name="darknet_multiplexer" args="load darknet_multiplexer/Multiplexer standalone_nodelet" output="screen" unless="$(arg fakeyolo)" />
+    <node pkg="nodelet" type="nodelet" name="darknet_multiplexer" args="load darknet_multiplexer/Multiplexer standalone_nodelet" output="screen" />
     <!-- Debug -->
     <node pkg="nodelet" type="nodelet" name="darknet_drawer" args="load darknet_multiplexer/DarknetDrawer standalone_nodelet" output="screen"/>
     <!-- Get Darknet Classes Server -->

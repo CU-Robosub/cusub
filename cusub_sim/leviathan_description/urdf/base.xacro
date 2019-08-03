@@ -17,7 +17,7 @@
   <xacro:property name="y_size"  value="0.5"/>
   <xacro:property name="z_size" value="0.5"/>
 
-  <xacro:property name="mass" value="10"/>
+  <xacro:property name="mass" value="11"/>
   <!-- Center of gravity -->
   <xacro:property name="cog" value="0 0 0"/>
   <!-- Fluid density -->

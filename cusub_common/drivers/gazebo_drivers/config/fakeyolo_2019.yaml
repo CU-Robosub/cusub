@@ -4,17 +4,44 @@ yolo_faker:
  bounding_boxes_topic: 'cusub_perception/darknet_ros/bounding_boxes'
  sub_pose_topic: 'description/pose_gt'
  show_points: True
+ multiplexer:
+  enabled: True
+  topic: 'cusub_perception/darknet_multiplexer/out'
 
 # Cameras to run fake yolo on
  cameras:
    occam0:
-     frame: 'leviathan_gt/occam0_frame'
+     frame: 'leviathan_gt/occam0_frame_optical'
      image_topic: 'cusub_common/occam/image0'
      debug_image_enabled: True
      debug_image_topic: 'cusub_common/occam/image0_debug'
      camera_info_topic: 'cusub_common/occam/image0/camera_info'
+   occam1:
+     frame: 'leviathan_gt/occam1_frame_optical'
+     image_topic: 'cusub_common/occam/image1'
+     debug_image_enabled: True
+     debug_image_topic: 'cusub_common/occam/image1_debug'
+     camera_info_topic: 'cusub_common/occam/image1/camera_info'
+   occam2:
+     frame: 'leviathan_gt/occam2_frame_optical'
+     image_topic: 'cusub_common/occam/image2'
+     debug_image_enabled: True
+     debug_image_topic: 'cusub_common/occam/image2_debug'
+     camera_info_topic: 'cusub_common/occam/image2/camera_info'
+   occam3:
+     frame: 'leviathan_gt/occam3_frame_optical'
+     image_topic: 'cusub_common/occam/image3'
+     debug_image_enabled: True
+     debug_image_topic: 'cusub_common/occam/image3_debug'
+     camera_info_topic: 'cusub_common/occam/image3/camera_info'
+   occam4:
+     frame: 'leviathan_gt/occam4_frame_optical'
+     image_topic: 'cusub_common/occam/image4'
+     debug_image_enabled: True
+     debug_image_topic: 'cusub_common/occam/image4_debug'
+     camera_info_topic: 'cusub_common/occam/image4/camera_info'
    downcam:
-     frame: 'leviathan_gt/downcam_frame'
+     frame: 'leviathan_gt/downcam_frame_optical'
      image_topic: 'cusub_common/downcam'
      debug_image_enabled: True
      debug_image_topic: 'cusub_common/downcam_debug'
@@ -36,20 +63,20 @@ yolo_faker:
     - name: 'start_gate_pole'
       debug_color: [0,255,0]
       points: [[ 0.430, -0.075, 0.000],[ 0.250, -0.075, 0.000],[0.430, 0.075,0.000],[0.250,0.075,0.000],[ 0.430, -0.075, -0.750],[ 0.250, -0.075, -0.750],[0.430, 0.075, -0.750],[0.250,0.075, -0.750]]
-  path0:
-   link: 'PathMarker_1/base_link'
-   odom_topic: '/PathMarker_1/pose_gt'
-   classes:
-    - name: 'path'
-      debug_color: [0, 255, 0]
-      points: [[-0.076, 0.076,  0.000],[-0.076, -0.076,  0.000],[ 0.427,  0.076,  0.000],[ 0.498, -0.076,  0.00],[ 0.780,  0.427,  0.000],[ 0.888,  0.325,  0.00],[ 0.600,  0.325, -0.256],[ 0.780,  0.145, -0.256],[ 0.130,  0.130, -0.256],[ 0.130, -0.130, -0.256]]
-  path1:
-   link: 'PathMarker_2/base_link'
-   odom_topic: '/PathMarker_2/pose_gt'
-   classes:
-    - name: 'path'
-      debug_color: [0, 255, 0]
-      points: [[-0.076, 0.076,  0.000],[-0.076, -0.076,  0.000],[ 0.427,  0.076,  0.000],[ 0.498, -0.076,  0.00],[ 0.780,  0.427,  0.000],[ 0.888,  0.325,  0.00],[ 0.600,  0.325, -0.256],[ 0.780,  0.145, -0.256],[ 0.130,  0.130, -0.256],[ 0.130, -0.130, -0.256]]
+  # path0:
+  #  link: 'PathMarker_1/base_link'
+  #  odom_topic: '/PathMarker_1/pose_gt'
+  #  classes:
+  #   - name: 'path'
+  #     debug_color: [0, 255, 0]
+  #     points: [[-0.076, 0.076,  0.000],[-0.076, -0.076,  0.000],[ 0.427,  0.076,  0.000],[ 0.498, -0.076,  0.00],[ 0.780,  0.427,  0.000],[ 0.888,  0.325,  0.00],[ 0.600,  0.325, -0.256],[ 0.780,  0.145, -0.256],[ 0.130,  0.130, -0.256],[ 0.130, -0.130, -0.256]]
+  # path1:
+  #  link: 'PathMarker_2/base_link'
+  #  odom_topic: '/PathMarker_2/pose_gt'
+  #  classes:
+  #   - name: 'path'
+  #     debug_color: [0, 255, 0]
+  #     points: [[-0.076, 0.076,  0.000],[-0.076, -0.076,  0.000],[ 0.427,  0.076,  0.000],[ 0.498, -0.076,  0.00],[ 0.780,  0.427,  0.000],[ 0.888,  0.325,  0.00],[ 0.600,  0.325, -0.256],[ 0.780,  0.145, -0.256],[ 0.130,  0.130, -0.256],[ 0.130, -0.130, -0.256]]
   jiangshi:
    link: 'buoy_jiangshi_1/base_link'
    odom_topic: '/buoy_jiangshi_1/pose_gt'
@@ -80,19 +107,19 @@ yolo_faker:
     - name: 'wolf'
       debug_color: [0,0,255]
       points: [[.72,.55,-0.1],[1,.55,-.1],[.72,1.09,-.1],[1,1.09,-0.1]]
-  torpedo:
-   link: 'vampire_stake_1/base_link'
-   odom_topic: '/vampire_stake_1/pose_gt'
-   classes:
-    - name: 'dracula'
-      debug_color: [50,150,200]
-      points: [[0.0,-0.02,0.64],[0.60,-0.02,0.64],[0.60,-0.02,-0.65],[0.0,-0.02,-0.65]]
-    - name: 'open_oval'
-      debug_color: [150,200,50]
-      points: [[0.44,-0.02,0.6],[0.56,-0.02,0.6],[0.56,-0.02,0.39],[0.44,-0.02,0.39]]
-    - name: 'heart'
-      debug_color: [200,150,50]
-      points: [[0.3,-0.02,-0.1],[0.4,-0.02,-0.1],[0.4,-0.02,-0.18],[0.3,-0.02,-0.18]]
+  # torpedo:
+  #  link: 'vampire_stake_1/base_link'
+  #  odom_topic: '/vampire_stake_1/pose_gt'
+  #  classes:
+  #   - name: 'dracula'
+  #     debug_color: [50,150,200]
+  #     points: [[0.0,-0.02,0.64],[0.60,-0.02,0.64],[0.60,-0.02,-0.65],[0.0,-0.02,-0.65]]
+  #   - name: 'open_oval'
+  #     debug_color: [150,200,50]
+  #     points: [[0.44,-0.02,0.6],[0.56,-0.02,0.6],[0.56,-0.02,0.39],[0.44,-0.02,0.39]]
+  #   - name: 'heart'
+  #     debug_color: [200,150,50]
+  #     points: [[0.3,-0.02,-0.1],[0.4,-0.02,-0.1],[0.4,-0.02,-0.18],[0.3,-0.02,-0.18]]
   coffin_1:
    link: 'coffin_1/base_link'
    odom_topic: '/coffin_1/pose_gt'

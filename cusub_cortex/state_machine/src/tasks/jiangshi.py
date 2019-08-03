@@ -32,7 +32,9 @@ class Jiangshi(Task):
         self.link_objectives()
 
     def init_objectives(self):
-        self.search = Search.from_bounding_box(self.get_prior_param(), ["vampire_cute"], ["leviathan/description/occam0_frame_optical"], [1,0,0,0,0,0])
+        search_frames = ["leviathan/description/occam0_frame_optical"]
+        search_classes = ["vampire_cute"]
+        self.search = Search.from_bounding_box(self.get_prior_param(), search_classes, search_frames)
         self.slay = Slay()
 
     def link_objectives(self):
@@ -226,7 +228,7 @@ class Slay(Objective):
             rospy.sleep(0.25)
 
         rospy.loginfo("...slayed, backing up")
-        userdata.timeout_obj.set_new_time(2* rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"))
+        userdata.timeout_obj.set_new_time(rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"))
         # slay_set.data = original_set
         while not rospy.is_shutdown():
             slay_set.data = self.drive_state - slay_carrot

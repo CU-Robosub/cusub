@@ -30,7 +30,7 @@ class Triangle(Task):
 
     def init_objectives(self):
         frame = ["leviathan/description/occam0_frame_optical"]
-        self.search = Search.from_bounding_box(self.get_prior_param(), TRIANGLE_BOUY_CLASSES, frame, [1,1,1,1,1,0])
+        self.search = Search.from_bounding_box(self.get_prior_param(), TRIANGLE_BOUY_CLASSES, frame)
         self.slay = Slay()
 
     def link_objectives(self):
@@ -176,7 +176,7 @@ class Slay(Objective):
             rospy.sleep(0.25)
 
         rospy.loginfo("...slayed, backing up")
-        userdata.timeout_obj.set_new_time(2* rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"))
+        userdata.timeout_obj.set_new_time(rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"))
         # slay_set.data = original_set
         while not rospy.is_shutdown():
             slay_set.data = self.drive_state - slay_carrot

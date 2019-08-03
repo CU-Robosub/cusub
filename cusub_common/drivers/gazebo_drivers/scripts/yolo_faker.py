@@ -330,26 +330,34 @@ class YOLOFaker(object):
             Render bounding volume points?
         """
 
-        for det in detections:
+        """
+        Try catch block for wierd error
+        OverflowError: signed integer is less than minimum
+        """
+        try:
 
-            # Draw bounding box
-            cv2.rectangle(
-                cv_image,
-                (int(det[0][0]), int(det[0][2])),
-                (int(det[0][1]), int(det[0][3])),
-                det[1], 2
-                )
+            for det in detections:
 
-            # Draw bounding volume points
-            if self.show_points:
-                for point in det[3]:
-                    cv2.circle(
-                        cv_image,
-                        (int(point[0][0]), camera.height - int(point[0][1])),
-                        3,
-                        det[1],
-                        2
-                        )
+                # Draw bounding box
+                cv2.rectangle(
+                    cv_image,
+                    (int(det[0][0]), int(det[0][2])),
+                    (int(det[0][1]), int(det[0][3])),
+                    det[1], 2
+                    )
+
+                # Draw bounding volume points
+                if self.show_points:
+                    for point in det[3]:
+                        cv2.circle(
+                            cv_image,
+                            (int(point[0][0]), camera.height - int(point[0][1])),
+                            3,
+                            det[1],
+                            2
+                            )
+        except:
+            rospy.logwarn("Unexpected error rendering debug.")
 
     def camera_image_callback(self, image, camera):
         """Gets images from camera to generate detections on
@@ -366,6 +374,12 @@ class YOLOFaker(object):
             Holds camera parameters for projecting points
 
         """
+
+        if camera is None:
+            for list_camera in self.cameras.values():
+                if list_camera.frame.split('/')[-1] == image.header.frame_id.split('/')[-1]:
+                    camera = list_camera
+                    break
 
         cv_image = self.bridge.imgmsg_to_cv2(image, desired_encoding="rgb8")
 
@@ -434,6 +448,7 @@ class YOLOFaker(object):
 
         if camera.debug_image_pub:
             image_message = self.bridge.cv2_to_imgmsg(cv_image, encoding="rgb8")
+            image_message.header = image.header
             camera.debug_image_pub.publish(image_message)
 
     @staticmethod
@@ -490,7 +505,7 @@ class YOLOFaker(object):
 
             # check that we are not beyond viewing distance
             self.listener.waitForTransform(camera.frame, obj.frame_id, time, rospy.Duration(1))
-            (obj_trans, obj_rot) = self.listener.lookupTransform(camera.frame, obj.frame_id, time)
+            obj_trans, _ = self.listener.lookupTransform(camera.frame, obj.frame_id, time)
             if np.linalg.norm(obj_trans) > rospy.get_param('yolo_faker/visibility', 14.0):
                 continue
 
@@ -615,6 +630,9 @@ class YOLOFaker(object):
         # Get robot pose so we can have its ground truth for transforms
         rospy.Subscriber(sub_pose_topic, Odometry, self.robot_odometry_callback)
 
+        # Setup connection to multiplexer if its enabled
+        self.multiplexer_enabled = rospy.get_param('yolo_faker/multiplexer/enabled', False)
+
         # Setup cameras node will generate detections for
         self.cameras = {}
         cameras = rospy.get_param('yolo_faker/cameras')
@@ -634,11 +652,26 @@ class YOLOFaker(object):
             imagecallback = partial(self.camera_image_callback, camera=self.cameras[cameraname])
 
             rospy.Subscriber(camera['camera_info_topic'], CameraInfo, infocallback)
-            rospy.Subscriber(camera['image_topic'], Image, imagecallback)
+
+            if not self.multiplexer_enabled:
+
+                rospy.Subscriber(camera['image_topic'], Image, imagecallback, queue_size=1, buff_size=10000000)
+
+                if camera['debug_image_enabled']:
+                    self.cameras[cameraname].debug_image_pub = \
+                    rospy.Publisher(camera['debug_image_topic'], Image, queue_size=1)
+
+        if self.multiplexer_enabled:
+
+            multiplexer_topic = rospy.get_param('yolo_faker/multiplexer/topic')
+
+            imagecallback = partial(self.camera_image_callback, camera=None)
+            rospy.Subscriber(multiplexer_topic, Image, imagecallback, queue_size=1, buff_size=10000000)
 
             if camera['debug_image_enabled']:
-                self.cameras[cameraname].debug_image_pub = \
-                  rospy.Publisher(camera['debug_image_topic'], Image, queue_size=1)
+                debug_pub = rospy.Publisher(multiplexer_topic + '_debug', Image, queue_size=1)
+                for camera in self.cameras.values():
+                    camera.debug_image_pub = debug_pub
 
         # Setup objects that will generate bounding boxes
         self.objects = {}

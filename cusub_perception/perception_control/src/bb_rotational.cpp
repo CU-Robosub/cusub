@@ -8,28 +8,18 @@ BBRotational::BBRotational(ros::NodeHandle& nh) : BBController(nh)
 {
     ROS_INFO("loading BB Rotational");
 
-    // OCCAM
-    std::string occamNamespace = "perception_control/bb_controllers/proportional/occam";
-    nh.getParam(occamNamespace + "/rotation/threshold", m_rotationThresh);
-    nh.getParam(occamNamespace + "/rotation/carrot", m_rotationCarrot);
-    
-    std::string ns;
-    std::vector<std::string> occamFrames;
-    float frameOffset;
-    nh.getParam(occamNamespace + "/frames_ns", ns);
-    nh.getParam(occamNamespace + "/frames", occamFrames);
-    nh.getParam(occamNamespace + "/frame_offset", frameOffset);
-    createOccamTfs(ns, occamFrames, frameOffset);
-}
-
-void BBRotational::createOccamTfs(const std::string &frameNS, std::vector<std::string> occamFrames, const float &frameOffset)
-{
-    float offset = frameOffset;
-    for (int i = 0; i < occamFrames.size(); ++i)
+    // Load carrot + threshold params
+    std::string occamNamespace = "perception_control/bb_controllers/rotational";
+    if( !nh.getParam(occamNamespace + "/threshold", m_rotationThresh) )
     {
-        offset = offset + (frameOffset * i);
-        m_occamTransforms.insert(std::make_pair(frameNS + occamFrames.at(i), offset));
+        std::cout << "BB rotational unable to locate params." << std::endl;
+        std::abort();
     }
+    nh.getParam(occamNamespace + "/carrot", m_rotationCarrot);
+
+    // Occam transforms
+    
+    };
 }
 
 float BBRotational::getTargetYaw(const std::string &occamFrame)
@@ -37,13 +27,19 @@ float BBRotational::getTargetYaw(const std::string &occamFrame)
     float targetYaw = yawState - m_occamTransforms[occamFrame]; // figure out correct 
     if (targetYaw > M_PI)
     {
-        targetYaw -= M_PI;
+        while (targetYaw > M_PI)
+        {
+            targetYaw -= 2*M_PI;
+        }
     }
     else if (targetYaw < -M_PI)
     {
-        targetYaw += M_PI;
+        while (targetYaw < -M_PI)
+        {
+            targetYaw += 2*M_PI;
+        }
     }
-    
+
     return targetYaw;
 }
 
