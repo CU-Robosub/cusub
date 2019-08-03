@@ -88,6 +88,7 @@ class Drop(Objective):
         self.target_pixel_threshold = rospy.get_param("tasks/dropper/target_pixel_threshold")
         self.depth_carrot = rospy.get_param("tasks/dropper/depth_carrot")
         self.drop_depth = rospy.get_param("tasks/dropper/drop_depth")
+        self.drop_depth_timeout = rospy.get_param("tasks/dropper/drop_depth_timeout")
 
         super(Drop, self).__init__(self.outcomes, "Drop")
 
@@ -172,10 +173,11 @@ class Drop(Objective):
         self.vs_client.send_goal(goal, feedback_cb=self.vs_dive_feedback_callback)
         rospy.loginfo("...centering with downcam")
         
+        userdata.timeout_obj.set_new_time(self.drop_depth_timeout)
         depth_set = Float64()
         depth_set.data = self.last_depth
         while not rospy.is_shutdown():
-            # begin rising if centered in downcam
+            # begin dropping if centered in downcam
             if self.dive_feedback:
                 rospy.sleep(2)
                 rospy.loginfo_throttle(1, "...centered, adjusting depth")
@@ -186,6 +188,11 @@ class Drop(Objective):
                 self.depth_pub.publish(depth_set)
                 rospy.loginfo("...dropping")
                 break
+            
+            if userdata.timeout_obj.timed_out:
+                self.vs_client.cancel_goal()
+                break # still drop that ish
+            
                 
             self.depth_pub.publish(depth_set)
             rospy.sleep(0.25) # don't eat the core
