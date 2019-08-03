@@ -55,8 +55,10 @@ class JoyTeleop(object):
     left_torpedo_avail = True
     right_torpedo_avail = True
 
+    current_yaw_updated = False
     current_drive_updated = False
     current_strafe_updated = False
+    current_depth_updated = False
 
     joystick_in_control = True
 
@@ -65,10 +67,24 @@ class JoyTeleop(object):
         toggle_waypoint = rospy.ServiceProxy('toggleWaypointControl', ToggleControl)
 
         if self.joystick_in_control:
-            toggle_waypoint(True)
+
+            # Don't give back control, let state machine do this
+            # toggle_waypoint(True)
+
+            # Keep track of state
             self.joystick_in_control = False
+
         else:
+
+            # Stop waypoint navigator
             toggle_waypoint(False)
+
+            # Reset setpoint to current position
+            self.current_yaw_updated = False
+            self.current_drive_updated = False
+            self.current_strafe_updated = False
+            self.current_depth_updated = False
+
             self.joystick_in_control = True
 
     def joystick_state(self, data):
@@ -95,6 +111,11 @@ class JoyTeleop(object):
         self.roll_val = data.axes[self.roll_axes]
         self.gripper_val = data.axes[self.gripper_axes]
 
+    def yawStateCallback(self, data):
+        if not self.current_yaw_updated:
+            self.yaw_f64.data = data.data
+            self.current_yaw_updated = True
+
     def driveStateCallback(self, data):
         if not self.current_drive_updated:
             self.drive_f64.data = data.data
@@ -104,6 +125,11 @@ class JoyTeleop(object):
         if not self.current_strafe_updated:
             self.strafe_f64.data = data.data
             self.current_strafe_updated = True
+
+    def depthStateCallback(self, data):
+        if not self.current_depth_updated:
+            self.depth_f64.data = data.data
+            self.current_depth_updated = True
 
     @staticmethod
     def actuate(num, time):
@@ -135,10 +161,14 @@ class JoyTeleop(object):
 
         setpoint = rospy.get_param('~setpoint', True)
 
+        self.yaw_f64 = Float64()
+        self.yaw_f64.data = 0.0
         self.drive_f64 = Float64()
         self.drive_f64.data = 0.0
         self.strafe_f64 = Float64()
         self.strafe_f64.data = 0.0
+        depth_f64 = Float64()
+        depth_f64.data = 0.0
 
         if setpoint:
 
@@ -150,6 +180,8 @@ class JoyTeleop(object):
                                          Float64, queue_size=10)
 
             # get current accumulated strafe and drive to use for adjustments
+            rospy.Subscriber("motor_controllers/pid/yaw/state",
+                             Float64, self.yawStateCallback)
             rospy.Subscriber("motor_controllers/pid/drive/state",
                              Float64, self.driveStateCallback)
             rospy.Subscriber("motor_controllers/pid/strafe/state",
@@ -182,13 +214,10 @@ class JoyTeleop(object):
         self.pitch_axes = rospy.get_param("~pitch_axes", self.pitch_axes)
         self.roll_axes = rospy.get_param("~roll_axes", self.roll_axes)
 
-        self.default_depth = rospy.get_param("~default_depth", self.default_depth)
-
-        depth_f64 = Float64()
-        depth_f64.data = self.default_depth
-
-        yaw_f64 = Float64()
-        yaw_f64.data = 0.0
+        # Changed to use current depth
+        # self.default_depth = rospy.get_param("~default_depth", self.default_depth)
+        # depth_f64 = Float64()
+        # depth_f64.data = self.default_depth
 
         pitch_f64 = Float64()
         pitch_f64.data = 0
@@ -205,8 +234,8 @@ class JoyTeleop(object):
 
                 if setpoint:
 
-                    yaw_f64.data = yaw_f64.data + self.yaw_val * self.yaw_sensitivity
-                    pub_yaw.publish(yaw_f64)
+                    self.yaw_f64.data = self.yaw_f64.data + self.yaw_val * self.yaw_sensitivity
+                    pub_yaw.publish(self.yaw_f64)
 
                     self.drive_f64.data = self.drive_f64.data + self.drive_val * self.drive_sensitivity
                     pub_drive.publish(self.drive_f64)
@@ -216,9 +245,9 @@ class JoyTeleop(object):
 
                 else:
 
-                    yaw_f64 = Float64()
-                    yaw_f64.data = self.yaw_val * self.thruster_power * self.twist_effort
-                    pub_yaw.publish(yaw_f64)
+                    self.yaw_f64 = Float64()
+                    self.yaw_f64.data = self.yaw_val * self.thruster_power * self.twist_effort
+                    pub_yaw.publish(self.yaw_f64)
 
                     self.drive_f64 = Float64()
                     self.drive_f64.data = self.drive_val * self.thruster_power
