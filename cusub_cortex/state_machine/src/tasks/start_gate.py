@@ -164,26 +164,6 @@ class Attack(Objective):
             return self.do_gate_with_style(userdata)
         else:
             return self.do_gate_no_style(userdata)
-    #
-    # def go_thru_small_side(self):
-    #     '''
-    #     Responsibilities:
-    #         - adjust pose using third leg (should be taken care of by is_three_leg flag)
-    #         - set depth to proper value
-    #         - strafe to line up with new pose
-    #         - go_to_target
-    #     '''
-    #     # update startgate pose
-    #     target_pose = self.adjust_gate_pose(
-    #             self.cur_pose, \
-    #             self.start_gate_pose.pose, \
-    #             self.dist_behind, \
-    #             self.small_leg_left_side, \
-    #             self.leg_adjustment_meters)
-    #
-    #     # TODO: figure out how to line up
-
-        #depth_pub.publish()
 
     def enact_style(self):
         if self.current_yaw == None:
