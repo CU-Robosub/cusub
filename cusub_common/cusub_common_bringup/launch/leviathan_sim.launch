@@ -24,7 +24,7 @@
 
         <include file="$(find waypoint_navigator)/launch/waypoint_navigator.launch"/>
 
-        <node pkg="motor_controllers" type="roll_pitch_zero.py" name="zero_roll_pitch" />
+        <node pkg="motor_controllers" type="roll_pitch_zeroing.py" name="zero_roll_pitch" />
         
         <group ns="description">
             <rosparam file="$(find leviathan_description)/config/leviathan_control.yaml" command="load"/>

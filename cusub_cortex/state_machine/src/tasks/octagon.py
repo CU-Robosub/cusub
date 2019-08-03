@@ -41,9 +41,6 @@ class Octagon(Task):
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
 class Rise(Objective):
-    """
-    Center, get low, drop 
-    """
     outcomes=['success', 'timed_out']
 
     def __init__(self):
@@ -55,7 +52,6 @@ class Rise(Objective):
         self.darknet_classes = rospy.ServiceProxy('cusub_perception/darknet_multiplexer/get_classes', DarknetClasses)
         
         # variables
-        self.centering_time = rospy.get_param("tasks/octagon/centering_time", 1.0)
         self.approach_feedback = False
         self.dive_feedback = False
         self.was_centered = False

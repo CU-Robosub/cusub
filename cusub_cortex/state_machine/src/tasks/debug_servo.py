@@ -26,27 +26,19 @@ from perception_control.msg import VisualServoAction, VisualServoGoal, VisualSer
 from actuator.srv import ActivateActuator
 from darknet_multiplexer.srv import DarknetClasses
 
-class Dropper(Task):
-    name = "dropper"
+class Debug(Task):
+    name = "debug"
 
     def __init__(self):
-        self.name = "dropper"
-        super(Dropper, self).__init__()
+        super(Debug, self).__init__()
         self.init_objectives()
         self.link_objectives()
 
     def init_objectives(self):
-        darknet_cameras = [1,0,0,0,0,1]
-        search_frames = ["leviathan/description/occam0_frame_optical", "leviathan/description/downcam_frame_optical"]
-        search_classes = ["wolf", "bat", "dropper_cover"]
-        # search_frames = ["leviathan/description/downcam_frame_optical"]
-        self.search = Search.from_bounding_box(self.get_prior_param(), search_classes, search_frames, darknet_cameras)
         self.drop = Drop()
 
     def link_objectives(self):
         with self:
-            smach.StateMachine.add('Search', self.search, transitions={'found':'Drop', 'not_found':'manager'}, \
-                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
             smach.StateMachine.add('Drop', self.drop, transitions={'success':'manager', 'timed_out':'manager'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
@@ -70,6 +62,7 @@ class Drop(Objective):
         rospy.loginfo("\tfound actuator service")
         
         # variables
+        self.centering_time = rospy.get_param("tasks/dropper/centering_time", 1.0)
         self.approach_feedback = False
         self.dive_feedback = False
         self.was_centered = False
@@ -82,13 +75,11 @@ class Drop(Objective):
         self.drive_sub = rospy.Subscriber("cusub_common/motor_controllers/pid/drive/state", Float64, self.drive_callback)
         self.last_drive = 0
         
-        self.drop_timeout = rospy.get_param("tasks/dropper/drop_timeout")
-        self.drive_carrot = rospy.get_param("tasks/dropper/drive_carrot")
-        self.approach_depth = rospy.get_param("tasks/dropper/approach_depth")
-        self.target_pixel_threshold = rospy.get_param("tasks/dropper/target_pixel_threshold")
-        self.depth_carrot = rospy.get_param("tasks/dropper/depth_carrot")
-        self.drop_depth = rospy.get_param("tasks/dropper/drop_depth")
-        self.drop_depth_timeout = rospy.get_param("tasks/dropper/drop_depth_timeout")
+        self.drive_carrot = rospy.get_param("tasks/debug/drive_carrot")
+        self.approach_depth = rospy.get_param("tasks/debug/approach_depth")
+        self.target_pixel_threshold = rospy.get_param("tasks/debug/target_pixel_threshold")
+        self.depth_carrot = rospy.get_param("tasks/debug/depth_carrot")
+        self.drop_depth = rospy.get_param("tasks/debug/drop_depth")
 
         super(Drop, self).__init__(self.outcomes, "Drop")
 
@@ -111,7 +102,7 @@ class Drop(Objective):
         rospy.loginfo("...using visual servoing approach")
         
         self.configure_darknet_cameras([1,0,0,0,0,1])
-        target_classes = ["wolf", "bat", "dropper_cover"]
+        target_classes = ["path", "open_oval"]
         
         goal = VisualServoGoal()
         goal.target_classes = target_classes
@@ -131,18 +122,20 @@ class Drop(Objective):
         rospy.loginfo("...vs on occam")
         self.vs_client.send_goal(goal, feedback_cb=self.vs_approach_feedback_callback)
 
+        found_count = 0
         while not rospy.is_shutdown() :
             # pub out forward drive and depth
             drive_set.data = self.last_drive + self.drive_carrot
+            print(drive_set.data)
             self.drive_pub.publish(drive_set)
             self.depth_pub.publish(depth_set)
 
-            found = False
             for _class in self.darknet_classes(rospy.Duration(1), ["leviathan/description/downcam_frame_optical"]).classes:
+                print("Found: %s" % _class)
                 if _class in target_classes:
-                    found = True
+                    found_count += 1
             
-            if found: # getting downcam hits
+            if found_count > 0: # getting downcam hits
                 break
 
             if userdata.timeout_obj.timed_out:
@@ -156,7 +149,7 @@ class Drop(Objective):
         self.configure_darknet_cameras([0,0,0,0,0,1])
         goal = VisualServoGoal()
         goal.visual_servo_type = goal.PROPORTIONAL
-        goal.target_classes = ["wolf", "bat"]
+        goal.target_classes = ["path"]
         goal.camera = goal.DOWNCAM
         goal.target_pixel_threshold = self.target_pixel_threshold
         goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
@@ -173,12 +166,10 @@ class Drop(Objective):
         self.vs_client.send_goal(goal, feedback_cb=self.vs_dive_feedback_callback)
         rospy.loginfo("...centering with downcam")
         
-        userdata.timeout_obj.set_new_time(self.drop_depth_timeout)
         depth_set = Float64()
         depth_set.data = self.last_depth
-        userdata.timeout_obj.set_new_time(self.drop_timeout)
         while not rospy.is_shutdown():
-            # begin dropping if centered in downcam
+            # begin rising if centered in downcam
             if self.dive_feedback:
                 rospy.sleep(2)
                 rospy.loginfo_throttle(1, "...centered, adjusting depth")
@@ -188,11 +179,6 @@ class Drop(Objective):
                 depth_set.data = self.last_depth
                 self.depth_pub.publish(depth_set)
                 rospy.loginfo("...dropping")
-                break
-
-            if userdata.timeout_obj.timed_out:
-                rospy.logwarn("...timed out!")
-                # drop anyway
                 break
                 
             self.depth_pub.publish(depth_set)
