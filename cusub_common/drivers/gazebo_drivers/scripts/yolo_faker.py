@@ -36,6 +36,8 @@ import tf
 
 import numpy as np
 
+from itertools import combinations
+
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Image, CameraInfo
 from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
@@ -367,6 +369,8 @@ class YOLOFaker(object):
 
         cv_image = self.bridge.imgmsg_to_cv2(image, desired_encoding="rgb8")
 
+        detections = []
+
         if camera.is_ready():
 
             # Fake darknet yolo detections message
@@ -379,25 +383,50 @@ class YOLOFaker(object):
 
             for _, obj in self.objects.iteritems():
 
-                detections = self.get_detections(obj, camera, image.header.stamp)
+                detections += self.get_detections(obj, camera, image.header.stamp)
 
-                if detections is not None:
+            # Find bounding boxes and if overlap is to great remove the further bounding box
+            # Look at all pairs
+            removal = []
+            for detection_1, detection_2 in list(combinations(detections, 2)):
 
-                    if camera.debug_image_pub:
+                    # Find back detection
+                    back_detection = detection_2
+                    front_detection = detection_1
+                    if detection_1[4] > detection_2[4]:
+                        back_detection = detection_1
+                        front_detection = detection_2
 
-                        self.render_debug_context(cv_image, detections, camera)
+                    # Determine occlusion
+                    occlusion = YOLOFaker._compute_occlusion(front_detection, back_detection)
+                    #rospy.loginfo("%s %.2f" % (back_detection[2], occlusion))
+                    if occlusion > 0.1:
 
-                    for det in detections:
+                        # Mark for removal
+                        if back_detection not in removal:
+                            removal.append(back_detection)
 
-                        bounding_box = BoundingBox()
+            # Remove occluded detections
+            for detection in removal:
+                detections.remove(detection)
 
-                        bounding_box.Class = det[2]
-                        bounding_box.probability = 1.0
-                        bounding_box.xmin = int(det[0][0])
-                        bounding_box.xmax = int(det[0][1])
-                        bounding_box.ymin = int(det[0][2])
-                        bounding_box.ymax = int(det[0][3])
-                        bounding_boxes.bounding_boxes.append(bounding_box)
+            if detections is not None:
+
+                if camera.debug_image_pub:
+
+                    self.render_debug_context(cv_image, detections, camera)
+
+                for det in detections:
+
+                    bounding_box = BoundingBox()
+
+                    bounding_box.Class = det[2]
+                    bounding_box.probability = 1.0
+                    bounding_box.xmin = int(det[0][0])
+                    bounding_box.xmax = int(det[0][1])
+                    bounding_box.ymin = int(det[0][2])
+                    bounding_box.ymax = int(det[0][3])
+                    bounding_boxes.bounding_boxes.append(bounding_box)
 
             # Only publish detection if there are boxes in it
             if bounding_boxes.bounding_boxes:
@@ -406,6 +435,36 @@ class YOLOFaker(object):
         if camera.debug_image_pub:
             image_message = self.bridge.cv2_to_imgmsg(cv_image, encoding="rgb8")
             camera.debug_image_pub.publish(image_message)
+
+    @staticmethod
+    def _does_overlap(front, back):
+
+        #rospy.logwarn(front[0], back[1], front[1], back[0])
+
+        if front[0] > back[1] or front[1] < back[0]:
+            return False
+        if front[2] > back[3] or front[3] < back[2]:
+            return False
+        return True
+
+    @staticmethod
+    def _compute_occlusion(front_detection, back_detection):
+
+        front = front_detection[0]
+        back = back_detection[0]
+
+        if YOLOFaker._does_overlap(front, back):
+
+            left   = max(front[0], back[0])
+            right  = min(front[1], back[1])
+            bottom = max(front[2], back[2])
+            top    = min(front[3], back[3])
+
+            overlap_area = max(0, right - left) * max(0, top - bottom)
+
+            return overlap_area / ( (back[1] - back[0]) * (front[3] - front[2]) )
+
+        return 0.0
 
     def get_detections(self, obj, camera, time):
         """Takes in object and camera and finds objects in the cameras view
@@ -475,10 +534,15 @@ class YOLOFaker(object):
                 # Filter objects when they get to narrow to realistically be detected
                 if bounding_box[1] - bounding_box[0] > self.min_pixel_size \
                    and bounding_box[3] - bounding_box[2] > self.min_pixel_size:
-                    detections.append((bounding_box, obj_class.color,
-                                       obj_class.name, image_pts[0]))
 
-            # TODO Find bounding boxes and if overlap is to great remove the further bounding box
+                    # Compute points average distance from camera to use for overlap rejection
+                    avg_dist = 0.0
+                    for pt in new_pts:
+                        avg_dist += np.linalg.norm(pt)
+                    avg_dist /= len(new_pts)
+
+                    detections.append([bounding_box, obj_class.color,
+                                       obj_class.name, image_pts[0], avg_dist])
 
         return detections
 
