@@ -132,6 +132,7 @@ class Attack(Objective):
             userdata.outcome = "timed_out"
             return "timed_out"
         else:
+            self.update_next_priors("start_gate")
             userdata.outcome = "success"
             return "success"
 
@@ -152,6 +153,7 @@ class Attack(Objective):
                 else: # Replan has been requested loop again
                     pass
             else:
+                self.update_next_priors("start_gate")
                 userdata.outcome = "success"
                 return "success"
 

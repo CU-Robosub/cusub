@@ -181,6 +181,7 @@ class Drop(Objective):
                 rospy.sleep(2)
                 rospy.loginfo_throttle(1, "...centered, adjusting depth")
                 depth_set.data = self.last_depth - self.depth_carrot
+                self.update_next_priors("dropper")
             
             if self.last_depth < self.drop_depth:
                 depth_set.data = self.last_depth

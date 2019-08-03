@@ -226,7 +226,7 @@ class Slay(Objective):
             if userdata.timeout_obj.timed_out:
                 break
             rospy.sleep(0.25)
-
+        self.update_next_priors("jiangshi")
         rospy.loginfo("...slayed, backing up")
         userdata.timeout_obj.set_new_time(rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"))
         # slay_set.data = original_set
