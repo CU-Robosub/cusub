@@ -1,0 +1,6 @@
+<launch>
+    <include file="$(find cusub_perception_bringup)/launch/perception_sim.launch" />
+    <include file="$(find perception_control)/launch/perception_control.launch" ns="leviathan"/>
+    <include file="$(find cusub_common_bringup)/launch/leviathan_sim.launch" />
+    <include file="$(find cusub_cortex_bringup/launch/cortex_sim_typical.launch" />
+</launch>
