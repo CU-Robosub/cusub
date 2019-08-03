@@ -26,6 +26,7 @@ add_action_files(
   FILES 
     OrbitBuoy.action 
     VisualServo.action 
+    VisualPoint.action 
     PathOrient.action
 )
 
@@ -46,6 +47,9 @@ add_library( visual_servo
   src/visual_servo.cpp
   src/bb_controller.cpp
   src/bb_proportional.cpp
+  src/bb_rotational.cpp
+  src/VisualPoint.cpp
+  src/VisualMovement.cpp
 )
 add_dependencies(visual_servo perception_control_generate_messages_cpp)
 target_link_libraries(visual_servo ${catkin_LIBRARIES})
