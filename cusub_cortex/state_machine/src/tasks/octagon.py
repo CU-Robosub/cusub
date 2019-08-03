@@ -41,9 +41,6 @@ class Octagon(Task):
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
 class Rise(Objective):
-    """
-    Center, get low, drop 
-    """
     outcomes=['success', 'timed_out']
 
     def __init__(self):
