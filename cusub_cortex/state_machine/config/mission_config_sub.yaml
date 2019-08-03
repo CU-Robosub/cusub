@@ -61,6 +61,10 @@ tasks:
   # prior: [-19.5, 4.5, -2] # C
   prior: [17, 12, -1.8] # A
   do_orbit: false
+  orbit_right: true
+  strafe_carrot: 0.2
+  single_class_time: 1
+  target_vampire: 'vampire_flying'
   visual_servo: # approach and slay
     goal_percentage_of_frame: 0.4    # Percentage of image for target class
     slay_timeout: 10                 # How long the slay will last
