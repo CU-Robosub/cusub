@@ -1,7 +1,7 @@
 # Mission Config of the sub
 # ALL UNITS IN M
 
-using_sim_params : False
+using_sim_params : True
 manager_task_status_pub_rate: 1
 
 startup_delay: 0
@@ -20,11 +20,11 @@ tasks:
     outcome_timed_out: 'uh_oh'
   # prior: [0,-8.0,-1.5]
   # prior: [-9.5,-9.7,-0.75] D
-  prior: [11.5,9,-0.75] # A, using the odom from day 2
+  # prior: [11.5,9,-0.75] # A, using the odom from day 2
   # prior: [13.27, 1.3, -0.5] # A, using the axes of transdec 
   # prior: [-9, 2, -0.5] # B    KEEP IN MIND IF TOP IS ON SURFACE
   # prior: [12.5, -7.7, -0.75] # C
-  prior: [-14, 7, -0.75] # C
+  prior: [-18,-22,-1.5, "world"] # TRANSDEC
   dist_behind_gate: 1.0
   third_leg_adjustment: 0.5
   replan_thresh: 1.0
@@ -40,7 +40,8 @@ tasks:
   # prior: [-17, -19,-1.8] # D?
   # prior: [-18, 6, -1.8] # C
   # prior: [18, -14, -1.8] # B?
-#   prior: [16, 15, -1.8] # A
+  # prior: [16, 15, -1.8] # A
+  prior: [-25,-16,-1.5, "world"]
   method: vs        # solvepnp OR vs
   solvepnp:
     use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
@@ -59,7 +60,8 @@ tasks:
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
   # prior: [-19.5, 4.5, -2] # C
-  prior: [17, 12, -1.8] # A
+  # prior: [17, 12, -1.8] # A
+  prior: [-29,-18, -1.5, "world"]
   do_orbit: false
   visual_servo: # approach and slay
     goal_percentage_of_frame: 0.4    # Percentage of image for target class
@@ -78,8 +80,8 @@ tasks:
     outcome_timed_out: 'skip'
   # prior: [-2.5,2.0, 0.0] # Won't matter much b/c we'll almost immediately see it after the SG
   # prior: [-29,12, 0.0]
-#  prior: [19, 17, -1.25] # A
-  prior: [-26, 15, -1.25]
+  # prior: [19, 17, -1.25] # A
+  prior: [-33, -11, -2.0, "world"] # TRANSDEC
   target_pixel_threshold: 40   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   drop_timeout: 60
   drop_depth: -2.25
@@ -95,9 +97,8 @@ tasks:
     outcome_timed_out: 'skip'
   #prior: [-19.5, 4.5, -2] # C
   # prior: [19.5, -9, -2] # B?
-#  prior: [30.7, 23.4, -1] # A
-  prior: [-27, 22, -1] # C
-
+  # prior: [30.7, 23.4, -1] # A
+  prior: [-38, 0.0, -1, "world"] 
   target_pixel_threshold: 30   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   approach_depth: -1
   depth_carrot: 0.2
@@ -120,8 +121,8 @@ tasks:
   depth_carrot: 0.1
 
 mission_tasks: # Tasks To Do In Order
- - startup
- - start_gate
+#  - startup
+#  - start_gate
  - octagon
  - dropper
  - triangle
