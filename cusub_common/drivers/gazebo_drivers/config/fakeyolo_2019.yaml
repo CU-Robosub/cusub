@@ -100,7 +100,7 @@ yolo_faker:
     - name: 'coffin'
       debug_color: [20,40,70]
       points: [[ -0.30, 0.0, 1.42],[ 0.30, 0.0,  1.42],[ 0.30,  0.0, 1.2],[ -0.30,  0.0,  1.2],[ -0.30, 0.30, 1.42],[ 0.30, 0.30,  1.42],[ 0.30,  0.30, 1.2],[ -0.30,  0.30,  1.2]]
-  coffin_1:
+  coffin_2:
    link: 'coffin_2/base_link'
    odom_topic: '/coffin_2/pose_gt'
    classes:

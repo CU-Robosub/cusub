@@ -48,36 +48,6 @@ tasks:
     slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
     target_pixel_threshold: 50    # how close to our target do we need to be    
 
- dropper:
-  manager_info:
-    timeout_secs: 0
-    outcome_not_found: 'skip' # skip, later
-    outcome_timed_out: 'skip'
-  # prior: [-2.5,2.0, 0.0] # Won't matter much b/c we'll almost immediately see it after the SG
-  prior: [-29,12, 0.0]
-  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
-  target_pixel_threshold: 40   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
-  drop_timeout: 30
-  drop_depth: -3.8
-  drop_depth_thresh: 0.3
-  approach_depth: -2.5
-  drive_carrot: 0.7
-  depth_carrot: 0.5
-
-octagon:
-  manager_info:
-    timeout_secs: 0
-    outcome_not_found: 'skip' # skip, later
-    outcome_timed_out: 'skip'
-  prior: [-29,12, 0.0] # TODO
-  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
-  target_pixel_threshold: 40   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
-  drop_timeout: 30
-  approach_depth: -1.5
-  drive_carrot: 0.7
-  depth_carrot: 0.5
-  rise_depth: 0.5
-
  triangle:
   manager_info:
     timeout_secs: 0
@@ -94,6 +64,36 @@ octagon:
     do: false
     go_over_jiangshi_depth: -0.7
     meters_fwd: 2.0
+
+ dropper:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'skip'
+  # prior: [-2.5,2.0, 0.0] # Won't matter much b/c we'll almost immediately see it after the SG
+  prior: [-29,12, 0.0]
+  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
+  target_pixel_threshold: 40   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  drop_timeout: 30
+  drop_depth: -3.8
+  drop_depth_thresh: 0.3
+  approach_depth: -2.5
+  drive_carrot: 0.7
+  depth_carrot: 0.5
+
+ octagon:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'skip'
+  prior: [-29,12, 0.0] # TODO
+  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
+  target_pixel_threshold: 40   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  drop_timeout: 30
+  approach_depth: -1.5
+  drive_carrot: 0.7
+  depth_carrot: 0.5
+  rise_depth: 0.5
 
 mission_tasks: # Tasks To Do In Order
  #- startup

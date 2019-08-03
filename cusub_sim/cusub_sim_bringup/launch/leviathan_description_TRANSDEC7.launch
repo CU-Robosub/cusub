@@ -1,6 +1,6 @@
 <launch>
-        <arg name="x" default="0"/>
-        <arg name="y" default="29.7"/>
+        <arg name="x" default="-2.5"/>
+        <arg name="y" default="-28.9"/>
         <arg name="z" default="-2"/>
         <arg name="yaw" default="-1.5"/>
         <arg name="namespace" default="leviathan/description" />

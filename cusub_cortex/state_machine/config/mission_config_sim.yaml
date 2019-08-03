@@ -109,9 +109,23 @@ tasks:
   drive_carrot: 2.0
   depth_carrot: 0.5
 
+ octagon:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'skip'
+  prior: [-38, 0.0, -1, "world"] 
+  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
+  target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  approach_depth: -1
+  drive_carrot: 3.0
+  depth_carrot: 0.3
+  octagon_height: 0.0
+  finish_depth: -1.5
+  finish_thresh: 0.4
+
 mission_tasks: # Tasks To Do In Order
  - startup
  - start_gate
  - jiangshi
- - dropper
-
+ - triangle
