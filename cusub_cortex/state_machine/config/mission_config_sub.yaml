@@ -97,19 +97,24 @@ tasks:
     slay_timeout: 10                 # How long the slay will last
     slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
     target_pixel_threshold: 50    # how close to our target do we need to be
-  
+
  debug:
   manager_info:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
   centering_time: 5            # Time between first centered feedback & when we check if we're centered again
-  target_pixel_threshold: 30   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
-  drop_depth: -2.5
+  target_pixel_threshold: 40   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  drop_timeout: 30
+  drop_depth: -0.4
+  drop_depth_thresh: 0.1
+  approach_depth: -0.15
+  drive_carrot: 1.0 # note 0.5 doesn't move the sub forward
+  depth_carrot: 0.1
 
 mission_tasks: # Tasks To Do In Order
  - debug
 # - start_gate
 # - jiangshi
 # - triangle
- - dropper
+# - dropper
