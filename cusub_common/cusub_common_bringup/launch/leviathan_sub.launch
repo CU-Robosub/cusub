@@ -24,7 +24,7 @@
         <node pkg="tf" type="static_transform_publisher" name="leviathan_depth_map_broadcaster"
               args="0 0 0 0 0 0 leviathan/description/map leviathan/description/depth_map_frame 100"/>
 
-        <node pkg="motor_controllers" type="roll_pitch_zero.py" name="zero_roll_pitch" />
+        <node pkg="motor_controllers" type="roll_pitch_zeroing.py" name="zero_roll_pitch" />
 
         <include file="$(find motor_controllers)/launch/controller_matrix.launch"/>
         <include file="$(find depth_sensor)/launch/depth_sensor.launch" />
