@@ -70,7 +70,6 @@ class Drop(Objective):
         rospy.loginfo("\tfound actuator service")
         
         # variables
-        self.centering_time = rospy.get_param("tasks/dropper/centering_time", 1.0)
         self.approach_feedback = False
         self.dive_feedback = False
         self.was_centered = False
@@ -83,6 +82,7 @@ class Drop(Objective):
         self.drive_sub = rospy.Subscriber("cusub_common/motor_controllers/pid/drive/state", Float64, self.drive_callback)
         self.last_drive = 0
         
+        self.drop_timeout = rospy.get_param("tasks/dropper/drop_timeout")
         self.drive_carrot = rospy.get_param("tasks/dropper/drive_carrot")
         self.approach_depth = rospy.get_param("tasks/dropper/approach_depth")
         self.target_pixel_threshold = rospy.get_param("tasks/dropper/target_pixel_threshold")
@@ -176,6 +176,7 @@ class Drop(Objective):
         userdata.timeout_obj.set_new_time(self.drop_depth_timeout)
         depth_set = Float64()
         depth_set.data = self.last_depth
+        userdata.timeout_obj.set_new_time(self.drop_timeout)
         while not rospy.is_shutdown():
             # begin dropping if centered in downcam
             if self.dive_feedback:
@@ -188,11 +189,11 @@ class Drop(Objective):
                 self.depth_pub.publish(depth_set)
                 rospy.loginfo("...dropping")
                 break
-            
+
             if userdata.timeout_obj.timed_out:
-                self.vs_client.cancel_goal()
-                break # still drop that ish
-            
+                rospy.logwarn("...timed out!")
+                # drop anyway
+                break
                 
             self.depth_pub.publish(depth_set)
             rospy.sleep(0.25) # don't eat the core

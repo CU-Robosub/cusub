@@ -20,11 +20,12 @@ tasks:
     outcome_timed_out: 'uh_oh'
   # prior: [0,-8.0,-1.5]
   # prior: [-9.5,-9.7,-0.75] D
-  # prior: [11.5,9,-0.75]  A
+  prior: [11.5,9,-0.75] # A, using the odom from day 2
+  # prior: [13.27, 1.3, -0.5] # A, using the axes of transdec 
   # prior: [-9, 2, -0.5] # B    KEEP IN MIND IF TOP IS ON SURFACE
-  prior: [12.5, -7.7, -0.75] # C
+  # prior: [12.5, -7.7, -0.75] # C
   dist_behind_gate: 1.0
-  third_leg_adjustment: 0.25
+  third_leg_adjustment: 0.5
   replan_thresh: 1.0
   style_dist: 2.0
   do_style: True
@@ -35,9 +36,10 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip'
     outcome_timed_out: 'skip'
-  # prior: [-17, -19,-1.8] # A or D?
+  # prior: [-17, -19,-1.8] # D?
   # prior: [-18, 6, -1.8] # C
-  prior: [18, -14, -1.8] # B?
+  # prior: [18, -14, -1.8] # B?
+  prior: [16, 15, -1.8] # A
   method: vs        # solvepnp OR vs
   solvepnp:
     use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
@@ -55,13 +57,14 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  prior: [-19.5, 4.5, -2] # C
+  # prior: [-19.5, 4.5, -2] # C
+  prior: [17, 12, -1.8] # A
   do_orbit: false
   visual_servo: # approach and slay
     goal_percentage_of_frame: 0.4    # Percentage of image for target class
     slay_timeout: 10                 # How long the slay will last
     slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
-    target_pixel_threshold: 50    # how close to our target do we need to be    
+    target_pixel_threshold: 50    # how close to our target do we need to be
   mikes_method:
     do: false
     go_over_jiangshi_depth: -0.7
@@ -69,20 +72,19 @@ tasks:
 
  dropper:
   manager_info:
-    timeout_secs: 0
+    timeout_secs: 180
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
   # prior: [-2.5,2.0, 0.0] # Won't matter much b/c we'll almost immediately see it after the SG
   # prior: [-29,12, 0.0]
-  prior: [29, -14, 0.0] # B?
-  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
+  prior: [19, 17, -1.25] # A
   target_pixel_threshold: 40   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
-  drop_timeout: 30
-  drop_depth: -0.4
-  drop_depth_thresh: 0.3
-  approach_depth: -0.15
-  drive_carrot: 0.7
+  drop_timeout: 60
+  drop_depth: -2.25
+  approach_depth: -1.25
+  drive_carrot: 1.0
   depth_carrot: 0.5
+  drop_depth_timeout: 60
 
  octagon:
   manager_info:
@@ -90,20 +92,21 @@ tasks:
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
   #prior: [-19.5, 4.5, -2] # C
-  prior: [19.5, -9, -2] # B?
-  do_orbit: false
-  visual_servo: # approach and slay
-    goal_percentage_of_frame: 0.4    # Percentage of image for target class
-    slay_timeout: 10                 # How long the slay will last
-    slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
-    target_pixel_threshold: 50    # how close to our target do we need to be
+  # prior: [19.5, -9, -2] # B?
+  prior: [30.7, 23.4, -1] # A
+  target_pixel_threshold: 30   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  approach_depth: -1
+  depth_carrot: 0.2
+  drive_carrot: 1.0
+  octagon_height: 0.0
+  finish_depth: -1.5
+  finish_depth_thresh: 0.4
 
  debug:
   manager_info:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
   target_pixel_threshold: 40   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   drop_timeout: 30
   drop_depth: -0.4
@@ -113,8 +116,9 @@ tasks:
   depth_carrot: 0.1
 
 mission_tasks: # Tasks To Do In Order
- - debug
-# - start_gate
-# - jiangshi
-# - triangle
-# - dropper
+ - startup
+ - start_gate
+ - octagon
+ - dropper
+ - triangle
+ - jiangshi
