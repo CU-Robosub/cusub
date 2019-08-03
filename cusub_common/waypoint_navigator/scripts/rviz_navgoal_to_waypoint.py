@@ -44,7 +44,7 @@ class RVIZNavgoalToWaypoint(object):
         wp_goal.movement_mode = waypointGoal.STRAFE_MODE
 
         # We need a depth because the navgoal from rviz is 2D
-        wp_goal.goal_pose.pose.position.z = rospy.get_param("~depth", -2.0)
+        wp_goal.goal_pose.pose.position.z = rospy.get_param("~depth", -0.1)
 
         # Send new goal
         self.waycli.send_goal(wp_goal)
