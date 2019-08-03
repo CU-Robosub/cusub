@@ -53,8 +53,8 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip'
     outcome_timed_out: 'skip'
-  # prior: [4.0,0.0,-1.5, "world"] # DIVEWELL
-  prior: [-25,-16,-1.5, "world"] # TRANSDEC
+  prior: [4.0,0.0,-1.5, "world"] # DIVEWELL
+  # prior: [-33,-11,-2, "world"] # TRANSDEC
   method: vs        # solvepnp OR vs
   solvepnp:
     use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
@@ -72,10 +72,16 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  prior: [-29,-18, -1.5, "world"]
-  do_orbit: false
+  # prior: [-29,-18, -2.5, "world"]
+  # prior: [4.0,0, -2.5, "world"] # DIVEWELL
+  prior: [0.42, 4, -1, "world"] # DIVEWELL DEBUG VISUAL POINT
+  do_orbit: true
+  orbit_right: true
+  strafe_carrot: 0.2
+  single_class_time: 1
+  target_vampire: 'vampire_flying'
   visual_servo: # approach and slay
-    goal_percentage_of_frame: 0.4    # Percentage of image for target class
+    goal_percentage_of_frame: 0.2    # Percentage of image for target class
     slay_timeout: 10                 # How long the slay will last
     slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
     target_pixel_threshold: 50    # how close to our target do we need to be    
@@ -121,7 +127,7 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  prior: [-38, 0.0, -1, "world"] 
+  prior: [-28.98, 1.16, -1, "world"] 
   target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   approach_depth: -1
   depth_carrot: 0.2
@@ -131,9 +137,9 @@ tasks:
   finish_depth_thresh: 0.4
 
 mission_tasks: # Tasks To Do In Order
- - startup
- - start_gate # maybe do visual servoing on the gate?
- - octagon
- - dropper
+#  - startup
+#  - start_gate # maybe do visual servoing on the gate?
+#  - octagon
+#  - dropper
  - triangle
- - jiangshi
+#  - jiangshi

@@ -16,8 +16,8 @@ perception_control:
           maxout_pixel_dist: 100
       occam:
         drive:
-          max_setpoint: 1.0
-          maxout_pixel_dist: 100
+          max_setpoint: 0.5 # Reality 1.0
+          maxout_pixel_dist: 50 # 100
         strafe:
           max_setpoint: 1.0
           maxout_pixel_dist: 50
@@ -27,6 +27,18 @@ perception_control:
         depth:
           max_setpoint: 0.2
           maxout_pixel_dist: 70
+    
+      rotational:
+        timeout_frames: 50
+        occam:
+          rotation:
+            carrot: 0.3
+            threshold: 0.1
+          frame_ns: "/leviathan/description/"
+          frames: ["occam1_frame_optical", "occam2_frame_optical", "occam3_frame_optical", "occam4_frame_optical"]
+          frame_offset: 1.25664 # radians
+
+
   path_orient:
     yaw_setpoint_carrot: 0.5
     bang_bang_deadzone: 10.0    # Absolute value of hough lines slope before entering deadzone
