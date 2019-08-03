@@ -14,6 +14,14 @@
   </class>
 </library>
 
+<library path="lib/libvisual_servo">
+  <class name="perception_control/VisualPoint" type="perception_control::VisualPoint" base_class_type="nodelet::Nodelet">
+    <description>
+        Points to a bounding box in a different frame
+    </description>
+  </class>
+</library>
+
 <library path="lib/libpath_orient">
   <class name="perception_control/PathOrient" type="perception_control::PathOrient" base_class_type="nodelet::Nodelet">
     <description>
