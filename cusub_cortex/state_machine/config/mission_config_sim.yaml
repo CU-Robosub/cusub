@@ -134,10 +134,9 @@ tasks:
   finish_depth_thresh: 0.4
 
 mission_tasks: # Tasks To Do In Order
- - debug
-#  - startup
-#  - start_gate # maybe do visual servoing on the gate?
-#  - octagon
-#  - dropper
-#  - triangle
-#  - jiangshi
+ - startup
+ - start_gate # maybe do visual servoing on the gate?
+ - octagon
+ - dropper
+ - triangle
+ - jiangshi
