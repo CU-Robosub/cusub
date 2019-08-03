@@ -96,14 +96,19 @@ tasks:
     goal_percentage_of_frame: 0.4    # Percentage of image for target class
     slay_timeout: 10                 # How long the slay will last
     slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
-    target_pixel_threshold: 50    # how close to our target do we need to be    
-  mikes_method:
-    do: false
-    go_over_jiangshi_depth: -0.7
-    meters_fwd: 2.0
+    target_pixel_threshold: 50    # how close to our target do we need to be
+  
+ debug:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'skip'
+  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
+  target_pixel_threshold: 30   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  drop_depth: -2.5
 
 mission_tasks: # Tasks To Do In Order
-# - startup
+ - debug
 # - start_gate
 # - jiangshi
 # - triangle

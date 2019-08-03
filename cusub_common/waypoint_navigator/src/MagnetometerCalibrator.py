@@ -3,6 +3,8 @@
 import rospy
 import tf
 import math
+import yaml
+import io
 
 from waypoint_navigator.srv import *
 from std_msgs.msg import Float64
@@ -23,6 +25,11 @@ class MagnetometerCalibrator:
         declination = math.degrees(self.imu_yaw + math.radians(cur_dec) - requested_yaw)
         rospy.set_param('/declination', declination)
         rospy.loginfo("Setting declination to: %f" % declination)
+
+        declination_data = {'declination': declination}
+        with io.open('declination.yaml', 'w', encoding='utf8') as declination_file:
+            yaml.dump(declination_data, declination_file, default_flow_style=False, allow_unicode=True)
+
         return []
 
     def odometryCallback(self, odom):
@@ -47,9 +54,19 @@ class MagnetometerCalibrator:
 
     def run(self):
 
+        declination_data = None
+        try:
+            with open("declination.yaml", "r") as stream:
+                declination_data = yaml.safe_load(stream)
+        except:
+            rospy.logwarn("No declination saved!")
+
+        if declination_data is not None:
+            print declination_data
+
         # get current sub orientation to zero the magnetometer
-        self.pose_sub = rospy.Subscriber("/sensor_fusion/odometry/filtered", Odometry, self.odometryCallback)
-        self.imu_data = rospy.Subscriber("/imu/data", Imu, self.imuCallback)
+        self.pose_sub = rospy.Subscriber("odometry/filtered", Odometry, self.odometryCallback)
+        self.imu_data = rospy.Subscriber("imu", Imu, self.imuCallback)
 
         # service to activate magnetometer calibration
         s = rospy.Service('calibrateMagnetometer', CalibrateMagnetometer, self.calibrate)

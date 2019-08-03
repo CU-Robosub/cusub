@@ -5,6 +5,6 @@
         <param name="baud_rate" value="115200" />
         <param name="rate_hz" value="10" />
         <param name="daisy_chain" value="false" />
-	<param name="port_name" value="/dev/serial/by-id/usb-Pololu_Corporation_Pololu_Mini_Maestro_12-Channel_USB_Servo_Controller_00107580-if00" />
+	<param name="port_name" value="/dev/serial/by-id/usb-Pololu_Corporation_Pololu_Mini_Maestro_12-Channel_USB_Servo_Controller_00211116-if00" />
     </node>
 </launch>
