@@ -35,6 +35,8 @@
 
 	<node pkg="actuator" type="ActuatorService.py" name="actuator" ns="cusub_common" />
 
+        <node pkg="waypoint_navigator" type="MagnetometerCalibrator.py" name="magcal" ns="cusub_common" />
+
         <include file="$(find waypoint_navigator)/launch/waypoint_navigator.launch"/>
 
         <group ns="cusub_common">
