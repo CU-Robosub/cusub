@@ -25,6 +25,8 @@ from tasks.path import Path
 from tasks.dropper import Dropper
 from tasks.startup_task import Startup
 from tasks.triangle import Triangle
+from tasks.octagon import Octagon
+from tasks.debug_servo import Debug
 
 def createTransitionsForManager(task_list, final_outcome):
     transition_dict = {}
@@ -59,6 +61,10 @@ def loadStateMachines(task_list):
             task_sm = Startup()
         elif task == "triangle":
             task_sm = Triangle()
+        elif task == "octagon":
+            task_sm = Octagon()
+        elif task == "debug":
+            task_sm = Debug()
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 

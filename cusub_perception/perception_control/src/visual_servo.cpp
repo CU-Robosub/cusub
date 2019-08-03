@@ -15,6 +15,7 @@ void VisualServo::onInit()
     frozen_controls = false;
     wayToggleClient = nh->serviceClient<waypoint_navigator::ToggleControl>("cusub_common/toggleWaypointControl");
     controllingPids = false;
+    requestNum = 0;
     server = new vsServer(*nh, "visual_servo", boost::bind(&VisualServo::execute, this, _1), false);
     server->start();
 }
@@ -42,7 +43,7 @@ bool VisualServo::getTarget(const std::vector<darknet_ros_msgs::BoundingBox> &bo
             else if (box.Class == "coffin")
             {
                 foundTargets[box.Class].push_back(box);
-                std::cout << "Adding multiple coffins!" << std::endl;
+                // std::cout << "Adding multiple coffins!" << std::endl;
             }
             else // we only want one class for everything else
             {
@@ -372,8 +373,10 @@ bool VisualServo::controlPids(const bool takeControl)
 
 void VisualServo::execute(const perception_control::VisualServoGoalConstPtr goal)
 {
-    NODELET_INFO("VisualServo received request.");
+    requestNum += 1;
+    NODELET_INFO("VisualServo received request: %d", requestNum );
     activeGoal = goal;
+    
 
     if (goal->visual_servo_type == goal->PROPORTIONAL)
     {

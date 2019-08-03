@@ -26,27 +26,20 @@ from perception_control.msg import VisualServoAction, VisualServoGoal, VisualSer
 from actuator.srv import ActivateActuator
 from darknet_multiplexer.srv import DarknetClasses
 
-class Dropper(Task):
-    name = "dropper"
+class Debug(Task):
+    name = "debug_servo"
 
     def __init__(self):
-        self.name = "dropper"
+        self.name = "debug_servo"
         super(Dropper, self).__init__()
         self.init_objectives()
         self.link_objectives()
 
     def init_objectives(self):
-        darknet_cameras = [1,0,0,0,0,1]
-        search_frames = ["leviathan/description/occam0_frame_optical", "leviathan/description/downcam_frame_optical"]
-        search_classes = ["wolf", "bat", "dropper_cover"]
-        # search_frames = ["leviathan/description/downcam_frame_optical"]
-        self.search = Search.from_bounding_box(self.get_prior_param(), search_classes, search_frames, darknet_cameras)
         self.drop = Drop()
 
     def link_objectives(self):
         with self:
-            smach.StateMachine.add('Search', self.search, transitions={'found':'Drop', 'not_found':'manager'}, \
-                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
             smach.StateMachine.add('Drop', self.drop, transitions={'success':'manager', 'timed_out':'manager'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
@@ -62,7 +55,6 @@ class Drop(Objective):
         rospy.loginfo("...waiting for visual_servo server")
         self.vs_client.wait_for_server()
         rospy.loginfo("\tfound visual servo server")
-        self.darknet_classes = rospy.ServiceProxy('cusub_perception/darknet_multiplexer/get_classes', DarknetClasses)
 
         rospy.loginfo("...waiting for actuator service")
         rospy.wait_for_service("cusub_common/activateActuator")
@@ -71,37 +63,13 @@ class Drop(Objective):
         
         # variables
         self.centering_time = rospy.get_param("tasks/dropper/centering_time", 1.0)
-        self.approach_feedback = False
         self.dive_feedback = False
-        self.was_centered = False
 
         self.depth_pub = rospy.Publisher("cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
-        self.depth_sub = rospy.Subscriber("cusub_common/motor_controllers/pid/depth/state", Float64, self.depth_callback)
-        self.last_depth = -0.5
-        
-        self.drive_pub = rospy.Publisher("cusub_common/motor_controllers/pid/drive/setpoint", Float64, queue_size=1)
-        self.drive_sub = rospy.Subscriber("cusub_common/motor_controllers/pid/drive/state", Float64, self.drive_callback)
-        self.last_drive = 0
-        
-        self.drive_carrot = rospy.get_param("tasks/dropper/drive_carrot")
-        self.approach_depth = rospy.get_param("tasks/dropper/approach_depth")
         self.target_pixel_threshold = rospy.get_param("tasks/dropper/target_pixel_threshold")
-        self.depth_carrot = rospy.get_param("tasks/dropper/depth_carrot")
         self.drop_depth = rospy.get_param("tasks/dropper/drop_depth")
 
         super(Drop, self).__init__(self.outcomes, "Drop")
-
-    def vs_approach_feedback_callback(self, feedback):
-        self.approach_feedback = feedback.centered
-
-    def vs_dive_feedback_callback(self, feedback):
-        self.dive_feedback = feedback.centered
-    
-    def depth_callback(self, depth):
-        self.last_depth = depth.data
-
-    def drive_callback(self, drive):
-        self.last_drive = drive.data
 
     def actuate_dropper(self, dropper_num):
         self.actuator_service(dropper_num, 500)
@@ -109,53 +77,11 @@ class Drop(Objective):
     def visual_servo_method(self, userdata):
         rospy.loginfo("...using visual servoing approach")
         
-        self.configure_darknet_cameras([1,0,0,0,0,1])
-        target_classes = ["wolf", "bat", "dropper_cover"]
-        
-        goal = VisualServoGoal()
-        goal.target_classes = target_classes
-        goal.camera = goal.OCCAM
-        goal.x_axis = goal.YAW_AXIS
-        goal.y_axis = goal.NO_AXIS
-        goal.area_axis = goal.NO_AXIS
-        goal.target_frame = rospy.get_param("~robotname") +"/description/occam0_frame_optical"
-        goal.visual_servo_type = goal.PROPORTIONAL
-        goal.target_pixel_x = goal.CAMERAS_CENTER_X
-        goal.target_box_area = goal.AREA_NOT_USED
-        goal.target_pixel_threshold = self.target_pixel_threshold
-        
-        depth_set = Float64()
-        depth_set.data = self.approach_depth
-        drive_set = Float64()
-        rospy.loginfo("...vs on occam")
-        self.vs_client.send_goal(goal, feedback_cb=self.vs_approach_feedback_callback)
-
-        while not rospy.is_shutdown() :
-            # pub out forward drive and depth
-            drive_set.data = self.last_drive + self.drive_carrot
-            self.drive_pub.publish(drive_set)
-            self.depth_pub.publish(depth_set)
-
-            found = False
-            for _class in self.darknet_classes(rospy.Duration(1), ["leviathan/description/downcam_frame_optical"]).classes:
-                if _class in target_classes:
-                    found = True
-            
-            if found: # getting downcam hits
-                break
-
-            if userdata.timeout_obj.timed_out:
-                self.vs_client.cancel_goal()
-                userdata.outcome = "timed_out"
-                return "timed_out"
-        self.vs_client.cancel_goal()
-        rospy.sleep(2) # wait for the previous goal to end before sending next goal
-
         # toggle to using the downcam to 
         self.configure_darknet_cameras([0,0,0,0,0,1])
         goal = VisualServoGoal()
         goal.visual_servo_type = goal.PROPORTIONAL
-        goal.target_classes = ["wolf", "bat"]
+        goal.target_classes = ["vampire_cute"]
         goal.camera = goal.DOWNCAM
         goal.target_pixel_threshold = self.target_pixel_threshold
         goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
