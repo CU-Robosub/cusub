@@ -2,13 +2,13 @@
     <arg name="detection_topic" default="cusub_perception/darknet_ros/bounding_boxes" />
     <arg name="image_topic" default="cusub_common/occam/image0" />
     <arg name="detection_thresh" default="0.8" />
-n    <arg name="debug_mode" default="true" />
+    <arg name="debug_mode" default="true" />
     
     <node pkg="nodelet" type="nodelet" name="pc_standalone_nodelet" args="manager" output="screen"/>
     <rosparam command="load" file="$(find perception_control)/config/perception_control.yaml"/>
     <!-- <node pkg="nodelet" type="nodelet" name="orbit" args="load perception_control/Orbit orbit_standalone_nodelet" output="screen"/> -->
     <!-- Visual Servoing -->
-    <node pkg="nodelet" type="nodelet" name="visualservo" args="load perception_control/VisualServo pc_standalone_nodelet" output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="visualservo" args="load perception_control/VisualServo pc_standalone_nodelet" output="screen" />
     <!-- Path Orientation -->
     <node pkg="nodelet" type="nodelet" name="path_orient" args="load perception_control/PathOrient pc_standalone_nodelet" output="screen"/>
     <!-- Optical Flow Tracking -->

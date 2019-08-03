@@ -1,13 +1,6 @@
 #!/usr/bin/env python
 from __future__ import division
 """
-Dropper task, attempts to center on the dropper, set the depth lower, and drop
-Objectives:
-- Search
-- Follow
----> Center on the dropper
----> Lower the depth
----> Drop
 """
 import numpy as np
 
@@ -23,37 +16,31 @@ from tasks.task import Task, Objective
 
 from perception_control.msg import VisualServoAction, VisualServoGoal, VisualServoFeedback
 
-from actuator.srv import ActivateActuator
 from darknet_multiplexer.srv import DarknetClasses
 
-class Dropper(Task):
-    name = "dropper"
+class Octagon(Task):
+    name = "octagon"
 
     def __init__(self):
-        self.name = "dropper"
-        super(Dropper, self).__init__()
+        super(Octagon, self).__init__()
         self.init_objectives()
         self.link_objectives()
 
     def init_objectives(self):
         darknet_cameras = [1,0,0,0,0,1]
         search_frames = ["leviathan/description/occam0_frame_optical", "leviathan/description/downcam_frame_optical"]
-        search_classes = ["wolf", "bat", "dropper_cover"]
-        # search_frames = ["leviathan/description/downcam_frame_optical"]
+        search_classes = ["coffin"]
         self.search = Search.from_bounding_box(self.get_prior_param(), search_classes, search_frames, darknet_cameras)
-        self.drop = Drop()
+        self.rise = Rise()
 
     def link_objectives(self):
         with self:
-            smach.StateMachine.add('Search', self.search, transitions={'found':'Drop', 'not_found':'manager'}, \
+            smach.StateMachine.add('Search', self.search, transitions={'found':'Rise', 'not_found':'manager'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
-            smach.StateMachine.add('Drop', self.drop, transitions={'success':'manager', 'timed_out':'manager'}, \
+            smach.StateMachine.add('Rise', self.rise, transitions={'success':'manager', 'timed_out':'manager'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
-class Drop(Objective):
-    """
-    Center, get low, drop 
-    """
+class Rise(Objective):
     outcomes=['success', 'timed_out']
 
     def __init__(self):
@@ -63,14 +50,9 @@ class Drop(Objective):
         self.vs_client.wait_for_server()
         rospy.loginfo("\tfound visual servo server")
         self.darknet_classes = rospy.ServiceProxy('cusub_perception/darknet_multiplexer/get_classes', DarknetClasses)
-
-        rospy.loginfo("...waiting for actuator service")
-        rospy.wait_for_service("cusub_common/activateActuator")
-        self.actuator_service = rospy.ServiceProxy("cusub_common/activateActuator", ActivateActuator)
-        rospy.loginfo("\tfound actuator service")
         
         # variables
-        self.centering_time = rospy.get_param("tasks/dropper/centering_time", 1.0)
+        self.centering_time = rospy.get_param("tasks/octagon/centering_time", 1.0)
         self.approach_feedback = False
         self.dive_feedback = False
         self.was_centered = False
@@ -83,13 +65,15 @@ class Drop(Objective):
         self.drive_sub = rospy.Subscriber("cusub_common/motor_controllers/pid/drive/state", Float64, self.drive_callback)
         self.last_drive = 0
         
-        self.drive_carrot = rospy.get_param("tasks/dropper/drive_carrot")
-        self.approach_depth = rospy.get_param("tasks/dropper/approach_depth")
-        self.target_pixel_threshold = rospy.get_param("tasks/dropper/target_pixel_threshold")
-        self.depth_carrot = rospy.get_param("tasks/dropper/depth_carrot")
-        self.drop_depth = rospy.get_param("tasks/dropper/drop_depth")
+        self.drive_carrot = rospy.get_param("tasks/octagon/drive_carrot")
+        self.approach_depth = rospy.get_param("tasks/octagon/approach_depth")
+        self.target_pixel_threshold = rospy.get_param("tasks/octagon/target_pixel_threshold")
+        self.depth_carrot = rospy.get_param("tasks/octagon/depth_carrot")
+        self.octagon_height = rospy.get_param("tasks/octagon/octagon_height")
+        self.finish_depth_thresh = rospy.get_param("tasks/octagon/finish_depth_thresh")
+        self.finish_depth = rospy.get_param("tasks/octagon/finish_depth")
 
-        super(Drop, self).__init__(self.outcomes, "Drop")
+        super(Rise, self).__init__(self.outcomes, "Rise")
 
     def vs_approach_feedback_callback(self, feedback):
         self.approach_feedback = feedback.centered
@@ -103,14 +87,11 @@ class Drop(Objective):
     def drive_callback(self, drive):
         self.last_drive = drive.data
 
-    def actuate_dropper(self, dropper_num):
-        self.actuator_service(dropper_num, 500)
-
     def visual_servo_method(self, userdata):
         rospy.loginfo("...using visual servoing approach")
         
         self.configure_darknet_cameras([1,0,0,0,0,1])
-        target_classes = ["wolf", "bat", "dropper_cover"]
+        target_classes = ["coffin"]
         
         goal = VisualServoGoal()
         goal.target_classes = target_classes
@@ -155,7 +136,7 @@ class Drop(Objective):
         self.configure_darknet_cameras([0,0,0,0,0,1])
         goal = VisualServoGoal()
         goal.visual_servo_type = goal.PROPORTIONAL
-        goal.target_classes = ["wolf", "bat"]
+        goal.target_classes = ["coffin"]
         goal.camera = goal.DOWNCAM
         goal.target_pixel_threshold = self.target_pixel_threshold
         goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
@@ -179,21 +160,27 @@ class Drop(Objective):
             if self.dive_feedback:
                 rospy.sleep(2)
                 rospy.loginfo_throttle(1, "...centered, adjusting depth")
-                depth_set.data = self.last_depth - self.depth_carrot
+                depth_set.data = self.last_depth + self.depth_carrot
             
-            if self.last_depth < self.drop_depth:
+            if self.last_depth > self.octagon_height:
                 depth_set.data = self.last_depth
                 self.depth_pub.publish(depth_set)
-                rospy.loginfo("...dropping")
+                rospy.loginfo("...surfacing")
                 break
                 
             self.depth_pub.publish(depth_set)
             rospy.sleep(0.25) # don't eat the core
         
-        self.actuate_dropper(1)
-        rospy.sleep(5) # center and wait for dropper
-        if not rospy.get_param("using_sim_params"):
-            self.actuate_dropper(0)
+        rospy.sleep(5) # wait at top of octagon
+        rospy.loginfo("...diving")
+        while not rospy.is_shutdown():
+            depth_set.data = self.finish_depth
+            if abs(self.last_depth - self.finish_depth) < self.finish_depth_thresh:
+                rospy.loginfo("...dove")
+                break
+
+            self.depth_pub.publish(depth_set)
+            rospy.sleep(0.25)
 
         self.vs_client.cancel_goal()
         rospy.sleep(3)

@@ -72,7 +72,7 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  prior: [4.0, 0.0, -1.5, "world"]
+  prior: [-29,-18, -1.5, "world"]
   do_orbit: false
   visual_servo: # approach and slay
     goal_percentage_of_frame: 0.4    # Percentage of image for target class
@@ -101,17 +101,43 @@ tasks:
   prior: [-33, -11, -2.0, "world"] # TRANSDEC
   # prior: [4, 0.0, -1, "world"] # DIVEWELL
   centering_time: 5            # Time between first centered feedback & when we check if we're centered again
-  target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
-  drop_timeout: 45
-  drop_depth: -2.5
-  drop_depth_thresh: 0.3
+  target_pixel_threshold: 30   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   approach_depth: -1
+  drop_timeout: 45
   drive_carrot: 2.0
   depth_carrot: 0.5
+  drop_depth: -2.5
+  drop_depth_timeout: 60
+
+ debug:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'skip'
+  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
+  target_pixel_threshold: 30   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  drop_depth: -2.5
+
+ octagon:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'skip'
+  prior: [-38, 0.0, -1, "world"] 
+  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
+  target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  approach_depth: -1
+  depth_carrot: 0.2
+  drive_carrot: 1.0
+  octagon_height: 0.0
+  finish_depth: -1.5
+  finish_depth_thresh: 0.4
 
 mission_tasks: # Tasks To Do In Order
- - startup
- - start_gate
- - jiangshi
- - dropper
-
+ - debug
+#  - startup
+#  - start_gate # maybe do visual servoing on the gate?
+#  - octagon
+#  - dropper
+#  - triangle
+#  - jiangshi

@@ -50,6 +50,23 @@ tasks:
     slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
     target_pixel_threshold: 50    # how close to our target do we need to be    
 
+ triangle:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'skip'
+  prior: [-19.5, 4.5, -2] # C
+  do_orbit: false
+  visual_servo: # approach and slay
+    goal_percentage_of_frame: 0.4    # Percentage of image for target class
+    slay_timeout: 10                 # How long the slay will last
+    slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
+    target_pixel_threshold: 50    # how close to our target do we need to be    
+  mikes_method:
+    do: false
+    go_over_jiangshi_depth: -0.7
+    meters_fwd: 2.0
+
  dropper:
   manager_info:
     timeout_secs: 0
@@ -67,7 +84,7 @@ tasks:
   drive_carrot: 0.7
   depth_carrot: 0.5
 
- triangle:
+ octagon:
   manager_info:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
