@@ -72,14 +72,16 @@ class Slay(Objective):
         self.strafe_carrot = rospy.get_param("tasks/triangle/strafe_carrot")
         self.strafe_state = None
         rospy.Subscriber("cusub_common/motor_controllers/pid/strafe/setpoint", Float64, self.strafe_callback)
-        self.strafe_pub = rospy.Publisher("cusub_common/motor_controllers/pid/setpoint", Float64, queue_size=1)
+        self.strafe_pub = rospy.Publisher("cusub_common/motor_controllers/pid/strafe/setpoint", Float64, queue_size=10)
+
+        self.single_class_time = rospy.get_param("tasks/triangle/single_class_time")
 
         rospy.loginfo("...waiting for toggle waypoint control")
         rospy.wait_for_service('cusub_common/toggleWaypointControl')
         self.wayToggle = rospy.ServiceProxy('cusub_common/toggleWaypointControl', ToggleControl)
         rospy.loginfo("\tfound toggle waypoint control")
 
-        self.depth_pub = rospy.Publisher("cusub_common/motor_controllers/pid/strafe/setpoint", Float64, queue_size=10)
+        self.depth_pub = rospy.Publisher("cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=10)
 
     def drive_callback(self, msg):
         self.drive_state = msg.data
@@ -97,10 +99,7 @@ class Slay(Objective):
         goal.target_classes = TRIANGLE_BOUY_CLASSES
         goal.camera = goal.OCCAM
         goal.x_axis = goal.YAW_AXIS
-        if rospy.get_param("using_sim_params"):
-            goal.y_axis = goal.NO_AXIS
-        else:
-            goal.y_axis = goal.DEPTH_AXIS
+        goal.y_axis = goal.DEPTH_AXIS
         goal.area_axis = goal.DRIVE_AXIS
         goal.target_frame = rospy.get_param("~robotname") +"/description/occam0_frame_optical"
         goal.visual_servo_type = goal.PROPORTIONAL
@@ -118,10 +117,10 @@ class Slay(Objective):
                 return "timed_out"
             if self.feedback:
                 break
-            if rospy.get_param("using_sim_params"): # go to a constant depth
-                depth_msg = Float64()
-                depth_msg.data = -2.0
-                self.depth_pub.publish(depth_msg)
+            # if rospy.get_param("using_sim_params"): # go to a constant depth
+            #     depth_msg = Float64()
+            #     depth_msg.data = -2.0
+            #     self.depth_pub.publish(depth_msg)
                 
             rospy.sleep(0.25)
         
@@ -132,24 +131,29 @@ class Slay(Objective):
         if self.do_orbit:
             target_frame = ["leviathan/description/occam0_frame_optical"]
             strafe_msg = Float64()
+            found = False
             while not rospy.is_shutdown():
                 # Adjust strafe with carrot on current strafe
                 strafe_set = 0.0 if self.strafe_state is None else self.strafe_state
                 if self.orbit_right:
-                    strafe_msg.data = strafe_set - self.strafe_carrot
-                else:
                     strafe_msg.data = strafe_set + self.strafe_carrot
+                else:
+                    strafe_msg.data = strafe_set - self.strafe_carrot
                 
-                self.strafe_pub(strafe_msg)
                 # Check available darknet classes in occam0 frame, hang for 1 second
-                present_classes = self.get_classes_service(rospy.Duration(1), target_frame).classes
+                present_classes = self.get_classes_service(rospy.Duration(0.5), target_frame).classes
                 if len(present_classes) == 1 and self.target_vampire in present_classes:
-                    # found target vampire
-                    break
+                    rospy.loginfo("Target class detectde by itself. Waiting...")
+                    if not found:
+                        userdata.timeout_obj.set_new_time(self.single_class_time)
+                        found = True
                 
                 if userdata.timeout_obj.timed_out:
                     break
 
+                self.strafe_pub.publish(strafe_msg)
+
+        rospy.sleep(3) # Provide time to fully center on the bouy
         self.vs_client.cancel_goal()
     
         # Slay the buoy
@@ -172,7 +176,7 @@ class Slay(Objective):
             rospy.sleep(0.25)
 
         rospy.loginfo("...slayed, backing up")
-        userdata.timeout_obj.set_new_time(3* rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"))
+        userdata.timeout_obj.set_new_time(2* rospy.get_param("tasks/jiangshi/visual_servo/slay_timeout"))
         # slay_set.data = original_set
         while not rospy.is_shutdown():
             slay_set.data = self.drive_state - slay_carrot
