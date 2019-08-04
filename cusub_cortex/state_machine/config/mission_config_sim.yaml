@@ -74,7 +74,7 @@ tasks:
     outcome_timed_out: 'skip'
   # prior: [-29,-18, -2.5, "world"]
   # prior: [4.0,0, -2.5, "world"] # DIVEWELL
-  prior: [0.42, 4, -1, "world"] # DIVEWELL DEBUG VISUAL POINT
+  prior: [-2.2, 0, -2, "world"] # DIVEWELL DEBUG VISUAL POINT
   do_orbit: true
   orbit_right: true
   strafe_carrot: 0.2
