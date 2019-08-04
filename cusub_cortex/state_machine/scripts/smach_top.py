@@ -10,6 +10,7 @@ import smach
 import smach_ros
 from geometry_msgs.msg import Pose, Point
 from std_msgs.msg import Empty
+from waypoint_navigator.srv import ToggleControl
 from waypoint_navigator.msg import waypointAction, waypointGoal
 import actionlib
 from tasks.start_gate import StartGate
@@ -88,6 +89,10 @@ def main():
     rospy.loginfo("Waiting for waypoint server")
 #    wayClient.wait_for_server()
     rospy.loginfo("\tconnected to server")
+
+    # Make sure the waypoint navigator is in control
+    toggle_waypoint = rospy.ServiceProxy('cusub_common/toggleWaypointControl', ToggleControl)
+    toggle_waypoint(True)
 
     if rospy.get_param('~using_darknet'):
         rospy.loginfo("Waiting for darknet multiplexer server")
