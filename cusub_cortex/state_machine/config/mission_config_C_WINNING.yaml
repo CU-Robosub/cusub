@@ -26,7 +26,7 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'uh_oh'
-  prior: [-14, 7, -0.5, "world"] # TRANSDEC
+  prior: [-14, 7, -0.5] # TRANSDEC
   dist_behind_gate: 1.0
   third_leg_adjustment: 0.75
   replan_thresh: 1.0
@@ -40,7 +40,7 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip'
     outcome_timed_out: 'skip'
-  prior: [-16, 15, -1.8, "world"] # DIVEWELL
+  prior: [-16, 15, -1.8] # DIVEWELL
   method: vs        # solvepnp OR vs
   solvepnp:
     use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
@@ -58,12 +58,12 @@ tasks:
     timeout_secs: 180
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  prior: [-19, 15, -1.8, "world"] # DIVEWELL
+  prior: [-19, 15, -1.8] # DIVEWELL
   do_orbit: true
   orbit_right: true
   strafe_carrot: 0.3
   single_class_time: 1
-  target_vampire: 'vampire_flying' # TODO COMEBACK
+  target_vampire: 'vampire_no_torso'
   visual_servo: # approach and slay
     goal_percentage_of_frame: 0.25    # Percentage of image for target class
     slay_timeout: 10                 # How long the slay will last
@@ -79,7 +79,7 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  prior: [-19, 17, -1.25, "world"] # TRANSDEC
+  prior: [-19, 17, -1.25] # TRANSDEC
   target_pixel_threshold: 50   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   approach_depth: -1.5
   drop_timeout: 120
@@ -93,7 +93,7 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  prior: [-31, 23, -1.0, "world"] 
+  prior: [-31, 23, -1.0] 
   target_pixel_threshold: 50   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   approach_depth: -1
   depth_carrot: 0.5
