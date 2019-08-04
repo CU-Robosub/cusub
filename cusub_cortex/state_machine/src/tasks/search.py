@@ -83,7 +83,7 @@ class Search(Objective):
     @classmethod
     def from_bounding_box(self, prior_pose_param, target_classes, target_frames):
         """ Allows the search to quit if darknet is publishing bounding box msgs of the target class at the current time """
-        return self(prior_pose_param, None, target_classes, target_frames,  min_seen_frames=min_seen_frames, darknet_cameras=darknet_cameras)
+        return self(prior_pose_param, None, target_classes, target_frames)
 
     def exit_callback(self, msg): # Abort on the first publishing
         if not self.replan_requested():
