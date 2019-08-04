@@ -7,7 +7,7 @@ namespace leviathan
 <launch>
   <arg name="sub" default="leviathan" />
   <arg name="using_darknet" default="true"/>
-  <arg name="config_filename" default="mission_config_sim.yaml"/>
+  <arg name="config_filename" default="mission_config_C_WINNING.yaml"/>
   <group ns="$(arg sub)">
     <include file="$(find mapper)/launch/mapper.launch"/>
     <include file="$(find state_machine)/launch/state_machine.launch" >

@@ -17,6 +17,7 @@ from std_msgs.msg import Empty
 from darknet_multiplexer.srv import DarknetCameras
 import numpy as np
 import tf
+from state_machine.msg import TaskStatus
 
 from optparse import OptionParser
 import inspect
@@ -95,6 +96,8 @@ class Objective(smach.State):
         """
         self.name = objtv_name
         rospy.Subscriber('cusub_common/odometry/filtered', Odometry, self.sub_pose_cb)
+        rospy.Subscriber('cusub_cortex/state_machine/task_status', TaskStatus, self.current_tasks_cb)
+        self.task_dict = {}
         self._replan_requested = False
         self.wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
         self.started = False
@@ -372,6 +375,45 @@ class Objective(smach.State):
         target_pose.orientation = cur_pose.orientation
         return target_pose
 
+    """
+    callback to update our prior dict
+    """
+    def current_tasks_cb(self, msg):
+        for i in range(0, len(msg.task_statuses), 2):
+            task = msg.task_statuses[i]
+            status = msg.task_statuses[i+1]
+            
+            self.task_dict[task] = status
+
+        
+    """
+    Will loop through the next tasks and update the relative priors
+    """
+    def update_next_priors(self, current_task):
+        xyzframe_list = rospy.get_param("tasks/"+current_task+"/prior")
+        cur_estimated_prior = Point()
+        cur_estimated_prior.x = xyzframe_list[0]
+        cur_estimated_prior.y = xyzframe_list[1]
+
+        for task, status in self.task_dict.iteritems():
+            if status == "queued": 
+                task_prior_name = "tasks/"+task+"/prior"
+
+                xyzframe_list = rospy.get_param(task_prior_name)
+                task_prior_pt = Point()
+                task_prior_pt.x = xyzframe_list[0]
+                task_prior_pt.y = xyzframe_list[1]
+                task_prior_pt.z = xyzframe_list[2]
+                
+                delta_x = task_prior_pt.x - cur_estimated_prior.x
+                delta_y = task_prior_pt.y - cur_estimated_prior.y
+
+                adjusted_prior = [self.cur_pose.position.x + delta_x, \
+                                  self.cur_pose.position.y + delta_y, \
+                                  task_prior_pt.z]
+                rospy.loginfo("...updating prior for " + task)
+                rospy.set_param(task_prior_name, adjusted_prior)
+                
 class Timeout():
     """
     @brief Timeout object for tasks
