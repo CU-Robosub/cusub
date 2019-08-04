@@ -13,10 +13,12 @@ from tasks.task import Objective
 import smach
 from geometry_msgs.msg import Point, PoseStamped, Pose
 import rospy
+import actionlib
 import tf
 from darknet_multiplexer.srv import DarknetClasses
+from perception_control.msg import VisualPointAction, VisualPointGoal, VisualPointFeedback
 
-DARKNET_CAMERAS_DEFAULT=[1,1,0,0,1,0]
+DARKNET_CAMERAS_DEFAULT=[1,1,1,1,1,0]
 
 class Search(Objective):
     
@@ -64,6 +66,8 @@ class Search(Objective):
             else: # list
                 self.target_frames.extend(target_frames)
             
+        self.num_frames_seen = 0
+        self.vp_client = actionlib.SimpleActionClient('visual_point', VisualPointAction)
         self.darknet_config = darknet_cameras
         super(Search, self).__init__(self.outcomes, "Search")
     
@@ -81,6 +85,9 @@ class Search(Objective):
         if not self.replan_requested():
             rospy.loginfo("...Task Found!")
             self.request_replan()
+
+    def vp_feedback_callback(self, feedback):
+        self.num_frames_seen = feedback.target_frame_count
 
     def execute_topic_exit(self, userdata):
         prior = self.get_odom_prior(self.prior_pose_param)
@@ -100,19 +107,22 @@ class Search(Objective):
         prior = self.get_odom_prior(self.prior_pose_param)
         self.go_to_pose_non_blocking(prior)
 
-        # Ask the server for available bounding box classes and check if our target_class is among those
-        while not rospy.is_shutdown():
-            present_classes = self.service(rospy.Duration(1), self.target_frames).classes
-            
-            found = False
-            for c in self.target_classes:
-                if c in present_classes:
-                    found = True
-            
-            if found:
-                break
+        goal = VisualPointGoal()
+        goal.target_classes = self.target_classes
+        goal.target_frame = "leviathan/description/occam0_frame_optical"
+        self.vp_client.send_goal(goal, feedback_cb=self.vp_feedback_callback)
 
-            if userdata.timeout_obj.timed_out:
+        while not rospy.is_shutdown():
+            if self.num_frames_seen > 3:
+                self.cancel_way_client_goal()
+                #probably gonn change later - not the best
+                rospy.loginfo("...found dat obj & pointed")
+                return "found"
+            elif self.num_frames_seen < 0:
+                self.cancel_way_client_goal() # throws error b/c wayToggle from vp???
+                self.go_to_pose_non_blocking(prior)
+            #Total hack method. TODO @LB
+            elif userdata.timeout_obj.timed_out:
                 self.cancel_way_client_goal()
                 userdata.outcome = "timed_out"
                 return "not_found"
@@ -120,8 +130,30 @@ class Search(Objective):
                 rospy.logerr("Search unable to find task.")
                 userdata.outcome = "not_found"
                 return "not_found"
-        self.cancel_way_client_goal()
-        return "found"
+            rospy.sleep(0.25)
+
+        # Ask the server for available bounding box classes and check if our target_class is among those
+        # while not rospy.is_shutdown():
+        #     present_classes = self.service(rospy.Duration(1), self.target_frames).classes
+            
+        #     found = False
+        #     for c in self.target_classes:
+        #         if c in present_classes:
+        #             found = True
+            
+        #     if found:
+        #         break
+
+        #     if userdata.timeout_obj.timed_out:
+        #         self.cancel_way_client_goal()
+        #         userdata.outcome = "timed_out"
+        #         return "not_found"
+        #     elif self.check_reached_pose(prior):
+        #         rospy.logerr("Search unable to find task.")
+        #         userdata.outcome = "not_found"
+        #         return "not_found"
+        # self.cancel_way_client_goal()
+        # return "found"
 
     def execute(self, userdata):
         rospy.loginfo("---Executing Search")

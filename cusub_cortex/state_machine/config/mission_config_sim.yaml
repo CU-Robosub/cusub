@@ -73,7 +73,8 @@ tasks:
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
   # prior: [-29,-18, -2.5, "world"]
-  prior: [4.0,0, -2.5, "world"] # DIVEWELL
+  # prior: [4.0,0, -2.5, "world"] # DIVEWELL
+  prior: [0.42, 4, -1, "world"] # DIVEWELL DEBUG VISUAL POINT
   do_orbit: true
   orbit_right: true
   strafe_carrot: 0.2
@@ -126,7 +127,7 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  prior: [-38, 0.0, -1, "world"] 
+  prior: [-28.98, 1.16, -1, "world"] 
   target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   approach_depth: -1
   depth_carrot: 0.2
@@ -136,9 +137,9 @@ tasks:
   finish_depth_thresh: 0.4
 
 mission_tasks: # Tasks To Do In Order
-#  - jiangshi
- - triangle
 #  - startup
 #  - start_gate # maybe do visual servoing on the gate?
 #  - octagon
 #  - dropper
+ - triangle
+#  - jiangshi
