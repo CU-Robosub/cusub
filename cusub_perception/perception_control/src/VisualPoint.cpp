@@ -48,12 +48,13 @@ void VisualPoint::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr 
         else
         {
             std::string logMsg = "Visual point servo detected " + foundBox.Class + 
-                                 " in frame " + foundFrame + " taking control";
-            NODELET_INFO(logMsg.c_str());
+                                 " in frame " + foundFrame;
+            NODELET_INFO("%s", logMsg.c_str());
             controlPids(true);
             m_targetYaw.active = true;
             m_targetYaw.fromFrame = foundFrame;
             m_targetYaw.value = m_currentController->getTargetYaw(bbs->image_header.frame_id);
+            NODELET_INFO("%f", m_targetYaw.value);
         }
     }
 
