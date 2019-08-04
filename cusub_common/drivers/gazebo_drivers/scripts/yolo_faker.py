@@ -634,7 +634,7 @@ class YOLOFaker(object):
             imagecallback = partial(self.camera_image_callback, camera=self.cameras[cameraname])
 
             rospy.Subscriber(camera['camera_info_topic'], CameraInfo, infocallback)
-            rospy.Subscriber(camera['image_topic'], Image, imagecallback)
+            rospy.Subscriber(camera['image_topic'], Image, imagecallback, queue_size=1)
 
             if camera['debug_image_enabled']:
                 self.cameras[cameraname].debug_image_pub = \
