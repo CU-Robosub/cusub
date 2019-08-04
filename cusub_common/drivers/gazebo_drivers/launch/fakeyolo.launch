@@ -7,7 +7,11 @@
     <!-- For debugging config object points it can render bounding volume points -->
     <arg name="show_points" default="false"/>
 
-    <node pkg="tf" type="static_transform_publisher" name="occam0_gt_broadcaster" args="0.055 0 0.22 0 0 0 leviathan_gt/base_link leviathan_gt/occam0_frame 50" />
+    <node pkg="tf" type="static_transform_publisher" name="occam0_gt_broadcaster" args="0.055 0 0.22  0.00 0 0 leviathan_gt/base_link leviathan_gt/occam0_frame 50" />
+    <node pkg="tf" type="static_transform_publisher" name="occam1_gt_broadcaster" args="0.055 0 0.22 -1.25 0 0 leviathan_gt/base_link leviathan_gt/occam1_frame 50" />
+    <node pkg="tf" type="static_transform_publisher" name="occam2_gt_broadcaster" args="0.055 0 0.22 -2.51 0 0 leviathan_gt/base_link leviathan_gt/occam2_frame 50" />
+    <node pkg="tf" type="static_transform_publisher" name="occam3_gt_broadcaster" args="0.055 0 0.22 -3.77 0 0 leviathan_gt/base_link leviathan_gt/occam3_frame 50" />
+    <node pkg="tf" type="static_transform_publisher" name="occam4_gt_broadcaster" args="0.055 0 0.22 -5.02 0 0 leviathan_gt/base_link leviathan_gt/occam4_frame 50" />
     <node pkg="tf" type="static_transform_publisher" name="downcam_gt_broadcaster" args="0.0 0 -0.1 0 1.57 0 leviathan_gt/base_link leviathan_gt/downcam_frame 50" />
 
     <rosparam command="load" file="$(find gazebo_drivers)/config/$(arg config_filename)"/>
