@@ -27,10 +27,9 @@ class Octagon(Task):
         self.link_objectives()
 
     def init_objectives(self):
-        darknet_cameras = [1,0,0,0,0,1]
         search_frames = ["leviathan/description/occam0_frame_optical", "leviathan/description/downcam_frame_optical"]
         search_classes = ["coffin"]
-        self.search = Search.from_bounding_box(self.get_prior_param(), search_classes, search_frames, darknet_cameras)
+        self.search = Search.from_bounding_box(self.get_prior_param(), search_classes, search_frames)
         self.rise = Rise()
 
     def link_objectives(self):

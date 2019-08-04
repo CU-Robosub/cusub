@@ -29,7 +29,7 @@ class StartGate(Task):
         self.link_objectives()
 
     def init_objectives(self):
-        self.search = Search(self.get_prior_param(), "cusub_cortex/mapper_out/start_gate")
+        self.search = Search.from_topic(self.get_prior_param(), "cusub_cortex/mapper_out/start_gate", [1,0,0,0,0,0])
         self.attack = Attack()
 
     def link_objectives(self):

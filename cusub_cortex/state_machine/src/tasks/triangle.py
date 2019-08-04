@@ -30,7 +30,7 @@ class Triangle(Task):
 
     def init_objectives(self):
         frame = ["leviathan/description/occam0_frame_optical"]
-        self.search = Search.from_bounding_box(self.get_prior_param(), TRIANGLE_BOUY_CLASSES, frame, [1,1,1,1,1,0])
+        self.search = Search.from_bounding_box(self.get_prior_param(), TRIANGLE_BOUY_CLASSES, frame)
         self.slay = Slay()
 
     def link_objectives(self):
