@@ -24,7 +24,7 @@
   <arg name="BT_x" default="27.6"/>
   <arg name="BT_y" default="-11.9"/>
   <arg name="BT_z" default="-4.7"/>
-  <arg name="BT_yaw" default="-0.8"/>
+  <arg name="BT_yaw" default="-1.38"/>
 
   <arg name="TO_x" default="27.00"/>
   <arg name="TO_y" default="7.5"/>

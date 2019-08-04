@@ -91,8 +91,8 @@ def main():
     rospy.loginfo("\tconnected to server")
 
     # Make sure the waypoint navigator is in control
-    toggle_waypoint = rospy.ServiceProxy('cusub_common/toggleWaypointControl', ToggleControl)
-    toggle_waypoint(True)
+    #toggle_waypoint = rospy.ServiceProxy('cusub_common/toggleWaypointControl', ToggleControl)
+    #toggle_waypoint(True)
 
     if rospy.get_param('~using_darknet'):
         rospy.loginfo("Waiting for darknet multiplexer server")

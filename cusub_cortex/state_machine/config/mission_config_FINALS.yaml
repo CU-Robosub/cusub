@@ -9,7 +9,7 @@
 #            later : move this task to the end of the mission_tasks queue, essentially coming back to the task later
 #            uh_oh : or any unrecognized string will crash and stop the SM
 
-using_sim_params : True
+using_sim_params : False
 manager_task_status_pub_rate: 1
 
 startup_delay: 0
@@ -19,7 +19,7 @@ tasks:
   manager_info:
     timeout_secs: 5
   depth: -1.5
-  dive_time: 3
+  dive_time: 10
 
  start_gate:
   manager_info:
@@ -31,7 +31,7 @@ tasks:
   third_leg_adjustment: 0.5
   replan_thresh: 1.0
   style_dist: 2.0
-  three_leg_depth: -0.2
+  three_leg_depth: -0.4 # Depth we go through gate at
   do_style: True
   spin_carrot_rads: 0.7
 
@@ -48,7 +48,7 @@ tasks:
     slay_dist: 0.0
     approach_dist: 2.0
   visual_servo: # approach and slay
-    goal_percentage_of_frame: 0.3    # Percentage of image for target class
+    goal_percentage_of_frame: 0.4    # Percentage of image for target class
     slay_timeout: 10                 # How long the slay will last
     slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
     target_pixel_threshold: 50    # how close to our target do we need to be    
@@ -61,11 +61,11 @@ tasks:
   prior: [19.98, 17.64, -1.8]
   do_orbit: true
   orbit_right: true
-  strafe_carrot: 0.2
+  strafe_carrot: 0.3
   single_class_time: 1
-  target_vampire: 'vampire_flying'
+  target_vampire: 'vampire_fathead' # 'vampire_fathead', 'vampire_no_torso', 'vampire_flying' # TODO UPDATE
   visual_servo: # approach and slay
-    goal_percentage_of_frame: 0.2    # Percentage of image for target class
+    goal_percentage_of_frame: 0.25   # Percentage of image for target class
     slay_timeout: 10                 # How long the slay will last
     slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
     target_pixel_threshold: 50    # how close to our target do we need to be    
@@ -81,10 +81,10 @@ tasks:
     outcome_timed_out: 'skip'
   prior: [27.03, 23.5, -1.25]
   target_pixel_threshold: 50   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
-  approach_depth: -1
-  drop_timeout: 90
-  drive_carrot: 2.0
-  depth_carrot: 0.5
+  approach_depth: -1.5
+  drop_timeout: 120
+  drive_carrot: 1.5
+  depth_carrot: 0.3
   drop_depth: -2.5
   drop_depth_timeout: 60
 
@@ -96,9 +96,9 @@ tasks:
   prior: [16.45, 44.65, -1.25]
   target_pixel_threshold: 50   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
   approach_depth: -1
-  depth_carrot: 0.2
+  depth_carrot: 0.5
   drive_carrot: 2.0
-  octagon_height: 0.0
+  octagon_height: 0.3
   finish_depth: -1.5
   finish_depth_thresh: 0.4
 
