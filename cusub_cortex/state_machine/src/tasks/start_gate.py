@@ -54,7 +54,6 @@ class Attack(Objective):
         self.leg_adjustment_meters = rospy.get_param('tasks/start_gate/third_leg_adjustment', 0.5)
         self.style_dist = rospy.get_param('tasks/start_gate/style_dist', 0.5)
         self.three_leg_dist = rospy.get_param('tasks/start_gate/three_leg_dist', 1.5)
-        self.three_leg_depth = rospy.get_param('tasks/start_gate/three_leg_depth', -1.0)
         self.is_three_leg = False
         self.do_style = rospy.get_param('tasks/start_gate/do_style', False)
         self.spin_carrot = rospy.get_param('tasks/start_gate/spin_carrot_rads', 0.3)

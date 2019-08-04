@@ -58,6 +58,6 @@
     <param name="frameid" value="leviathan/description/downcam_frame"/>
     <rosparam command="load" file="$(find gazebo_drivers)/config/gazebo_downcam_params.yaml"/>
   </node>
-  <node name="relay_downcam" pkg="topic_tools" type="relay" args="description/camera_5/image_raw cusub_common/downcam"/>
+  <node name="relay_downcam" pkg="topic_tools" type="relay" args="description/camera_5/image_raw cusub_common/downcam/image_color"/>
 
 </launch>

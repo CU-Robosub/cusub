@@ -42,7 +42,7 @@ void VisualPoint::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr 
     if ( !foundFrame.empty() )
     {
         std_msgs::Float64 new_yaw;        
-        if (foundFrame == m_activeGoal->target_frame) // indicate if target class is in our target frame!
+        if (foundFrame == m_activeGoal->target_frame || foundFrame == "leviathan/description/downcam_frame_optical") // indicate if target class is in our target frame!
         {
             m_seenFrames++;
             new_yaw.data = yawState;
