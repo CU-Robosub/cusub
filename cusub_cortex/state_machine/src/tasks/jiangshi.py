@@ -32,7 +32,9 @@ class Jiangshi(Task):
         self.link_objectives()
 
     def init_objectives(self):
-        self.search = Search.from_bounding_box(self.get_prior_param(), ["vampire_cute"], ["leviathan/description/occam0_frame_optical"], [1,0,0,0,0,0])
+        search_frames = ["leviathan/description/occam0_frame_optical"]
+        search_classes = ["vampire_cute"]
+        self.search = Search.from_bounding_box(self.get_prior_param(), search_classes, search_frames)
         self.slay = Slay()
 
     def link_objectives(self):
