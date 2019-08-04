@@ -4,8 +4,8 @@ from std_msgs.msg import Float64
 
 class ZeroRollPitch():
     def __init__(self):
-        self.roll_pub = rospy.Publisher('cusub_common/motor_controller/roll/setpoint', Float64, queue_size=1)
-        self.pitch_pub = rospy.Publisher('cusub_common/motor_controller/pitch/setpoint', Float64, queue_size=1)
+        self.roll_pub = rospy.Publisher('cusub_common/motor_controllers/pid/roll/setpoint', Float64, queue_size=1)
+        self.pitch_pub = rospy.Publisher('cusub_common/motor_controllers/pid/pitch/setpoint', Float64, queue_size=1)
 
     def zero(self):
         zero_msg = Float64()
