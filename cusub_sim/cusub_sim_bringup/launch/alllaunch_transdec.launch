@@ -36,23 +36,23 @@
   <arg name="DR_z" default="-4.2"/>
   <arg name="DR_yaw" default="-2.27"/>
 
-  <arg name="OC_x" default="-38.37"/>
-  <arg name="OC_y" default="-0.09"/>
+  <arg name="OC_x" default="-40.57"/>
+  <arg name="OC_y" default="-1.43"/>
   <arg name="OC_z" default="0.0"/>
   <arg name="OC_yaw" default="0.42"/>
 
-  <arg name="CO1_x" default="-39.44"/>
-  <arg name="CO1_y" default="-2"/>
+  <arg name="CO1_x" default="-41.44"/>
+  <arg name="CO1_y" default="-3"/>
   <arg name="CO1_z" default="-4.7"/>
   <arg name="CO1_yaw" default="-2.69"/>
 
-  <arg name="CO2_x" default="-36.46"/>
-  <arg name="CO2_y" default="-0.46"/>
+  <arg name="CO2_x" default="-38.3"/>
+  <arg name="CO2_y" default="-1.6"/>
   <arg name="CO2_z" default="-4.7"/>
   <arg name="CO2_yaw" default="-2.69"/>
 
   <include file="$(find robosub_descriptions)/launch/TRANSDEC.launch">
-    <arg name="paused" default="true"/>
+    <arg name="paused" default="false"/>
   </include>
 
   <include file="$(find robosub_descriptions)/launch/upload.launch">
