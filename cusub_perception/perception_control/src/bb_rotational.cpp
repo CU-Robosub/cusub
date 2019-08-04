@@ -9,8 +9,12 @@ BBRotational::BBRotational(ros::NodeHandle& nh) : BBController(nh)
     ROS_INFO("loading BB Rotational");
 
     // OCCAM
-    std::string occamNamespace = "perception_control/bb_controllers/proportional/occam";
-    nh.getParam(occamNamespace + "/rotation/threshold", m_rotationThresh);
+    std::string occamNamespace = "perception_control/bb_controllers/rotational/occam";
+    if( !nh.getParam(occamNamespace + "/rotation/threshold", m_rotationThresh) )
+    {
+        std::cout << "BB rotational unable to locate params." << std::endl;
+        std::abort();
+    }
     nh.getParam(occamNamespace + "/rotation/carrot", m_rotationCarrot);
     
     std::string ns;
@@ -27,7 +31,7 @@ void BBRotational::createOccamTfs(const std::string &frameNS, std::vector<std::s
     float offset = frameOffset;
     for (int i = 0; i < occamFrames.size(); ++i)
     {
-        offset = offset + (frameOffset * i);
+        offset = (frameOffset * (i+1));
         m_occamTransforms.insert(std::make_pair(frameNS + occamFrames.at(i), offset));
     }
 }
@@ -37,13 +41,19 @@ float BBRotational::getTargetYaw(const std::string &occamFrame)
     float targetYaw = yawState - m_occamTransforms[occamFrame]; // figure out correct 
     if (targetYaw > M_PI)
     {
-        targetYaw -= M_PI;
+        while (targetYaw > M_PI)
+        {
+            targetYaw -= 2*M_PI;
+        }
     }
     else if (targetYaw < -M_PI)
     {
-        targetYaw += M_PI;
+        while (targetYaw < -M_PI)
+        {
+            targetYaw += 2*M_PI;
+        }
     }
-    
+
     return targetYaw;
 }
 

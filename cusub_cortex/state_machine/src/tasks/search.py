@@ -104,31 +104,36 @@ class Search(Objective):
             return "not_found"
 
     def execute_bonding_box_exit(self, userdata):
-        prior = self.get_odom_prior(self.prior_pose_param)
-        self.go_to_pose_non_blocking(prior)
-
+        # launch the pointer search        
         goal = VisualPointGoal()
         goal.target_classes = self.target_classes
         goal.target_frame = "leviathan/description/occam0_frame_optical"
         self.vp_client.send_goal(goal, feedback_cb=self.vp_feedback_callback)
+        rospy.sleep(3)
+
+        # begin moving to prior
+        prior = self.get_odom_prior(self.prior_pose_param)
+        self.go_to_pose_non_blocking(prior) 
 
         while not rospy.is_shutdown():
-            if self.num_frames_seen > 3:
+            if self.num_frames_seen > 5:
                 self.cancel_way_client_goal()
                 #probably gonn change later - not the best
-                rospy.loginfo("...found dat obj & pointed")
+                rospy.loginfo("\n\n...found dat obj & pointed\n\n")
+                self.vp_client.cancel_goal()
                 return "found"
             elif self.num_frames_seen < 0:
-                self.cancel_way_client_goal() # throws error b/c wayToggle from vp???
+                self.cancel_way_client_goal() # todo LB
                 self.go_to_pose_non_blocking(prior)
-            #Total hack method. TODO @LB
             elif userdata.timeout_obj.timed_out:
                 self.cancel_way_client_goal()
                 userdata.outcome = "timed_out"
+                self.vp_client.cancel_goal()
                 return "not_found"
             elif self.check_reached_pose(prior):
                 rospy.logerr("Search unable to find task.")
                 userdata.outcome = "not_found"
+                self.vp_client.cancel_goal()
                 return "not_found"
             rospy.sleep(0.25)
 
