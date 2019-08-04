@@ -19,6 +19,9 @@ namespace perception_control
         virtual void respondOccamYaw(float diff) {;}
         virtual void respondOccamDepth(float diff) {;}
 
+        virtual float getTargetYaw(const std::string &occamFrame) {;}
+        virtual void targetYaw(float &target) {;}
+
         BBController(ros::NodeHandle& nh);
     protected:
         float driveState, strafeState, yawState, depthState;
