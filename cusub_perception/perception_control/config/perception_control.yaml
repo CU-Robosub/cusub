@@ -16,8 +16,8 @@ perception_control:
           maxout_pixel_dist: 100
       occam:
         drive:
-          max_setpoint: 0.5 # Reality 1.0
-          maxout_pixel_dist: 50 # 100
+          max_setpoint: 1.0
+          maxout_pixel_dist: 100
         strafe:
           max_setpoint: 1.0
           maxout_pixel_dist: 50
@@ -26,8 +26,7 @@ perception_control:
           maxout_pixel_dist: 100
         depth:
           max_setpoint: 0.2
-          maxout_pixel_dist: 70
-    
+          maxout_pixel_dist: 70    
     rotational:
       timeout_frames: 50
       carrot: 0.3

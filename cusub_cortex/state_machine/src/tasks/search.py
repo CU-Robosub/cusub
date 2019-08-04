@@ -15,6 +15,7 @@ from geometry_msgs.msg import Point, PoseStamped, Pose
 import rospy
 import actionlib
 import tf
+import time
 from darknet_multiplexer.srv import DarknetClasses
 from perception_control.msg import VisualPointAction, VisualPointGoal, VisualPointFeedback
 
@@ -125,6 +126,7 @@ class Search(Objective):
                 #probably gonn change later - not the best
                 rospy.loginfo("...Found one of %s in one of %s, search success!"%(self.target_classes, self.target_frames))
                 self.vp_client.cancel_goal()
+                time.sleep(2)
                 return "found"
             elif self.num_frames_seen < 0:
                 self.cancel_way_client_goal() # todo LB
@@ -133,11 +135,13 @@ class Search(Objective):
                 self.cancel_way_client_goal()
                 userdata.outcome = "timed_out"
                 self.vp_client.cancel_goal()
+                time.sleep(2)
                 return "not_found"
             elif self.check_reached_pose(prior):
                 rospy.logerr("Search unable to find task.")
                 userdata.outcome = "not_found"
                 self.vp_client.cancel_goal()
+                time.sleep(2)
                 return "not_found"
             rospy.sleep(0.25)
 
