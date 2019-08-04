@@ -16,13 +16,11 @@ public:
     BBRotational(ros::NodeHandle& nh);
 
 private:
-    void createOccamTfs(const std::string &frameNS, std::vector<std::string> occamFrames, const float &frameOffset);
-
     float m_rotationCarrot;
     float m_rotationThresh;
 
     float m_occamTargetYaw;
-    std::map<std::string, float> m_occamTransforms;
+    
 
 };
 

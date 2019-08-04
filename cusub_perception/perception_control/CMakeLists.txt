@@ -47,9 +47,6 @@ add_library( visual_servo
   src/visual_servo.cpp
   src/bb_controller.cpp
   src/bb_proportional.cpp
-  src/bb_rotational.cpp
-  src/VisualPoint.cpp
-  src/VisualMovement.cpp
 )
 add_dependencies(visual_servo perception_control_generate_messages_cpp)
 target_link_libraries(visual_servo ${catkin_LIBRARIES})
@@ -57,6 +54,15 @@ if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(visual_servo ${catkin_EXPORTED_LIBRARIES} ${PROJECT_NAME}_EXPORTED_TARGETS)
 endif()
 
+# VISUAL POINT
+add_library( visual_point
+  src/VisualPoint.cpp
+)
+add_dependencies(visual_point perception_control_generate_messages_cpp)
+target_link_libraries(visual_point ${catkin_LIBRARIES})
+if(catkin_EXPORTED_LIBRARIES)
+  add_dependencies(visual_point ${catkin_EXPORTED_LIBRARIES} ${PROJECT_NAME}_EXPORTED_TARGETS)
+endif()
 
 # PATH ORIENTATION
 add_library( path_orient

@@ -30,14 +30,8 @@ perception_control:
     
     rotational:
       timeout_frames: 50
-      occam:
-        rotation:
-          carrot: 0.3
-          threshold: 0.1
-        frames_ns: "leviathan/description/"
-        frames: ["occam1_frame_optical", "occam2_frame_optical", "occam3_frame_optical", "occam4_frame_optical"]
-        frame_offset: 1.25664 # radians
-
+      carrot: 0.3
+      threshold: 0.1
 
   path_orient:
     yaw_setpoint_carrot: 0.5
