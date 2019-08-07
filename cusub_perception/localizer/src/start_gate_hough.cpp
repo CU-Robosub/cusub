@@ -78,7 +78,7 @@ namespace pose_generator
     bool StartGateHough::generatePose(
         sensor_msgs::Image& image, 
         vector<darknet_ros_msgs::BoundingBox>& bbs,
-        geometry_msgs::Pose& pose,
+        geometry_msgs::PoseStamped& pose,
         string& class_name
     ){
         class_name = "start_gate";
@@ -110,7 +110,7 @@ namespace pose_generator
         img_points[3].y += bbs.back().ymin;
 
         // Get pose from image points using a solvepnp
-        getPoseFromPoints(gate_truth_pts, img_points, pose); // inherited
+        getPoseFromPoints(gate_truth_pts, img_points, pose.pose); // inherited
         if (three_legs && bbs.size() == 3) { publishLegSide(bbs); }
         return true;
     }

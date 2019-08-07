@@ -76,7 +76,7 @@ int main(int argc, char **argv)
     sensor_msgs::Image test_image;
     img_bridge.toImageMsg(test_image);
 
-    geometry_msgs::Pose pose;
+    geometry_msgs::PoseStamped pose;
     string class_id;
     if(sgh.generatePose(test_image, bbs, pose, class_id))
     {

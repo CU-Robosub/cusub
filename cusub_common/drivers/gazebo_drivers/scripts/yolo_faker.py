@@ -509,6 +509,7 @@ class YOLOFaker(object):
             if np.linalg.norm(obj_trans) > rospy.get_param('yolo_faker/visibility', 14.0):
                 continue
 
+            # TODO use transformPoint
             new_pts = []
             for point in obj_class.points:
 

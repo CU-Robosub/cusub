@@ -125,7 +125,7 @@ namespace pose_generator
     bool JiangshiWatershed::generatePose(
         sensor_msgs::Image& image, 
         vector<darknet_ros_msgs::BoundingBox>& bbs,
-        geometry_msgs::Pose& pose,
+        geometry_msgs::PoseStamped& pose,
         string& class_name
         ){
             class_name = "jiangshi";
@@ -152,9 +152,9 @@ namespace pose_generator
             img_points[3].y += bbs[0].ymin - border_size;
 
             // Get pose from image points using a solvepnp
-            getPoseFromPoints(truth_pts, img_points, pose); // inherited
+            getPoseFromPoints(truth_pts, img_points, pose.pose); // inherited
              // Adjust Jiangshi Orientation according to aspect ratio of the bounding box
-            if ( useAspectRatio ) { getOrientationFromAspectRatio( bbs[0], pose.position.x, pose.orientation ); }
+            if ( useAspectRatio ) { getOrientationFromAspectRatio( bbs[0], pose.pose.position.x, pose.pose.orientation ); }
             return true;
         }
 }

@@ -8,7 +8,7 @@ localizer:
     vampire_no_torso: ignore
     bat: ignore
     wolf: ignore
-    dropper_cover: ignore
+    dropper_cover: zp
     pinger: ignore
     coffin: ignore
     dracula: ignore

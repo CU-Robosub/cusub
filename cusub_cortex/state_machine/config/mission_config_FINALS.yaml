@@ -9,7 +9,7 @@
 #            later : move this task to the end of the mission_tasks queue, essentially coming back to the task later
 #            uh_oh : or any unrecognized string will crash and stop the SM
 
-using_sim_params : False
+using_sim_params : True
 manager_task_status_pub_rate: 1
 
 startup_delay: 0

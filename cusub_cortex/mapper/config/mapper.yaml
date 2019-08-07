@@ -5,3 +5,4 @@ mapper:
   classes:
     start_gate: 50
     jiangshi: 30
+    dropper_cover: 10

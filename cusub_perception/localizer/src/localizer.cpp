@@ -47,10 +47,12 @@ namespace localizer_ns
    */
   bool Localizer::checkBox(const darknet_ros_msgs::BoundingBox& bb)
   {
+    /*
     if( bb.xmin == 0 || bb.ymin == 0 ||  // TODO logic to allow for downcam bounding box checking
-        bb.xmax >= 752 || bb.ymax >= 480)
+        bb.xmax >= 752 || bb.ymax >= 480) // Indeed
       { return false; }
     else { return true; }
+    */
   }
 
   /*
@@ -87,8 +89,8 @@ namespace localizer_ns
       det.class_id = "pose"; // each generatePose() call should change this
       det.pose.header.seq = detection_num++;
       det.pose.header.stamp = bbs->image_header.stamp;
-      det.pose.header.frame_id = bbs->image_header.frame_id;
-      if( bb_map_it->first->generatePose(bbs->image, bb_map_it->second, det.pose.pose, det.class_id))
+      det.pose.header.frame_id = "leviathan/description/odom";//bbs->image_header.frame_id;
+      if( bb_map_it->first->generatePose(bbs->image, bb_map_it->second, det.pose, det.class_id))
       {
         pub.publish(det);
       }
