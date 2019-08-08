@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 from __future__ import division
 """
+Octagon Task, attempts to center on and rise in the octagon
+Visual servos with the front camera on the octagon task until it sees the coffin's in the downcam
+Visual servos with the downcam to center on the coffins
+Rises slowly straight upwards until it breaches in the octagon
 """
 import numpy as np
 

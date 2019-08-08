@@ -2,6 +2,8 @@
 from __future__ import division
 """
 Manager State
+Manages state transitions between tasks
+Reads in the state transitions from the mission_config parameters
 """
 import smach
 import smach_ros

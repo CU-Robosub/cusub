@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 from __future__ import division
 """
-Dropper task, attempts to center on the dropper, set the depth lower, and drop
+Dropper task
+- centers on the dropper through visual servoing in the vehicle's downcam
+- dives
+- drops 2 droppers in the target bin
 Objectives:
 - Search
 - Follow

@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 from __future__ import division
 """
-Startup Task
+Startup Task, allows the man on the competition dock time to remove the tether from the vehicle before it starts its autonomous run.
+Waits briefly at the surface before diving.
 """
 import rospy
 import smach
@@ -37,7 +38,7 @@ class Dive(Objective):
     def execute(self, userdata):
         depth_msg = Float64()
         depth_msg.data = 0.2 # experimentally determined from leviathan
-        rospy.loginfo("...GET TO THE CHOPPA")
+        rospy.loginfo("...pull tether")
         while not rospy.is_shutdown():
             self.dive_pub.publish(depth_msg)
             if userdata.timeout_obj.timed_out:

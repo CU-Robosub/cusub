@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """
-These classes serves as the meta class for all tasks and objectives
-The best way to write a new task is to learn by example from a simple task, such as start gate
+Meta Classes for all Tasks and Objectives.
 """
 
 import smach
