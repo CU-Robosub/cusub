@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import division
 """
-Jiangshi Buoy Task, attempts to slay Jiangshi
+Jiangshi Buoy Task, attempts to bump into the jiangshi buoy
 Objectives:
 - Search
 - Slay

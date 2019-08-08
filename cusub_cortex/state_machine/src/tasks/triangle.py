@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 from __future__ import division
 """
-Triangle Buoy Task
+Triangle Buoy Task. Attempts to run into a selected side of the triangle buoy.
+Approaches the bouy, uses visual servoing to orbit around the buoy, runs into the selected side
 """
 from tasks.task import Task, Objective
 from tasks.search import Search

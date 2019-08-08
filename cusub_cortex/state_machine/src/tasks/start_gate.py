@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 from __future__ import division
 """
-StartGate Task, attempts to go through the start gate
+StartGate Task, attempts to go through the start gate.
+Receives a pose of the start gate and adjusts the pose according to the smaller side of the gate in order to maximize points.
+---
 Objectives:
 1) Search (based on prior)
 2) Attack (goes behind gate based on arg distBehindGate)

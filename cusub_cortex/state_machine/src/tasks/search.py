@@ -2,12 +2,9 @@
 Search Objective:
 @brief Approach a prior for a task
 
-Two ways to initialize:
-1) exit_topic, once a msg has been received on 'exit_topic' quit out
-    indicate with target_class = None or call Search.from_topic()
-2) target_class, a service request is made that inquires about which bounding boxes are available
-    if target_class is among the bounding boxes available, the search quits out
-    indicate with target_class != None or call Search.from_bounding_box()
+Searches can either end through the publishing of the pose of our target task
+OR
+Through the publishing of a bounding box of our target task
 """
 from tasks.task import Objective
 import smach
