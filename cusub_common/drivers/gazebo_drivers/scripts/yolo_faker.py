@@ -473,9 +473,10 @@ class YOLOFaker(object):
                     if bounding_box.ymax > image.height:
                         bounding_box.ymax = image.height
 
-                    bounding_boxes.bounding_boxes.append(bounding_box)
-
-                    debug_data.append((bounding_box, det[1], det[3]))
+                    # Drop some boxes for realism
+                    if random.random() < self.global_detection_rate:
+                        bounding_boxes.bounding_boxes.append(bounding_box)
+                        debug_data.append((bounding_box, det[1], det[3]))
 
                 if camera.debug_image_pub:
 
@@ -665,6 +666,9 @@ class YOLOFaker(object):
 
         # Box noise for more realisitc detections
         self.global_box_noise = rospy.get_param('yolo_faker/global_box_noise', 0.2)
+
+        # Global detection rate
+        self.global_detection_rate = rospy.get_param('yolo_faker/detection_rate', 1.0)
 
         # Fake darknet YOLO
         self.darknet_detection_pub = rospy.Publisher(bouding_boxes_topic,

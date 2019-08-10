@@ -5,6 +5,8 @@ yolo_faker:
  sub_pose_topic: 'description/pose_gt'
  show_points: False
  global_box_noise: 0.2
+ visibility: 14.0
+ detection_rate: 0.8
  multiplexer:
   enabled: True
   topic: 'cusub_perception/darknet_multiplexer/out'
