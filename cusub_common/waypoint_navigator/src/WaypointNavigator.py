@@ -91,6 +91,13 @@ class WaypointNavigator(object):
         if(len(self.waypointlist) > 0):
             self.waypoint = self.waypointlist[0]
 
+    def check_done(self, dist):
+        # finish manuver if we reach the waypoint and are facing the correct direction
+        if(dist < REACHED_THRESHOLD):
+                self.advance_waypoint()
+            else:
+                rospy.loginfo("distance: " + str(dist))
+
     def odometryCallback(self, odom):
 
         position = odom.pose.pose.position
@@ -134,7 +141,9 @@ class WaypointNavigator(object):
                     self.drive_pub.publish(drive_f64)
                     # rospy.logdebug(xy_dist)
 
-            if self.movement_mode == STRAFE_MODE:
+                    check_done(dist)
+
+            elif self.movement_mode == STRAFE_MODE:
 
                 targetyaw = self.waypoint_yaw
 
@@ -163,12 +172,10 @@ class WaypointNavigator(object):
                     self.strafe_pub.publish(strafe_f64)
 
                     # finish manuver if we reach the waypoint and are facing the correct direction
-                    if(dist < REACHED_THRESHOLD):
-                        self.advance_waypoint()
-                    else:
-                        rospy.loginfo("distance: " + str(dist))
+                    check_done(dist)
                         
-            if self.movement_mode == BACKUP_MODE:
+            elif self.movement_mode == BACKUP_MODE:
+
                 # point toward waypoint
                 targetyaw = math.atan2(dy, dx) + math.pi
                 # rospy.logdebug("dx, dy: %f %f" % (dx, dy))
@@ -191,6 +198,8 @@ class WaypointNavigator(object):
                     drive_f64.data = self.currentDrive - min(xy_dist, 3.0)
                     self.drive_pub.publish(drive_f64)
                     # rospy.logdebug(xy_dist)
+
+                    check_done(dist)
 
             # Set target depth
             depth_f64 = Float64()
