@@ -154,7 +154,7 @@ namespace pose_generator
                 //  the z of the ray equal to the object height
                 double object_z;
                 ros::NodeHandle nh;
-                nh.getParam((std::string("localizer/zp/height/") + bb.Class).c_str(), object_z);
+                nh.getParam((std::string("localizer/zp/height/") + bounding_box.Class).c_str(), object_z);
                 double scale = (cam_pt.z - object_z) / (cam_pt.z - ray_pt.z);
 
                 // Create the pose

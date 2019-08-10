@@ -131,6 +131,7 @@ namespace pose_generator
             localizer::Detection det;
             det.class_id = "jiangshi";
             det.pose.header.stamp = image.header.stamp;
+            det.pose.header.frame_id = image.header.frame_id;
 
             if( bbs.size() != 1 ) { return false; }
             int border_size = 10; // add room for a border that we'll say is part of the 'not bouy' class

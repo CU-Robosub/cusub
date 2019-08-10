@@ -94,9 +94,9 @@ class WaypointNavigator(object):
     def check_done(self, dist):
         # finish manuver if we reach the waypoint and are facing the correct direction
         if(dist < REACHED_THRESHOLD):
-                self.advance_waypoint()
-            else:
-                rospy.loginfo("distance: " + str(dist))
+            self.advance_waypoint()
+        else:
+            rospy.loginfo("distance: " + str(dist))
 
     def odometryCallback(self, odom):
 
@@ -141,7 +141,7 @@ class WaypointNavigator(object):
                     self.drive_pub.publish(drive_f64)
                     # rospy.logdebug(xy_dist)
 
-                    check_done(dist)
+                    self.check_done(dist)
 
             elif self.movement_mode == STRAFE_MODE:
 
@@ -172,7 +172,7 @@ class WaypointNavigator(object):
                     self.strafe_pub.publish(strafe_f64)
 
                     # finish manuver if we reach the waypoint and are facing the correct direction
-                    check_done(dist)
+                    self.check_done(dist)
                         
             elif self.movement_mode == BACKUP_MODE:
 
@@ -199,7 +199,7 @@ class WaypointNavigator(object):
                     self.drive_pub.publish(drive_f64)
                     # rospy.logdebug(xy_dist)
 
-                    check_done(dist)
+                    self.check_done(dist)
 
             # Set target depth
             depth_f64 = Float64()

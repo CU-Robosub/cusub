@@ -84,6 +84,7 @@ namespace pose_generator
         localizer::Detection det;
         det.class_id = "start_gate";
         det.pose.header.stamp = image.header.stamp;
+        det.pose.header.frame_id = image.header.frame_id;
 
         if ( three_legs && (bbs.size() < 2 || bbs.size() > 3) ) {return false;}
         if ( !three_legs && bbs.size() != 2) {return false;}
