@@ -46,19 +46,20 @@ namespace pose_generator
         vector<localizer::Detection>& detections
         ){
 
-            for(auto bb_it=bbs.begin(); bb_it != bbs.end(); bb_it++){
-
-                auto bb = *bb_it;
+            for(auto bounding_box : bbs){
 
                 localizer::Detection det;
-                det.class_id = bb.Class; // Z-Plane localizer works on any object
+                det.class_id = bounding_box.Class; // Z-Plane localizer works on any object
                 det.pose.header.stamp = image.header.stamp;
 
                 vector<Point2f> points;
                 vector<Point2f> undistorted_points;
 
                 // Find the box center point
-                points.push_back(Point2f((bb.xmin + bb.xmax) / 2, (bb.ymin + bb.ymax) / 2 ));
+                points.push_back(
+                    Point2f(
+                        (bounding_box.xmin + bounding_box.xmax) / 2,
+                        (bounding_box.ymin + bounding_box.ymax) / 2 ));
 
                 // Correct the center point for camera image scaling
                 if(image.header.frame_id.find("downcam") != string::npos){
@@ -93,6 +94,7 @@ namespace pose_generator
 
                 } else {
 
+                    // Don't know what camera parameters are so we give up
                     continue;
 
                 }
@@ -155,7 +157,7 @@ namespace pose_generator
                 nh.getParam((std::string("localizer/zp/height/") + bb.Class).c_str(), object_z);
                 double scale = (cam_pt.z - object_z) / (cam_pt.z - ray_pt.z);
 
-                // Create the posez
+                // Create the pose
                 det.pose.header.frame_id = reference_frame;
                 det.pose.pose.position.x = cam_pt.x + (ray_pt.x - cam_pt.x) * scale;
                 det.pose.pose.position.y = cam_pt.y + (ray_pt.y - cam_pt.y) * scale;
