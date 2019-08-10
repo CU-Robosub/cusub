@@ -138,6 +138,7 @@ class Rise(Objective):
         goal.camera = goal.DOWNCAM
         goal.target_pixel_threshold = self.target_pixel_threshold
         goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
+        goal.area_axis = goal.NO_AXIS
         goal.x_axis = goal.STRAFE_AXIS
         goal.y_axis = goal.DRIVE_AXIS
         goal.target_pixel_x = goal.CAMERAS_CENTER_X
