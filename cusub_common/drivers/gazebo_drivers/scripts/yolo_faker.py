@@ -517,7 +517,7 @@ class YOLOFaker(object):
 
             overlap_area = max(0, right - left) * max(0, top - bottom)
 
-            return overlap_area / ( (back[1] - back[0]) * (front[3] - front[2]) )
+            return overlap_area / ( (back[1] - back[0]) * (back[3] - back[2]) )
 
         return 0.0
 
