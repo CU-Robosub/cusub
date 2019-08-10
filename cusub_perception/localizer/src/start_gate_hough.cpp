@@ -78,12 +78,16 @@ namespace pose_generator
     bool StartGateHough::generatePose(
         sensor_msgs::Image& image, 
         vector<darknet_ros_msgs::BoundingBox>& bbs,
-        geometry_msgs::PoseStamped& pose,
-        string& class_name
+        vector<localizer::Detection>& detections
     ){
-        class_name = "start_gate";
+
+        localizer::Detection det;
+        det.class_id = "start_gate";
+        det.pose.header.stamp = image.header.stamp;
+
         if ( three_legs && (bbs.size() < 2 || bbs.size() > 3) ) {return false;}
         if ( !three_legs && bbs.size() != 2) {return false;}
+
         sortBoxes(bbs);
         // Double check that its RGB8 not BGR8
         cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::RGB8);
@@ -110,8 +114,12 @@ namespace pose_generator
         img_points[3].y += bbs.back().ymin;
 
         // Get pose from image points using a solvepnp
-        getPoseFromPoints(gate_truth_pts, img_points, pose.pose); // inherited
+        getPoseFromPoints(gate_truth_pts, img_points, det.pose.pose); // inherited
         if (three_legs && bbs.size() == 3) { publishLegSide(bbs); }
+
+        detections.push_back(det);
+
         return true;
+
     }
 }

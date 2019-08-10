@@ -125,10 +125,13 @@ namespace pose_generator
     bool JiangshiWatershed::generatePose(
         sensor_msgs::Image& image, 
         vector<darknet_ros_msgs::BoundingBox>& bbs,
-        geometry_msgs::PoseStamped& pose,
-        string& class_name
+        vector<localizer::Detection>& detections
         ){
-            class_name = "jiangshi";
+
+            localizer::Detection det;
+            det.class_id = "jiangshi";
+            det.pose.header.stamp = image.header.stamp;
+
             if( bbs.size() != 1 ) { return false; }
             int border_size = 10; // add room for a border that we'll say is part of the 'not bouy' class
             if ( !checkBoxes(bbs, border_size) ) { return false; }
@@ -152,9 +155,13 @@ namespace pose_generator
             img_points[3].y += bbs[0].ymin - border_size;
 
             // Get pose from image points using a solvepnp
-            getPoseFromPoints(truth_pts, img_points, pose.pose); // inherited
+            getPoseFromPoints(truth_pts, img_points, det.pose.pose); // inherited
              // Adjust Jiangshi Orientation according to aspect ratio of the bounding box
-            if ( useAspectRatio ) { getOrientationFromAspectRatio( bbs[0], pose.pose.position.x, pose.pose.orientation ); }
+            if ( useAspectRatio ) { getOrientationFromAspectRatio( bbs[0], det.pose.pose.position.x, det.pose.pose.orientation ); }
+
+            detections.push_back(det);
+
             return true;
+
         }
 }

@@ -3,7 +3,8 @@
 yolo_faker:
  bounding_boxes_topic: 'cusub_perception/darknet_ros/bounding_boxes'
  sub_pose_topic: 'description/pose_gt'
- show_points: True
+ show_points: False
+ global_box_noise: 0.2
  multiplexer:
   enabled: True
   topic: 'cusub_perception/darknet_multiplexer/out'
@@ -83,7 +84,7 @@ yolo_faker:
    classes:
     - name: 'vampire_cute'
       debug_color: [0, 255, 0]
-      points: [ [-0.4048, -0.0508, 0.6096], [ 0.4048, -0.0508,  0.6096], [ -.4048,  0.0508,  0.6096], [ 0.4048,  0.0508,  0.6096], [-0.4048, -0.0508, -.6096], [ 0.4048, -0.0508,  -.6096], [ -.4048,  0.0508,  -.6096], [ 0.4048,  0.0508,  -.6096] ]
+      points: [ [-0.4048, -0.0508, 0.6096], [ 0.4048, -0.0508,  0.6096], [-0.4048, -0.0508, -.6096], [ 0.4048, -0.0508,  -.6096] ]
   triangle:
    link: 'triangular_buoy_1/buoy_link'
    odom_topic: '/triangular_buoy_1/pose_gt'

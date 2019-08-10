@@ -23,8 +23,7 @@ namespace pose_generator
         bool generatePose(
                 sensor_msgs::Image& image, 
                 vector<darknet_ros_msgs::BoundingBox>& bbs,
-                geometry_msgs::PoseStamped& pose,
-                string& class_name
+                vector<localizer::Detection>& detections
             ){ return false;}
     };
 }

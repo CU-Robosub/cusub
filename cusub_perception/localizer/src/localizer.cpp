@@ -53,6 +53,7 @@ namespace localizer_ns
       { return false; }
     else { return true; }
     */
+    return true;
   }
 
   /*
@@ -85,18 +86,10 @@ namespace localizer_ns
     map<pose_generator::PoseGenerator*, vector<darknet_ros_msgs::BoundingBox>>::iterator bb_map_it;
     for(bb_map_it=bb_map.begin(); bb_map_it != bb_map.end(); bb_map_it++)
     {
-      localizer::Detection det;
-      det.class_id = "pose"; // each generatePose() call should change this
-      det.pose.header.seq = detection_num++;
-      det.pose.header.stamp = bbs->image_header.stamp;
-      det.pose.header.frame_id = bbs->image_header.frame_id;
-      if( bb_map_it->first->generatePose(bbs->image, bb_map_it->second, det.pose, det.class_id))
-      {
-        pub.publish(det);
-      }
-      else
-      {
-        // NODELET_WARN_THROTTLE(1, "Localizer failed to localize %s", det.class_id.c_str());
+      vector<localizer::Detection> detections;
+      bb_map_it->first->generatePose(bbs->image, bb_map_it->second, detections);
+      for(auto det_it=detections.begin(); det_it!=detections.end(); det_it++){
+        pub.publish(*det_it);
       }
     }
   }

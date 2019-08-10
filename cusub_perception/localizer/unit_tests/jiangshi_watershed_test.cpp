@@ -73,12 +73,12 @@ int main(int argc, char ** argv)
     sensor_msgs::Image test_image;
     img_bridge.toImageMsg(test_image);
 
-    geometry_msgs::PoseStamped pose;
     string class_id;
-    if(jw.generatePose(test_image, bbs, pose, class_id))
+    vector<localizer::Detection> detections;
+    if(jw.generatePose(test_image, bbs, detections))
     {
         cout << "localized pose!" <<endl;
-        cout << pose << endl;
+        cout << detections[0].pose << endl;
     }
     
     // rectangle(image, Point(box.xmin,box.ymin), Point(box.xmax, box.ymax), Scalar(0,0,255));
