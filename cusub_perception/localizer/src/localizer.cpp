@@ -65,31 +65,29 @@ namespace localizer_ns
   {
     // Group all bounding boxes that use same PoseGenerator into vectors
     map<pose_generator::PoseGenerator*, vector<darknet_ros_msgs::BoundingBox>> bb_map;
-    map<string, pose_generator::PoseGenerator*>::iterator it;
     for(darknet_ros_msgs::BoundingBox box : bbs->bounding_boxes)
     {
-      it = mappings.find(box.Class);
-      if(it == mappings.end())
+      auto generator_mapping = mappings.find(box.Class);
+      if(generator_mapping == mappings.end())
       {
         NODELET_ERROR("No pose generator given for %s. Add to localizer/config/localizer_config.yaml", box.Class.c_str());
       } else {
-        if(bb_map.find(it->second) == bb_map.end()) // pose gen ptr hasn't been added to bb_map yet
+        if(bb_map.find(generator_mapping->second) == bb_map.end()) // pose gen ptr hasn't been added to bb_map yet
         {
           vector<darknet_ros_msgs::BoundingBox> new_bb_vector;
-          bb_map[it->second] = new_bb_vector;
+          bb_map[generator_mapping->second] = new_bb_vector;
         }
-        if ( checkBox(box) ) { bb_map[it->second].push_back(box); }
+        if ( checkBox(box) ) { bb_map[generator_mapping->second].push_back(box); }
       }
     }
 
     // Call generatePose on all PoseGenerators passing in vector of bounding boxes
-    map<pose_generator::PoseGenerator*, vector<darknet_ros_msgs::BoundingBox>>::iterator bb_map_it;
-    for(bb_map_it=bb_map.begin(); bb_map_it != bb_map.end(); bb_map_it++)
+    for(auto generator_bbs_pair : bb_map)
     {
       vector<localizer::Detection> detections;
-      bb_map_it->first->generatePose(bbs->image, bb_map_it->second, detections);
-      for(auto det_it=detections.begin(); det_it!=detections.end(); det_it++){
-        pub.publish(*det_it);
+      generator_bbs_pair.first->generatePose(bbs->image, generator_bbs_pair.second, detections);
+      for(auto detection : detections){
+        pub.publish(detection);
       }
     }
   }
