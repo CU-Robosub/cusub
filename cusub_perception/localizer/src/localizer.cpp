@@ -89,7 +89,7 @@ namespace localizer_ns
       det.class_id = "pose"; // each generatePose() call should change this
       det.pose.header.seq = detection_num++;
       det.pose.header.stamp = bbs->image_header.stamp;
-      det.pose.header.frame_id = "leviathan/description/odom";//bbs->image_header.frame_id;
+      det.pose.header.frame_id = bbs->image_header.frame_id;
       if( bb_map_it->first->generatePose(bbs->image, bb_map_it->second, det.pose, det.class_id))
       {
         pub.publish(det);

@@ -32,6 +32,7 @@ namespace pose_generator
             ){;}
         protected:
             void getPoseFromPoints(vector<Point3f>& truth_pts, vector<Point2f>& img_points, geometry_msgs::Pose& pose);
+
             vector<double> downcam_camera_matrix_values{
                 333.16354886231323, 0.0, 640.5, 0.0, 333.16354886231323, 480.5, 0.0, 0.0, 1.0
             };

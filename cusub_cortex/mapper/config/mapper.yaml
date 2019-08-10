@@ -6,3 +6,7 @@ mapper:
     start_gate: 50
     jiangshi: 30
     dropper_cover: 10
+    wolf: 10
+    bat: 10
+    path: 10
+    coffin: 10

@@ -50,18 +50,39 @@ namespace pose_generator
             vector<Point2f> points;
             vector<Point2f> undistorted_points;
 
-            class_name = "dropper_cover";
-
             // Reject images that potentialy have bad detections
             if( bbs.size() != 1 ) { return false; }
+
+            // Z-Plane localizer works on any object
+            class_name = bbs[0].Class;
 
             // Find the box center point
             points.push_back(Point2f((bbs[0].xmin + bbs[0].xmax) / 2, (bbs[0].ymin + bbs[0].ymax) / 2 ));
 
             //ROS_DEBUG_STREAM("\ncenter_point: \n" << points);
 
+            // Figure out which camera parameters we should be using
+            // TODO some kind of camera manager
+            Mat camera_matrix;
+            Mat dist_coefs;
+            if(image.header.frame_id.find("occam") != string::npos){
+
+                camera_matrix = occam_camera_matrix;
+                dist_coefs = occam_dist_coefs;
+
+            } else if(image.header.frame_id.find("downcam") != string::npos){
+
+                camera_matrix = downcam_camera_matrix;
+                dist_coefs = downcam_dist_coefs;
+
+            } else {
+
+                return false;
+
+            }
+
             // Undistort the point
-            undistortPoints(points, undistorted_points, downcam_camera_matrix, downcam_dist_coefs, noArray(),  downcam_camera_matrix);
+            undistortPoints(points, undistorted_points, camera_matrix, dist_coefs, noArray(),  camera_matrix);
 
             //ROS_DEBUG_STREAM("\nundistorted_points: \n" << undistorted_points);
 
@@ -72,10 +93,10 @@ namespace pose_generator
             Mat ray_point{1,3,DataType<double>::type, ray_points.data()};
 
             //ROS_DEBUG_STREAM("\nrp: \n" << ray_point);
-            //ROS_DEBUG_STREAM("\ninv: \n" << downcam_camera_matrix.inv());
+            //ROS_DEBUG_STREAM("\ninv: \n" << camera_matrix.inv());
             //ROS_DEBUG_STREAM("\nt: \n" << ray_point.t());
 
-            Mat point_cam_space = downcam_camera_matrix.inv() * ray_point.t();
+            Mat point_cam_space = camera_matrix.inv() * ray_point.t();
 
             //ROS_DEBUG_STREAM("\npoint_cam_space: \n" << point_cam_space);
 
@@ -106,11 +127,16 @@ namespace pose_generator
             //ROS_DEBUG_STREAM("\ncam: \n" << cam_pt);
             //ROS_DEBUG_STREAM("\nraw: \n" << ray_pt);
 
+            // TODO check that the ray is not being projected at to shallow
+            // of an angle as that is likely to be very error prone
+
             // Use the ray defined by the camera center and the ray point to
             //  intersect the Z-Plane that is defined by the floor
             //  We can do this by scaling the vector by the factor that makes
             //  the z of the ray equal to the object height
-            double object_z = -4.2;
+            double object_z;
+            ros::NodeHandle nh;
+            nh.getParam((std::string("localizer/zp/height/") + bbs[0].Class).c_str(), object_z);
             double scale = (cam_pt.z - object_z) / (cam_pt.z - ray_pt.z);
 
             // Create the posez
