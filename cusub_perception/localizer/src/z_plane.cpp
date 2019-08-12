@@ -18,7 +18,15 @@ namespace pose_generator
     ZPlane::ZPlane()
     {
         ros::NodeHandle nh;
+
         ROS_INFO("Z-Plane localizer enabled");
+
+        // Load object heights
+        if( !nh.getParam("localizer/zp/height/", object_heights))
+        {
+            ROS_ERROR("Z-Plane localizer failed to load heights");
+            abort();
+        }
     }
 
     geometry_msgs::Point ZPlane::transformPoint(std_msgs::Header header, std::string target_frame, double x, double y, double z){
@@ -41,8 +49,8 @@ namespace pose_generator
     }
 
     bool ZPlane::generatePose(
-        sensor_msgs::Image& image, 
-        vector<darknet_ros_msgs::BoundingBox>& bbs,
+        const sensor_msgs::Image& image, 
+        const vector<darknet_ros_msgs::BoundingBox>& bbs,
         vector<localizer::Detection>& detections
         ){
 
@@ -152,9 +160,12 @@ namespace pose_generator
                 //  intersect the Z-Plane that is defined by the floor
                 //  We can do this by scaling the vector by the factor that makes
                 //  the z of the ray equal to the object height
-                double object_z;
-                ros::NodeHandle nh;
-                nh.getParam((std::string("localizer/zp/height/") + bounding_box.Class).c_str(), object_z);
+
+                // Check we have a z to use for localization of this class
+                if(object_heights.find(bounding_box.Class) == object_heights.end()){
+                    continue;
+                }
+                double object_z = object_heights[bounding_box.Class];
                 double scale = (cam_pt.z - object_z) / (cam_pt.z - ray_pt.z);
 
                 // Create the pose

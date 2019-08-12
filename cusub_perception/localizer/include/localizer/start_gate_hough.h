@@ -33,8 +33,8 @@ namespace pose_generator
     {
         public:
             bool generatePose(
-                sensor_msgs::Image& image, 
-                vector<darknet_ros_msgs::BoundingBox>& bbs,
+                const sensor_msgs::Image& image, 
+                const vector<darknet_ros_msgs::BoundingBox>& bbs,
                 vector<localizer::Detection>& detections
             );
             StartGateHough();

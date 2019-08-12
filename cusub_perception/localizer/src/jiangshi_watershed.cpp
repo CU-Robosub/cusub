@@ -88,7 +88,7 @@ namespace pose_generator
     /*
         Checks that each bounding box is border_size away from the edge of the image.
      */
-    bool JiangshiWatershed::checkBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs, int border_size)
+    bool JiangshiWatershed::checkBoxes(const vector<darknet_ros_msgs::BoundingBox>& bbs, int border_size)
     {
         for( int i=0; i<bbs.size(); i++)
         {
@@ -101,7 +101,7 @@ namespace pose_generator
         return true;
     }
 
-    void JiangshiWatershed::getOrientationFromAspectRatio(darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat)
+    void JiangshiWatershed::getOrientationFromAspectRatio(const darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat)
     {
         float aspectRatio = ( (float) (bb.xmax - bb.xmin) ) / ( (float) (bb.ymax - bb.ymin) );
         // Linearly fit the transformation from aspectRatio to yaw angle of the buoy
@@ -123,8 +123,8 @@ namespace pose_generator
     }
 
     bool JiangshiWatershed::generatePose(
-        sensor_msgs::Image& image, 
-        vector<darknet_ros_msgs::BoundingBox>& bbs,
+        const sensor_msgs::Image& image, 
+        const vector<darknet_ros_msgs::BoundingBox>& bbs,
         vector<localizer::Detection>& detections
         ){
 

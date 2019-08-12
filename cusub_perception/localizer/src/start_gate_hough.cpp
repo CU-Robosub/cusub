@@ -76,8 +76,8 @@ namespace pose_generator
     }
 
     bool StartGateHough::generatePose(
-        sensor_msgs::Image& image, 
-        vector<darknet_ros_msgs::BoundingBox>& bbs,
+        const sensor_msgs::Image& image, 
+        const vector<darknet_ros_msgs::BoundingBox>& bbs,
         vector<localizer::Detection>& detections
     ){
 
@@ -89,13 +89,15 @@ namespace pose_generator
         if ( three_legs && (bbs.size() < 2 || bbs.size() > 3) ) {return false;}
         if ( !three_legs && bbs.size() != 2) {return false;}
 
-        sortBoxes(bbs);
+        vector<darknet_ros_msgs::BoundingBox> boxes = bbs;
+
+        sortBoxes(boxes);
         // Double check that its RGB8 not BGR8
         cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::RGB8);
 
         // Trim each leg out of image
-        Rect left_rect(bbs[0].xmin, bbs[0].ymin,bbs[0].xmax-bbs[0].xmin,bbs[0].ymax-bbs[0].ymin);
-        Rect right_rect(bbs.back().xmin, bbs.back().ymin,bbs.back().xmax-bbs.back().xmin,bbs.back().ymax-bbs.back().ymin);
+        Rect left_rect(boxes[0].xmin, boxes[0].ymin,boxes[0].xmax-boxes[0].xmin,boxes[0].ymax-boxes[0].ymin);
+        Rect right_rect(boxes.back().xmin, boxes.back().ymin,boxes.back().xmax-boxes.back().xmin,boxes.back().ymax-boxes.back().ymin);
         Mat left_pole = cv_ptr->image(left_rect);
         Mat right_pole = cv_ptr->image(right_rect);
 
@@ -105,18 +107,18 @@ namespace pose_generator
         if(!getPoints(right_pole, img_points)) {return false;}
 
         // Transform Points back to main image
-        img_points[0].x += bbs[0].xmin;
-        img_points[0].y += bbs[0].ymin;
-        img_points[1].x += bbs[0].xmin;
-        img_points[1].y += bbs[0].ymin;
-        img_points[2].x += bbs.back().xmin;
-        img_points[2].y += bbs.back().ymin;
-        img_points[3].x += bbs.back().xmin;
-        img_points[3].y += bbs.back().ymin;
+        img_points[0].x += boxes[0].xmin;
+        img_points[0].y += boxes[0].ymin;
+        img_points[1].x += boxes[0].xmin;
+        img_points[1].y += boxes[0].ymin;
+        img_points[2].x += boxes.back().xmin;
+        img_points[2].y += boxes.back().ymin;
+        img_points[3].x += boxes.back().xmin;
+        img_points[3].y += boxes.back().ymin;
 
         // Get pose from image points using a solvepnp
         getPoseFromPoints(gate_truth_pts, img_points, det.pose.pose); // inherited
-        if (three_legs && bbs.size() == 3) { publishLegSide(bbs); }
+        if (three_legs && boxes.size() == 3) { publishLegSide(boxes); }
 
         detections.push_back(det);
 
