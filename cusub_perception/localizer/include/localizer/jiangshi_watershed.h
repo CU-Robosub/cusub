@@ -27,16 +27,15 @@ namespace pose_generator
         public:
             JiangshiWatershed();
             bool generatePose(
-                sensor_msgs::Image& image, 
-                vector<darknet_ros_msgs::BoundingBox>& bbs,
-                geometry_msgs::Pose& pose,
-                string& class_name
+                const sensor_msgs::Image& image, 
+                const vector<darknet_ros_msgs::BoundingBox>& bbs,
+                vector<localizer::Detection>& detections
             );
         private:
-            void getOrientationFromAspectRatio(darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat);
+            void getOrientationFromAspectRatio(const darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat);
             bool getPoints(Mat& img, int border_size, vector<Point2f>& points);
             void sortPoints(Mat& img, vector<Point2f>& points);
-            bool checkBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs, int border_size);
+            bool checkBoxes(const vector<darknet_ros_msgs::BoundingBox>& bbs, int border_size);
             vector<Point3f> truth_pts{      // TODO lookup the actual dimensions of jiangshi
                 Point3f(0,-0.3048,-0.61595),
                 Point3f(0,-0.3048, 0.61595),

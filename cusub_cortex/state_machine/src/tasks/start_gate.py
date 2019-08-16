@@ -62,7 +62,7 @@ class Attack(Objective):
         self.first_pose_received = False
         self.start_gate_pose = None
         self.small_leg_left_side = None
-        self.three_leg_depth = rospy.get_param('tasks/start_gate/three_leg_dist', -1.0)
+        self.three_leg_depth = rospy.get_param('tasks/start_gate/three_leg_depth', -1.0)
         self.started = False
         self.current_yaw = None
         self.current_depth = None

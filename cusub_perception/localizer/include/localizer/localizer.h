@@ -12,6 +12,7 @@
 #include <localizer/start_gate_hough.h>
 #include <localizer/ignore_pg.h>
 #include <localizer/jiangshi_watershed.h>
+#include <localizer/z_plane.h>
 #include <geometry_msgs/Pose.h>
 #include "localizer/Detection.h"
 
@@ -39,13 +40,15 @@ namespace localizer_ns
     pose_generator::StartGateHough sgh;
     pose_generator::IgnorePG ignore_pg;
     pose_generator::JiangshiWatershed jw;
+    pose_generator::ZPlane zp;
   }
   // Pose Generator Mappings
   map<string, pose_generator::PoseGenerator*> sel_mappings =  {
-    { "hough", &pose_gen_decls::sgh},
+    {"hough", &pose_gen_decls::sgh},
     {"bouy_pnp", &pose_gen_decls::sgh},
     {"ignore", &pose_gen_decls::ignore_pg},
-    {"jiangshi_watershed", &pose_gen_decls::jw}
+    {"jiangshi_watershed", &pose_gen_decls::jw},
+    {"zp", &pose_gen_decls::zp}
   };
   
 }

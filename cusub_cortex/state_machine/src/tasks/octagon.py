@@ -142,15 +142,11 @@ class Rise(Objective):
         goal.camera = goal.DOWNCAM
         goal.target_pixel_threshold = self.target_pixel_threshold
         goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
+        goal.area_axis = goal.NO_AXIS
         goal.x_axis = goal.STRAFE_AXIS
         goal.y_axis = goal.DRIVE_AXIS
-        goal.area_axis = goal.NO_AXIS
-        if rospy.get_param("using_sim_params"):
-            goal.target_pixel_x = goal.DOWNCAM_FAKE_CENTER_X
-            goal.target_pixel_y = goal.DOWNCAM_FAKE_CENTER_Y
-        else: # real sub
-            goal.target_pixel_x = goal.CAMERAS_CENTER_X
-            goal.target_pixel_y = goal.CAMERAS_CENTER_Y
+        goal.target_pixel_x = goal.CAMERAS_CENTER_X
+        goal.target_pixel_y = goal.CAMERAS_CENTER_Y
         goal.target_box_area = goal.AREA_NOT_USED
         self.vs_client.send_goal(goal, feedback_cb=self.vs_dive_feedback_callback)
         rospy.loginfo("...centering with downcam")

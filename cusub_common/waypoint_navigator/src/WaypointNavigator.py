@@ -91,6 +91,13 @@ class WaypointNavigator(object):
         if(len(self.waypointlist) > 0):
             self.waypoint = self.waypointlist[0]
 
+    def check_done(self, dist):
+        # finish manuver if we reach the waypoint and are facing the correct direction
+        if(dist < REACHED_THRESHOLD):
+            self.advance_waypoint()
+        else:
+            rospy.loginfo("distance: " + str(dist))
+
     def odometryCallback(self, odom):
 
         position = odom.pose.pose.position
@@ -134,7 +141,9 @@ class WaypointNavigator(object):
                     self.drive_pub.publish(drive_f64)
                     # rospy.logdebug(xy_dist)
 
-            if self.movement_mode == STRAFE_MODE:
+                    self.check_done(dist)
+
+            elif self.movement_mode == STRAFE_MODE:
 
                 targetyaw = self.waypoint_yaw
 
@@ -163,12 +172,10 @@ class WaypointNavigator(object):
                     self.strafe_pub.publish(strafe_f64)
 
                     # finish manuver if we reach the waypoint and are facing the correct direction
-                    if(dist < REACHED_THRESHOLD):
-                        self.advance_waypoint()
-                    else:
-                        rospy.loginfo("distance: " + str(dist))
+                    self.check_done(dist)
                         
-            if self.movement_mode == BACKUP_MODE:
+            elif self.movement_mode == BACKUP_MODE:
+
                 # point toward waypoint
                 targetyaw = math.atan2(dy, dx) + math.pi
                 # rospy.logdebug("dx, dy: %f %f" % (dx, dy))
@@ -191,6 +198,8 @@ class WaypointNavigator(object):
                     drive_f64.data = self.currentDrive - min(xy_dist, 3.0)
                     self.drive_pub.publish(drive_f64)
                     # rospy.logdebug(xy_dist)
+
+                    self.check_done(dist)
 
             # Set target depth
             depth_f64 = Float64()
@@ -233,14 +242,13 @@ class WaypointNavigator(object):
         self.yaw_state_sub = rospy.Subscriber("motor_controllers/pid/yaw/state", Float64, self.yawStateCallback)
         self.depth_state_sub = rospy.Subscriber("motor_controllers/pid/depth/state", Float64, self.depthStateCallback)
 
-
-	rospy.loginfo("waiting for drive state")
+        rospy.loginfo("waiting for drive state")
         rospy.wait_for_message("motor_controllers/pid/drive/state", Float64)
-	rospy.loginfo("waiting for depth state")
+        rospy.loginfo("waiting for depth state")
         rospy.wait_for_message("motor_controllers/pid/depth/state", Float64)
-	rospy.loginfo("waiting for yaw state")
+        rospy.loginfo("waiting for yaw state")
         rospy.wait_for_message("motor_controllers/pid/yaw/state", Float64)
-	rospy.loginfo("waiting for strafe state")
+        rospy.loginfo("waiting for strafe state")
         rospy.wait_for_message("motor_controllers/pid/strafe/state", Float64)
 
         # get current sub position to figure out how to get where we want
@@ -250,8 +258,11 @@ class WaypointNavigator(object):
         s = rospy.Service('addWaypoint', AddWaypoint, self.addWaypoint)
 
         self.controlling_pids = True
-	rospy.loginfo("Opening Toggle Service")
+
+        rospy.loginfo("Opening Toggle Service")
+
         s2 = rospy.Service('toggleWaypointControl', ToggleControl, self.toggleControl)
+
         self.control_pub = rospy.Publisher("waypoint_controlling_pids", Bool, queue_size=10)
         control_pub_timer = rospy.Timer(rospy.Duration(0.1), self.publish_controlling_pids)
 
