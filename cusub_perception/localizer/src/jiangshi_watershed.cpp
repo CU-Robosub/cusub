@@ -88,7 +88,7 @@ namespace pose_generator
     /*
         Checks that each bounding box is border_size away from the edge of the image.
      */
-    bool JiangshiWatershed::checkBoxes(vector<darknet_ros_msgs::BoundingBox>& bbs, int border_size)
+    bool JiangshiWatershed::checkBoxes(const vector<darknet_ros_msgs::BoundingBox>& bbs, int border_size)
     {
         for( int i=0; i<bbs.size(); i++)
         {
@@ -101,7 +101,7 @@ namespace pose_generator
         return true;
     }
 
-    void JiangshiWatershed::getOrientationFromAspectRatio(darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat)
+    void JiangshiWatershed::getOrientationFromAspectRatio(const darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat)
     {
         float aspectRatio = ( (float) (bb.xmax - bb.xmin) ) / ( (float) (bb.ymax - bb.ymin) );
         // Linearly fit the transformation from aspectRatio to yaw angle of the buoy
@@ -123,12 +123,16 @@ namespace pose_generator
     }
 
     bool JiangshiWatershed::generatePose(
-        sensor_msgs::Image& image, 
-        vector<darknet_ros_msgs::BoundingBox>& bbs,
-        geometry_msgs::Pose& pose,
-        string& class_name
+        const sensor_msgs::Image& image, 
+        const vector<darknet_ros_msgs::BoundingBox>& bbs,
+        vector<localizer::Detection>& detections
         ){
-            class_name = "jiangshi";
+
+            localizer::Detection det;
+            det.class_id = "jiangshi";
+            det.pose.header.stamp = image.header.stamp;
+            det.pose.header.frame_id = image.header.frame_id;
+
             if( bbs.size() != 1 ) { return false; }
             int border_size = 10; // add room for a border that we'll say is part of the 'not bouy' class
             if ( !checkBoxes(bbs, border_size) ) { return false; }
@@ -152,9 +156,13 @@ namespace pose_generator
             img_points[3].y += bbs[0].ymin - border_size;
 
             // Get pose from image points using a solvepnp
-            getPoseFromPoints(truth_pts, img_points, pose); // inherited
+            getPoseFromPoints(truth_pts, img_points, det.pose.pose); // inherited
              // Adjust Jiangshi Orientation according to aspect ratio of the bounding box
-            if ( useAspectRatio ) { getOrientationFromAspectRatio( bbs[0], pose.position.x, pose.orientation ); }
+            if ( useAspectRatio ) { getOrientationFromAspectRatio( bbs[0], det.pose.pose.position.x, det.pose.pose.orientation ); }
+
+            detections.push_back(det);
+
             return true;
+
         }
 }

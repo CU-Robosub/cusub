@@ -1,55 +1,55 @@
 <launch>
 
   <!-- Obstacle positions -->
-  <arg name="SG_x" default="-18.0"/>
-  <arg name="SG_y" default="-22.0"/>
+  <arg name="SG_x" default="21"/>
+  <arg name="SG_y" default="-21"/>
   <arg name="SG_z" default="0.0"/>
-  <arg name="SG_yaw" default="-2.08"/>
+  <arg name="SG_yaw" default="-0.92"/>
 
-  <arg name="PM_x" default="-22.40"/>
-  <arg name="PM_y" default="-21.00"/>
+  <arg name="PM_x" default="21.80"/>
+  <arg name="PM_y" default="-20.40"/>
   <arg name="PM_z" default="-4.4"/>
-  <arg name="PM_yaw" default="-0.68"/>
+  <arg name="PM_yaw" default="0.34"/>
 
-  <arg name="PM2_x" default="-28.06"/>
-  <arg name="PM2_y" default="-14.84"/>
+  <arg name="PM2_x" default="30.4"/>
+  <arg name="PM2_y" default="-11.7"/>
   <arg name="PM2_z" default="-4.4"/>
-  <arg name="PM2_yaw" default="1.94"/>
+  <arg name="PM2_yaw" default="0.3"/>
 
-  <arg name="BJ_x" default="-25.45"/>
-  <arg name="BJ_y" default="-16.5"/>
-  <arg name="BJ_z" default="-2.1"/>
-  <arg name="BJ_yaw" default="-2.26"/>
+  <arg name="BJ_x" default="32.0"/>
+  <arg name="BJ_y" default="-14.0"/>
+  <arg name="BJ_z" default="-2.2"/>
+  <arg name="BJ_yaw" default="2.45"/>
 
-  <arg name="BT_x" default="-28.97"/>
-  <arg name="BT_y" default="-17.99"/>
+  <arg name="BT_x" default="27.6"/>
+  <arg name="BT_y" default="-11.9"/>
   <arg name="BT_z" default="-4.7"/>
-  <arg name="BT_yaw" default="-1.92"/>
+  <arg name="BT_yaw" default="-1.38"/>
 
-  <arg name="TO_x" default="-28.11"/>
-  <arg name="TO_y" default="-4.01"/>
-  <arg name="TO_z" default="-3.24"/>
+  <arg name="TO_x" default="27.00"/>
+  <arg name="TO_y" default="7.5"/>
+  <arg name="TO_z" default="-3.0"/>
   <arg name="TO_yaw" default="0.17"/>
 
-  <arg name="DR_x" default="-33.44"/>
-  <arg name="DR_y" default="-11.42"/>
+  <arg name="DR_x" default="34.9"/>
+  <arg name="DR_y" default="-3.2"/>
   <arg name="DR_z" default="-4.2"/>
-  <arg name="DR_yaw" default="-2.27"/>
+  <arg name="DR_yaw" default="-0.3"/>
 
-  <arg name="OC_x" default="-40.57"/>
-  <arg name="OC_y" default="-1.43"/>
+  <arg name="OC_x" default="27.4"/>
+  <arg name="OC_y" default="20.7"/>
   <arg name="OC_z" default="0.0"/>
-  <arg name="OC_yaw" default="0.42"/>
+  <arg name="OC_yaw" default="-0.72"/>
 
-  <arg name="CO1_x" default="-41.44"/>
-  <arg name="CO1_y" default="-3"/>
+  <arg name="CO1_x" default="25.3"/>
+  <arg name="CO1_y" default="18.3"/>
   <arg name="CO1_z" default="-4.7"/>
-  <arg name="CO1_yaw" default="-2.69"/>
+  <arg name="CO1_yaw" default="-2.27"/>
 
-  <arg name="CO2_x" default="-38.3"/>
-  <arg name="CO2_y" default="-1.6"/>
+  <arg name="CO2_x" default="27.6"/>
+  <arg name="CO2_y" default="20.9"/>
   <arg name="CO2_z" default="-4.7"/>
-  <arg name="CO2_yaw" default="-2.69"/>
+  <arg name="CO2_yaw" default="-2.25"/>
 
   <include file="$(find robosub_descriptions)/launch/TRANSDEC.launch">
     <arg name="paused" default="false"/>

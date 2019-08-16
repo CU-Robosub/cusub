@@ -34,6 +34,8 @@ from functools import partial
 import rospy
 import tf
 
+import random
+
 import numpy as np
 
 from itertools import combinations
@@ -317,7 +319,7 @@ class YOLOFaker(object):
             camera.width = info.width
             camera.height = info.height
 
-    def render_debug_context(self, cv_image, detections, camera):
+    def render_debug_context(self, cv_image, debug_data, camera):
         """Renders debug information to image
 
         Parameters
@@ -336,28 +338,32 @@ class YOLOFaker(object):
         """
         try:
 
-            for det in detections:
+            for data in debug_data:
+
+                box = data[0]
+                color = data[1]
+                points = data[2]
 
                 # Draw bounding box
                 cv2.rectangle(
                     cv_image,
-                    (int(det[0][0]), int(det[0][2])),
-                    (int(det[0][1]), int(det[0][3])),
-                    det[1], 2
+                    (int(box.xmin), int(box.ymin)),
+                    (int(box.xmax), int(box.ymax)),
+                    color, 2
                     )
 
                 # Draw bounding volume points
                 if self.show_points:
-                    for point in det[3]:
+                    for point in points:
                         cv2.circle(
                             cv_image,
                             (int(point[0][0]), camera.height - int(point[0][1])),
                             3,
-                            det[1],
+                            color,
                             2
                             )
-        except:
-            rospy.logwarn("Unexpected error rendering debug.")
+        except Exception as e:
+            rospy.logwarn("Unexpected error rendering debug: " + e.message)
 
     def camera_image_callback(self, image, camera):
         """Gets images from camera to generate detections on
@@ -426,9 +432,7 @@ class YOLOFaker(object):
 
             if detections is not None:
 
-                if camera.debug_image_pub:
-
-                    self.render_debug_context(cv_image, detections, camera)
+                debug_data = []
 
                 for det in detections:
 
@@ -436,11 +440,47 @@ class YOLOFaker(object):
 
                     bounding_box.Class = det[2]
                     bounding_box.probability = 1.0
+
                     bounding_box.xmin = int(det[0][0])
                     bounding_box.xmax = int(det[0][1])
                     bounding_box.ymin = int(det[0][2])
                     bounding_box.ymax = int(det[0][3])
-                    bounding_boxes.bounding_boxes.append(bounding_box)
+
+                    box_noise = self.global_box_noise
+
+                    # Fix camera scaling issues from multiplexer
+                    if camera.width != image.width or camera.height != image.height:
+                        x_scale = float(image.width) / float(camera.width)
+                        y_scale = float(image.height) / float(camera.height)
+                        bounding_box.xmin *= x_scale
+                        bounding_box.xmax *= x_scale
+                        bounding_box.ymin *= y_scale
+                        bounding_box.ymax *= y_scale
+
+                    # Add noise to boxes
+                    width = bounding_box.xmax - bounding_box.xmin
+                    height = bounding_box.ymax - bounding_box.ymin
+                    bounding_box.xmin += int((random.random() - 0.5) * width * box_noise)
+                    bounding_box.xmax += int((random.random() - 0.5) * width * box_noise)
+                    bounding_box.ymin += int((random.random() - 0.5) * height * box_noise)
+                    bounding_box.ymax += int((random.random() - 0.5) * height * box_noise)
+                    if bounding_box.xmin < 0:
+                        bounding_box.xmin = 0
+                    if bounding_box.ymin < 0:
+                        bounding_box.ymin = 0
+                    if bounding_box.xmax > image.width:
+                        bounding_box.xmax = image.width
+                    if bounding_box.ymax > image.height:
+                        bounding_box.ymax = image.height
+
+                    # Drop some boxes for realism
+                    if random.random() < self.global_detection_rate:
+                        bounding_boxes.bounding_boxes.append(bounding_box)
+                        debug_data.append((bounding_box, det[1], det[3]))
+
+                if camera.debug_image_pub:
+
+                    self.render_debug_context(cv_image, debug_data, camera)
 
             # Only publish detection if there are boxes in it
             if bounding_boxes.bounding_boxes:
@@ -477,7 +517,7 @@ class YOLOFaker(object):
 
             overlap_area = max(0, right - left) * max(0, top - bottom)
 
-            return overlap_area / ( (back[1] - back[0]) * (front[3] - front[2]) )
+            return overlap_area / ( (back[1] - back[0]) * (back[3] - back[2]) )
 
         return 0.0
 
@@ -509,6 +549,7 @@ class YOLOFaker(object):
             if np.linalg.norm(obj_trans) > rospy.get_param('yolo_faker/visibility', 14.0):
                 continue
 
+            # TODO use transformPoint
             new_pts = []
             for point in obj_class.points:
 
@@ -622,6 +663,12 @@ class YOLOFaker(object):
 
         # Shows bounding volume points for debugging
         self.show_points = rospy.get_param('yolo_faker/show_points', False)
+
+        # Box noise for more realisitc detections
+        self.global_box_noise = rospy.get_param('yolo_faker/global_box_noise', 0.2)
+
+        # Global detection rate
+        self.global_detection_rate = rospy.get_param('yolo_faker/detection_rate', 1.0)
 
         # Fake darknet YOLO
         self.darknet_detection_pub = rospy.Publisher(bouding_boxes_topic,

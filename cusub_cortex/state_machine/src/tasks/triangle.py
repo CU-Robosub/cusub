@@ -144,7 +144,7 @@ class Slay(Objective):
                 # Check available darknet classes in occam0 frame, hang for 1 second
                 present_classes = self.get_classes_service(rospy.Duration(0.5), target_frame).classes
                 if len(present_classes) == 1 and self.target_vampire in present_classes:
-                    rospy.loginfo("Target class detectde by itself. Waiting...")
+                    rospy.loginfo("Target class detected by itself. Waiting...")
                     if not found:
                         userdata.timeout_obj.set_new_time(self.single_class_time)
                         found = True

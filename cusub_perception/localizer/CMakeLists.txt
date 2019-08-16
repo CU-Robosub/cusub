@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   geometry_msgs
   std_msgs
+  tf
 )
 
 add_message_files(
@@ -38,6 +39,7 @@ add_library( localizer
   src/pose_generator.cpp
   src/start_gate_hough.cpp
   src/jiangshi_watershed.cpp
+  src/z_plane.cpp
 )
 target_link_libraries(localizer ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
