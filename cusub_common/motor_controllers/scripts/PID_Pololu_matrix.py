@@ -27,6 +27,9 @@ class PID_Pololu():
         self.effort_array = [0, 0, 0, 0, 0, 0]
         self.motor_array = np.empty([8,6])
 
+        self.motor_array = np.array(rospy.get_param("tam"))
+
+        """
         '''roll, pitch, yaw, depth, drive, strafe'''
         self.motor_array[0] = [ 1,  1,    0, -.5,   0,   0] #Front Right
         self.motor_array[1] = [-1,  1,    0, -.5,   0,   0] #Front Left
@@ -36,14 +39,15 @@ class PID_Pololu():
         self.motor_array[5] = [ 0,  0,  0.5,   0,   0,  .5] #Back
         self.motor_array[6] = [ 0,  0,  0.2,   0, -.8,   0] #Left -.65
         self.motor_array[7] = [ 0,  0, -0.2,   0, -.8,   0] #Right -.8
+        """
 
         '''FR, FL, BR, BL,  F,  B,  L,  R'''
         self.flip_motor_array = np.array(rospy.get_param("flip_motor_array"))
         self.scale_array      = np.array([5, 5, 5, 5, 5, 5, 5, 5])
-        self.offset_array     = np.array([1420, 1420, 1420, 1420,
+        #self.offset_array     = np.array([1420, 1420, 1420, 1420,
+        #                                  1500, 1500, 1500, 1500])
+        self.offset_array     = np.array([1500, 1500, 1500, 1500,
                                           1500, 1500, 1500, 1500])
-
-        rospy.logfatal(self.flip_motor_array)
 
         ## Publisher for sending commands to the pololu
         self.motor_pub = rospy.Publisher('cusub_common/motor_controllers/pololu_control/command',
@@ -107,7 +111,8 @@ class PID_Pololu():
         motor_transform = motor_transform * self.flip_motor_array
         motor_transform = motor_transform + self.offset_array
 
-        command_order = [ 4, 0, 1, 2, 3, 5, 6, 7]
+        #command_order = [ 4, 0, 1, 2, 3, 5, 6, 7]
+        command_order = [0, 1, 2, 3, 4, 5, 6, 7]
         arr = []
         for i in command_order:
             arr.append(motor_transform[i])

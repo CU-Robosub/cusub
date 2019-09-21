@@ -2,10 +2,10 @@
 
     <arg name="namespace" default="leviathan/cusub_common"/> <!-- Which sub are we controlling -->
 
-    <group ns="$(arg namespace)">
+    <arg name="setpoint" default="true"/>       <!-- Use setpoints for controlling, if false we publish directly to control efforts -->
+    <arg name="controller" default="ps4"/>      <!-- Controller type: ps4, xbox -->
 
-        <arg name="setpoint" default="true"/>       <!-- Use setpoints for controlling, if false we publish directly to control efforts -->
-        <arg name="controller" default="ps4"/>      <!-- Controller type: ps4, xbox -->
+    <group ns="$(arg namespace)">
 
         <arg name="start_joy" default="false"/> <!-- autolaunch joy node.  This should be launched remotely if running on sub, locally if for sim -->
 
