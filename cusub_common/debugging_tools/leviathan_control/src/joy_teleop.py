@@ -260,10 +260,10 @@ class JoyTeleop(object):
                 depth_f64.data = depth_f64.data + self.depth_val * self.depth_sensitivity
                 pub_depth.publish(depth_f64)
 
-            pitch_f64.data = self.pitch_val*math.radians(45.0) # allow 15 deg pitch
-            pub_pitch.publish(pitch_f64)
-            roll_f64.data = self.roll_val*math.radians(15.0) # allow 15 deg roll
-            pub_roll.publish(roll_f64)
+            #pitch_f64.data = self.pitch_val*math.radians(45.0) # allow 15 deg pitch
+            #pub_pitch.publish(pitch_f64)
+            #roll_f64.data = self.roll_val*math.radians(15.0) # allow 15 deg roll
+            #pub_roll.publish(roll_f64)
 
             # 1.0 to -1.0, remap 0.65 to 0.0
             grip = self.gripper_val * 100.0

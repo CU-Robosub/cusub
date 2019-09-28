@@ -23,16 +23,17 @@ class MotorControl(object):
     def motor_command_callback(self, data):
         """Get motor pwms and generate thrust commands from them"""
 
-        self.thrust[0].data = (data.data[7] - 1500.0) / -3.0 # Right
-        self.thrust[1].data = (data.data[6] - 1500.0) / -3.0 # Left
+        # Flip motors based on motor flip array to match reality
+        flip_motor_array = rospy.get_param('flip_motor_array')
 
-        self.thrust[2].data = (data.data[2] - 1420.0) / 1.5 # Front Left
-        self.thrust[3].data = (data.data[1] - 1420.0) / 1.5 # Front Right
-        self.thrust[4].data = (data.data[4] - 1420.0) / 1.5 # Back Left
-        self.thrust[5].data = (data.data[3] - 1420.0) / 1.5 # Back Right
-
-        self.thrust[6].data = (data.data[0] - 1500.0) / 3.0 # Front
-        self.thrust[7].data = (data.data[5] - 1500.0) / 3.0 # Back
+        self.thrust[0].data = (data.data[0] - 1500.0) /  5.0 * flip_motor_array[0]
+        self.thrust[1].data = (data.data[1] - 1500.0) /  5.0 * flip_motor_array[1]
+        self.thrust[2].data = (data.data[2] - 1500.0) /  5.0 * flip_motor_array[2]
+        self.thrust[3].data = (data.data[3] - 1500.0) /  5.0 * flip_motor_array[3]
+        self.thrust[4].data = (data.data[4] - 1500.0) /  5.0 * flip_motor_array[4]
+        self.thrust[5].data = (data.data[5] - 1500.0) /  5.0 * flip_motor_array[5]
+        self.thrust[6].data = (data.data[6] - 1500.0) /  5.0 * flip_motor_array[6]
+        self.thrust[7].data = (data.data[7] - 1500.0) /  5.0 * flip_motor_array[7]
 
     def motor_control(self):
         """Main loop manages updating motor thrusts"""
