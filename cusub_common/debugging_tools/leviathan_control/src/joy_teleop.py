@@ -221,6 +221,8 @@ class JoyTeleop(object):
         self.pitch_limit = rospy.get_param("~pitch_limit", 15.0)
         self.roll_limit = rospy.get_param("~roll_limit", 15.0)
 
+        self.pitch_roll_enabled = rospy.get_param("~pitch_roll_enabled", True)
+
         pitch_f64 = Float64()
         pitch_f64.data = 0
         roll_f64 = Float64()
@@ -266,11 +268,12 @@ class JoyTeleop(object):
                 depth_f64.data = depth_f64.data + self.depth_val * self.depth_sensitivity
                 pub_depth.publish(depth_f64)
 
-            pitch_f64.data = self.pitch_val*math.radians(self.pitch_limit)
-            pub_pitch.publish(pitch_f64)
+            if self.pitch_roll_enabled:
+                pitch_f64.data = self.pitch_val*math.radians(self.pitch_limit)
+                pub_pitch.publish(pitch_f64)
 
-            roll_f64.data = self.roll_val*math.radians(self.roll_limit)
-            pub_roll.publish(roll_f64)
+                roll_f64.data = self.roll_val*math.radians(self.roll_limit)
+                pub_roll.publish(roll_f64)
 
             # 1.0 to -1.0, remap 0.65 to 0.0
             grip = self.gripper_val * 100.0

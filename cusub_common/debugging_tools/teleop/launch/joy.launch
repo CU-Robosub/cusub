@@ -5,6 +5,7 @@
     <!-- Use setpoints for controlling, if false we publish directly to control efforts -->
     <arg name="yaw_setpoint" default="true"/>
     <arg name="drive_strafe_setpoint" default="true"/>
+    <arg name="pitch_roll_enabled" default="true"/>
 
     <arg name="controller" default="ps4"/>      <!-- Controller type: ps4, xbox -->
 
@@ -31,6 +32,7 @@
 
                 <param name="yaw_setpoint" value="$(arg yaw_setpoint)" />
                 <param name="drive_strafe_setpoint" value="$(arg drive_strafe_setpoint)" />
+                <param name="pitch_roll_enabled" value="$(arg pitch_roll_enabled)" />
 
             </node>
 
