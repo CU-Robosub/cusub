@@ -2,7 +2,10 @@
 
     <arg name="namespace" default="leviathan/cusub_common"/> <!-- Which sub are we controlling -->
 
-    <arg name="setpoint" default="true"/>       <!-- Use setpoints for controlling, if false we publish directly to control efforts -->
+    <!-- Use setpoints for controlling, if false we publish directly to control efforts -->
+    <arg name="yaw_setpoint" default="true"/>
+    <arg name="drive_strafe_setpoint" default="true"/>
+
     <arg name="controller" default="ps4"/>      <!-- Controller type: ps4, xbox -->
 
     <group ns="$(arg namespace)">
@@ -26,9 +29,8 @@
                 <param name="pitch_axes" value="7" />
                 <param name="roll_axes" value="6" />
 
-                <param name="default_depth" value="0" />
-
-                <param name="setpoint" value="$(arg setpoint)" />
+                <param name="yaw_setpoint" value="$(arg yaw_setpoint)" />
+                <param name="drive_strafe_setpoint" value="$(arg drive_strafe_setpoint)" />
 
             </node>
 

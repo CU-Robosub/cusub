@@ -1,0 +1,6 @@
+<launch>
+
+  <!-- Start the a underwater world simulation scenario -->
+  <include file="$(find robosub_descriptions)/launch/divewell.launch"/>
+
+</launch>

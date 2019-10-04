@@ -137,7 +137,7 @@ class JoyTeleop(object):
             activate_actuator = rospy.ServiceProxy('activateActuator', ActivateActuator)
             activate_actuator(num, time)
         except:
-            print "Actuation Failed"
+            print("Actuation Failed")
 
     def actuate_left_dropper(self, _):
         self.actuate(0, 500)
@@ -159,7 +159,9 @@ class JoyTeleop(object):
 
         rospy.init_node('joy_teleop', anonymous=True)
 
-        setpoint = rospy.get_param('~setpoint', True)
+        yaw_setpoint = rospy.get_param('~yaw_setpoint', True)
+
+        drive_strafe_setpoint = rospy.get_param('~drive_strafe_setpoint', True)
 
         self.yaw_f64 = Float64()
         self.yaw_f64.data = 0.0
@@ -170,27 +172,29 @@ class JoyTeleop(object):
         depth_f64 = Float64()
         depth_f64.data = 0.0
 
-        if setpoint:
+        if yaw_setpoint:
 
             pub_yaw = rospy.Publisher('motor_controllers/pid/yaw/setpoint',
                                       Float64, queue_size=10)
-            pub_drive = rospy.Publisher('motor_controllers/pid/drive/setpoint',
-                                        Float64, queue_size=10)
-            pub_strafe = rospy.Publisher('motor_controllers/pid/strafe/setpoint',
-                                         Float64, queue_size=10)
-
             # get current accumulated strafe and drive to use for adjustments
             rospy.Subscriber("motor_controllers/pid/yaw/state",
                              Float64, self.yawStateCallback)
-            rospy.Subscriber("motor_controllers/pid/drive/state",
-                             Float64, self.driveStateCallback)
-            rospy.Subscriber("motor_controllers/pid/strafe/state",
-                             Float64, self.strafeStateCallback)
 
         else: 
 
             pub_yaw = rospy.Publisher('motor_controllers/mux/yaw/control_effort',
                                       Float64, queue_size=10)
+
+        if drive_strafe_setpoint:
+            rospy.Subscriber("motor_controllers/pid/drive/state",
+                             Float64, self.driveStateCallback)
+            rospy.Subscriber("motor_controllers/pid/strafe/state",
+                             Float64, self.strafeStateCallback)
+            pub_drive = rospy.Publisher('motor_controllers/pid/drive/setpoint',
+                                        Float64, queue_size=10)
+            pub_strafe = rospy.Publisher('motor_controllers/pid/strafe/setpoint',
+                                         Float64, queue_size=10)
+        else:
             pub_drive = rospy.Publisher('motor_controllers/mux/drive/control_effort',
                                          Float64, queue_size=10)
             pub_strafe = rospy.Publisher('motor_controllers/mux/strafe/control_effort',
@@ -214,10 +218,8 @@ class JoyTeleop(object):
         self.pitch_axes = rospy.get_param("~pitch_axes", self.pitch_axes)
         self.roll_axes = rospy.get_param("~roll_axes", self.roll_axes)
 
-        # Changed to use current depth
-        # self.default_depth = rospy.get_param("~default_depth", self.default_depth)
-        # depth_f64 = Float64()
-        # depth_f64.data = self.default_depth
+        self.pitch_limit = rospy.get_param("~pitch_limit", 15.0)
+        self.roll_limit = rospy.get_param("~roll_limit", 15.0)
 
         pitch_f64 = Float64()
         pitch_f64.data = 0
@@ -232,10 +234,18 @@ class JoyTeleop(object):
 
             if self.joystick_in_control:
 
-                if setpoint:
+                if yaw_setpoint:
 
                     self.yaw_f64.data = self.yaw_f64.data + self.yaw_val * self.yaw_sensitivity
                     pub_yaw.publish(self.yaw_f64)
+
+                else:
+
+                    self.yaw_f64 = Float64()
+                    self.yaw_f64.data = self.yaw_val * self.thruster_power * self.twist_effort
+                    pub_yaw.publish(self.yaw_f64)
+
+                if drive_strafe_setpoint:
 
                     self.drive_f64.data = self.drive_f64.data + self.drive_val * self.drive_sensitivity
                     pub_drive.publish(self.drive_f64)
@@ -244,10 +254,6 @@ class JoyTeleop(object):
                     pub_strafe.publish(self.strafe_f64)
 
                 else:
-
-                    self.yaw_f64 = Float64()
-                    self.yaw_f64.data = self.yaw_val * self.thruster_power * self.twist_effort
-                    pub_yaw.publish(self.yaw_f64)
 
                     self.drive_f64 = Float64()
                     self.drive_f64.data = self.drive_val * self.thruster_power
@@ -260,9 +266,10 @@ class JoyTeleop(object):
                 depth_f64.data = depth_f64.data + self.depth_val * self.depth_sensitivity
                 pub_depth.publish(depth_f64)
 
-            pitch_f64.data = self.pitch_val*math.radians(45.0) # allow 15 deg pitch
+            pitch_f64.data = self.pitch_val*math.radians(self.pitch_limit)
             pub_pitch.publish(pitch_f64)
-            roll_f64.data = self.roll_val*math.radians(15.0) # allow 15 deg roll
+
+            roll_f64.data = self.roll_val*math.radians(self.roll_limit)
             pub_roll.publish(roll_f64)
 
             # 1.0 to -1.0, remap 0.65 to 0.0
