@@ -37,6 +37,10 @@ void Tracking::onInit()
     m_frameCount = 0;
     setupPublishers();
     setupSubscribers();
+
+    // setup configuration service
+    m_thresholdServer = nhPrivate.advertiseService("tracking_threshold", &Tracking::configureTracking, this);
+
     NODELET_INFO("Tracking initialized");
 }
 
@@ -60,6 +64,12 @@ void Tracking::setupSubscribers()
 {
     m_imageSubscriber = m_nh.subscribe(m_imageTopicName, 1, &Tracking::imageCallback, this);
     m_detectionSubscriber = m_nh.subscribe(m_detectionTopicName, 1, &Tracking::darknetCallback, this);
+}
+
+bool Tracking::configureTracking(tracking::TrackingConfig::Request &req, tracking::TrackingConfig::Response &resp)
+{
+    m_detectionThresh = req.threshold;
+    return true;
 }
 
 std::vector<BoundingBox> Tracking::getBoxes(const std::string &framename)

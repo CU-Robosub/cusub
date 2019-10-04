@@ -1,0 +1,8 @@
+# How to publish from cmd line: rosservice call darknet_multiplexer/configure_active_cameras "{actives:[1,0,1,0,1,0]}"
+# threshold for how confident of boxes to allow to reset tracking
+# set to 0 to pass the darknet box directly through
+# set to 100 to go full tracking
+# usually want somewhere in between
+float32 threshold
+---
+bool success

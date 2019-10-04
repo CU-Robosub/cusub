@@ -14,6 +14,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <darknet_ros_msgs/BoundingBoxes.h>
 #include <sensor_msgs/Image.h>
+#include <tracking/TrackingConfig.h>
 #include "ObjectTracker.h"
 
 
@@ -47,7 +48,10 @@ private:
     void updateTracker(ObjectTracker * objectTracker,const BoundingBox &bbox, const ImageData &image);
     ObjectTracker * findTracker(const std::string &frameId, const std::string &classname, const BoundingBox &bbox);
 
+    bool configureTracking(tracking::TrackingConfig::Request &req, tracking::TrackingConfig::Response &resp);
+
     ros::NodeHandle m_nh;
+    ros::ServiceServer m_thresholdServer;
     ros::Publisher m_bboxPublisher;
     std::string m_imageTopicName;
     ros::Subscriber m_imageSubscriber;
