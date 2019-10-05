@@ -7,6 +7,28 @@ from std_msgs.msg import Float64MultiArray, Float64
 from pololu_controller.msg import MotorCommand
 from nav_msgs.msg import Odometry
 
+import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d
+import numpy as np
+
+# Linearize Thrust Curve
+control = [-100, -90, -80, -70, -60, -50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+effort = [-3.559, -3.447, -3.336, -3.114, -2.669, -1.89, -1.112, -0.6672, -0.2224, -0.001, 0, 0.001, 0.2224, 0.6672, 1.112, 1.89, 2.669, 3.114, 3.336, 3.447, 3.559]
+
+control_from_efforts = interp1d(effort, control)
+
+new_effort = []
+new_control = []
+remapped_control = []
+for effort in np.linspace(-3.559, 3.559, 100):
+    new_control_val = control_from_efforts(effort)
+    new_effort.append(effort)
+    new_control.append(new_control_val)
+    remapped_control_val = effort / 3.558 * 100.0
+    print(remapped_control_val)
+    remapped_control.append(remapped_control_val)
+
+remapped_control_from_control = interp1d(remapped_control, new_control)
 
 # * Front: 0
 # * front_right: 6
@@ -106,9 +128,14 @@ class PID_Pololu():
     def strafe_callback(self,msg): self.effort_array[5] = msg.data
 
     def motor_publish(self, event):
-        motor_transform =   np.sum(self.effort_array * self.motor_array, 1)
-        motor_transform = motor_transform * self.scale_array
+        motor_transform =  np.sum(self.effort_array * self.motor_array, 1)
         motor_transform = motor_transform * self.flip_motor_array
+
+        for i in range(len(motor_transform)):
+            motor_transform[i] = max(min(motor_transform[i], 100.0), -100.0)
+            motor_transform[i] = remapped_control_from_control(motor_transform[i])
+
+        motor_transform = motor_transform * self.scale_array
         motor_transform = motor_transform + self.offset_array
 
         #command_order = [ 4, 0, 1, 2, 3, 5, 6, 7]

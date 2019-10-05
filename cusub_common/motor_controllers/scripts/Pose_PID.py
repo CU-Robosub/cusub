@@ -59,6 +59,7 @@ class Pose_PID():
         self.strafe_pub = rospy.Publisher('cusub_common/motor_controllers/pid/strafe/state',Float64,queue_size=1)
 
         self.last_yaw = 0
+        self.accumulated_yaw = 0
 
         self.state = rospy.Subscriber('cusub_common/odometry/filtered', Odometry, self.state_callback, queue_size=1)
 
@@ -75,12 +76,28 @@ class Pose_PID():
         #roll pitch control
         orientation = msg.pose.pose.orientation
         (roll, pitch, yaw) = tf.transformations.euler_from_quaternion([orientation.x, orientation.y,orientation.z,orientation.w])
+
+        # Calculate change in yaw
+        dyaw = self.last_yaw - yaw
+        if dyaw > np.pi:
+            dyaw -= 2.0 * np.pi
+        if dyaw < -np.pi:
+            dyaw += 2.0 * np.pi
+
+        self.last_yaw = yaw
+
+        # Change delta yaw
+        self.accumulated_yaw -= dyaw
+
+        # Round yaw to nearest real match
+        # TODO
+
         #drive and strafe setpoints
         (drive, strafe ) = self.point_and_shoot_model(position.x, prev_position.x,
                                                       position.y, prev_position.y,
                                                       yaw)
 
-        self.setpoint_publisher(yaw, roll, pitch, depth, drive, strafe)
+        self.setpoint_publisher(self.accumulated_yaw, roll, pitch, depth, drive, strafe)
         self.last_pose = msg
 
 
@@ -115,17 +132,29 @@ class Pose_PID():
     def depth_callback(self,msg):
         self.depth_pub_data = msg.pose.pose.position.z
         self.depth_pub.publish(self.depth_pub_data)
+
     def imu_callback(self,msg):
         (r, p, y) = tf.transformations.euler_from_quaternion([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
-        #This is so we can turn to 180
-        if((self.last_yaw*y)<0 and abs(self.last_yaw)>math.pi/2):
-            y = np.sign(self.last_yaw)*(2*math.pi-abs(y))
-        else:
-            self.last_yaw = y
 
-        #
-        self.yaw_pub_data = y
+        # Calculate change in yaw
+        dy = self.last_yaw - y
+        if dy > np.pi:
+            dy -= 2.0 * np.pi
+        if dy < -np.pi:
+            dy += 2.0 * np.pi
+
+        self.last_yaw = y
+
+        # Change delta yaw
+        self.accumulated_yaw += dy
+
+        # Round yaw to nearest real match
+        # TODO
+
+        # Publish yaw
+        self.yaw_pub_data = self.accumulated_yaw
         self.yaw_pub.publish(self.yaw_pub_data)
+
     ## Pose Callback
     #  This function takes the current pose and splits that out to the PID states
     # @param self The object pointer
@@ -143,14 +172,25 @@ class Pose_PID():
             return
         #Next we turn the quaternions into euler angles
         (r, p, y) = tf.transformations.euler_from_quaternion([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
-        #This is so we can turn to 180
-        if((self.last_yaw*y)<0 and abs(self.last_yaw)>math.pi/2):
-            y = np.sign(self.last_yaw)*(2*math.pi-abs(y))
-        else:
-            self.last_yaw = y
 
-        #
-        self.yaw_pub_data = y
+        # Calculate change in yaw
+        dy = self.last_yaw - y
+        rospy.logerr(dy)
+        if dy > np.pi:
+            dy -= 2.0 * np.pi
+        if dy < -np.pi:
+            dy += 2.0 * np.pi
+
+        self.last_yaw = y
+
+        # Change delta yaw
+        self.accumulated_yaw += dy
+
+        # Round yaw to nearest real match
+        # TODO
+
+        # Publish yaw
+        self.yaw_pub_data = self.accumulated_yaw
         self.yaw_pub.publish(self.yaw_pub_data)
 
         self.roll_pub_data = r
