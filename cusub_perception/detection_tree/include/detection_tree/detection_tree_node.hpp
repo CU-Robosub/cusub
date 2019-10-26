@@ -13,6 +13,8 @@
 #include <std_msgs/Header.h>
 #include <geometry_msgs/Pose.h>
 
+// Camel case classes + functions, underscore variables + namespaces
+
 namespace det_tree_ns
 {
     class DetectionTree
@@ -22,11 +24,13 @@ namespace det_tree_ns
         private:
             void darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs);
             void createDvector(darknet_ros_msgs::BoundingBox& bb, std_msgs::Header& image_header, dvector& dv);
-            void createDobject(dvector dv, int dobject_num);
-            void determineDobject(dvector dv);
-            bool pose_solve(dobject& dobj, geometry_msgs::Pose& pose);
+            void createDobject(dvector& dv, int dobject_num);
+            void addDvectorToDobject(dvector& dv, dobject& dobj);
+            int determineDobjectNum(dvector& dv); // -1 for new dobject
+            bool poseSolveDobject(dobject& dobj, geometry_msgs::Pose& pose);
             vector<dobject> dobject_list;
             ros::Subscriber darknet_sub;
+            ros::Publisher dvector_pub;
             // transform listener
     }
 }
