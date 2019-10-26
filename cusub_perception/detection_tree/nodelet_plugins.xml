@@ -1,0 +1,8 @@
+<library path="lib/libdetection_tree_node">
+  <class name="detection_tree/DetectionTree" type="det_tree_ns::DetectionTree" base_class_type="nodelet::Nodelet">
+    <description>
+      Interface between darknet and visual servoing. Stores and organizes
+      darknet hits.
+    </description>
+  </class>
+</library>

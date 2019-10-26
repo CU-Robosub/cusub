@@ -8,10 +8,18 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   roscpp
   std_msgs
+  nodelet
+  tf
 )
-catkin_package()
+catkin_package(
+  LIBRARIES detection_tree_node
+)
 
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
+
+add_library( detection_tree_node 
+src/detection_tree_node )
+target_link_libraries(detection_tree_node ${catkin_LIBRARIES})
