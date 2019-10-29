@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="nodelet" type="nodelet" name="detection_tree_standalone_nodelet" args="manager" output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="detection_tree" args="load detection_tree/DetectionTree detection_tree_standalone_nodelet" output="screen"/>    
+</launch>

@@ -3,7 +3,7 @@
 
 #include <pluginlib/class_list_macros.h>
 #include "detection_tree/detection_tree.hpp"
-// #include <nodelet/nodelet.h>
+#include <nodelet/nodelet.h>
 #include <ros/ros.h>
 #include <vector>
 // #include <map>
@@ -17,7 +17,7 @@
 
 namespace det_tree_ns
 {
-    class DetectionTree
+    class DetectionTree : public nodelet::Nodelet
     {
         public:
             virtual void onInit();
@@ -28,11 +28,11 @@ namespace det_tree_ns
             void addDvectorToDobject(dvector& dv, dobject& dobj);
             int determineDobjectNum(dvector& dv); // -1 for new dobject
             bool poseSolveDobject(dobject& dobj, geometry_msgs::Pose& pose);
-            vector<dobject> dobject_list;
+            std::vector<dobject> dobject_list;
             ros::Subscriber darknet_sub;
             ros::Publisher dvector_pub;
             // transform listener
-    }
+    };
 }
 
 #endif
