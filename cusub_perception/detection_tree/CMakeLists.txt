@@ -10,9 +10,11 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   nodelet
   tf
+  sensor_msgs
 )
 catkin_package(
   LIBRARIES detection_tree_node
+  CATKIN_DEPENDS nodelet roscpp
 )
 
 include_directories(
@@ -21,5 +23,5 @@ include_directories(
 )
 
 add_library( detection_tree_node 
-src/detection_tree_node )
+src/detection_tree_node.cpp )
 target_link_libraries(detection_tree_node ${catkin_LIBRARIES})
