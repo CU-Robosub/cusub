@@ -11,10 +11,15 @@ void DetectionTree::onInit()
     // dvector_pub = nh.advertise<localizer::Detection>("cusub_perception/mapper/task_poses",1);    
     
     // Subscribe to the camera info topics
-    all_info_topics_received = false;
-    for(int i = 0; i < camera_info_topics.size(); i++)
-        camera_info_subs.push_back(nh.subscribe(camera_info_topics[i], 1, &DetectionTree::cameraInfoCallback, this));
+    std::string cam_info = "/camera_info";
+    int chars_to_trim = cam_info.length();
 
+    // Temporarily subscribe to all camera info topics
+    for( auto topic_frame : camera_topic_frame_map)
+    {
+        std::cout << "Added Camera: " << topic_frame.second << std::endl;
+        camera_info_subs.insert({topic_frame.second, nh.subscribe(topic_frame.first, 1, &DetectionTree::cameraInfoCallback, this)});
+    }
     NODELET_INFO("Loaded Detection Tree");
 }   
 
@@ -50,11 +55,22 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs
     ;
 }
 
-void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr ci)
+void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfo ci)
 {
-    std::string frame_id = ci->header.frame_id;
-    NODELET_INFO("Received : %s", frame_id.c_str());
-    // check in here if we've received all of the cameras & unsubscribe
+    std::string frame_id = ci.header.frame_id;
+
+    // Loop through and find corresponding camera info topic
+    // record and unsubscribe from the topic
+    for (auto itr_pair : camera_info_subs)
+    {
+        if( itr_pair.first == frame_id ) // not found
+        {
+            NODELET_INFO("Received : %s", frame_id.c_str());
+            camera_info.insert({frame_id, ci});
+            camera_info_subs[itr_pair.first].shutdown(); // unsubscribe
+            break;
+        }
+    }
 }
 
 dvector* DetectionTree::createDvector(darknet_ros_msgs::BoundingBox& bb, std_msgs::Header& image_header)

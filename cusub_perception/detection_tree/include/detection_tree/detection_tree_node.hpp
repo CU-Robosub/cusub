@@ -6,7 +6,7 @@
 #include <nodelet/nodelet.h>
 #include <ros/ros.h>
 #include <vector>
-// #include <map>
+#include <map>
 #include <string>
 #include <darknet_ros_msgs/BoundingBoxes.h>
 #include <darknet_ros_msgs/BoundingBox.h>
@@ -27,7 +27,7 @@ namespace det_tree_ns
         private:
             std::string sub_name;
             void darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs);
-            void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr ci);
+            void cameraInfoCallback(const sensor_msgs::CameraInfo ci);
             dvector* createDvector(darknet_ros_msgs::BoundingBox& bb, std_msgs::Header& image_header);
             bool boxToBearing(std_msgs::Header& camera_header, darknet_ros_msgs::BoundingBox& box, geometry_msgs::Quaternion& bearing);
             int determineDobject(dvector* dv_ptr, dobject* dobj_ptr); // -1 for new dobject
@@ -39,17 +39,15 @@ namespace det_tree_ns
             ros::Publisher dvector_pub;
             tf::TransformListener listener;
 
-            bool all_info_topics_received;
-            std::vector<ros::Subscriber> camera_info_subs;
-            // some map between frame and coefficients
-            std::vector<std::string> camera_info_topics = 
-            {
-               "/leviathan/cusub_common/occam/image0/camera_info",
-               "/leviathan/cusub_common/occam/image1/camera_info",
-               "/leviathan/cusub_common/occam/image2/camera_info",
-               "/leviathan/cusub_common/occam/image3/camera_info",
-               "/leviathan/cusub_common/occam/image4/camera_info",
-               "/leviathan/cusub_common/downcam/camera_info"
+            std::map<std::string, ros::Subscriber> camera_info_subs;
+            std::map<std::string, sensor_msgs::CameraInfo> camera_info;
+            std::map<std::string, std::string> camera_topic_frame_map = {
+               {"/leviathan/cusub_common/occam/image0/camera_info", "leviathan/description/occam0_frame"},
+               {"/leviathan/cusub_common/occam/image1/camera_info", "leviathan/description/occam1_frame"},
+               {"/leviathan/cusub_common/occam/image2/camera_info", "leviathan/description/occam2_frame"},
+               {"/leviathan/cusub_common/occam/image3/camera_info", "leviathan/description/occam3_frame"},
+               {"/leviathan/cusub_common/occam/image4/camera_info", "leviathan/description/occam4_frame"},
+               {"/leviathan/cusub_common/downcam/camera_info", "leviathan/description/downcam_frame"}
             }; // TODO move to launch file for configurability
     };
 }
