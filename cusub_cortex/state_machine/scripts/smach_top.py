@@ -14,9 +14,9 @@ from waypoint_navigator.srv import ToggleControl
 from waypoint_navigator.msg import waypointAction, waypointGoal
 import actionlib
 from tasks.start_gate import StartGate
-from tasks.bangbang_dice_task import BangBangDiceTask
-from tasks.bangbang_roulette_task import BangBangRouletteTask
-from tasks.naive_visual_servo_objective import NaiveVisualServoTask
+# from tasks.bangbang_dice_task import BangBangDiceTask
+# from tasks.bangbang_roulette_task import BangBangRouletteTask
+# from tasks.naive_visual_servo_objective import NaiveVisualServoTask
 # from tasks.dropper_task import DropperTask
 # from tasks.bangbang_roulette_task import BangBangRouletteTask
 from tasks.jiangshi import Jiangshi
@@ -27,7 +27,8 @@ from tasks.dropper import Dropper
 from tasks.startup_task import Startup
 from tasks.triangle import Triangle
 from tasks.octagon import Octagon
-from tasks.debug_servo import Debug
+# from tasks.debug_servo import Debug
+from tasks.prequal_2020 import Prequal_2020
 
 def createTransitionsForManager(task_list, final_outcome):
     transition_dict = {}
@@ -64,6 +65,8 @@ def loadStateMachines(task_list):
             task_sm = Triangle()
         elif task == "octagon":
             task_sm = Octagon()
+        elif task == "prequal_2020":
+            task_sm = Prequal_2020()
         elif task == "debug":
             task_sm = Debug()
         else:

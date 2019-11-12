@@ -21,6 +21,17 @@ tasks:
   depth: -1.5
   dive_time: 10
 
+ prequal_2020:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'uh_oh'
+  pose_list:
+    pose1: [1,1,3]
+    pose2: [1,1,3]
+    pose3: [1,1,3]
+    pose4: [1,1,3]
+
  start_gate:
   manager_info:
     timeout_secs: 0
@@ -112,9 +123,10 @@ tasks:
   drop_depth: -2.5
 
 mission_tasks: # Tasks To Do In Order
-  - startup
-  - start_gate # maybe do visual servoing on the gate?
-  - jiangshi
-  - triangle
-  - dropper
-  - octagon
+  - prequal_2020
+  # - startup
+  # - start_gate # maybe do visual servoing on the gate?
+  # - jiangshi
+  # - triangle
+  # - dropper
+  # - octagon
