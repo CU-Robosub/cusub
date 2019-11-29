@@ -13,7 +13,7 @@ typedef struct{
     std::string class_id;
     int dobject_num;
     float probability;
-} dvector;
+} dvector; // TODO turn this into a rosmsg?
 
 typedef struct{
     int dobject_num;

@@ -15,6 +15,9 @@
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
 #include <sensor_msgs/CameraInfo.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+#include <opencv2/calib3d.hpp>
 
 // Camel case classes + functions, underscore variables + namespaces
 
@@ -26,7 +29,7 @@ namespace det_tree_ns
             virtual void onInit();
         private:
             std::string sub_name;
-            void darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs);
+            void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
             void cameraInfoCallback(const sensor_msgs::CameraInfo ci);
             dvector* createDvector(darknet_ros_msgs::BoundingBox& bb, std_msgs::Header& image_header);
             bool boxToBearing(std_msgs::Header& camera_header, darknet_ros_msgs::BoundingBox& box, geometry_msgs::Quaternion& bearing);

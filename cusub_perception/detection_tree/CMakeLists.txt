@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(detection_tree)
 
 add_compile_options(-std=c++11)
+set(OpenCV_DIR /usr/share/OpenCV)
 
 find_package(catkin REQUIRED COMPONENTS
   darknet_ros_msgs
@@ -11,6 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   nodelet
   tf
   sensor_msgs
+  OpenCV
+  cv_bridge
 )
 catkin_package(
   LIBRARIES detection_tree_node

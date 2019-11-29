@@ -6,14 +6,10 @@ void DetectionTree::onInit()
 {
     sub_name = "leviathan"; // TODO Pull from config
     ros::NodeHandle& nh = getMTNodeHandle();
-    
+
     darknet_sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &DetectionTree::darknetCallback, this);
     // dvector_pub = nh.advertise<localizer::Detection>("cusub_perception/mapper/task_poses",1);    
     
-    // Subscribe to the camera info topics
-    std::string cam_info = "/camera_info";
-    int chars_to_trim = cam_info.length();
-
     // Temporarily subscribe to all camera info topics
     for( auto topic_frame : camera_topic_frame_map)
     {
@@ -25,11 +21,38 @@ void DetectionTree::onInit()
 
 /* 
 @brief Turns hits into dvectors and adds them to corresponding dobject or creates a new one
+        Publishes dvector to all listeners
 @param pointer to darknet bounding box msg
 @return None
  */
-void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs)
+void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs)
 {
+    std::string frame = bbs->image_header.frame_id;
+    if( camera_info.find(frame) == camera_info.end() )
+    {
+        NODELET_INFO("Unreceived camera info: %s",  frame.c_str());
+        return;
+    }
+
+    sensor_msgs::CameraInfo ci = camera_info[bbs->image_header.frame_id];
+    cv::Mat K(3, 3, CV_64FC1, (void *) ci.K.data());
+    cv::Mat Kinv = K.inv();
+    cv::Mat D(ci.D.size(), 1, CV_64FC1, (void *) ci.D.data());
+
+    for ( auto box : bbs->bounding_boxes)
+    {
+        int center_x = box.xmax - box.xmin;
+        int center_y = box.ymax - box.ymin;
+        cv::Point2f pt(center_x, center_y);
+        std::vector<cv::Point2f> pts = {pt};
+        std::vector<cv::Point2f> upts;
+        cv::undistortPoints(pts, upts, K, D);
+        std::vector<cv::Vec3f> homoPts;
+        cv::convertPointsToHomogeneous(upts, homoPts);
+        cv::Mat homoVec(3, 1, CV_64FC1, (void *) homoPts.data());
+        cv::Mat bearing_vec = Kinv * homoVec;
+        std::cout << "M " << std::endl << bearing_vec << std::endl;
+    }
     // std::string sub_frame = "/" + sub_name + "/description/odom";
     // try{
     //     if( listener.waitForTransform(bbs->image_header.frame_id,
@@ -63,10 +86,12 @@ void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfo ci)
     // record and unsubscribe from the topic
     for (auto itr_pair : camera_info_subs)
     {
-        if( itr_pair.first == frame_id ) // not found
+        if( itr_pair.first == frame_id )
         {
             NODELET_INFO("Received : %s", frame_id.c_str());
             camera_info.insert({frame_id, ci});
+            if ( camera_info_subs.size() == camera_info.size() )
+                NODELET_INFO("All camera's info acquired");
             camera_info_subs[itr_pair.first].shutdown(); // unsubscribe
             break;
         }
