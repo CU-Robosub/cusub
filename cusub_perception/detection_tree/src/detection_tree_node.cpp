@@ -41,16 +41,26 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
 
     for ( auto box : bbs->bounding_boxes)
     {
-        int center_x = box.xmax - box.xmin;
-        int center_y = box.ymax - box.ymin;
+        int center_x = (box.xmax + box.xmin) / 2;
+        int center_y = (box.ymax + box.ymin) / 2;
         cv::Point2f pt(center_x, center_y);
+        // std::cout << "Points: " << pt << std::endl;
         std::vector<cv::Point2f> pts = {pt};
+        std::cout << "pts: " << pts[0] << std::endl;
         std::vector<cv::Point2f> upts;
-        cv::undistortPoints(pts, upts, K, D);
-        std::vector<cv::Vec3f> homoPts;
-        cv::convertPointsToHomogeneous(upts, homoPts);
-        cv::Mat homoVec(3, 1, CV_64FC1, (void *) homoPts.data());
-        cv::Mat bearing_vec = Kinv * homoVec;
+        cv::undistortPoints(pts, upts, K, D, cv::noArray(),  K);
+        std::cout << "upts: " << upts[0] << std::endl;
+        std::vector<double> ray_points{ upts[0].x, upts[0].y, 1 };
+        cv::Mat ray_point{3,1,cv::DataType<double>::type, ray_points.data()};
+        std::cout << "ray pt: " << ray_point << std::endl;
+        // std::vector<cv::Vec3f> homoPts;
+        // cv::convertPointsToHomogeneous(upts, homoPts);
+        // std::cout << "homoPts: " << homoPts[0] << std::endl;
+        // cv::Mat homoVec(3, 1, CV_32FC1, (void *) homoPts[0].data());
+        // cv::Mat homoVec(3, 1, CV_32FC1, homoPts[0]);
+        std::cout << "K: " << K << std::endl;
+        std::cout << "Kinv: " << K.inv() << std::endl;
+        cv::Mat bearing_vec = Kinv * ray_point;
         std::cout << "Class: " << box.Class << std::endl;
         std::cout << "M " << std::endl << bearing_vec << std::endl;
     }
