@@ -1,6 +1,8 @@
 #include "detection_tree/detection_tree_node.hpp"
 
 using namespace det_tree_ns;
+using namespace std;
+using namespace cv;
 
 void DetectionTree::onInit()
 {
@@ -11,7 +13,7 @@ void DetectionTree::onInit()
     // Temporarily subscribe to all camera info topics
     for( auto topic_frame : camera_topic_frame_map)
     {
-        std::cout << "Added Camera: " << topic_frame.second << std::endl;
+        cout << "Added Camera: " << topic_frame.second << endl;
         camera_info_subs.insert({topic_frame.second, nh.subscribe(topic_frame.first, 1, &DetectionTree::cameraInfoCallback, this)});
     }    
     darknet_sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &DetectionTree::darknetCallback, this);
@@ -26,7 +28,7 @@ void DetectionTree::onInit()
  */
 void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs)
 {
-    std::string frame = bbs->image_header.frame_id;
+    string frame = bbs->image_header.frame_id;
     if( camera_info.find(frame) == camera_info.end() )
     {
         // NODELET_INFO("Unreceived camera info: %s",  frame.c_str());
@@ -35,34 +37,21 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
 
     // Get matrices needed to calculate bearing to object
     sensor_msgs::CameraInfo ci = camera_info[bbs->image_header.frame_id];
-    cv::Mat K(3, 3, CV_64FC1, (void *) ci.K.data());
-    cv::Mat Kinv = K.inv();
-    cv::Mat D(ci.D.size(), 1, CV_64FC1, (void *) ci.D.data());
+    Mat K(3, 3, CV_64FC1, (void *) ci.K.data());
+    Mat Kinv = K.inv();
+    Mat D(ci.D.size(), 1, CV_64FC1, (void *) ci.D.data());
 
     for ( auto box : bbs->bounding_boxes)
     {
         int center_x = (box.xmax + box.xmin) / 2;
         int center_y = (box.ymax + box.ymin) / 2;
-        cv::Point2f pt(center_x, center_y);
-        // std::cout << "Points: " << pt << std::endl;
-        std::vector<cv::Point2f> pts = {pt};
-        std::cout << "pts: " << pts[0] << std::endl;
-        std::vector<cv::Point2f> upts;
-        cv::undistortPoints(pts, upts, K, D, cv::noArray(),  K);
-        std::cout << "upts: " << upts[0] << std::endl;
-        std::vector<double> ray_points{ upts[0].x, upts[0].y, 1 };
-        cv::Mat ray_point{3,1,cv::DataType<double>::type, ray_points.data()};
-        std::cout << "ray pt: " << ray_point << std::endl;
-        // std::vector<cv::Vec3f> homoPts;
-        // cv::convertPointsToHomogeneous(upts, homoPts);
-        // std::cout << "homoPts: " << homoPts[0] << std::endl;
-        // cv::Mat homoVec(3, 1, CV_32FC1, (void *) homoPts[0].data());
-        // cv::Mat homoVec(3, 1, CV_32FC1, homoPts[0]);
-        std::cout << "K: " << K << std::endl;
-        std::cout << "Kinv: " << K.inv() << std::endl;
-        cv::Mat bearing_vec = Kinv * ray_point;
-        std::cout << "Class: " << box.Class << std::endl;
-        std::cout << "M " << std::endl << bearing_vec << std::endl;
+        Point2f pt(center_x, center_y);
+        vector<cv::Point2f> pts = {pt};
+        vector<cv::Point2f> upts;
+        undistortPoints(pts, upts, K, D, cv::noArray(),  K);
+        vector<double> ray_points{ upts[0].x, upts[0].y, 1 };
+        Mat ray_point{3,1,cv::DataType<double>::type, ray_points.data()};
+        Mat bearing_vec = Kinv * ray_point;
     }
     // std::string sub_frame = "/" + sub_name + "/description/odom";
     // try{
