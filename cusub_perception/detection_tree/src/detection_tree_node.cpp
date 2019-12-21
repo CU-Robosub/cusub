@@ -9,6 +9,7 @@ void DetectionTree::onInit()
     sub_name = "leviathan"; // TODO Pull from config
     ros::NodeHandle& nh = getMTNodeHandle();
     
+    debug_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("cusub_perception/detection_tree/poses",10);
     // dvector_pub = nh.advertise<localizer::Detection>("cusub_perception/mapper/task_poses",1);        
     // Temporarily subscribe to all camera info topics
     for( auto topic_frame : camera_topic_frame_map)
@@ -41,6 +42,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
     Mat Kinv = K.inv();
     Mat D(ci.D.size(), 1, CV_64FC1, (void *) ci.D.data());
 
+    Mat bearing_vec;
     for ( auto box : bbs->bounding_boxes)
     {
         int center_x = (box.xmax + box.xmin) / 2;
@@ -51,23 +53,55 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         undistortPoints(pts, upts, K, D, cv::noArray(),  K);
         vector<double> ray_points{ upts[0].x, upts[0].y, 1 };
         Mat ray_point{3,1,cv::DataType<double>::type, ray_points.data()};
-        Mat bearing_vec = Kinv * ray_point;
+        bearing_vec = Kinv * ray_point;
     }
-    // std::string sub_frame = "/" + sub_name + "/description/odom";
-    // try{
-    //     if( listener.waitForTransform(bbs->image_header.frame_id,
-    //         sub_frame, bbs->image_header.stamp, ros::Duration(1.0)) )
-    //     {
-    //         tf::Stamped<tf::Pose> sub_pose;
-    //         tf::Stamped<tf::Pose> camera_pose();
-    //         tf::Pose odom_pose;
-    //         listener.transformPose(sub_frame, )
-    //     } else {
-    //         NODELET_WARN("Detection Tree missed transform");
-    //     }
-    // } catch (tf::TransformException ex){
-    //     NODELET_WARN("Detection Tree Error in transform");
-    // }
+
+    // Transform bearing vector to odom frame
+    std::string sub_frame = "/" + sub_name + "/description/odom";
+    geometry_msgs::PoseStamped odom_cam_pose;
+    size_t length = bbs->image_header.frame_id.length();
+    string cam_frame = bbs->image_header.frame_id.substr(0, length-8); // trim _optical
+    try{
+        if( listener.waitForTransform(cam_frame, sub_frame, bbs->image_header.stamp, ros::Duration(1.0)) )
+        {
+            geometry_msgs::PoseStamped cam_pose;
+            cam_pose.header = bbs->image_header;
+            cam_pose.header.frame_id = cam_frame; // don't want "_optical" in frame id
+            // Calculate the orientation in quaternions
+            tf2::Quaternion cam_quat_tf;
+            cout << "bearing vec: " << bearing_vec << endl;
+            cv::Size s = bearing_vec.size();
+            cout << "bearing vec dims: " << s << endl;
+            float yaw = -bearing_vec.at<double>(0,0); // flip yaw to match odom coords
+            cout << "yaw: " << yaw << endl;
+            float pitch = -bearing_vec.at<double>(0,1); // flip pitch
+            cout << "pitch: " << pitch << endl;
+            float roll = 0;
+            cam_quat_tf.setRPY( roll, pitch, yaw );
+            cam_quat_tf.normalize();
+
+            // Convert tf::quaternion to geometry_msgs::Quaternion
+            cam_pose.pose.orientation = tf2::toMsg(cam_quat_tf);
+
+            // cout << "transforming pose..." << endl;
+            listener.transformPose(sub_frame, cam_pose, odom_cam_pose);
+            cout << "odom pose: " << odom_cam_pose << endl;
+            
+            tf2::Quaternion odom_quat;
+            tf2::fromMsg(odom_cam_pose.pose.orientation, odom_quat);
+            tf2::Matrix3x3 m(odom_quat);
+            double roll2, pitch2, yaw2;
+            m.getRPY(roll2, pitch2, yaw2);
+            cout << "odom yaw: " << yaw2 << endl;
+            cout << "odom pitch: " << pitch2 << endl;
+            cout << "--------------------" << endl;
+        } else {
+            NODELET_WARN("Detection Tree missed transform. Throwing out detection.");
+        }
+    } catch (tf::TransformException ex){
+        NODELET_WARN("Detection Tree Error in transform");
+    }
+    debug_pose_pub.publish(odom_cam_pose);
 
     // do tf lookup based on camera's time stamp
     // create new dvector (use new keyword)

@@ -12,8 +12,11 @@
 #include <darknet_ros_msgs/BoundingBox.h>
 #include <std_msgs/Header.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Quaternion.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
@@ -40,8 +43,8 @@ namespace det_tree_ns
             std::vector<dobject> dobject_list;
             ros::Subscriber darknet_sub;
             ros::Publisher dvector_pub;
+            ros::Publisher debug_pose_pub;
             tf::TransformListener listener;
-
             std::map<std::string, ros::Subscriber> camera_info_subs;
             std::map<std::string, sensor_msgs::CameraInfo> camera_info;
             std::map<std::string, std::string> camera_topic_frame_map = {
