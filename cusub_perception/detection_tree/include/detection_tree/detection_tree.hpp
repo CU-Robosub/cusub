@@ -6,20 +6,13 @@
 #include <std_msgs/Header.h>
 #include <string>
 #include <vector>
-
-typedef struct{
-    geometry_msgs::PoseStamped det_pose;
-    std_msgs::Header camera_header;
-    std::string class_id;
-    int dobject_num;
-    float probability;
-} dvector; // TODO turn this into a rosmsg?
+#include <detection_tree/Dvector.h>
 
 typedef struct{
     int dobject_num;
     std::string class_id;
     geometry_msgs::Pose pose;
-    std::vector<dvector> dvector_list;
-} dobject;
+    std::vector<detection_tree::Dvector> dvector_list;
+} Dobject;
 
 #endif

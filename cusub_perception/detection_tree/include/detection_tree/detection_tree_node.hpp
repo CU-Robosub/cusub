@@ -21,6 +21,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/calib3d.hpp>
+#include <detection_tree/Dvector.h>
 
 // Camel case classes + functions, underscore variables + namespaces
 
@@ -34,13 +35,13 @@ namespace det_tree_ns
             std::string sub_name;
             void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
             void cameraInfoCallback(const sensor_msgs::CameraInfo ci);
-            dvector* createDvector(darknet_ros_msgs::BoundingBox& bb, std_msgs::Header& image_header);
+            detection_tree::Dvector* createDvector(darknet_ros_msgs::BoundingBox& bb, std_msgs::Header& image_header);
             bool boxToBearing(std_msgs::Header& camera_header, darknet_ros_msgs::BoundingBox& box, geometry_msgs::Quaternion& bearing);
-            int determineDobject(dvector* dv_ptr, dobject* dobj_ptr); // -1 for new dobject
-            void createDobject(dvector* dv_ptr);
-            void addDvectorToDobject(dvector* dv_ptr, dobject* dobj_ptr);
-            bool poseSolveDobject(dobject* dobj, geometry_msgs::Pose& pose);
-            std::vector<dobject> dobject_list;
+            int determineDobject(detection_tree::Dvector* dv_ptr, Dobject* dobj_ptr); // -1 for new dobject
+            void createDobject(detection_tree::Dvector* dv_ptr);
+            void addDvectorToDobject(detection_tree::Dvector* dv_ptr, Dobject* dobj_ptr);
+            bool poseSolveDobject(Dobject* dobj, geometry_msgs::Pose& pose);
+            std::vector<Dobject> dobject_list;
             ros::Subscriber darknet_sub;
             ros::Publisher dvector_pub;
             ros::Publisher debug_pose_pub;

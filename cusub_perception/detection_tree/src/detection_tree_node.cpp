@@ -137,10 +137,10 @@ void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfo ci)
     NODELET_WARN("Unrecognized camera frame: %s", frame_id.c_str());
 }
 
-dvector* DetectionTree::createDvector(darknet_ros_msgs::BoundingBox& bb, std_msgs::Header& image_header)
-{
-    ;
-}
+// dvector* DetectionTree::createDvector(darknet_ros_msgs::BoundingBox& bb, std_msgs::Header& image_header)
+// {
+    // ;
+// }
 
 
 PLUGINLIB_EXPORT_CLASS(det_tree_ns::DetectionTree, nodelet::Nodelet);
