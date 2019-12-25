@@ -35,13 +35,13 @@ namespace det_tree_ns
             std::string sub_name;
             void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
             void cameraInfoCallback(const sensor_msgs::CameraInfo ci);
-            detection_tree::Dvector* createDvector(darknet_ros_msgs::BoundingBox& bb, std_msgs::Header& image_header);
+            int transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_pose, cv::Mat& bearing_vec, std_msgs::Header& image_header);
             bool boxToBearing(std_msgs::Header& camera_header, darknet_ros_msgs::BoundingBox& box, geometry_msgs::Quaternion& bearing);
-            int determineDobject(detection_tree::Dvector* dv_ptr, Dobject* dobj_ptr); // -1 for new dobject
-            void createDobject(detection_tree::Dvector* dv_ptr);
+            int determineDobject(detection_tree::Dvector* dv);
+            int createDobject(detection_tree::Dvector* dv);
             void addDvectorToDobject(detection_tree::Dvector* dv_ptr, Dobject* dobj_ptr);
             bool poseSolveDobject(Dobject* dobj, geometry_msgs::Pose& pose);
-            std::vector<Dobject> dobject_list;
+            std::vector<Dobject*> dobject_list;
             ros::Subscriber darknet_sub;
             ros::Publisher dvector_pub;
             ros::Publisher debug_pose_pub;

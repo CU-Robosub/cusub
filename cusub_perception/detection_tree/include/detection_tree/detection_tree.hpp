@@ -9,10 +9,10 @@
 #include <detection_tree/Dvector.h>
 
 typedef struct{
-    int dobject_num;
+    int num; // dobject number
     std::string class_id;
     geometry_msgs::Pose pose;
-    std::vector<detection_tree::Dvector> dvector_list;
+    std::vector<detection_tree::Dvector*> dvector_list;
 } Dobject;
 
 #endif
