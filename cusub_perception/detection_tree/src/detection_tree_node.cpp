@@ -9,7 +9,8 @@ void DetectionTree::onInit()
     sub_name = "leviathan"; // TODO Pull from config
     ros::NodeHandle& nh = getMTNodeHandle();
     
-    debug_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("cusub_perception/detection_tree/poses",10);
+    debug_dv_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("cusub_perception/detection_tree/poses",10);
+    debug_dobj_poses_pub = nh.advertise<geometry_msgs::PoseArray>("cusub_perception/detection_tree/dobjects",10);
     dvector_pub = nh.advertise<detection_tree::Dvector>("cusub_perception/detection_tree/dvectors",10);
     // Temporarily subscribe to all camera info topics
     for( auto topic_frame : camera_topic_frame_map)
@@ -18,6 +19,7 @@ void DetectionTree::onInit()
         camera_info_subs.insert({topic_frame.second, nh.subscribe(topic_frame.first, 1, &DetectionTree::cameraInfoCallback, this)});
     }    
     darknet_sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &DetectionTree::darknetCallback, this);
+    dobj_pub_timer = nh.createTimer(ros::Duration(0.5), &DetectionTree::dobjPubCallback, this); // TODO pull config
     NODELET_INFO("Loaded Detection Tree");
 }
 
@@ -108,7 +110,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         std_msgs::Header image_header = bbs->image_header;
         int ret = transformBearingToOdom(odom_cam_pose, bearing_vec, image_header);
         if (ret) continue; // failed transform
-        debug_pose_pub.publish(odom_cam_pose);
+        debug_dv_pose_pub.publish(odom_cam_pose);
 
         // Extract roll, pitch, yaw in odom frame
         double roll_odom, pitch_odom, yaw_odom;
@@ -192,6 +194,31 @@ void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfo ci)
         }
     }
     NODELET_WARN("Unrecognized camera frame: %s", frame_id.c_str());
+}
+
+void DetectionTree::dobjPubCallback(const ros::TimerEvent&)
+{
+    geometry_msgs::PoseArray pose_arr;
+    pose_arr.header.frame_id = "/" + sub_name + "/description/odom";
+
+    for( auto dobj : dobject_list )
+    {
+        geometry_msgs::Pose pose;
+        pose.position = dobj->dvector_list.back()->sub_pt;
+        tf2::Quaternion quat_tf;
+        double yaw = dobj->dvector_list.back()->azimuth;
+        double pitch = dobj->dvector_list.back()->elevation;
+        quat_tf.setRPY(0.0, pitch, yaw);
+        quat_tf.normalize();
+        pose.orientation = tf2::toMsg(quat_tf);
+        pose_arr.poses.push_back(pose);
+    }
+    pose_arr.header.stamp = ros::Time::now();
+    if( !pose_arr.poses.empty() ) // publish if not empty
+    {
+        debug_dobj_poses_pub.publish(pose_arr);
+    }
+    // NODELET_INFO("Entering Callback!");
 }
 
 PLUGINLIB_EXPORT_CLASS(det_tree_ns::DetectionTree, nodelet::Nodelet);
