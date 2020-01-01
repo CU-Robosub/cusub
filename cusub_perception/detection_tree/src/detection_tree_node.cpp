@@ -94,6 +94,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
     for ( auto box : bbs->bounding_boxes)
     {
         NODELET_INFO("Box received");
+
         // Get bearing vector in local camera frame
         int center_x = (box.xmax + box.xmin) / 2;
         int center_y = (box.ymax + box.ymin) / 2;
@@ -128,6 +129,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         dv->camera_header = image_header;
         dv->class_id = box.Class;
         dv->probability = box.probability;
+        dv->magnitude = (box.xmax - box.xmin) * (box.ymax - box.ymin);
         NODELET_INFO("Determining Dobject");
         int dobj_num = determineDobject(dv);
 
