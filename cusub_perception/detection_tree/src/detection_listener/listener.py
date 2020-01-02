@@ -1,0 +1,148 @@
+#!/usr/bin/env python
+
+import rospy
+from detection_tree.msg import Dvector
+import threading
+import numpy as np
+
+class Dobject:
+    
+    def __init__(self, num, class_id):
+        self.num = num
+        self.class_id = class_id
+        self.dvectors = []
+        self.pose = None
+        self.lock = threading.Lock()
+
+    def add_dvector(self, dv):
+        self.lock.acquire(True)
+        self.dvectors.append(dv)
+        self.lock.release()
+    
+    def update_pose(self, pose):
+        self.pose = pose
+
+    def get_num_dvectors(self):
+        return len(self.dvectors)
+
+    def get_pose(self):
+        return self.pose
+
+    def get_dvectors_since_time(self, past_time):
+        self.lock.acquire(True)
+
+        # Check if we have any available dvs
+        dv_last_time = self.dvectors[-1].camera_header.stamp
+        if past_time > dv_time:
+            self.lock.release()
+            return None
+        else: # we have dvs available
+            for i in reversed(range(len(self.dvectors))):
+                dv_time = self.dvectors[i].camera_header.stamp
+                if past_time > dv_time:
+                    self.lock.release()
+                    return self.dvectors[i+1:] # won't be out of range since we checked the first
+            # All dv's are in the timespan
+            self.lock.release()
+            return self.dvectors
+
+    def get_most_recent_dvectors(self, num):
+        if num > len(self.dvectors):
+            return None
+        else:
+            first_dv = len(self.dvectors) - num
+            return self.dvectors[first_dv:]
+
+"""
+Subscribes to dvector topic
+"""
+class Listener:
+    
+    def __init__(self):
+        self.dobjects = []
+        self.new_dv_flags = []
+        rospy.Subscriber("cusub_perception/detection_tree/dvectors", Dvector, self.dvector_callback)
+
+        # Pose Subscriber
+        # rospy.Subscriber("cusub_perception/detection_tree/dvectors", Dvector, self.dvector_callback)
+
+    # def pose_callback(self, msg):
+    #     num = msg.dobject_num
+        
+    def dvector_callback(self, msg): # if we got dobj.num = 1 and len == 1
+        num = msg.dobject_num
+        if num < len(self.dobjects): # We have this dobject
+            self.dobjects[num].add_dvector(msg)
+            self.new_dv_flags[num] = True
+        elif num == len(self.dobjects): # New dobject
+            self.create_new_dobj(num, msg.class_id, msg)
+        else: # Out of order creation of dobject --> we missed a few dvectors
+            rospy.logwarn("We missed a dvector...trigger synchrnoization")
+            return
+
+    def check_new_dv(self, dobj_num):
+        if dobj_num >= len(self.new_dv_flags):
+            return None
+        else:
+            return self.new_dv_flags[dobj_num]
+
+    def clear_new_dv_flag(self, dobj_num):
+        self.new_dv_flags[dobj_num] = False
+
+    def create_new_dobj(self, dobj_num, class_id, dv):
+        self.dobjects.append(Dobject(dobj_num, class_id))
+        self.dobjects[-1].add_dvector(dv)
+        self.new_dv_flags.append(True)
+        
+    # TODO maybe also an option for bearings within a certain distance of current position?
+    def get_avg_bearing(self, dobj_num, num_dv=None, secs=None):
+        """
+        Gets the average bearing over a number of dvectors or time
+
+        Assumes bearings are from the same point (else we'd pose solve)
+
+        Params
+        ------
+        dobj_num : int
+            Which dobject we're talking about
+        num_dv : int (optional)
+            Number of dvectors to average over
+        secs : float (optional)
+            Number of seconds to average over
+        
+        Returns
+        -------
+        [ azimuth, elevation, magnitude ] : float, float, int
+            Average bearing
+        """
+        if num_dv != None and secs != None:
+            rospy.logerr("Incorrect Input 1")
+            return None
+        elif num_dv == None and secs == None:
+            rospy.logerr("Incorrect Input 2")
+            return None
+        elif dobj_num >= len(self.dobjects):
+            rospy.logerr("Incorrect Input 3. Dobject unreceived")
+            return None
+        elif num_dv != None:
+            dvs = self.dobjects[dobj_num].get_most_recent_dvectors(num_dv)
+            if dvs == None:
+                return None
+            else:
+                return self._get_averages(dvs)
+        else:
+            t_past = rospy.get_rostime() - rospy.Duration.from_sec(secs)
+            dvs = self.dobjects[dobj_num].get_dvectors_since_time(t_past)
+            if dvs == None:
+                return None
+            else:
+                return self._get_averages(dvs)
+
+    def _get_averages(self, dvs):
+        az = np.mean([i.azimuth for i in dvs])
+        el = np.mean([i.elevation for i in dvs])
+        mag = np.mean([i.magnitude for i in dvs])
+        return [az, el, mag]
+
+    def synchronize_dobjects(self): # SHOULDN'T BE NECESSARY IF WE INITIALIZE AT STARTUP
+        pass
