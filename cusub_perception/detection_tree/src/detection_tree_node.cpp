@@ -15,12 +15,12 @@ void DetectionTree::onInit()
     // Temporarily subscribe to all camera info topics
     for( auto topic_frame : camera_topic_frame_map)
     {
-        cout << "Added Camera: " << topic_frame.second << endl;
+        det_print(string("Added Camera: ") + topic_frame.second);
         camera_info_subs.insert({topic_frame.second, nh.subscribe(topic_frame.first, 1, &DetectionTree::cameraInfoCallback, this)});
     }    
     darknet_sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &DetectionTree::darknetCallback, this);
     dobj_pub_timer = nh.createTimer(ros::Duration(0.5), &DetectionTree::dobjPubCallback, this); // TODO pull config
-    NODELET_INFO("Loaded Detection Tree");
+    det_print("Loaded Detection Tree");
 }
 
 /*
@@ -57,11 +57,11 @@ int DetectionTree::transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_p
             listener.transformPose(sub_frame, cam_pose, odom_cam_pose);
 
         } else {
-            NODELET_WARN("Detection Tree missed transform. Throwing out detection.");
+            det_print_warn("Detection Tree missed transform. Throwing out detection.");
             return -1;
         }
     } catch (tf::TransformException ex){
-        NODELET_WARN("Detection Tree Error in transform");
+        det_print_warn("Detection Tree Error in transform");
         return -1;
     }
     return 0;
@@ -79,7 +79,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
     string frame_optical = bbs->image_header.frame_id;
     if( camera_info.find(frame_optical) == camera_info.end() )
     {
-        // NODELET_INFO("Unreceived camera info: %s",  frame.c_str());
+        // det_print("Unreceived camera info: %s",  frame.c_str());
         return;
     }
 
@@ -93,7 +93,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
     Mat bearing_vec;
     for ( auto box : bbs->bounding_boxes)
     {
-        NODELET_INFO("Box received");
+        det_print("Box received");
 
         // Get bearing vector in local camera frame
         int center_x = (box.xmax + box.xmin) / 2;
@@ -121,7 +121,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         m.getRPY(roll_odom, pitch_odom, yaw_odom);
 
         // Create Dvector
-        NODELET_INFO("Creating Dvector");
+        det_print("Creating Dvector");
         detection_tree::Dvector* dv = new detection_tree::Dvector; // we'll be storing it globally
         dv->sub_pt = odom_cam_pose.pose.position;
         dv->azimuth = yaw_odom;
@@ -130,7 +130,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         dv->class_id = box.Class;
         dv->probability = box.probability;
         dv->magnitude = (box.xmax - box.xmin) * (box.ymax - box.ymin);
-        NODELET_INFO("Determining Dobject");
+        det_print("Determining Dobject");
         int dobj_num = determineDobject(dv);
 
         if( dobj_num == -1) // Create new dobject
@@ -141,7 +141,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
             // Check for the pose solve
         }            
         dv->dobject_num = dobj_num;
-        NODELET_INFO("Publishing Dvector");
+        det_print("Publishing Dvector");
         dvector_pub.publish(*dv);
     }
 }
@@ -183,19 +183,19 @@ void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfo ci)
     {
         if( itr_pair.first == frame_id )
         {
-            NODELET_INFO("Received : %s", frame_id.c_str());
+            det_print(string("Received : ") + frame_id.c_str());
             // TODO remove on actual sub
 
             camera_info.insert({frame_id + "_optical", ci}); // adding _optical is 100% a hack
             camera_info_subs[itr_pair.first].shutdown(); // unsubscribe
             if ( camera_info_subs.size() == camera_info.size() )
             {
-                NODELET_INFO("All camera's info acquired");
+                det_print("All camera's info acquired");
             }
             return;
         }
     }
-    NODELET_WARN("Unrecognized camera frame: %s", frame_id.c_str());
+    det_print_warn("Unrecognized camera frame: %s", frame_id.c_str());
 }
 
 void DetectionTree::dobjPubCallback(const ros::TimerEvent&)
@@ -220,7 +220,17 @@ void DetectionTree::dobjPubCallback(const ros::TimerEvent&)
     {
         debug_dobj_poses_pub.publish(pose_arr);
     }
-    // NODELET_INFO("Entering Callback!");
+}
+
+void DetectionTree::det_print(std::string str)
+{
+    ROS_INFO( (DETECTION_TREE_NAME + str).c_str());
+}
+
+void DetectionTree::det_print_warn(std::string str)
+{
+    string s = DETECTION_TREE_NAME + DETECTION_TREE_WARN_START  + str + DETECTION_TREE_WARN_END;
+    ROS_INFO( s.c_str());
 }
 
 PLUGINLIB_EXPORT_CLASS(det_tree_ns::DetectionTree, nodelet::Nodelet);
