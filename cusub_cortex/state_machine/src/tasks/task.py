@@ -21,6 +21,16 @@ from state_machine.msg import TaskStatus
 from optparse import OptionParser
 import inspect
 
+class bcolors: # For terminal colors
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 POSE_REACHED_THRESHOLD = 0.3
 
 # Waypoint Navigator Macros
@@ -33,7 +43,8 @@ class Task(smach.StateMachine):
 
     outcome = ["manager"]
 
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         super(Task, self).__init__(
             outcomes=self.outcome,\
             input_keys=['timeout_obj'],\
@@ -70,7 +81,14 @@ class Task(smach.StateMachine):
         str : String
              The rosparam name of prior
         """
-        return "tasks/" + self.name + "/prior"
+        return "tasks/" + self.name.lower() + "/prior"
+
+    def smprint(self, string, warn=False):
+        if warn:
+            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
+        else:
+            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + string)
+
 
 """
 Objectives are subtasks within a task
@@ -113,6 +131,12 @@ class Objective(smach.State):
             outcomes=outcomes,\
             input_keys=['timeout_obj'],\
             output_keys=['timeout_obj', 'outcome'])
+
+    def smprint(self, string, warn=False):
+        if warn:
+            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
+        else:
+            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + string)
 
     def configure_darknet_cameras(self, camera_bool_list):
         """
@@ -418,6 +442,7 @@ class Timeout():
     @brief Timeout object for tasks
     """
     timer = None
+    name = "Timeout Object"
 
     def set_new_time(self, seconds):
         """ In objectives reference like: userdata.timeout_obj.set_new_time(4) """
@@ -426,14 +451,21 @@ class Timeout():
         self.timed_out = False
         if seconds != 0:
             self.timer = rospy.Timer(rospy.Duration(seconds), self.timer_callback)
+            self.smprint("Next task time: " + str(seconds))    
         else:
-            rospy.logwarn("No timeout monitoring on next task")
+            self.smprint("No timeout monitoring on next task", warn=True)
 
     def timer_callback(self, msg):
         self.timer.shutdown()
-        rospy.logerr("Task Timed Out")
+        self.smprint("Task Timed Out")
         self.timed_out = True
 
     def timed_out(self):
         """ In objectives reference like: userdata.timeout_obj.timed_out """
         return self.timed_out
+
+    def smprint(self, string, warn=False):
+        if warn:
+            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
+        else:
+            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + string)

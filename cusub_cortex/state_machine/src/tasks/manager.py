@@ -12,10 +12,21 @@ import rospy
 from state_machine.msg import TaskStatus
 from state_machine.srv import *
 
+class bcolors: # For terminal colors
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 class Manager(smach.State):
+    name = "Manager"
 
     def __init__(self, task_names, mission_end_outcome='mission_success'):
-        rospy.loginfo("Loading manager obj")
+        self.smprint("initializing")
         self.queued_tasks = task_names
         self.mission_end_outcome = mission_end_outcome
         outcomes = self.queued_tasks + [mission_end_outcome]
@@ -65,7 +76,7 @@ class Manager(smach.State):
     def move_on(self):
         self.queued_tasks.pop(0)
     def later(self):
-        rospy.loginfo("Latering")
+        self.smprint("Latering")
         task = self.queued_tasks.pop(0)
         self.queued_tasks.append(task)
     
@@ -83,4 +94,10 @@ class Manager(smach.State):
             return GetNextTaskResponse("mission_complete")
         else:
             return GetNextTaskResponse(self.queued_tasks[1])
+
+    def smprint(self, string, warn=False):
+        if warn:
+            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
+        else:
+            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + string)
 

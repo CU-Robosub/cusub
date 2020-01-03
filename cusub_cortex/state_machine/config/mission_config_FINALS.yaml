@@ -41,17 +41,6 @@ tasks:
     outcome_not_found: 'skip'
     outcome_timed_out: 'skip'
   prior: [22.33, 15.28, -1.8]
-  method: vs        # solvepnp OR vs
-  solvepnp:
-    use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
-    replan_thresh: 1.0
-    slay_dist: 0.0
-    approach_dist: 2.0
-  visual_servo: # approach and slay
-    goal_percentage_of_frame: 0.4    # Percentage of image for target class
-    slay_timeout: 10                 # How long the slay will last
-    slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
-    target_pixel_threshold: 50    # how close to our target do we need to be    
 
  triangle:
   manager_info:
@@ -112,9 +101,9 @@ tasks:
   drop_depth: -2.5
 
 mission_tasks: # Tasks To Do In Order
-  - startup
-  - start_gate # maybe do visual servoing on the gate?
+  # - startup
+  # - start_gate
   - jiangshi
-  - triangle
-  - dropper
-  - octagon
+  # - triangle
+  # - dropper
+  # - octagon

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import rospy
-from detection_listener.listener import Listener
+from detection_listener.listener import DetectionListener
 """
 Tests the detection tree listener class
 
@@ -10,7 +10,7 @@ Let's listen to the dv's and print the average over the last 30 dvs or 1second
 class TestListener:
 
     def __init__(self):
-        self.detection_listener = Listener()
+        self.detection_listener = DetectionListener()
 
     def run(self):
         r = rospy.Rate(1000)

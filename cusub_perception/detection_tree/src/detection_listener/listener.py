@@ -56,7 +56,7 @@ class Dobject:
 """
 Subscribes to dvector topic
 """
-class Listener:
+class DetectionListener:
     
     def __init__(self):
         self.dobjects = []
