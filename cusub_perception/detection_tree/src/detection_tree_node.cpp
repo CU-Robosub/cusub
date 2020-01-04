@@ -195,7 +195,7 @@ void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfo ci)
             return;
         }
     }
-    det_print_warn("Unrecognized camera frame: %s", frame_id.c_str());
+    det_print_warn(string("Unrecognized camera frame: ") + frame_id);
 }
 
 void DetectionTree::dobjPubCallback(const ros::TimerEvent&)

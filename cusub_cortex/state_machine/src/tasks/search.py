@@ -15,23 +15,53 @@ class Search(Objective):
 
     outcomes = ['found','not_found']
 
-    def __init__(self, task_name, target_classes, prior_pose_param_str, darknet_cameras=DARKNET_CAMERAS_DEFAULT):
+    def __init__(self, task_name, target_classes, listener, prior_pose_param_str, darknet_cameras=DARKNET_CAMERAS_DEFAULT):
         super(Search, self).__init__(self.outcomes, task_name + "/Search")
         self.darknet_config = darknet_cameras
         self.prior_pose_param_str = prior_pose_param_str
         self.target_classes = target_classes
-        self.det_listener = DetectionListener()
+        self.det_listener = listener
         self.tf_listener = tf.TransformListener()
 
     def execute(self, userdata):
         self.smprint("executing")
-        self.smprint("configuring darknet cameras")
         self.configure_darknet_cameras(self.darknet_config)
-
         prior = self.get_odom_prior(self.prior_pose_param_str) # attempt to grab from mapper first --> we may already have localized it
+        self.go_to_pose_non_blocking(prior)
+
+        self.smprint("approaching prior, listening for detections of " + ", ".join(self.target_classes))
+        while not rospy.is_shutdown():
+            if self.query_listener():
+                self.smprint("detected class")
+                userdata.outcome = "success"
+                return "found"
+            elif userdata.timeout_obj.timed_out:
+                self.cancel_way_client_goal()
+                userdata.outcome = "timed_out"
+                return "not_found"
+            elif self.check_reached_pose(prior):
+                self.smprint("reached prior without any detections", warn=True)
+                self.smprint("spiral search functionality not implemented...quitting", warn=True)
+                userdata.outcome = "not_found"
+                return "not_found"
+
+            rospy.sleep(0.25)
 
         userdata.outcome = "success"
         return "found"
+
+    def query_listener(self):
+        dobj_dict = self.det_listener.query_classes(self.target_classes)
+        if not dobj_dict: # No classes present
+            return False
+        else:             # At least one class is present, check if there's been a new dvector
+                          # We take this extra step for the unlikely case we return to Search from another state
+            for key in dobj_dict.keys():
+                dobj_nums = dobj_dict[key]
+                for num in dobj_nums:
+                    if self.det_listener.check_new_dv(num):
+                        return True
+        return False
         
     def get_odom_prior(self, rosparam_str):
         if not rospy.has_param(rosparam_str):
@@ -51,9 +81,9 @@ class Search(Objective):
             try:
                 odom_frame = '/'+ rospy.get_param("~robotname") + '/description/odom'
                 self.smprint("...waiting for transform: " + odom_frame + " -> /" + xyzframe_list[3])
-                self.listener.waitForTransform(p.header.frame_id, odom_frame, p.header.stamp, rospy.Duration(5))
+                self.tf_listener.waitForTransform(p.header.frame_id, odom_frame, p.header.stamp, rospy.Duration(5))
                 self.smprint("...found transform")
-                p = self.listener.transformPose(odom_frame, p)
+                p = self.tf_listener.transformPose(odom_frame, p)
             except (tf.ExtrapolationException, tf.ConnectivityException, tf.LookupException) as e:
                 rospy.logerr(e)
         return p.pose

@@ -68,6 +68,26 @@ class DetectionListener:
 
     # def pose_callback(self, msg):
     #     num = msg.dobject_num
+
+    # Query multiple classes
+    # Returns dictionary of class_ids : dobj_nums
+    def query_classes(self, class_ids):
+        dobj_dict = {}
+        for c in class_ids:
+            dobj_nums = self.query_class(c)
+            if dobj_nums:
+                dobj_dict[c] = dobj_nums
+        return dobj_dict
+
+    def query_class(self, class_id):
+        """
+        Returns dobject numbers of all dobjects matching class_ids
+        """
+        nums = []
+        for i in range(len(self.dobjects)):
+            if self.dobjects[i].class_id == class_id:
+                nums.append(i)
+        return nums
         
     def dvector_callback(self, msg): # if we got dobj.num = 1 and len == 1
         num = msg.dobject_num

@@ -146,6 +146,7 @@ def main():
                 transitions={'manager':'manager'},\
                 remapping={'outcome':'previous_outcome'}) # all states will transition to the manager) # all states will transition to the manager
     
+        smprint("starting SM")
         outcome = sm_top.execute()
 
 if __name__ == '__main__':

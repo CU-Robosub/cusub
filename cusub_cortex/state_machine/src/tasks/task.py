@@ -154,14 +154,14 @@ class Objective(smach.State):
             1 success
             0 failed
         """
-        rospy.loginfo("...configuring darknet cameras")
+        self.smprint("configuring darknet cameras")
         if not self.using_darknet:
             return False
         rospy.wait_for_service("cusub_perception/darknet_multiplexer/configure_active_cameras")
         try:
             darknet_config = rospy.ServiceProxy("cusub_perception/darknet_multiplexer/configure_active_cameras", DarknetCameras)
             resp1 = darknet_config(camera_bool_list)
-            rospy.loginfo("\tconfiguring")
+            self.smprint("...configured")
             return True
         except rospy.ServiceException, e:
             rospy.logerr("Darknet Camera Config Service call failed: %s"%e)
@@ -225,7 +225,7 @@ class Objective(smach.State):
         self.wayClient.cancel_all_goals()
         rospy.sleep(0.2)
         self.wayClient.send_goal(wpGoal)
-        rospy.loginfo("...goal sent to waypointNav")
+        self.smprint("goal sent to waypointNav")
     
     def block_on_reaching_pose(self, target_pose, timeout_obj, replan_enabled=True):
         """
@@ -434,7 +434,7 @@ class Objective(smach.State):
                 adjusted_prior = [self.cur_pose.position.x + delta_x, \
                                   self.cur_pose.position.y + delta_y, \
                                   task_prior_pt.z]
-                rospy.loginfo("...updating prior for " + task)
+                self.smprint("updating prior for " + task)
                 rospy.set_param(task_prior_name, adjusted_prior)
                 
 class Timeout():
@@ -451,13 +451,13 @@ class Timeout():
         self.timed_out = False
         if seconds != 0:
             self.timer = rospy.Timer(rospy.Duration(seconds), self.timer_callback)
-            self.smprint("Next task time: " + str(seconds))    
+            self.smprint("Next task time: " + str(seconds) + "s")    
         else:
             self.smprint("No timeout monitoring on next task", warn=True)
 
     def timer_callback(self, msg):
         self.timer.shutdown()
-        self.smprint("Task Timed Out")
+        self.smprint("Task Timed Out", warn=True)
         self.timed_out = True
 
     def timed_out(self):
