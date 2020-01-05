@@ -31,9 +31,6 @@ class Search(Objective):
 
     def execute(self, userdata):
         self.smprint("executing")
-        
-        return "found"
-
         self.configure_darknet_cameras(self.darknet_config)
         prior = self.get_odom_prior(self.prior_pose_param_str) # attempt to grab from mapper first --> we may already have localized it
         # self.go_to_pose_non_blocking(prior)

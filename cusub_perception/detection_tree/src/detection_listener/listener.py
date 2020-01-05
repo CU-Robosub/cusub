@@ -48,10 +48,9 @@ class Dobject:
 
     def get_most_recent_dvectors(self, num):
         if num > len(self.dvectors):
-            return None
-        else:
-            first_dv = len(self.dvectors) - num
-            return self.dvectors[first_dv:]
+            num = len(self.dvectors)
+        first_dv = len(self.dvectors) - num
+        return self.dvectors[first_dv:]
 
 """
 Subscribes to dvector topic
@@ -146,10 +145,7 @@ class DetectionListener:
             return None
         elif num_dv != None:
             dvs = self.dobjects[dobj_num].get_most_recent_dvectors(num_dv)
-            if dvs == None:
-                return None
-            else:
-                return self._get_averages(dvs)
+            return self._get_averages(dvs)
         else:
             t_past = rospy.get_rostime() - rospy.Duration.from_sec(secs)
             dvs = self.dobjects[dobj_num].get_dvectors_since_time(t_past)

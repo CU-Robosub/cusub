@@ -47,38 +47,62 @@ class Jiangshi(Task):
 class Approach(Objective):
     outcomes = ['success','timed_out', 'lost_object']
 
+    target_class_id = "vampire_cute"
+
     def __init__(self, task_name, listener):
         super(Approach, self).__init__(self.outcomes, task_name + "/Approach")
         self.listener = listener
         self.yaw_client = PIDClient("yaw")
+        self.drive_client = PIDClient("drive", "cusub_common/motor_controllers/mag_pid/")
+
+        self.mag_target = 152600
     
     def execute(self, userdata):
         self.smprint("executing")
 
-        # We know we have a good detection
-        # Find the dobject num
-
-        self.yaw_client.enable()
-        self.yaw_client.set_setpoint(0.0)
+        # Find vampire_cute's dobject number and check for errors
+        dobj_nums = self.listener.query_class(self.target_class_id)
+        if len(dobj_nums) > 1:
+            self.smprint(str(len(dobj_nums)) + " " + self.target_class_id + " classes detected!", warn=True)
+            self.smprint("selecting the first", warn=True)
+        elif not dobj_nums:
+            self.smprint("somehow no " + self.target_class_id + " classes found?", warn=True)
+            return "lost_object"
+        dobj_num = dobj_nums[0]
+        self.smprint("located " + self.target_class_id + "'s dobject num: " + str(dobj_num))
         
-        """ Basically the visual servoing object needs to be able to 
-        - switch certain PID loops to control other axes
-        - decide which PID loops publish where (Yeah the visual servoing object could do this)
-        """
+        # TODO start a watch dog timer on detections
 
-        # Maybe I need a vs object to stop the waypoint navigator
-        # Face toward the object --> Some assurance we're getting good hits?
-        # Start the PID loops (should move us in the direction of the detections)
-        # Publish the first setpoints
+        # Begin looping
+        # --- if timeout --> stop PID's and exit state
+        # --- if new dv available
+        # --- grab most recent dvector
+        # --- set state/setpoint for the 3 PID loops
+        # --- determine success conditions: check magnitude + elevation
 
+        # Enable the PID loops
+        self.yaw_client.enable()
+        self.drive_client.enable()
+        self.drive_client.set_setpoint(self.mag_target)
+        
+        r = rospy.Rate(30)
         while not rospy.is_shutdown():
+            if self.listener.check_new_dv(dobj_num):
+                [az, el, mag] = self.listener.get_avg_bearing(dobj_num, num_dv=5)
+                self.yaw_client.set_setpoint(az, loop=False)
+                self.drive_client.set_state(mag)
+                self.listener.clear_new_dv_flag(dobj_num)
             if userdata.timeout_obj.timed_out:
                 self.cancel_way_client_goal()
                 userdata.outcome = "timed_out"
                 return "not_found"
-                
+            self.drive_client.set_setpoint(self.mag_target, loop=False)
+            r.sleep()
         userdata.outcome = "success"
         return "success"
+
+    def check_in_position(self, az, el, mag):
+        pass
 
 class Slay(Objective):
     outcomes = ['found','not_found']

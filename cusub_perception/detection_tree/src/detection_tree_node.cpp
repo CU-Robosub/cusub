@@ -93,7 +93,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
     Mat bearing_vec;
     for ( auto box : bbs->bounding_boxes)
     {
-        det_print("Box received");
+        // det_print("Box received");
 
         // Get bearing vector in local camera frame
         int center_x = (box.xmax + box.xmin) / 2;
@@ -121,7 +121,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         m.getRPY(roll_odom, pitch_odom, yaw_odom);
 
         // Create Dvector
-        det_print("Creating Dvector");
+        // det_print("Creating Dvector");
         detection_tree::Dvector* dv = new detection_tree::Dvector; // we'll be storing it globally
         dv->sub_pt = odom_cam_pose.pose.position;
         dv->azimuth = yaw_odom;
@@ -130,7 +130,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         dv->class_id = box.Class;
         dv->probability = box.probability;
         dv->magnitude = (box.xmax - box.xmin) * (box.ymax - box.ymin);
-        det_print("Determining Dobject");
+        // det_print("Determining Dobject");
         int dobj_num = determineDobject(dv);
 
         if( dobj_num == -1) // Create new dobject
@@ -141,7 +141,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
             // Check for the pose solve
         }            
         dv->dobject_num = dobj_num;
-        det_print("Publishing Dvector");
+        // det_print("Publishing Dvector");
         dvector_pub.publish(*dv);
     }
 }
@@ -151,7 +151,9 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
     @return dobject number
 */
 int DetectionTree::createDobject(detection_tree::Dvector* dv)
-{
+{   
+    string s = string("creating new dobj for ") + DETECTION_TREE_COLOR_START + dv->class_id + DETECTION_TREE_END;
+    det_print(s);
     Dobject* dobj = new Dobject;
     dobj->num = dobject_list.size();
     dobj->class_id = dv->class_id;
@@ -229,7 +231,7 @@ void DetectionTree::det_print(std::string str)
 
 void DetectionTree::det_print_warn(std::string str)
 {
-    string s = DETECTION_TREE_NAME + DETECTION_TREE_WARN_START  + str + DETECTION_TREE_WARN_END;
+    string s = DETECTION_TREE_NAME + DETECTION_TREE_WARN_START  + str + DETECTION_TREE_END;
     ROS_INFO( s.c_str());
 }
 

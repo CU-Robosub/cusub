@@ -5,7 +5,8 @@
 #include <string>
 #define DETECTION_TREE_NAME             std::string("[\033[92mDetection Tree\033[0m] ")
 #define DETECTION_TREE_WARN_START       std::string("\033[93m[WARN] ")
-#define DETECTION_TREE_WARN_END         std::string("\033[0m")
+#define DETECTION_TREE_COLOR_START      std::string("\033[95m")
+#define DETECTION_TREE_END              std::string("\033[0m")
 #endif
 
 #include <pluginlib/class_list_macros.h>
