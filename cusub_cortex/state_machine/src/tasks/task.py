@@ -17,6 +17,7 @@ from darknet_multiplexer.srv import DarknetCameras
 import numpy as np
 import tf
 from state_machine.msg import TaskStatus
+from waypoint_navigator.srv import *
 
 from optparse import OptionParser
 import inspect
@@ -109,6 +110,8 @@ class Objective(smach.State):
         self.wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
         self.started = False
         self.using_darknet = rospy.get_param("~using_darknet")
+
+        self.wayToggle = rospy.ServiceProxy('cusub_common/toggleWaypointControl', ToggleControl)
 
         # initialize the pose
         pose = Pose()

@@ -57,13 +57,16 @@ class PIDClient:
     def standard_state_callback(self, msg):
         self.standard_setpoint_msg = msg
 
+    def get_standard_state(self):
+        return self.standard_setpoint_msg.data
+
     # Returns true for successful enabling
     def enable(self):
         if not self.standard and not self.enabled:
             b = Bool()
             b.data = False
             self.repeated_publish(self.standard_enable_pub, b)
-            
+
             # Make rosservice call to switch mux
             new_topic = "/" + self.sub_name + "/cusub_common/motor_controllers/cv/" + self.axis + "/control_effort"
             self.smprint("enabling " + self.axis + " PID loop")
@@ -114,7 +117,7 @@ class PIDClient:
         return True
             
     def set_setpoint(self, data, loop=True):
-        if not self.enabled:
+        if not self.enabled and not self.standard:
             self.smprint("Setting setpoint but PID loop is not enabled!", warn=True)
         f = Float64()
         f.data = data
@@ -126,7 +129,7 @@ class PIDClient:
     def set_state(self, data, loop=False):
         if self.standard:
             self.smprint("Setting state of a 'standard' PID loop, will be overided by robot_localization", warn=True)
-        if not self.enabled:
+        if not self.enabled and not self.standard:
             self.smprint("Setting state but PID loop is not enabled!", warn=True)
         f = Float64()
         f.data = data

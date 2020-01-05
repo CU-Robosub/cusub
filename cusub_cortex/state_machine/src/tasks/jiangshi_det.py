@@ -33,26 +33,32 @@ class Jiangshi(Task):
         search_classes = ["vampire_cute"]
         self.search = Search(self.name, self.listener, search_classes, self.get_prior_param())
         self.approach = Approach(self.name, self.listener)
+        self.slay = Slay(self.name)
         self.revisit = Revisit(self.name, self.listener)
+        self.backup = Backup(self.name)
 
     def link_objectives(self):
         with self:
             smach.StateMachine.add('Search', self.search, transitions={'found':'Approach', 'not_found':'manager'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
             smach.StateMachine.add('Revisit', self.revisit, transitions={'found':'Approach', 'not_found':'Search'}, \
-                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})                
-            smach.StateMachine.add('Approach', self.approach, transitions={'success':'manager', 'timed_out':'manager', 'lost_object':'Revisit'}, \
+                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
+            smach.StateMachine.add('Slay', self.slay, transitions={'slayed':'Backup', 'timed_out':'manager'}, \
+                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
+            smach.StateMachine.add('Backup', self.backup, transitions={'backed_up':'manager', 'timed_out':'manager'}, \
+                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
+            smach.StateMachine.add('Approach', self.approach, transitions={'in_position':'Slay', 'timed_out':'manager', 'lost_object':'Revisit'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
             
 
 class Approach(Objective):
-    outcomes = ['success','timed_out', 'lost_object']
+    outcomes = ['in_position','timed_out', 'lost_object']
 
     target_class_id = "vampire_cute"
 
     def __init__(self, task_name, listener):
         name = task_name + "/Approach"
-        super(Approach, self).__init__(self.outcomes, task_name + "/Approach")
+        super(Approach, self).__init__(self.outcomes, name)
         self.listener = listener
         self.yaw_client = PIDClient(name, "yaw")
         self.drive_client = PIDClient(name, "drive", "cusub_common/motor_controllers/mag_pid/")
@@ -121,8 +127,7 @@ class Approach(Objective):
         self.yaw_client.disable()
         self.drive_client.disable()
         self.depth_client.disable()
-        userdata.outcome = "success"
-        return "success"
+        return "in_position"
 
     def check_in_position(self, az, el, mag):
         az_reached, el_reached, mag_reached = True, False, False
@@ -133,17 +138,40 @@ class Approach(Objective):
         return az_reached and el_reached and mag_reached
 
 class Slay(Objective):
-    outcomes = ['found','not_found']
+    outcomes = ['slayed', 'timed_out']
 
-    def __init__(self, task_name, listener):
-        super(Slay, self).__init__(self.outcomes, task_name + "/Slay")
+    def __init__(self, task_name):
+        name = task_name + "/Slay"
+        super(Slay, self).__init__(self.outcomes, name)
+        self.drive_client = PIDClient(name, "drive")
 
+
+    def execute(self, userdata):
+        self.smprint("executing")
+        self.wayToggle(False)
+        cur_state = self.drive_client.get_standard_state()
+        self.drive_client.set_setpoint(cur_state + 1)
+        rospy.sleep(10)
+        self.smprint("slayed")
+        return "slayed"
 
 class Backup(Objective):
-    outcomes = ['found','not_found']
+    outcomes = ['backed_up','timed_out']
 
-    def __init__(self, task_name, listener):
-        super(Backup, self).__init__(self.outcomes, task_name + "/Backup")
+    def __init__(self, task_name):
+        name = task_name + "/Backup"
+        super(Backup, self).__init__(self.outcomes, name)
+        self.drive_client = PIDClient(name, "drive")
+
+    def execute(self, userdata):
+        self.smprint("executing")
+        cur_state = self.drive_client.get_standard_state()
+        self.drive_client.set_setpoint(cur_state - 1)
+        rospy.sleep(10)
+        self.wayToggle(True)
+        self.smprint("backed up")
+        return "backed_up"
+
 
 class Revisit(Objective):
     outcomes = ['found','not_found']
