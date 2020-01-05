@@ -50,22 +50,29 @@ class Approach(Objective):
     target_class_id = "vampire_cute"
 
     def __init__(self, task_name, listener):
+        name = task_name + "/Approach"
         super(Approach, self).__init__(self.outcomes, task_name + "/Approach")
         self.listener = listener
-        self.yaw_client = PIDClient("yaw")
-        self.drive_client = PIDClient("drive", "cusub_common/motor_controllers/mag_pid/")
+        self.yaw_client = PIDClient(name, "yaw")
+        self.drive_client = PIDClient(name, "drive", "cusub_common/motor_controllers/mag_pid/")
 
+        seconds = 2
+        self.rate = 30
+        self.count_target = seconds * self.rate
+        self.count = 0
+        
         self.mag_target = 152600
+        self.el_target = 0
     
     def execute(self, userdata):
         self.smprint("executing")
 
         # Find vampire_cute's dobject number and check for errors
         dobj_nums = self.listener.query_class(self.target_class_id)
-        if len(dobj_nums) > 1:
+        if len(dobj_nums) > 1: # Check if more than 1 instance of target_class
             self.smprint(str(len(dobj_nums)) + " " + self.target_class_id + " classes detected!", warn=True)
             self.smprint("selecting the first", warn=True)
-        elif not dobj_nums:
+        elif not dobj_nums: # Chck if target class is not present (shouldn't be possible)
             self.smprint("somehow no " + self.target_class_id + " classes found?", warn=True)
             return "lost_object"
         dobj_num = dobj_nums[0]
@@ -73,36 +80,44 @@ class Approach(Objective):
         
         # TODO start a watch dog timer on detections
 
-        # Begin looping
-        # --- if timeout --> stop PID's and exit state
-        # --- if new dv available
-        # --- grab most recent dvector
-        # --- set state/setpoint for the 3 PID loops
-        # --- determine success conditions: check magnitude + elevation
-
         # Enable the PID loops
         self.yaw_client.enable()
         self.drive_client.enable()
         self.drive_client.set_setpoint(self.mag_target)
         
-        r = rospy.Rate(30)
+        r = rospy.Rate(self.rate)
         while not rospy.is_shutdown():
             if self.listener.check_new_dv(dobj_num):
                 [az, el, mag] = self.listener.get_avg_bearing(dobj_num, num_dv=5)
                 self.yaw_client.set_setpoint(az, loop=False)
                 self.drive_client.set_state(mag)
                 self.listener.clear_new_dv_flag(dobj_num)
+
+                if self.check_in_position(az, 0.0, mag):
+                    self.count += 1
+                    if self.count > self.count_target:
+                        break
+                else:
+                    self.count = 0
             if userdata.timeout_obj.timed_out:
-                self.cancel_way_client_goal()
+                self.drive_client.disable()
                 userdata.outcome = "timed_out"
                 return "not_found"
             self.drive_client.set_setpoint(self.mag_target, loop=False)
+            # self.depth_client.set_setpoint(self.el_target, loop=False)
             r.sleep()
+
+        self.drive_client.disable()
         userdata.outcome = "success"
         return "success"
 
     def check_in_position(self, az, el, mag):
-        pass
+        az_reached, el_reached, mag_reached = True, False, False
+        if (self.mag_target - mag) < 0.1*self.mag_target:
+            mag_reached = True
+        if (self.el_target - el) < 0.05*self.mag_target:
+            el_reached = True
+        return az_reached and el_reached and mag_reached
 
 class Slay(Objective):
     outcomes = ['found','not_found']
