@@ -2,12 +2,9 @@
 Search Objective
 """
 from tasks.task import Objective
-# import smach
-from detection_listener.listener import DetectionListener
 from geometry_msgs.msg import PoseStamped
 import rospy
 import tf
-from darknet_multiplexer.srv import DarknetClasses
 
 DARKNET_CAMERAS_DEFAULT=[1,1,1,1,1,0]
 
@@ -15,7 +12,16 @@ class Search(Objective):
 
     outcomes = ['found','not_found']
 
-    def __init__(self, task_name, target_classes, listener, prior_pose_param_str, darknet_cameras=DARKNET_CAMERAS_DEFAULT):
+    def __init__(self, task_name, listener, target_classes, prior_pose_param_str, darknet_cameras=DARKNET_CAMERAS_DEFAULT):
+        """
+        Params
+        ------
+        task_name : str
+        listener : DetectionListener
+        target_classes : list
+        prior_pose_param_str : str
+        darknet_cameras : list
+        """
         super(Search, self).__init__(self.outcomes, task_name + "/Search")
         self.darknet_config = darknet_cameras
         self.prior_pose_param_str = prior_pose_param_str
@@ -25,20 +31,26 @@ class Search(Objective):
 
     def execute(self, userdata):
         self.smprint("executing")
+        
+        return "found"
+
         self.configure_darknet_cameras(self.darknet_config)
         prior = self.get_odom_prior(self.prior_pose_param_str) # attempt to grab from mapper first --> we may already have localized it
-        self.go_to_pose_non_blocking(prior)
+        # self.go_to_pose_non_blocking(prior)
 
         self.smprint("approaching prior, listening for detections of " + ", ".join(self.target_classes))
         while not rospy.is_shutdown():
-            if self.query_listener():
+            # Check for detection
+            if self.query_listener(): 
                 self.smprint("detected class")
                 userdata.outcome = "success"
                 return "found"
+            # Check for timeout
             elif userdata.timeout_obj.timed_out:
                 self.cancel_way_client_goal()
                 userdata.outcome = "timed_out"
                 return "not_found"
+            # Check for reaching the prior pose
             elif self.check_reached_pose(prior):
                 self.smprint("reached prior without any detections", warn=True)
                 self.smprint("spiral search functionality not implemented...quitting", warn=True)
@@ -47,7 +59,6 @@ class Search(Objective):
 
             rospy.sleep(0.25)
 
-        userdata.outcome = "success"
         return "found"
 
     def query_listener(self):
