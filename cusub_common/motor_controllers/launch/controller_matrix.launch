@@ -9,12 +9,11 @@
 	<node name="pose_pid" pkg="motor_controllers" type="Pose_PID.py" output="screen"/>
 	<node name="pid_pololu" pkg="motor_controllers" type="PID_Pololu_matrix.py" output="screen"/>
 
+	<!-- DEPTH -->
 	<node pkg="topic_tools" type="mux" name="depth_mux" ns="cusub_common/motor_controllers" args="mux/depth/control_effort pid/depth/control_effort cv/depth/control_effort">
 		<remap from="mux" to="depth_mux"/>
 		<param name="initial_topic " value="pid/depth/control_effort" />
 	</node>
-
-	<!-- DEPTH -->
 	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/depth" >
 		<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_depth.yaml" />
 		<param name="rate" value="25" />
@@ -23,6 +22,19 @@
 		<param name="diagnostic_period" value="0.25" />
 		<param name="max_loop_frequency" value="25.0" />
 		<param name="min_loop_frequency" value="25.0" />
+	</node>
+
+	<!-- DEPTH/ELEV2DEPTH -->
+	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/elev_pid/depth">
+		<rosparam command="load" file="$(find motor_controllers)/special_conf/$(arg pid_type)_elev2depth.yaml" />
+		<param name="rate" value="25" />
+		<param name="upper_limit" value="100" />
+		<param name="lower_limit" value="-100" />
+		<param name="diagnostic_period" value="0.25" />
+		<param name="max_loop_frequency" value="25.0" />
+		<param name="min_loop_frequency" value="25.0" />
+		<param name="pid_enabled" value="false" />
+		<param name="topic_from_controller" value="/leviathan/cusub_common/motor_controllers/cv/depth/control_effort" />
 	</node>
 
 	<!-- PITCH -->

@@ -30,27 +30,41 @@ class PIDClient:
 
         if root_topic == STANDARD_ROOT_TOPIC:
             self.standard = True
-            control_effort_topic = root_topic + axis + "/control_effort"
+            # control_effort_topic = root_topic + axis + "/control_effort"
         else:
             self.standard = False
-            control_effort_topic = "/" + self.sub_name + "/cusub_common/motor_controllers/cv/" + self.axis + "/control_effort"
+            # control_effort_topic = "/" + self.sub_name + "/cusub_common/motor_controllers/cv/" + self.axis + "/control_effort"
 
         enable_topic = root_topic + axis + "/pid_enable"
         disable_topic = root_topic + axis + "/pid_enable"
         setpoint_topic = root_topic + axis + "/setpoint"
         state_topic = root_topic + axis + "/state"
+        standard_setpoint_topic = STANDARD_ROOT_TOPIC + axis + "/setpoint"
+        standard_state_topic = STANDARD_ROOT_TOPIC + axis + "/state"
+        standard_enable_topic = STANDARD_ROOT_TOPIC + axis + "/pid_enable"
 
         self.enable_pub = rospy.Publisher(enable_topic, Bool, queue_size=10)
         self.disable_pub = rospy.Publisher(disable_topic, Bool, queue_size=10)
-        self.end_control_effort_pub = rospy.Publisher(control_effort_topic, Float64, queue_size=10)
+        # self.end_control_effort_pub = rospy.Publisher(control_effort_topic, Float64, queue_size=10)
         self.setpoint_pub = rospy.Publisher(setpoint_topic, Float64, queue_size=10)
         self.state_pub = rospy.Publisher(state_topic, Float64, queue_size=10)
+        self.standard_setpoint_pub = rospy.Publisher(standard_setpoint_topic, Float64, queue_size=10)
+        self.standard_enable_pub =rospy.Publisher(standard_enable_topic, Bool, queue_size=10)
+
+        self.standard_setpoint_msg = None
+        rospy.Subscriber(standard_state_topic, Float64, self.standard_state_callback)
+
+    def standard_state_callback(self, msg):
+        self.standard_setpoint_msg = msg
 
     # Returns true for successful enabling
     def enable(self):
         if not self.standard and not self.enabled:
+            b = Bool()
+            b.data = False
+            self.repeated_publish(self.standard_enable_pub, b)
+            
             # Make rosservice call to switch mux
-            # prev_topic = "cusub_common/motor_controllers/pid/" + self.axis + "/control_effort"
             new_topic = "/" + self.sub_name + "/cusub_common/motor_controllers/cv/" + self.axis + "/control_effort"
             self.smprint("enabling " + self.axis + " PID loop")
             srv_name = "cusub_common/motor_controllers/" + self.axis + "_mux/select"
@@ -70,11 +84,15 @@ class PIDClient:
         return True
 
     def disable(self):
-        b = Bool()
-        b.data = False
-        self.repeated_publish(self.enable_pub, b)
-        
         if not self.standard and self.enabled:
+            # Freeze in place
+            setpoint = self.standard_setpoint_msg
+            self.repeated_publish(self.standard_setpoint_pub, setpoint)
+
+            b = Bool()
+            b.data = True
+            self.repeated_publish(self.standard_enable_pub, b)
+
             # Make rosservice call to switch mux
             new_topic = "/" + self.sub_name + "/cusub_common/motor_controllers/pid/" + self.axis + "/control_effort"
             self.smprint("disabling " + self.axis + " PID loop")
@@ -86,16 +104,14 @@ class PIDClient:
                 resp = mux_select(new_topic)
             except rospy.ServiceException as exc:
                 rospy.logerr("Could not switch mux to enable PID: " + str(exc))
-                return False
+                return False            
 
-            f = Float64()
-            f.data = 0.0
-            self.repeated_publish(self.end_control_effort_pub, f)
+            b = Bool()
+            b.data = False
+            self.repeated_publish(self.enable_pub, b)
 
         self.enabled = False
         return True
-
-        # TODO if not standard root topic -> then set the setpoint equal to the current state
             
     def set_setpoint(self, data, loop=True):
         if not self.enabled:
@@ -125,7 +141,7 @@ class PIDClient:
         while not rospy.is_shutdown() and count > 0:
             pub.publish(msg)
             count -= 1
-            rospy.sleep(0.1)
+            rospy.sleep(0.01)
     
     def smprint(self, string, warn=False):
         if warn:

@@ -15,6 +15,7 @@ import rospy
 import smach
 import smach_ros
 from detection_listener.listener import DetectionListener
+import numpy as np
 
 class Jiangshi(Task):
     name = "Jiangshi"
@@ -55,6 +56,7 @@ class Approach(Objective):
         self.listener = listener
         self.yaw_client = PIDClient(name, "yaw")
         self.drive_client = PIDClient(name, "drive", "cusub_common/motor_controllers/mag_pid/")
+        self.depth_client = PIDClient(name, "depth", "cusub_common/motor_controllers/elev_pid/")
 
         seconds = 2
         self.rate = 30
@@ -62,7 +64,8 @@ class Approach(Objective):
         self.count = 0
         
         self.mag_target = 152600
-        self.el_target = 0
+        self.elev_target = 0.0
+        self.elev_thresh = 0.05
     
     def execute(self, userdata):
         self.smprint("executing")
@@ -83,31 +86,41 @@ class Approach(Objective):
         # Enable the PID loops
         self.yaw_client.enable()
         self.drive_client.enable()
+        self.depth_client.enable()
         self.drive_client.set_setpoint(self.mag_target)
-        
+        self.depth_client.set_setpoint(self.elev_target)
+
+        self.smprint("servoing")
         r = rospy.Rate(self.rate)
         while not rospy.is_shutdown():
             if self.listener.check_new_dv(dobj_num):
                 [az, el, mag] = self.listener.get_avg_bearing(dobj_num, num_dv=5)
                 self.yaw_client.set_setpoint(az, loop=False)
                 self.drive_client.set_state(mag)
+                self.depth_client.set_state(el * (1000/np.sqrt(mag)))
                 self.listener.clear_new_dv_flag(dobj_num)
 
-                if self.check_in_position(az, 0.0, mag):
+                if self.check_in_position(az, el, mag):
                     self.count += 1
                     if self.count > self.count_target:
+                        self.smprint("in position")
                         break
                 else:
                     self.count = 0
             if userdata.timeout_obj.timed_out:
+                self.yaw_client.disable()
                 self.drive_client.disable()
+                self.depth_client.disable()
                 userdata.outcome = "timed_out"
                 return "not_found"
+
             self.drive_client.set_setpoint(self.mag_target, loop=False)
-            # self.depth_client.set_setpoint(self.el_target, loop=False)
+            self.depth_client.set_setpoint(self.elev_target, loop=False)
             r.sleep()
 
+        self.yaw_client.disable()
         self.drive_client.disable()
+        self.depth_client.disable()
         userdata.outcome = "success"
         return "success"
 
@@ -115,7 +128,7 @@ class Approach(Objective):
         az_reached, el_reached, mag_reached = True, False, False
         if (self.mag_target - mag) < 0.1*self.mag_target:
             mag_reached = True
-        if (self.el_target - el) < 0.05*self.mag_target:
+        if (self.elev_target - el) < self.elev_thresh:
             el_reached = True
         return az_reached and el_reached and mag_reached
 
