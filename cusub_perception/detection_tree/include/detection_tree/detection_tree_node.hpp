@@ -1,13 +1,15 @@
 #ifndef DETECTION_TREE_NODE_SRC_DETECTION_TREE_NODE_H_
 #define DETECTION_TREE_NODE_SRC_DETECTION_TREE_NODE_H_
 
-#ifndef DETECTION_TREE_NAME
+// Logging Formats
 #include <string>
 #define DETECTION_TREE_NAME             std::string("[\033[92mDetection Tree\033[0m] ")
 #define DETECTION_TREE_WARN_START       std::string("\033[93m[WARN] ")
 #define DETECTION_TREE_COLOR_START      std::string("\033[95m")
 #define DETECTION_TREE_END              std::string("\033[0m")
-#endif
+
+# define DOBJECT_PROBABILITY_ZERO       0.0
+# define DOBJECT_NOT_FOUND              -1
 
 #include <pluginlib/class_list_macros.h>
 #include "detection_tree/detection_tree.hpp"
@@ -17,6 +19,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <cmath>
 #include <darknet_ros_msgs/BoundingBoxes.h>
 #include <darknet_ros_msgs/BoundingBox.h>
 #include <std_msgs/Header.h>
@@ -46,13 +49,20 @@ namespace det_tree_ns
             void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
             void cameraInfoCallback(const sensor_msgs::CameraInfo ci);
             int transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_pose, cv::Mat& bearing_vec, std_msgs::Header& image_header);
-            int determineDobject(detection_tree::Dvector* dv);
             int createDobject(detection_tree::Dvector* dv);
             bool poseSolveDobject(Dobject* dobj, geometry_msgs::Pose& pose);
             void dobjPubCallback(const ros::TimerEvent&);
             void det_print(std::string str);
             void det_print_warn(std::string str);
 
+            // Dvector Association Functions
+            void associateDvectors(std::vector<detection_tree::Dvector*>& dv_list, std::map<detection_tree::Dvector*, int>& dv_dobj_map);            
+            void assignDobjScores(std::vector<detection_tree::Dvector*>& dv_list, std::map<detection_tree::Dvector*, std::map<int, double>*>& dvs_scored);
+            void setDobjProbabilityToZero(std::map<detection_tree::Dvector*, std::map<int, double>*>& dvs_scored, int dobj_num);
+            detection_tree::Dvector* findBestMatch(std::map<detection_tree::Dvector*, std::map<int, double>*>& dvs_scored, int& matching_dobj);
+            void averageBearing(std::vector<detection_tree::Dvector*>& dvs, double& average_az, double& average_elev, double& average_mag);
+
+            int dvector_num;
             ros::Timer dobj_pub_timer; // timer to publish most recent dvector for all dobjs
             std::vector<Dobject*> dobject_list;
             ros::Subscriber darknet_sub;

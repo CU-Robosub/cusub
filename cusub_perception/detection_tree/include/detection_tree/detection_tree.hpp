@@ -15,4 +15,15 @@ typedef struct{
     std::vector<detection_tree::Dvector*> dvector_list;
 } Dobject;
 
+void getLastDvectors(Dobject* dobj, int num, std::vector<detection_tree::Dvector*>& dvs)
+{
+    int size = dobj->dvector_list.size();
+    if( num > size )
+        num = size;
+    for( int i=size-1; i >= size - num; i--)
+    {
+        dvs.push_back(dobj->dvector_list[i]);
+    }
+}
+
 #endif

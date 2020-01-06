@@ -1,3 +1,4 @@
+int32 dvector_num
 std_msgs/Header camera_header
 geometry_msgs/Point sub_pt
 float64 azimuth

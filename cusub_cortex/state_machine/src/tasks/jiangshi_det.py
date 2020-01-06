@@ -103,7 +103,7 @@ class Approach(Objective):
                 [az, el, mag] = self.listener.get_avg_bearing(dobj_num, num_dv=5)
                 self.yaw_client.set_setpoint(az, loop=False)
                 self.drive_client.set_state(mag)
-                self.depth_client.set_state(el * (1000/np.sqrt(mag)))
+                self.depth_client.set_state(el * (1000/np.sqrt(mag))) # normalize the elevation bearing using the magnitude
                 self.listener.clear_new_dv_flag(dobj_num)
 
                 if self.check_in_position(az, el, mag):
@@ -149,10 +149,12 @@ class Slay(Objective):
     def execute(self, userdata):
         self.smprint("executing")
         self.wayToggle(False)
+        self.drive_client.enable()
         cur_state = self.drive_client.get_standard_state()
         self.drive_client.set_setpoint(cur_state + 1)
         rospy.sleep(10)
         self.smprint("slayed")
+        self.drive_client.disable()
         return "slayed"
 
 class Backup(Objective):
@@ -166,13 +168,16 @@ class Backup(Objective):
     def execute(self, userdata):
         self.smprint("executing")
         cur_state = self.drive_client.get_standard_state()
+        self.drive_client.enable()
         self.drive_client.set_setpoint(cur_state - 1)
         rospy.sleep(10)
         self.wayToggle(True)
+        self.drive_client.disable()
         self.smprint("backed up")
         return "backed_up"
 
 
+# TODO
 class Revisit(Objective):
     outcomes = ['found','not_found']
 

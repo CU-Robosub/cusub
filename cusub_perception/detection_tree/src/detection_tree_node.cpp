@@ -8,6 +8,7 @@ void DetectionTree::onInit()
 {
     sub_name = "leviathan"; // TODO Pull from config
     ros::NodeHandle& nh = getMTNodeHandle();
+    dvector_num = 0;
     
     debug_dv_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("cusub_perception/detection_tree/poses",10);
     debug_dobj_poses_pub = nh.advertise<geometry_msgs::PoseArray>("cusub_perception/detection_tree/dobjects",10);
@@ -15,12 +16,12 @@ void DetectionTree::onInit()
     // Temporarily subscribe to all camera info topics
     for( auto topic_frame : camera_topic_frame_map)
     {
-        det_print(string("Added Camera: ") + topic_frame.second);
+        // det_print(string("Added Camera: ") + topic_frame.second);
         camera_info_subs.insert({topic_frame.second, nh.subscribe(topic_frame.first, 1, &DetectionTree::cameraInfoCallback, this)});
     }    
     darknet_sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &DetectionTree::darknetCallback, this);
     dobj_pub_timer = nh.createTimer(ros::Duration(0.5), &DetectionTree::dobjPubCallback, this); // TODO pull config
-    det_print("Loaded Detection Tree");
+    det_print(string("Loaded Detection Tree"));
 }
 
 /*
@@ -57,11 +58,11 @@ int DetectionTree::transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_p
             listener.transformPose(sub_frame, cam_pose, odom_cam_pose);
 
         } else {
-            det_print_warn("Detection Tree missed transform. Throwing out detection.");
+            det_print_warn(string("Detection Tree missed transform. Throwing out detection."));
             return -1;
         }
     } catch (tf::TransformException ex){
-        det_print_warn("Detection Tree Error in transform");
+        det_print_warn(string("Detection Tree Error in transform"));
         return -1;
     }
     return 0;
@@ -79,7 +80,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
     string frame_optical = bbs->image_header.frame_id;
     if( camera_info.find(frame_optical) == camera_info.end() )
     {
-        // det_print("Unreceived camera info: %s",  frame.c_str());
+        // det_print(string("Unreceived camera info: ") + frame_optical);
         return;
     }
 
@@ -91,10 +92,9 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
 
     // Loop through boxes and generate dvectors
     Mat bearing_vec;
+    vector<detection_tree::Dvector*> dv_list;
     for ( auto box : bbs->bounding_boxes)
     {
-        // det_print("Box received");
-
         // Get bearing vector in local camera frame
         int center_x = (box.xmax + box.xmin) / 2;
         int center_y = (box.ymax + box.ymin) / 2;
@@ -121,7 +121,6 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         m.getRPY(roll_odom, pitch_odom, yaw_odom);
 
         // Create Dvector
-        // det_print("Creating Dvector");
         detection_tree::Dvector* dv = new detection_tree::Dvector; // we'll be storing it globally
         dv->sub_pt = odom_cam_pose.pose.position;
         dv->azimuth = yaw_odom;
@@ -130,18 +129,28 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         dv->class_id = box.Class;
         dv->probability = box.probability;
         dv->magnitude = (box.xmax - box.xmin) * (box.ymax - box.ymin);
-        // det_print("Determining Dobject");
-        int dobj_num = determineDobject(dv);
+        dv->dvector_num = dvector_num;
+        dvector_num++;
+        dv_list.push_back(dv);
+    }
+    map<detection_tree::Dvector*, int> dv_dobj_map;
+    associateDvectors(dv_list, dv_dobj_map);
 
-        if( dobj_num == -1) // Create new dobject
-            dobj_num = createDobject(dv);
-        else // Existing dobject, append the dvector
+    // Add dvectors to dobjects or create a new dobject
+    // Publish dvectors
+    for ( auto it = dv_dobj_map.begin(); it != dv_dobj_map.end(); it++ )
+    {
+        detection_tree::Dvector* dv = it->first;
+        int dobj_num = it->second;
+        // Create new dobject
+        if( dobj_num == DOBJECT_NOT_FOUND)
         {
+            dobj_num = createDobject(dv);
+        } 
+        else {
             dobject_list[dobj_num]->dvector_list.push_back(dv);
-            // Check for the pose solve
-        }            
+        }
         dv->dobject_num = dobj_num;
-        // det_print("Publishing Dvector");
         dvector_pub.publish(*dv);
     }
 }
@@ -157,22 +166,135 @@ int DetectionTree::createDobject(detection_tree::Dvector* dv)
     Dobject* dobj = new Dobject;
     dobj->num = dobject_list.size();
     dobj->class_id = dv->class_id;
+    dobj->pose = geometry_msgs::Pose();
     dobj->dvector_list.push_back(dv);
     dobject_list.push_back(dobj);
     return dobj->num;
 }
 
+void DetectionTree::averageBearing(vector<detection_tree::Dvector*>& dvs, double& average_az, double& average_elev, double& average_mag)
+{
+    average_az = 0.0;
+    average_elev = 0.0;
+    average_mag = 0.0;
+    for ( auto dv : dvs )
+    {
+        average_az += dv->azimuth;
+        average_elev += dv->elevation;
+        average_mag += dv->magnitude;
+    }
+    average_az /= dvs.size();
+    average_elev /= dvs.size();
+    average_mag /= dvs.size();
+}
+
+void DetectionTree::assignDobjScores(std::vector<detection_tree::Dvector*>& dv_list, map<detection_tree::Dvector*, map<int, double>*>& dvs_scored)
+{
+    for ( auto dv : dv_list )
+    {
+        map<int, double>* dobj_scores = new map<int, double>();
+        vector<Dobject*> dobjects;
+        for (auto dobj : dobject_list )
+        {
+            if (dobj->class_id == dv->class_id) // class matches; score here
+            {
+                std::vector<detection_tree::Dvector*> dvs;
+                getLastDvectors(dobj, 5, dvs);
+                double average_az, average_elev, average_mag;
+                averageBearing(dvs, average_az, average_elev, average_mag);
+
+                // Compute distance between bearing vectors
+                double azimuth_diff = pow(dv->azimuth - average_az, 2);
+                double elevation_diff = pow(dv->azimuth - average_az, 2);
+                double distance = sqrt(azimuth_diff + elevation_diff);
+                // det_print(string("distance: ") + to_string(distance));
+
+                // Turn distance into a score
+                double score = 1 / distance;
+                dobj_scores->insert({dobj->num, score});
+            }
+        }
+        dvs_scored.insert({dv, dobj_scores});
+    }
+}
+
+/* @brief sets a dobject's probability to zero because we have already assigned this dobject to another dvector in the same image frame
+   @param dvs_scored map
+   @param the dobject_number
+   @return None
+*/
+void DetectionTree::setDobjProbabilityToZero(map<detection_tree::Dvector*, map<int, double>*>& dvs_scored, int dobj_num)
+{
+    for ( auto dv_it = dvs_scored.begin(); dv_it != dvs_scored.end(); dv_it++ )
+    {
+        for ( auto dobj_it = dv_it->second->begin(); dobj_it != dv_it->second->end(); dobj_it++ )
+        {
+            if (dobj_it->first == dobj_num)
+            {
+                dobj_it->second = DOBJECT_PROBABILITY_ZERO;
+            }
+        }
+    }
+}
+
+detection_tree::Dvector* DetectionTree::findBestMatch(map<detection_tree::Dvector*, map<int, double>*>& dvs_scored, int& matching_dobj)
+{
+    detection_tree::Dvector* best_matched_dv;
+    double top_score = DOBJECT_PROBABILITY_ZERO;
+    for ( auto dv_it = dvs_scored.begin(); dv_it != dvs_scored.end(); dv_it++ )
+    {
+        for ( auto dobj_it = dv_it->second->begin(); dobj_it != dv_it->second->end(); dobj_it++ )
+        {
+           if( dobj_it->second > top_score ) // check if this dobject match beats our top score
+            {
+                best_matched_dv = dv_it->first;
+                matching_dobj = dobj_it->first;
+                top_score = dobj_it->second;
+            }
+        }
+    }
+    // Check if we had no matches (this means there are no available dobjects for this class)
+    if (top_score == DOBJECT_PROBABILITY_ZERO)
+    {
+        best_matched_dv = dvs_scored.begin()->first;
+        matching_dobj = DOBJECT_NOT_FOUND;
+    }
+    return best_matched_dv;
+}
+
 /* @brief given a dvector, determine which dobject it belongs to or if a new one should be created
    @param dvector
    @return the dobject number or -1 for new dobject
+   @return map{ dv : dobj_num }
 */
-int DetectionTree::determineDobject(detection_tree::Dvector* dv)
+void DetectionTree::associateDvectors(std::vector<detection_tree::Dvector*>& dv_list, map<detection_tree::Dvector*, int>& dv_dobj_map)
 {
-    for( auto dobj : dobject_list )
+    map<detection_tree::Dvector*, map<int, double>*> dvs_scored;
+    assignDobjScores(dv_list, dvs_scored);
+
+    // while we have more dvectors to assign
+    while( dvs_scored.size() > 0)
     {
-        return dobj->num; // TODO association algorithm
+        int dobj_num_matched;
+        detection_tree::Dvector* dv = findBestMatch(dvs_scored, dobj_num_matched);
+        dv_dobj_map.insert({dv, dobj_num_matched});
+        dvs_scored.erase(dv);
+        if( dobj_num_matched != DOBJECT_NOT_FOUND )
+        {
+            setDobjProbabilityToZero(dvs_scored, dobj_num_matched); // make this dobject not be considered for all other dvectors
+        }
     }
-    return -1;
+
+    // Free map memory in dvs_scored
+    for ( auto it_dv = dvs_scored.begin(); it_dv != dvs_scored.end(); it_dv++ )
+    {
+        delete it_dv->second;
+    }
+    // while num keys in dvs_scored > 0
+    //  findBestMatch()
+    //  add new entry to dv_dobj_map
+    //  remove entry from dvs_scored
+    //  setDobjProbabilityToZero( that dobj )
 }
 
 void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfo ci)
@@ -185,14 +307,14 @@ void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfo ci)
     {
         if( itr_pair.first == frame_id )
         {
-            det_print(string("Received : ") + frame_id.c_str());
+            // det_print(string("Received : ") + frame_id.c_str());
             // TODO remove on actual sub
 
             camera_info.insert({frame_id + "_optical", ci}); // adding _optical is 100% a hack
             camera_info_subs[itr_pair.first].shutdown(); // unsubscribe
             if ( camera_info_subs.size() == camera_info.size() )
             {
-                det_print("All camera's info acquired");
+                det_print(string("All camera's info acquired"));
             }
             return;
         }

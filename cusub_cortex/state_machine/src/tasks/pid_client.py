@@ -30,10 +30,8 @@ class PIDClient:
 
         if root_topic == STANDARD_ROOT_TOPIC:
             self.standard = True
-            # control_effort_topic = root_topic + axis + "/control_effort"
         else:
             self.standard = False
-            # control_effort_topic = "/" + self.sub_name + "/cusub_common/motor_controllers/cv/" + self.axis + "/control_effort"
 
         enable_topic = root_topic + axis + "/pid_enable"
         disable_topic = root_topic + axis + "/pid_enable"
@@ -45,7 +43,6 @@ class PIDClient:
 
         self.enable_pub = rospy.Publisher(enable_topic, Bool, queue_size=10)
         self.disable_pub = rospy.Publisher(disable_topic, Bool, queue_size=10)
-        # self.end_control_effort_pub = rospy.Publisher(control_effort_topic, Float64, queue_size=10)
         self.setpoint_pub = rospy.Publisher(setpoint_topic, Float64, queue_size=10)
         self.state_pub = rospy.Publisher(state_topic, Float64, queue_size=10)
         self.standard_setpoint_pub = rospy.Publisher(standard_setpoint_topic, Float64, queue_size=10)
