@@ -41,6 +41,12 @@ tasks:
     outcome_not_found: 'skip'
     outcome_timed_out: 'skip'
   prior: [22.33, 15.28, -1.8]
+  seconds_in_position: 2
+  new_dv_check_rate: 30
+  mag_target: 152600 # target dvector magnitude
+  elev_target: 0.0 # 
+  elev_thresh: 0.05
+  slay_carrot_dist: 1
 
  triangle:
   manager_info:

@@ -64,14 +64,14 @@ class Approach(Objective):
         self.drive_client = PIDClient(name, "drive", "cusub_common/motor_controllers/mag_pid/")
         self.depth_client = PIDClient(name, "depth", "cusub_common/motor_controllers/elev_pid/")
 
-        seconds = 2
-        self.rate = 30
+        seconds = rospy.get_param("tasks/jiangshi/seconds_in_position")
+        self.rate = rospy.get_param("tasks/jiangshi/new_dv_check_rate")
         self.count_target = seconds * self.rate
         self.count = 0
         
-        self.mag_target = 152600
-        self.elev_target = 0.0
-        self.elev_thresh = 0.05
+        self.mag_target = rospy.get_param("tasks/jiangshi/mag_target")
+        self.elev_target = rospy.get_param("tasks/jiangshi/elev_target")
+        self.elev_thresh = rospy.get_param("tasks/jiangshi/elev_thresh")
     
     def execute(self, userdata):
         self.smprint("executing")
@@ -144,14 +144,14 @@ class Slay(Objective):
         name = task_name + "/Slay"
         super(Slay, self).__init__(self.outcomes, name)
         self.drive_client = PIDClient(name, "drive")
-
+        self.carrot_dist = rospy.get_param("tasks/jiangshi/slay_carrot_dist")
 
     def execute(self, userdata):
         self.smprint("executing")
         self.wayToggle(False)
         self.drive_client.enable()
         cur_state = self.drive_client.get_standard_state()
-        self.drive_client.set_setpoint(cur_state + 1)
+        self.drive_client.set_setpoint(cur_state + self.carrot_dist)
         rospy.sleep(10)
         self.smprint("slayed")
         self.drive_client.disable()
@@ -164,12 +164,13 @@ class Backup(Objective):
         name = task_name + "/Backup"
         super(Backup, self).__init__(self.outcomes, name)
         self.drive_client = PIDClient(name, "drive")
+        self.carrot_dist = rospy.get_param("tasks/jiangshi/slay_carrot_dist")
 
     def execute(self, userdata):
         self.smprint("executing")
         cur_state = self.drive_client.get_standard_state()
         self.drive_client.enable()
-        self.drive_client.set_setpoint(cur_state - 1)
+        self.drive_client.set_setpoint(cur_state - self.slay_carrot_dist)
         rospy.sleep(10)
         self.wayToggle(True)
         self.drive_client.disable()
