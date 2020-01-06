@@ -1,6 +1,6 @@
 <launch>
 
-    <arg name="config_filename" default="mission_config_FINALS.yaml"/>
+    <arg name="config_filename" default="mission_config_2020.yaml"/>
     <arg name="using_darknet" default="true"/> <!-- Tells SM whether or not to configure darknet cameras per task -->
     <arg name="sub" default="leviathan" />
     <!-- Include the mission config parameters -->
