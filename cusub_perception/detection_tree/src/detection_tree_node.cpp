@@ -63,7 +63,7 @@ int DetectionTree::transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_p
             double yaw = atan2(delta2, delta1);
             double tmp = sqrt( pow(delta1,2) + pow(delta2,2) );
             double pitch = atan2(delta3, tmp);
-            pitch *= -1; // flip pitch
+            pitch *= -1; // flip pitch to actually align with odom frame
             double roll = 0.0;
 
             tf2::Quaternion cam_quat_tf;
@@ -72,8 +72,8 @@ int DetectionTree::transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_p
             odom_cam_pose.pose.orientation = tf2::toMsg(cam_quat_tf);
 
             det_print("------------------");
-            det_print(to_string(yaw * (180 / 3.1415)));
-            det_print(to_string(pitch * (180 / 3.1415)));
+            det_print(string("yaw: ") + to_string(yaw * (180 / 3.1415)) + string(" deg"));
+            det_print(string("pitch ") + to_string(pitch * (180 / 3.1415)) + string(" deg"));
             std::cout << odom_cam_pose.pose.orientation << std::endl;
             // det_print(to_string(delta_z));
             // Calculate the orientation in quaternions

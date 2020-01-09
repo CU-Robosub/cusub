@@ -24,7 +24,7 @@
       <arg name="y" default="$(arg PM1_y)"/>
       <arg name="z" default="$(arg PM1_z)"/>
       <arg name="yaw" default="$(arg PM1_yaw)"/>
-  </include>
+  </include> -->
 
   <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="dropper_garlic"/>
@@ -32,7 +32,7 @@
       <arg name="y" default="$(arg DROP_y)"/>
       <arg name="z" default="$(arg DROP_z)"/>
       <arg name="yaw" default="$(arg DROP_yaw)"/>
-  </include> -->
+  </include>
 
   <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="StartGate"/>
@@ -50,13 +50,13 @@
       <arg name="yaw" default="$(arg TASK_yaw)"/>
   </include> -->
 
-    <include file="$(find robosub_descriptions)/launch/upload.launch">
+    <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="triangular_buoy"/>
       <arg name="x" default="$(arg TASK_x)"/>
       <arg name="y" default="$(arg TASK_y)"/>
       <arg name="z" default="$(arg TASK_z)"/>
       <arg name="yaw" default="$(arg TASK_yaw)"/>
-  </include>
+  </include> -->
 
   <!-- <rosparam file="$(find robosub_descriptions)/config/triangular_bouy_control.yaml" command="load"/>
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
@@ -79,22 +79,22 @@
                 pose:
                   position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
                   orientation: [0, 0, $(arg TASK_yaw)] -->
-              TriangleBuoy_1:
+              <!-- TriangleBuoy_1:
                 mesh: package://robosub_descriptions/models/triangular_buoy/triangular_buoy.dae
                 pose:
                   position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
-                  orientation: [0, 0, $(arg TASK_yaw)] 
+                  orientation: [0, 0, $(arg TASK_yaw)]  -->
               <!-- PathMarker_1:
                 mesh: package://robosub_descriptions/models/PathMarker/PathMarker.dae
                 pose:
                   position: [$(arg PM1_x), $(arg PM1_y), $(arg PM1_z)]
                   orientation: [1.57, 0, $(arg PM1_yaw)] -->
-            <!-- meshes: 
+            meshes: 
               DropperGarlic_1:
                 mesh: package://robosub_descriptions/models/dropper_garlic/dropper_garlic.dae
                 pose:
-                  position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
-                  orientation: [1.57, 0, $(arg TASK_yaw)] -->
+                  position: [$(arg DROP_x), $(arg DROP_y), $(arg DROP_z)]
+                  orientation: [1.57, 0, $(arg DROP_yaw)]
         </rosparam>
   </node>
 
