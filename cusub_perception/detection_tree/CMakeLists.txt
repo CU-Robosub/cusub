@@ -42,4 +42,5 @@ include_directories(
 
 add_library( detection_tree_node 
 src/detection_tree_node.cpp )
+add_dependencies(detection_tree_node detection_tree_generate_messages_cpp)
 target_link_libraries(detection_tree_node ${catkin_LIBRARIES})

@@ -48,6 +48,7 @@ int DetectionTree::transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_p
             point_pose.header = image_header;
             cam_pose.pose.orientation.w = 1;
             point_pose.pose.orientation.w = 1;
+
             // cam_pose.header.frame_id = cam_frame; // don't want "_optical" in frame id
             listener.transformPose(sub_frame, cam_pose, odom_cam_pose);
             
@@ -136,7 +137,20 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         // Get bearing vector in local camera frame
         int center_x = (box.xmax + box.xmin) / 2;
         int center_y = (box.ymax + box.ymin) / 2;
+
+        // Correct the center point for camera image scaling
+        if(bbs->image.height != ci.height || bbs->image.width != ci.width){
+
+            float scale_x = ((float) ci.width) / ((float) bbs->image.width);
+            float scale_y = ((float) ci.height) / ((float) bbs->image.height); 
+            center_x *= scale_x;
+            center_y *= scale_y;
+
+        }
+
         Point2f pt(center_x, center_y);
+
+
         vector<cv::Point2f> pts = {pt};
         vector<cv::Point2f> upts;
         undistortPoints(pts, upts, K, D, cv::noArray(),  K);
