@@ -36,9 +36,6 @@ int DetectionTree::transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_p
     std::string sub_frame = "/" + sub_name + "/description/odom";
     geometry_msgs::PoseStamped odom_point_pose;
     size_t length = image_header.frame_id.length();
-    // size_t length = bbs->image_header.frame_id.length();
-    // string cam_frame = image_header.frame_id.substr(0, length-8); // trim _optical
-
     string cam_frame = image_header.frame_id; //.substr(0, length-8); // trim _optical
     try{
         if( listener.waitForTransform(cam_frame, sub_frame, image_header.stamp, ros::Duration(1.0)) )
@@ -49,15 +46,16 @@ int DetectionTree::transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_p
             cam_pose.pose.orientation.w = 1;
             point_pose.pose.orientation.w = 1;
 
-            // cam_pose.header.frame_id = cam_frame; // don't want "_optical" in frame id
+            // transform camera pose
             listener.transformPose(sub_frame, cam_pose, odom_cam_pose);
             
-            // TODO transform both points, take the difference, get the angles, get quaternions, throw it back
+            // transform detection point
             point_pose.pose.position.x = bearing_vec.at<double>(0,0);
             point_pose.pose.position.y = bearing_vec.at<double>(0,1);
             point_pose.pose.position.z = bearing_vec.at<double>(0,2);
             listener.transformPose(sub_frame, point_pose, odom_point_pose);
 
+            // take the difference between the two transformed points, then get the angles from the difference
             double delta1 = odom_point_pose.pose.position.x - odom_cam_pose.pose.position.x;
             double delta2 = odom_point_pose.pose.position.y - odom_cam_pose.pose.position.y;
             double delta3 = odom_point_pose.pose.position.z - odom_cam_pose.pose.position.z;
@@ -72,30 +70,9 @@ int DetectionTree::transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_p
             cam_quat_tf.normalize();
             odom_cam_pose.pose.orientation = tf2::toMsg(cam_quat_tf);
 
-            det_print("------------------");
-            det_print(string("yaw: ") + to_string(yaw * (180 / 3.1415)) + string(" deg"));
-            det_print(string("pitch ") + to_string(pitch * (180 / 3.1415)) + string(" deg"));
-            std::cout << odom_cam_pose.pose.orientation << std::endl;
-            // det_print(to_string(delta_z));
-            // Calculate the orientation in quaternions
-            // tf2::Quaternion cam_quat_tf;
-            // float yaw = -bearing_vec.at<double>(0,0); // flip yaw to match odom coords
-            // float pitch = bearing_vec.at<double>(0,1); // flip pitch
-            // float roll = 0;
-            // if (cam_frame.find("downcam") != std::string::npos) {
-                // yaw -= 45;
-                // pitch -= 45;
-            // }
-            // det_print("bearing beforehand");
-            // det_print(string("pitch: ") + to_string(pitch * (180/3.14159265)));
-            // det_print(string("yaw: ") + to_string(yaw * (180/3.14159265)));
-            // cam_quat_tf.setRPY( roll, pitch, yaw );
-            // cam_quat_tf.normalize();
-
-            // Convert tf::quaternion to geometry_msgs::Quaternion
-            // cam_pose.pose.orientation = tf2::toMsg(cam_quat_tf);
-            // listener.transformPose(sub_frame, cam_pose, odom_cam_pose);
-
+            // det_print("------------------");
+            // det_print(string("yaw: ") + to_string(yaw * (180 / 3.1415)) + string(" deg"));
+            // det_print(string("pitch ") + to_string(pitch * (180 / 3.1415)) + string(" deg"));
         } else {
             det_print_warn(string("Detection Tree missed transform. Throwing out detection."));
             return -1;
@@ -172,11 +149,6 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         tf2::fromMsg(odom_cam_pose.pose.orientation, odom_quat);
         tf2::Matrix3x3 m(odom_quat);
         m.getRPY(roll_odom, pitch_odom, yaw_odom);
-        // det_print("transformed bearing");
-        // det_print(string("roll: ") + to_string(roll_odom * (180/3.14159265)));
-        // det_print(string("pitch: ") + to_string(pitch_odom * (180/3.14159265)));
-        // det_print(string("yaw: ") + to_string(yaw_odom * (180/3.14159265)));
-        // det_print("--------------------");
 
         // Create Dvector
         detection_tree::Dvector* dv = new detection_tree::Dvector; // we'll be storing it globally
@@ -348,11 +320,6 @@ void DetectionTree::associateDvectors(std::vector<detection_tree::Dvector*>& dv_
     {
         delete it_dv->second;
     }
-    // while num keys in dvs_scored > 0
-    //  findBestMatch()
-    //  add new entry to dv_dobj_map
-    //  remove entry from dvs_scored
-    //  setDobjProbabilityToZero( that dobj )
 }
 
 void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfo ci)
