@@ -141,7 +141,6 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         int ret = transformBearingToOdom(odom_cam_pose, bearing_vec, image_header);
         if (ret) continue; // failed transform
         debug_dv_pose_pub.publish(odom_cam_pose);
-        continue;
 
         // Extract roll, pitch, yaw in odom frame
         double roll_odom, pitch_odom, yaw_odom;
