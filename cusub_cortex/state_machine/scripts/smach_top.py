@@ -14,6 +14,7 @@ from waypoint_navigator.srv import ToggleControl
 from waypoint_navigator.msg import waypointAction, waypointGoal
 import actionlib
 from tasks.jiangshi_det import Jiangshi
+from tasks.droppers_det import Droppers
 from tasks.start_gate import StartGate
 # from tasks.bangbang_dice_task import BangBangDiceTask
 # from tasks.bangbang_roulette_task import BangBangRouletteTask
@@ -24,7 +25,7 @@ from tasks.start_gate import StartGate
 from tasks.manager import Manager
 from tasks.task import Timeout
 from tasks.path import Path
-from tasks.dropper import Dropper
+# from tasks.dropper import Dropper
 from tasks.startup_task import Startup
 from tasks.triangle import Triangle
 from tasks.octagon import Octagon
@@ -73,8 +74,8 @@ def loadStateMachines(task_list):
             task_sm = Path("0")
         elif task == "path1":
             task_sm = Path("1")
-        elif task == "dropper":
-            task_sm = Dropper()
+        elif task == "droppers":
+            task_sm = Droppers()
         elif task == "startup":
             task_sm = Startup()
         elif task == "triangle":
