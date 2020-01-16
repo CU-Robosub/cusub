@@ -72,10 +72,10 @@ int DetectionTree::transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_p
             cam_quat_tf.normalize();
             odom_cam_pose.pose.orientation = tf2::toMsg(cam_quat_tf);
 
-            det_print("------------------");
-            det_print(string("yaw: ") + to_string(yaw * (180 / 3.1415)) + string(" deg"));
-            det_print(string("pitch ") + to_string(pitch * (180 / 3.1415)) + string(" deg"));
-            std::cout << odom_cam_pose.pose.orientation << std::endl;
+            // det_print("------------------");
+            // det_print(string("yaw: ") + to_string(yaw * (180 / 3.1415)) + string(" deg"));
+            // det_print(string("pitch ") + to_string(pitch * (180 / 3.1415)) + string(" deg"));
+            // std::cout << odom_cam_pose.pose.orientation << std::endl;
             // det_print(to_string(delta_z));
             // Calculate the orientation in quaternions
             // tf2::Quaternion cam_quat_tf;
@@ -164,7 +164,6 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         int ret = transformBearingToOdom(odom_cam_pose, bearing_vec, image_header);
         if (ret) continue; // failed transform
         debug_dv_pose_pub.publish(odom_cam_pose);
-        continue;
 
         // Extract roll, pitch, yaw in odom frame
         double roll_odom, pitch_odom, yaw_odom;

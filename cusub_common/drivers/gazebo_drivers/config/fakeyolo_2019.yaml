@@ -66,50 +66,50 @@ yolo_faker:
     - name: 'start_gate_pole'
       debug_color: [0,255,0]
       points: [[ 0.430, -0.075, 0.000],[ 0.250, -0.075, 0.000],[0.430, 0.075,0.000],[0.250,0.075,0.000],[ 0.430, -0.075, -0.750],[ 0.250, -0.075, -0.750],[0.430, 0.075, -0.750],[0.250,0.075, -0.750]]
-  path0:
-   link: 'PathMarker_1/base_link'
-   odom_topic: '/PathMarker_1/pose_gt'
-   classes:
-    - name: 'path'
-      debug_color: [0, 255, 0]
-      points: [[-0.076, 0.076,  0.000],[-0.076, -0.076,  0.000],[ 0.427,  0.076,  0.000],[ 0.498, -0.076,  0.00],[ 0.780,  0.427,  0.000],[ 0.888,  0.325,  0.00],[ 0.600,  0.325, -0.256],[ 0.780,  0.145, -0.256],[ 0.130,  0.130, -0.256],[ 0.130, -0.130, -0.256]]
-  path1:
-   link: 'PathMarker_2/base_link'
-   odom_topic: '/PathMarker_2/pose_gt'
-   classes:
-    - name: 'path'
-      debug_color: [0, 255, 0]
-      points: [[-0.076, 0.076,  0.000],[-0.076, -0.076,  0.000],[ 0.427,  0.076,  0.000],[ 0.498, -0.076,  0.00],[ 0.780,  0.427,  0.000],[ 0.888,  0.325,  0.00],[ 0.600,  0.325, -0.256],[ 0.780,  0.145, -0.256],[ 0.130,  0.130, -0.256],[ 0.130, -0.130, -0.256]]
-  jiangshi:
-   link: 'buoy_jiangshi_1/base_link'
-   odom_topic: '/buoy_jiangshi_1/pose_gt'
-   classes:
-    - name: 'vampire_cute'
-      debug_color: [0, 255, 0]
-      points: [ [-0.4048, -0.0508, 0.6096], [ 0.4048, -0.0508,  0.6096], [-0.4048, -0.0508, -.6096], [ 0.4048, -0.0508,  -.6096] ]
-  triangle:
-   link: 'triangular_buoy_1/buoy_link'
-   odom_topic: '/triangular_buoy_1/pose_gt'
-   classes:
-    - name: 'vampire_no_torso'
-      debug_color: [200,200,0]
-      points: [[0.35,-0.19,3.12],[0.02,0.37,3.12],[0.02,0.37,1.86],[0.35,-0.19,1.86]]
-    - name: 'vampire_fathead'
-      debug_color: [0,200,200]
-      points: [[0.0,0.37,3.12],[-0.35,-0.18,3.12],[0.0,0.37,1.86],[-0.35,-0.18,1.86]]
-    - name: 'vampire_flying'  
-      debug_color: [200,0,200]
-      points: [[-0.32,-0.23,3.12],[0.34,-0.22,3.12],[0.34,-0.22,1.86],[-0.32,-0.23,1.86]]
-  dropper:
-   link: 'dropper_garlic_1/base_link'
-   odom_topic: '/dropper_garlic_1/pose_gt'
-   classes:
-    - name: 'dropper_cover'
-      debug_color: [255, 0, 0]
-      points: [[-0.05,.53,0.1],[.4,.53,0.1],[-0.05,1.1,0.1],[.4,1.1,0.1]]
-    - name: 'wolf'
-      debug_color: [0,0,255]
-      points: [[.72,.55,-0.1],[1,.55,-.1],[.72,1.09,-.1],[1,1.09,-0.1]]
+  # path0:
+  #  link: 'PathMarker_1/base_link'
+  #  odom_topic: '/PathMarker_1/pose_gt'
+  #  classes:
+  #   - name: 'path'
+  #     debug_color: [0, 255, 0]
+  #     points: [[-0.076, 0.076,  0.000],[-0.076, -0.076,  0.000],[ 0.427,  0.076,  0.000],[ 0.498, -0.076,  0.00],[ 0.780,  0.427,  0.000],[ 0.888,  0.325,  0.00],[ 0.600,  0.325, -0.256],[ 0.780,  0.145, -0.256],[ 0.130,  0.130, -0.256],[ 0.130, -0.130, -0.256]]
+  # path1:
+  #  link: 'PathMarker_2/base_link'
+  #  odom_topic: '/PathMarker_2/pose_gt'
+  #  classes:
+  #   - name: 'path'
+  #     debug_color: [0, 255, 0]
+  #     points: [[-0.076, 0.076,  0.000],[-0.076, -0.076,  0.000],[ 0.427,  0.076,  0.000],[ 0.498, -0.076,  0.00],[ 0.780,  0.427,  0.000],[ 0.888,  0.325,  0.00],[ 0.600,  0.325, -0.256],[ 0.780,  0.145, -0.256],[ 0.130,  0.130, -0.256],[ 0.130, -0.130, -0.256]]
+  # jiangshi:
+  #  link: 'buoy_jiangshi_1/base_link'
+  #  odom_topic: '/buoy_jiangshi_1/pose_gt'
+  #  classes:
+  #   - name: 'vampire_cute'
+  #     debug_color: [0, 255, 0]
+  #     points: [ [-0.4048, -0.0508, 0.6096], [ 0.4048, -0.0508,  0.6096], [-0.4048, -0.0508, -.6096], [ 0.4048, -0.0508,  -.6096] ]
+  # triangle:
+  #  link: 'triangular_buoy_1/buoy_link'
+  #  odom_topic: '/triangular_buoy_1/pose_gt'
+  #  classes:
+  #   - name: 'vampire_no_torso'
+  #     debug_color: [200,200,0]
+  #     points: [[0.35,-0.19,3.12],[0.02,0.37,3.12],[0.02,0.37,1.86],[0.35,-0.19,1.86]]
+  #   - name: 'vampire_fathead'
+  #     debug_color: [0,200,200]
+  #     points: [[0.0,0.37,3.12],[-0.35,-0.18,3.12],[0.0,0.37,1.86],[-0.35,-0.18,1.86]]
+  #   - name: 'vampire_flying'  
+  #     debug_color: [200,0,200]
+  #     points: [[-0.32,-0.23,3.12],[0.34,-0.22,3.12],[0.34,-0.22,1.86],[-0.32,-0.23,1.86]]
+  # dropper:
+  #  link: 'dropper_garlic_1/base_link'
+  #  odom_topic: '/dropper_garlic_1/pose_gt'
+  #  classes:
+  #   - name: 'dropper_cover'
+  #     debug_color: [255, 0, 0]
+  #     points: [[-0.05,.53,0.1],[.4,.53,0.1],[-0.05,1.1,0.1],[.4,1.1,0.1]]
+  #   - name: 'wolf'
+  #     debug_color: [0,0,255]
+  #     points: [[.72,.55,-0.1],[1,.55,-.1],[.72,1.09,-.1],[1,1.09,-0.1]]
   # torpedo:
   #  link: 'vampire_stake_1/base_link'
   #  odom_topic: '/vampire_stake_1/pose_gt'
@@ -123,17 +123,17 @@ yolo_faker:
   #   - name: 'heart'
   #     debug_color: [200,150,50]
   #     points: [[0.3,-0.02,-0.1],[0.4,-0.02,-0.1],[0.4,-0.02,-0.18],[0.3,-0.02,-0.18]]
-  coffin_1:
-   link: 'coffin_1/base_link'
-   odom_topic: '/coffin_1/pose_gt'
-   classes:
-    - name: 'coffin'
-      debug_color: [20,40,70]
-      points: [[ -0.30, 0.0, 1.42],[ 0.30, 0.0,  1.42],[ 0.30,  0.0, 1.2],[ -0.30,  0.0,  1.2],[ -0.30, 0.30, 1.42],[ 0.30, 0.30,  1.42],[ 0.30,  0.30, 1.2],[ -0.30,  0.30,  1.2]]
-  coffin_2:
-   link: 'coffin_2/base_link'
-   odom_topic: '/coffin_2/pose_gt'
-   classes:
-    - name: 'coffin'
-      debug_color: [20,40,70]
-      points: [[ -0.30, 0.0, 1.42],[ 0.30, 0.0,  1.42],[ 0.30,  0.0, 1.2],[ -0.30,  0.0,  1.2],[ -0.30, 0.30, 1.42],[ 0.30, 0.30,  1.42],[ 0.30,  0.30, 1.2],[ -0.30,  0.30,  1.2]]
+  # coffin_1:
+  #  link: 'coffin_1/base_link'
+  #  odom_topic: '/coffin_1/pose_gt'
+  #  classes:
+  #   - name: 'coffin'
+  #     debug_color: [20,40,70]
+  #     points: [[ -0.30, 0.0, 1.42],[ 0.30, 0.0,  1.42],[ 0.30,  0.0, 1.2],[ -0.30,  0.0,  1.2],[ -0.30, 0.30, 1.42],[ 0.30, 0.30,  1.42],[ 0.30,  0.30, 1.2],[ -0.30,  0.30,  1.2]]
+  # coffin_2:
+  #  link: 'coffin_2/base_link'
+  #  odom_topic: '/coffin_2/pose_gt'
+  #  classes:
+  #   - name: 'coffin'
+  #     debug_color: [20,40,70]
+  #     points: [[ -0.30, 0.0, 1.42],[ 0.30, 0.0,  1.42],[ 0.30,  0.0, 1.2],[ -0.30,  0.0,  1.2],[ -0.30, 0.30, 1.42],[ 0.30, 0.30,  1.42],[ 0.30,  0.30, 1.2],[ -0.30,  0.30,  1.2]]
