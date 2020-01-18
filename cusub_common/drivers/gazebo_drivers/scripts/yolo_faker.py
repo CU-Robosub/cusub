@@ -545,7 +545,7 @@ class YOLOFaker(object):
 
             # check that we are not beyond viewing distance
             try:
-                self.listener.waitForTransform(camera.frame, obj.frame_id, time, rospy.Duration(1))
+                self.listener.waitForTransform(camera.frame, obj.frame_id, time, rospy.Duration(0.0))
             except tf.Exception:
                 # For some reason this objects transform does not exist
                 # returning an empty list
