@@ -33,13 +33,13 @@ class Dobject:
 
         # Check if we have any available dvs
         dv_last_time = self.dvectors[-1].camera_header.stamp
-        if past_time > dv_time:
+        if past_time > dv_last_time:
             self.lock.release()
             return None
         else: # we have dvs available
             for i in reversed(range(len(self.dvectors))):
-                dv_time = self.dvectors[i].camera_header.stamp
-                if past_time > dv_time:
+                dv_last_time = self.dvectors[i].camera_header.stamp
+                if past_time > dv_last_time:
                     self.lock.release()
                     return self.dvectors[i+1:] # won't be out of range since we checked the first
             # All dv's are in the timespan
