@@ -20,7 +20,7 @@
     </include>
 
     <!-- Nodelets -->
-
+    
     <!-- Occam -->
     <!-- Localizer -->
     <node pkg="nodelet" type="nodelet" name="localizer" args="load localizer/Localizer standalone_nodelet" output="screen" respawn="true"/>

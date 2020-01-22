@@ -14,7 +14,8 @@ from waypoint_navigator.srv import ToggleControl
 from waypoint_navigator.msg import waypointAction, waypointGoal
 import actionlib
 from tasks.jiangshi_det import Jiangshi
-from tasks.droppers_det import Droppers
+# from tasks.droppers_det import Droppers
+from tasks.droppers_z_plane import Droppers
 from tasks.start_gate import StartGate
 # from tasks.bangbang_dice_task import BangBangDiceTask
 # from tasks.bangbang_roulette_task import BangBangRouletteTask
