@@ -1,0 +1,4 @@
+Kd: 20.0
+Ki: 3.5
+Kp: 15
+windup_limit: 10

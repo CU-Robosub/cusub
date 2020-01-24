@@ -1,6 +1,6 @@
 [submodule "cusub_sim/uuv_simulator"]
 	path = cusub_sim/uuv_simulator
-	url = https://github.com/uuvsimulator/uuv_simulator
+	url = https://github.com/CU-Robosub/uuv_simulator
 
 [submodule "cusub_perception/darknet_ros/darknet"]
 	path = cusub_perception/darknet_ros/darknet

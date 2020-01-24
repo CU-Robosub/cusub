@@ -1,0 +1,10 @@
+<launch>
+    <rosparam command="load" file="$(find detection_tree)/config/detection_tree.yaml"/>
+    <arg name="standalone" default="true" />
+    <arg name="manager_name" default="detection_tree_nodelet" />
+
+    <!-- Manager if standalone-->
+    <node pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen" if="$(arg standalone)"/>
+    <!-- Detection Tree -->
+    <node pkg="nodelet" type="nodelet" name="detection_tree" args="load detection_tree/DetectionTree $(arg manager_name)" output="screen"/>
+</launch>
