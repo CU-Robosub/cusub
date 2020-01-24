@@ -22,7 +22,7 @@
     <arg name="manager_name" default="perception_nodelet" />
     <node pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen"/>
     <!-- Localizer -->
-    <!-- <node pkg="nodelet" type="nodelet" name="localizer" args="load localizer/Localizer $(arg manager_name)" output="screen"/> -->
+    <node pkg="nodelet" type="nodelet" name="localizer" args="load localizer/Localizer $(arg manager_name)" output="screen"/>
     <!-- Multiplexer -->
     <node pkg="nodelet" type="nodelet" name="darknet_multiplexer" args="load darknet_multiplexer/Multiplexer $(arg manager_name)" output="screen" />
     <!-- Debug -->

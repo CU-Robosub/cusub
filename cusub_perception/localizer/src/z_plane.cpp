@@ -129,26 +129,32 @@ namespace pose_generator
                 // Transform the point into world space as well as the camera center
                 std::string reference_frame("leviathan/description/odom");
                 std::string camera_frame(image.header.frame_id);
+                geometry_msgs::Point cam_pt, ray_pt;
+                try {
+                    listener.waitForTransform(reference_frame, camera_frame, image.header.stamp, ros::Duration(5.0));
 
-                listener.waitForTransform(reference_frame, camera_frame, image.header.stamp, ros::Duration(5.0));
+                    cam_pt = transformPoint(
+                            image.header,
+                            reference_frame,
+                            0,
+                            0,
+                            0
+                        );
 
-                geometry_msgs::Point cam_pt =
-                    transformPoint(
-                        image.header,
-                        reference_frame,
-                        0,
-                        0,
-                        0
-                    );
+                    ray_pt = transformPoint(
+                            image.header,
+                            reference_frame,
+                            point_cam_space.at<double>(0),
+                            point_cam_space.at<double>(1),
+                            point_cam_space.at<double>(2)
+                        );
+                }catch(tf::TransformException ex)
+                {
+                    ros::Duration(1.0).sleep();
+                    continue;
+                }
 
-                geometry_msgs::Point ray_pt =
-                    transformPoint(
-                        image.header,
-                        reference_frame,
-                        point_cam_space.at<double>(0),
-                        point_cam_space.at<double>(1),
-                        point_cam_space.at<double>(2)
-                    );
+                
 
                 //ROS_DEBUG_STREAM("\ncam: \n" << cam_pt);
                 //ROS_DEBUG_STREAM("\nraw: \n" << ray_pt);

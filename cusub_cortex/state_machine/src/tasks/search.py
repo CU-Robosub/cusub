@@ -58,6 +58,7 @@ class Search(Objective):
 
         return "found"
 
+    # Checks listener for existence of any of self.target_classes
     def query_listener(self):
         dobj_dict = self.det_listener.query_classes(self.target_classes)
         if not dobj_dict: # No classes present

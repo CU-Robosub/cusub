@@ -18,7 +18,7 @@ class PIDClient:
             - "yaw"
         root_topic : str
         """
-        self.name = objective_name + "/PID Client"
+        self.name = objective_name + "/" + axis.upper() + " Client"
         if axis not in ["drive", "strafe", "depth", "yaw"]:
             rospy.logerr("PID axis unrecognized: " + axis)
         if root_topic[-1] != "/":
@@ -84,11 +84,10 @@ class PIDClient:
         return True
 
     def disable(self):
-        if not self.standard and self.enabled:
+        if not self.standard and self.enabled: # Standard PID loops only get disabled when enabling a nonstandard
             # Freeze in place
             setpoint = self.standard_setpoint_msg
             self.repeated_publish(self.standard_setpoint_pub, setpoint)
-
             b = Bool()
             b.data = True
             self.repeated_publish(self.standard_enable_pub, b)
@@ -110,7 +109,7 @@ class PIDClient:
             b.data = False
             self.repeated_publish(self.enable_pub, b)
 
-        self.enabled = False
+            self.enabled = False
         return True
             
     def set_setpoint(self, data, loop=True):
