@@ -10,7 +10,7 @@
   <arg name="PM1_z" default="-3.5"/>
   <arg name="PM1_yaw" default="-0.75"/>
 
-  <arg name="DROP_x" default="4.0"/>
+  <arg name="DROP_x" default="3.0"/>
   <arg name="DROP_y" default="0.0"/>
   <arg name="DROP_z" default="-3.5"/>
   <arg name="DROP_yaw" default="-0.75"/>

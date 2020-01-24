@@ -69,19 +69,12 @@ tasks:
     go_over_jiangshi_depth: -0.7
     meters_fwd: 2.0
 
- dropper:
+ droppers:
   manager_info:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
   prior: [27.03, 23.5, -1.25]
-  target_pixel_threshold: 50   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
-  approach_depth: -1.5
-  drop_timeout: 120
-  drive_carrot: 1.5
-  depth_carrot: 0.3
-  drop_depth: -2.5
-  drop_depth_timeout: 60
 
  octagon:
   manager_info:
@@ -109,7 +102,7 @@ tasks:
 mission_tasks: # Tasks To Do In Order
   # - startup
   # - start_gate
-  - jiangshi
+  # - jiangshi
   # - triangle
-  # - dropper
+  - droppers
   # - octagon
