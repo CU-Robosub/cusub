@@ -41,12 +41,15 @@ add_library( localizer
   src/jiangshi_watershed.cpp
   src/z_plane.cpp
 )
-target_link_libraries(localizer ${catkin_LIBRARIES})
-if(catkin_EXPORTED_LIBRARIES)
-  add_dependencies(localizer ${catkin_EXPORTED_LIBRARIES})
-  endif()
 
-  add_dependencies(localizer localizer_generate_messages_cpp)
+if(catkin_EXPORTED_LIBRARIES)
+add_dependencies(localizer ${catkin_EXPORTED_LIBRARIES})
+endif()
+
+add_dependencies(localizer localizer_generate_messages_cpp)
+add_dependencies(localizer ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(localizer ${catkin_LIBRARIES})
 
 # Test files
 
@@ -55,6 +58,7 @@ add_executable( start_gate_unit
   src/pose_generator.cpp
   src/start_gate_hough.cpp
 )
+add_dependencies(start_gate_unit ${catkin_EXPORTED_TARGETS})
 target_link_libraries(start_gate_unit ${catkin_LIBRARIES})
 
 add_executable( jiangshi_unit 
@@ -62,4 +66,5 @@ add_executable( jiangshi_unit
   src/pose_generator.cpp
   src/jiangshi_watershed.cpp
 )
+add_dependencies(jiangshi_unit ${catkin_EXPORTED_TARGETS})
 target_link_libraries(jiangshi_unit ${catkin_LIBRARIES})
