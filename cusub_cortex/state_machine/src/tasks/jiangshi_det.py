@@ -34,20 +34,20 @@ class Jiangshi(Task):
         self.search = Search(self.name, self.listener, search_classes, self.get_prior_param())
         self.approach = Approach(self.name, self.listener)
         self.slay = Slay(self.name)
-        self.revisit = Revisit(self.name, self.listener)
+        self.Retrace = Retrace(self.name, self.listener)
         self.backup = Backup(self.name)
 
     def link_objectives(self):
         with self:
             smach.StateMachine.add('Search', self.search, transitions={'found':'Approach', 'not_found':'manager'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
-            smach.StateMachine.add('Revisit', self.revisit, transitions={'found':'Approach', 'not_found':'Search'}, \
+            smach.StateMachine.add('Retrace', self.Retrace, transitions={'found':'Approach', 'not_found':'Search'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
             smach.StateMachine.add('Slay', self.slay, transitions={'slayed':'Backup', 'timed_out':'manager'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
             smach.StateMachine.add('Backup', self.backup, transitions={'backed_up':'manager', 'timed_out':'manager'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
-            smach.StateMachine.add('Approach', self.approach, transitions={'in_position':'Slay', 'timed_out':'manager', 'lost_object':'Revisit'}, \
+            smach.StateMachine.add('Approach', self.approach, transitions={'in_position':'Slay', 'timed_out':'manager', 'lost_object':'Retrace'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
             
 
@@ -99,7 +99,12 @@ class Approach(Objective):
         self.smprint("servoing")
         r = rospy.Rate(self.rate)
         while not rospy.is_shutdown():
+            #check watchdog
+            #if self.watchdog = "expired":
+                #return "lost_object"
             if self.listener.check_new_dv(dobj_num):
+                #reset watchdog
+                #self.watchdog = "restart"
                 [az, el, mag] = self.listener.get_avg_bearing(dobj_num, num_dv=5)
                 self.yaw_client.set_setpoint(az, loop=False)
                 self.drive_client.set_state(mag)
@@ -179,8 +184,50 @@ class Backup(Objective):
 
 
 # TODO
-class Revisit(Objective):
+class Retrace(Objective):
     outcomes = ['found','not_found']
 
+    target_class_id = "vampire_cute"
+
     def __init__(self, task_name, listener):
-        super(Revisit, self).__init__(self.outcomes, task_name + "/Revisit")
+        super(Retrace, self).__init__(self.outcomes, task_name + "/Retrace")
+        self.listener = listener
+
+    def execute(self, userdata):
+        self.smprint("executing R`etrace")
+        dobj_nums = self.listener.query_class(self.target_class_id)
+        if not len(dobj_nums): #shouldn't be possible
+            # do some timeout?
+            userdata.outcome = "timed_out"
+            return "not_found"
+        dobj_num = dobj_nums[0]
+        # get last dvector sub_pt
+        [subx,suby,subz] = self.listener.dobjects.[dobj_num][-1].sub_pt 
+        [az, el, mag] = self.listener.get_avg_bearing(dobj_num, num_dv=5) # maybe check if we have at least 5?
+        # ....OR.....
+        # az = self.listener.dobjects.[dobj_num][-1].azimuth 
+        # el = self.listener.dobjects.[dobj_num][-1].elevation
+        # mag = self.listener.dobjects.[dobj_num][-1].magnitude
+        #set waypoint to this point. Give some distance to account for error in bearing and sub_pt
+        # Take control of waypoint_Nav
+        # Set waypoint
+        count = 0
+        while not rospy.is_shutdown():
+            if self.listener.check_new_dv(dobj_num) and count < 5: #assume we can get 5 hits quickly?
+                #found object again
+                count += 1
+            else 
+                return "found"
+
+            if userdata.timeout_obj.timed_out:
+                self.yaw_client.disable()
+                self.drive_client.disable()
+                self.depth_client.disable()
+                userdata.outcome = "timed_out"
+                return "not_found"
+
+        #clean up if we are killed
+        return "not_found"
+        
+
+
