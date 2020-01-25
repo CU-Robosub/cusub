@@ -18,6 +18,12 @@
   <arg name="DROP_z" default="-3.5"/>
   <arg name="DROP_yaw" default="-0.75"/>
 
+  <arg name="torpedo" default="false"/>
+  <arg name="TO_x" default="3.0"/>
+  <arg name="TO_y" default="0.0"/>
+  <arg name="TO_z" default="-1.5"/>
+  <arg name="TO_yaw" default="-0.75"/>
+
   <!-- Start the a underwater world simulation scenario -->
   <include file="$(find robosub_descriptions)/launch/divewell.launch"/>
 
@@ -28,6 +34,14 @@
       <arg name="z" default="$(arg PM1_z)"/>
       <arg name="yaw" default="$(arg PM1_yaw)"/>
   </include> -->
+
+  <include file="$(find robosub_descriptions)/launch/upload.launch" if="$(arg torpedo)">
+      <arg name="obstacle" default="vampire_stake"/>
+      <arg name="x" default="$(arg TO_x)"/>
+      <arg name="y" default="$(arg TO_y)"/>
+      <arg name="z" default="$(arg TO_z)"/>
+      <arg name="yaw" default="$(arg TO_yaw)"/>
+  </include>
 
   <include file="$(find robosub_descriptions)/launch/upload.launch" if="$(arg droppers)">
       <arg name="obstacle" default="dropper_garlic"/>

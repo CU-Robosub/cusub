@@ -1,0 +1,4 @@
+<launch>
+    <node name="joy" pkg="joy" type="joy_node"/>
+    <node name="yoda_joy" pkg="baby_yoda_description" type="torpedo_joy.py"/>
+</launch>

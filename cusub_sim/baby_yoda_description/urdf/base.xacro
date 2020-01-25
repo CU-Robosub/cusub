@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Loading some constants -->
+  <xacro:include filename="$(find uuv_descriptions)/urdf/common.urdf.xacro"/>
+  <!-- Loading file with sensor macros -->
+  <xacro:include filename="$(find uuv_sensor_ros_plugins)/urdf/sensor_snippets.xacro"/>
+  <!-- Loading the UUV simulator ROS plugin macros -->
+  <xacro:include filename="$(find uuv_gazebo_ros_plugins)/urdf/snippets.xacro"/>
+  <!-- Loading vehicle's specific macros -->
+  <xacro:include filename="$(find baby_yoda_description)/urdf/snippets.xacro"/>
+
+  <!--
+    Vehicle's parameters (remember to enter the model parameters below)
+  -->
+
+  <xacro:property name="x_size" value="0.1524"/>
+  <xacro:property name="y_size"  value="0.0508"/>
+  <xacro:property name="z_size" value="0.0508"/>
+
+  <xacro:property name="mass" value="0.31"/>
+  <!-- Center of gravity -->
+  <xacro:property name="cog" value="0 0 0.0"/>
+  <!-- Fluid density -->
+  <xacro:property name="rho" value="1028"/>
+
+  <xacro:property name="fin_mesh_file" value="file://$(find baby_yoda_description)/mesh/fin.dae"/>
+
+  <!-- Vehicle macro -->
+  <xacro:macro name="baby_yoda_base" params="namespace *gazebo">
+
+      <!-- Rigid body description of the base link -->
+      <link name="${namespace}/base_link">
+
+        <visual>
+          <origin xyz="0 0 0" rpy="0 1.57 0"/>
+          <geometry>
+            <cylinder length="0.1524" radius="0.0254"/>
+          </geometry>
+        </visual>
+
+        <collision>
+          <origin xyz="0 0 0" rpy="0 1.57 0"/>
+          <geometry>
+            <cylinder length="0.1524" radius="0.0254"/>
+          </geometry>
+        </collision>
+
+       <xacro:cylinder_inertia mass="0.31" radius="0.254" length="0.1524"/>
+
+      </link>
+
+    <gazebo reference="${namespace}/base_link">
+      <selfCollide>false</selfCollide>
+    </gazebo>
+
+    <!-- Set up hydrodynamic plugin given as input parameter -->
+    <xacro:insert_block name="gazebo"/>
+
+    <!-- Include the thruster modules -->
+    <xacro:include filename="$(find baby_yoda_description)/urdf/actuators.xacro"/>
+
+    <!-- Include the sensor modules -->
+    <xacro:include filename="$(find baby_yoda_description)/urdf/sensors.xacro"/>
+
+  </xacro:macro>
+
+</robot>

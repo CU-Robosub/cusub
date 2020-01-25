@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Center of buoyancy -->
+    <xacro:property name="baby_yoda_cob" value="0 0 0.015"/>
+
+    <!-- Vehicle's actual volume (Gazebo cannot compute the volume out of the mesh) -->
+    <xacro:property name="baby_yoda_volume" value="0.0003"/>
+
+    <!-- Describing the dimensions of the vehicle's bounding box -->
+    <xacro:property name="baby_yoda_length" value="0.1524"/>
+    <xacro:property name="baby_yoda_width"  value="0.0508"/>
+    <xacro:property name="baby_yoda_height" value="0.0508"/>
+
+    <xacro:property name="rho" value="1028"/>
+
+    <xacro:macro name="baby_yoda_hydro_model" params="namespace">
+      <!-- List of hydrodynamic models this robot's links -->
+      <link name="${namespace}/base_link">
+
+        <fluid_density>${rho}</fluid_density>
+        <flow_velocity_topic>hydrodynamics/current_velocity</flow_velocity_topic>
+
+        <!-- This flag will make the link neutrally buoyant -->
+        <neutrally_buoyant>0</neutrally_buoyant>
+
+        <volume>${baby_yoda_volume}</volume>
+
+        <box>
+          <width>${baby_yoda_width}</width>
+          <length>${baby_yoda_length}</length>
+          <height>${baby_yoda_height}</height>
+        </box>
+
+        <!-- Center of buoyancy -->
+        <center_of_buoyancy>${baby_yoda_cob}</center_of_buoyancy>
+
+        <hydrodynamic_model>
+          <type>fossen</type>
+
+          <xacro:added_mass_cylinder mass="0.29" radius="0.0254" length="0.1524" rho="1028"/>
+
+            <linear_damping>
+              -0.08      0       0       0       0       0
+              0       -1.62    0       0       0       1.50
+              0       0       -1.08    0       -1.00    0
+              0       0       0       -0.13     0       0
+              0       0       0.37      0       -0.20     0
+              0       -0.34     0       0       0       -0.32
+            </linear_damping>
+
+        </hydrodynamic_model>
+
+      </link>
+    </xacro:macro>
+
+</robot>

@@ -1,0 +1,251 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:property name="fin_area" value="0.04155"/>
+  <xacro:property name="fin_drag_coef" value="0.04155"/>
+  <xacro:property name="fin_lift_coef" value="3.0"/>
+  <xacro:property name="fin_rho" value="1028.0"/>
+
+  <xacro:macro name="fin_two_lines_macro_int"
+    params="namespace
+            parent_link
+            fin_id
+            *origin
+            min_joint_limit
+            max_joint_limit
+            mesh_filename
+            fin_dynamics_time_constant
+            fin_cross_section_area
+            fluid_density
+            a0
+            alpha_stall
+            cla
+            cla_stall
+            cda
+            cda_stall
+            current_velocity_topic">
+
+    <joint name="${namespace}/fin${fin_id}_joint" type="revolute">
+        <limit effort="0" lower="${min_joint_limit}" upper="${max_joint_limit}" velocity="0"/>
+        <xacro:insert_block name="origin"/>
+        <axis xyz="0 0 1"/>
+        <parent link="${parent_link}" />
+        <child link="${namespace}/fin${fin_id}" />
+    </joint>
+
+    <link name="${namespace}/fin${fin_id}">
+
+      <inertial>
+        <mass value="0.001" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.000000017" ixy="0.0" ixz="0.0"
+               iyy="0.000000017" iyz="0.0"
+               izz="0.000000017" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.02 0.002 0.05" />
+        </geometry>
+      </visual>
+    </link>
+
+    <gazebo>
+      <plugin name="${namespace}_fin${fin_id}_model" filename="libuuv_fin_ros_plugin.so">
+        <dynamics>
+          <type>FirstOrder</type>
+          <timeConstant>${fin_dynamics_time_constant}</timeConstant>
+        </dynamics>
+
+        <liftdrag>
+          <type>TwoLines</type>
+          <area>${fin_cross_section_area}</area>
+          <fluid_density>${fluid_density}</fluid_density>
+          <a0>${a0}</a0>
+          <alpha_stall>${alpha_stall}</alpha_stall>
+          <cla>${cla}</cla><!-- ^= 0.244 when using deg -->
+          <cla_stall>${cla_stall}</cla_stall>
+          <cda>${cda}</cda>
+          <cda_stall>${cda_stall}</cda_stall>
+        </liftdrag>
+
+        <current_velocity_topic>${current_velocity_topic}</current_velocity_topic>
+        <fin_id>${fin_id}</fin_id>
+        <link_name>${namespace}/fin${fin_id}</link_name>
+        <joint_name>${namespace}/fin${fin_id}_joint</joint_name>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
+
+  <!-- FIN SNIPPETS -->
+  <xacro:macro name="fin_macro" params="namespace fin_id *origin">
+    <xacro:fin_two_lines_macro_int
+      namespace="${namespace}"
+      parent_link="${namespace}/base_link"
+      fin_id="${fin_id}"
+      min_joint_limit="${-80*d2r}"
+      max_joint_limit="${80*d2r}"
+      mesh_filename="${fin_mesh_file}"
+      fin_dynamics_time_constant="0.1"
+      fin_cross_section_area="0.002"
+      current_velocity_topic="hydrodynamics/current_velocity"
+      fluid_density="1027.0"
+      a0="0.0"
+      alpha_stall="0.174533"
+      cla="13.98"
+      cla_stall="0.0"
+      cda="0.0"
+      cda_stall="">
+      <xacro:insert_block name="origin"/>
+    </xacro:fin_two_lines_macro_int>
+  </xacro:macro>
+
+  <xacro:macro name="occam_camera_macro" params="robot_namespace camera_id frame *axis *origin">
+
+  <joint name="${robot_namespace}/camera_${camera_id}_optical_joint" type="fixed">
+    <!-- these values have to be these values otherwise the gazebo camera
+        image won't be aligned properly with the frame it is supposedly
+        originating from -->
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    <parent link="${robot_namespace}/${frame}"/>
+    <child link="${robot_namespace}/${frame}_optical"/>
+  </joint>
+
+  <link name="${robot_namespace}/${frame}_optical">
+  </link>
+
+  <!--camera_link-->
+  <link name="${robot_namespace}/${frame}">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <!--mesh filename="package://simple_arm/meshes/camera.dae"/-->
+        <sphere radius="0.01"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <!--mesh filename="package://simple_arm/meshes/camera.dae"/-->
+        <sphere radius="0.01"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1.0 0 0 1.0"/>
+      </material>
+    </visual>
+  </link>
+
+  <joint name="${robot_namespace}/camera_${camera_id}_joint" type="fixed">
+    <xacro:insert_block name="axis" />
+    <xacro:insert_block name="origin" />
+    <parent link="${namespace}/base_link"/>
+    <child link="${robot_namespace}/${frame}"/>
+  </joint>
+
+  <gazebo reference="${robot_namespace}/${frame}">
+    <sensor type="camera" name="rgb_camera">
+      <update_rate>30.0</update_rate>
+      <camera name="rgb_camera">
+        <!--
+          The correct FOV is 1.0397, but because of gazebo distortion crop we
+           need to inflate it by 20% so it ends up the correct size
+          This will unfortunatly make it report a faulty camera matrix
+          TODO see if camera intrinsics propertys are working maybe we
+           can override
+        -->
+        <horizontal_fov>1.24764</horizontal_fov>
+        <image>
+          <width>752</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.008</stddev>
+        </noise>
+        <distortion>
+          <k1>-0.360085</k1>
+          <k2>0.115116</k2>
+          <k3>0.0</k3>
+          <p1>0.007768</p1>
+          <p2>0.004616</p2>
+          <center>0.5 0.5</center>
+        </distortion>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>camera_${camera_id}</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>${frame}_optical</frameName>
+        <distortionK1>-0.360085</distortionK1>
+        <distortionK2>0.115116</distortionK2>
+        <distortionK3>0.000000</distortionK3>
+        <distortionT1>0.007768</distortionT1>
+        <distortionT2>0.004616</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+  </xacro:macro>
+
+  <xacro:macro name="thruster_macro" params="robot_namespace thruster_id *axis *origin">
+    <link name="${robot_namespace}/thruster_${thruster_id}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 1.5707963 0"/>
+        <geometry>
+          <cylinder radius="0.02" length="0.01"/>
+        </geometry>
+      </visual>
+      <!-- <collision>
+        <origin xyz="0 0 0" rpy="0 1.5707963 0"/>
+        <geometry>
+          <cylinder radius="0.046" length="0.04"/>
+        </geometry>
+      </collision> -->
+      <inertial>
+        <mass value="0.001" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="0.000000017" ixy="0.0" ixz="0.0"
+               iyy="0.000000017" iyz="0.0"
+               izz="0.000000017" />
+      </inertial>
+    </link>
+
+    <joint name="${robot_namespace}/thruster_${thruster_id}_joint" type="continuous">
+      <xacro:insert_block name="axis" />
+      <xacro:insert_block name="origin" />
+      <parent link="${robot_namespace}/base_link" />
+      <child link="${robot_namespace}/thruster_${thruster_id}" />
+    </joint>
+
+    <gazebo>
+      <plugin name="${robot_namespace}_${thruster_id}_thruster_model" filename="libuuv_thruster_ros_plugin.so">
+        <linkName>${robot_namespace}/thruster_${thruster_id}</linkName>
+        <jointName>${robot_namespace}/thruster_${thruster_id}_joint</jointName>
+        <thrusterID>${thruster_id}</thrusterID>
+        <gain>5</gain>
+        <dynamics>
+          <type>FirstOrder</type>
+          <timeConstant>0.2</timeConstant>
+        </dynamics>
+        <conversion>
+          <type>Basic</type>
+          <rotorConstant>0.00001</rotorConstant>
+        </conversion>
+      </plugin>
+    </gazebo>
+
+    <gazebo reference="${robot_namespace}/thruster_${thruster_id}">
+      <selfCollide>false</selfCollide>
+    </gazebo>
+  </xacro:macro>
+
+</robot>
