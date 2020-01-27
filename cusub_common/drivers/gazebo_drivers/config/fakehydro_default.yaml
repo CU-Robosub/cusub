@@ -8,5 +8,7 @@ fakehydro:
       odom_topic: '/dropper_garlic_1/pose_gt'
 
   meas_freq: 2
+  standard_deviation : 10
+  psi_proximity_degrees: 45 # in degrees
   starting_object: dropper # options: 'random', any member of above objecs list
   
