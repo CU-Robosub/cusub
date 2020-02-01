@@ -41,17 +41,12 @@ tasks:
     outcome_not_found: 'skip'
     outcome_timed_out: 'skip'
   prior: [22.33, 15.28, -1.8]
-  method: vs        # solvepnp OR vs
-  solvepnp:
-    use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
-    replan_thresh: 1.0
-    slay_dist: 0.0
-    approach_dist: 2.0
-  visual_servo: # approach and slay
-    goal_percentage_of_frame: 0.4    # Percentage of image for target class
-    slay_timeout: 10                 # How long the slay will last
-    slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
-    target_pixel_threshold: 50    # how close to our target do we need to be    
+  seconds_in_position: 2
+  new_dv_check_rate: 30
+  mag_target: 152600 # target dvector magnitude
+  elev_target: 0.0 # 
+  elev_thresh: 0.05
+  slay_carrot_dist: 1
 
  triangle:
   manager_info:
@@ -74,19 +69,12 @@ tasks:
     go_over_jiangshi_depth: -0.7
     meters_fwd: 2.0
 
- dropper:
+ droppers:
   manager_info:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
   prior: [27.03, 23.5, -1.25]
-  target_pixel_threshold: 50   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
-  approach_depth: -1.5
-  drop_timeout: 120
-  drive_carrot: 1.5
-  depth_carrot: 0.3
-  drop_depth: -2.5
-  drop_depth_timeout: 60
 
  octagon:
   manager_info:
@@ -112,9 +100,9 @@ tasks:
   drop_depth: -2.5
 
 mission_tasks: # Tasks To Do In Order
-  - startup
-  - start_gate # maybe do visual servoing on the gate?
-  - jiangshi
-  - triangle
-  - dropper
-  - octagon
+  # - startup
+  # - start_gate
+  # - jiangshi
+  # - triangle
+  - droppers
+  # - octagon

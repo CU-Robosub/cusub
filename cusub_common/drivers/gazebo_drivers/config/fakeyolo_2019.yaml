@@ -110,19 +110,19 @@ yolo_faker:
     - name: 'wolf'
       debug_color: [0,0,255]
       points: [[.72,.55,-0.1],[1,.55,-.1],[.72,1.09,-.1],[1,1.09,-0.1]]
-  # torpedo:
-  #  link: 'vampire_stake_1/base_link'
-  #  odom_topic: '/vampire_stake_1/pose_gt'
-  #  classes:
-  #   - name: 'dracula'
-  #     debug_color: [50,150,200]
-  #     points: [[0.0,-0.02,0.64],[0.60,-0.02,0.64],[0.60,-0.02,-0.65],[0.0,-0.02,-0.65]]
-  #   - name: 'open_oval'
-  #     debug_color: [150,200,50]
-  #     points: [[0.44,-0.02,0.6],[0.56,-0.02,0.6],[0.56,-0.02,0.39],[0.44,-0.02,0.39]]
-  #   - name: 'heart'
-  #     debug_color: [200,150,50]
-  #     points: [[0.3,-0.02,-0.1],[0.4,-0.02,-0.1],[0.4,-0.02,-0.18],[0.3,-0.02,-0.18]]
+  torpedo:
+   link: 'vampire_stake_1/base_link'
+   odom_topic: '/vampire_stake_1/pose_gt'
+   classes:
+    - name: 'dracula'
+      debug_color: [50,150,200]
+      points: [[0.0,-0.02,0.64],[0.60,-0.02,0.64],[0.60,-0.02,-0.65],[0.0,-0.02,-0.65]]
+    - name: 'open_oval'
+      debug_color: [150,200,50]
+      points: [[0.44,-0.02,0.6],[0.56,-0.02,0.6],[0.56,-0.02,0.39],[0.44,-0.02,0.39]]
+    - name: 'heart'
+      debug_color: [200,150,50]
+      points: [[0.3,-0.02,-0.1],[0.4,-0.02,-0.1],[0.4,-0.02,-0.18],[0.3,-0.02,-0.18]]
   coffin_1:
    link: 'coffin_1/base_link'
    odom_topic: '/coffin_1/pose_gt'

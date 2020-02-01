@@ -13,21 +13,40 @@ from std_msgs.msg import Empty
 from waypoint_navigator.srv import ToggleControl
 from waypoint_navigator.msg import waypointAction, waypointGoal
 import actionlib
+from tasks.jiangshi_det import Jiangshi
+# from tasks.droppers_det import Droppers
+from tasks.droppers_z_plane import Droppers
 from tasks.start_gate import StartGate
-from tasks.bangbang_dice_task import BangBangDiceTask
-from tasks.bangbang_roulette_task import BangBangRouletteTask
-from tasks.naive_visual_servo_objective import NaiveVisualServoTask
+# from tasks.bangbang_dice_task import BangBangDiceTask
+# from tasks.bangbang_roulette_task import BangBangRouletteTask
+# from tasks.naive_visual_servo_objective import NaiveVisualServoTask
 # from tasks.dropper_task import DropperTask
 # from tasks.bangbang_roulette_task import BangBangRouletteTask
-from tasks.jiangshi import Jiangshi
+# from tasks.jiangshi import Jiangshi
 from tasks.manager import Manager
 from tasks.task import Timeout
 from tasks.path import Path
-from tasks.dropper import Dropper
+# from tasks.dropper import Dropper
 from tasks.startup_task import Startup
 from tasks.triangle import Triangle
 from tasks.octagon import Octagon
-from tasks.debug_servo import Debug
+# from tasks.debug_servo import Debug
+
+class bcolors: # For terminal colors
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+def smprint(string, warn=False):
+    if warn:
+        rospy.loginfo("[" + bcolors.OKGREEN + "Startup Script" + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
+    else:
+        rospy.loginfo("[" + bcolors.OKGREEN + "Startup Script" + bcolors.ENDC + "] " + string)
 
 def createTransitionsForManager(task_list, final_outcome):
     transition_dict = {}
@@ -46,7 +65,7 @@ def loadStateMachines(task_list):
     sm_list = []
     for task in task_list:
         task_sm = None
-        rospy.loginfo("Loading " + task + " state machine")
+        smprint("Loading " + bcolors.HEADER + task.capitalize() + bcolors.ENDC + " state machine")
 
         if task == "start_gate":
             task_sm = StartGate()
@@ -56,8 +75,8 @@ def loadStateMachines(task_list):
             task_sm = Path("0")
         elif task == "path1":
             task_sm = Path("1")
-        elif task == "dropper":
-            task_sm = Dropper()
+        elif task == "droppers":
+            task_sm = Droppers()
         elif task == "startup":
             task_sm = Startup()
         elif task == "triangle":
@@ -86,26 +105,26 @@ def main():
     
     # All Objectives depend on the waypoint server so let's wait for it to initalize here
     wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
-    rospy.loginfo("Waiting for waypoint server")
-#    wayClient.wait_for_server()
-    rospy.loginfo("\tconnected to server")
+    smprint("waiting for waypoint server")
+    # wayClient.wait_for_server()
+    smprint("...connected")
 
     # Make sure the waypoint navigator is in control
     #toggle_waypoint = rospy.ServiceProxy('cusub_common/toggleWaypointControl', ToggleControl)
     #toggle_waypoint(True)
 
     if rospy.get_param('~using_darknet'):
-        rospy.loginfo("Waiting for darknet multiplexer server")
+        smprint("waiting for darknet multiplexer server")
  #       rospy.wait_for_service("cusub_perception/darknet_multiplexer/configure_active_cameras")
-        rospy.loginfo("\tconnected to server")
+        smprint("...connected")
     else:
-        rospy.logwarn("SM not using darknet configuration service.")
+        smprint("SM NOT using darknet configuration service.", warn=True)
 
     # initialize all of the state machines
-    rospy.loginfo("Waiting for rosparams")
+    smprint("waiting for rosparams")
     while not rospy.has_param("mission_tasks") and not rospy.is_shutdown():
         rospy.sleep(1)
-    rospy.loginfo("\trosparams found")
+    smprint("...found")
 
     final_outcome = "mission_completed"
     sm_top = smach.StateMachine(outcomes=[final_outcome])
@@ -129,6 +148,7 @@ def main():
                 transitions={'manager':'manager'},\
                 remapping={'outcome':'previous_outcome'}) # all states will transition to the manager) # all states will transition to the manager
     
+        smprint("starting SM")
         outcome = sm_top.execute()
 
 if __name__ == '__main__':
