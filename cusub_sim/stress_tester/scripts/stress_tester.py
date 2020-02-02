@@ -11,6 +11,16 @@ import tf
 import argparse
 import time
 
+class bcolors: # For terminal colors
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 def set_model_state(model_name, pose):
     rospy.wait_for_service('/gazebo/set_model_state')    
     for i in range(3): # repeat 3 times, sometimes gazebo doesn't actually move the model but indicates it does in its modelstate...    
@@ -48,6 +58,8 @@ def main(noise, gazebo_paused):
     if not gazebo_paused:
         raw_input("Gazebo paused?")
 
+    noisy_positions = {}
+
     # loop through all objects in model_locs.yaml
     for model in model_locs.keys():
         [x, y, z, yaw] = model_locs[model]
@@ -58,14 +70,18 @@ def main(noise, gazebo_paused):
             z += np.random.normal(0, z_default_noise)
             yaw += np.random.normal(0, yaw_default_noise)
 
+        noisy_positions[model] = [x,y,z,yaw]
+
         # Generate model's pose
         quat = tf.transformations.quaternion_from_euler(0,0, yaw)
         ori = Quaternion(quat[0],quat[1],quat[2],quat[3])
         pose_in_world = Pose(Point(x,y,z), ori)
 
-        # Move the gazebo model there
-        rospy.loginfo("Moving "+ model)
+        print("moving " + bcolors.HEADER + model + bcolors.ENDC)
         set_model_state(model, pose_in_world)
+
+    with open('model_locs_noisy.yaml', 'w') as f:    
+        yaml.dump(noisy_positions, f)
 
 """ Accept all types of boolean commandline input """
 def str2bool(v):
