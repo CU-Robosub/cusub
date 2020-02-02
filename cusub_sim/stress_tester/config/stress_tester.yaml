@@ -1,0 +1,4 @@
+default_x_noise_std: 1
+default_y_noise_std: 1
+default_z_noise_std: 0
+default_yaw_noise_std_deg: 10
