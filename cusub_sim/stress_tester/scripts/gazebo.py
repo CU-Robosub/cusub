@@ -36,7 +36,7 @@ def main(noise, gazebo_paused):
     # Check we're in the file path we expect
     folder = os.getcwd()
     if folder[-7:] != "scripts":
-        print("Please run stress_tester.py in the scripts folder")
+        print("Please run gazebo.py in the scripts folder")
 
     # cd into the config folder
     os.chdir("../config")
@@ -47,7 +47,7 @@ def main(noise, gazebo_paused):
         model_locs = yaml.load(f, Loader=yaml.FullLoader)
     params = None
     with open('stress_tester.yaml') as f:
-        params = yaml.load(f, Loader=yaml.FullLoader)
+        params = yaml.load(f, Loader=yaml.FullLoader)["sim_gt"]
 
     # Load defualt noise params
     x_default_noise = params["default_x_noise_std"]
