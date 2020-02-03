@@ -62,6 +62,10 @@ def main(noise, gazebo_paused):
 
     # loop through all objects in model_locs.yaml
     for model in model_locs.keys():
+        if model == "mappings": # just add it and continue
+            noisy_positions[model] = model_locs[model]
+            continue
+
         [x, y, z, yaw] = model_locs[model]
         if noise:
             # Check for additional noise
