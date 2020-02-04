@@ -21,18 +21,22 @@ import numpy as np
 from waypoint_navigator.srv import ToggleControl
 import tf
 import copy
+from detection_listener.listener import DetectionListener
 
 class StartGate(Task):
-    name = "start_gate"
+    name = "Start_Gate"
 
     def __init__(self):
-        super(StartGate, self).__init__() # become a state machine first
+        super(StartGate, self).__init__(self.name) # become a state machine first
+        self.listener = DetectionListener() 
         self.init_objectives()
         self.link_objectives()
 
     def init_objectives(self):
-        self.search = Search.from_topic(self.get_prior_param(), "cusub_cortex/mapper_out/start_gate", [1,0,0,0,0,0])
-        self.attack = Attack()
+        search_classes = ["start_gate_pole"]
+        darknet_cameras = [1,1,0,0,1,1] # front 3 occams + downcam
+        self.search = Search(self.name, self.listener, search_classes, self.get_prior_param(), darknet_cameras=darknet_cameras)
+        self.attack = Attack(self.name)
 
     def link_objectives(self):
         with self: # we are a StateMachine
@@ -45,37 +49,37 @@ class Attack(Objective):
     """
     Tell the sub to go through the gate
     """
-
     outcomes=['success', 'timed_out']
 
-    def __init__(self):
-        rospy.loginfo("Loading attack")
-        super(Attack, self).__init__(self.outcomes, "Attack")
-        self.dist_behind = rospy.get_param('tasks/start_gate/dist_behind_gate', 1.0)
-        self.replan_threshold = rospy.get_param('tasks/start_gate/replan_thresh', 1.0)
-        self.leg_adjustment_meters = rospy.get_param('tasks/start_gate/third_leg_adjustment', 0.5)
-        self.style_dist = rospy.get_param('tasks/start_gate/style_dist', 0.5)
-        self.three_leg_dist = rospy.get_param('tasks/start_gate/three_leg_dist', 1.5)
-        self.is_three_leg = False
-        self.do_style = rospy.get_param('tasks/start_gate/do_style', False)
-        self.spin_carrot = rospy.get_param('tasks/start_gate/spin_carrot_rads', 0.3)
-        self.first_pose_received = False
-        self.start_gate_pose = None
-        self.small_leg_left_side = None
-        self.three_leg_depth = rospy.get_param('tasks/start_gate/three_leg_depth', -1.0)
-        self.started = False
-        self.current_yaw = None
-        self.current_depth = None
-        self.yaw_pub = rospy.Publisher("cusub_common/motor_controllers/pid/yaw/setpoint", Float64, queue_size=10)
-        rospy.loginfo("...waiting for cusub_common/toggleWaypointControl")
-        rospy.wait_for_service("cusub_common/toggleWaypointControl")
-        rospy.loginfo("...found service")
-        rospy.Subscriber("cusub_cortex/mapper_out/start_gate", PoseStamped, self.start_gate_callback)
-        rospy.Subscriber("cusub_perception/start_gate/small_pole_left_side", Bool, self.small_leg_callback)
-        rospy.Subscriber("cusub_common/motor_controllers/pid/yaw/state", Float64, self.yaw_callback)
-        # add depth knowledge
-        self.depth_pub = rospy.Publisher("cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
-        self.depth_sub = rospy.Subscriber("cusub_common/motor_controllers/pid/depth/state", Float64, self.depth_callback)
+    def __init__(self, task_name):
+        name = task_name + "/Approach"
+        super(Attack, self).__init__(self.outcomes, name)
+        self.smprint("loading")
+        # self.dist_behind = rospy.get_param('tasks/start_gate/dist_behind_gate', 1.0)
+        # self.replan_threshold = rospy.get_param('tasks/start_gate/replan_thresh', 1.0)
+        # self.leg_adjustment_meters = rospy.get_param('tasks/start_gate/third_leg_adjustment', 0.5)
+        # self.style_dist = rospy.get_param('tasks/start_gate/style_dist', 0.5)
+        # self.three_leg_dist = rospy.get_param('tasks/start_gate/three_leg_dist', 1.5)
+        # self.is_three_leg = False
+        # self.do_style = rospy.get_param('tasks/start_gate/do_style', False)
+        # self.spin_carrot = rospy.get_param('tasks/start_gate/spin_carrot_rads', 0.3)
+        # self.first_pose_received = False
+        # self.start_gate_pose = None
+        # self.small_leg_left_side = None
+        # self.three_leg_depth = rospy.get_param('tasks/start_gate/three_leg_depth', -1.0)
+        # self.started = False
+        # self.current_yaw = None
+        # self.current_depth = None
+        # self.yaw_pub = rospy.Publisher("cusub_common/motor_controllers/pid/yaw/setpoint", Float64, queue_size=10)
+        # rospy.loginfo("...waiting for cusub_common/toggleWaypointControl")
+        # rospy.wait_for_service("cusub_common/toggleWaypointControl")
+        # rospy.loginfo("...found service")
+        # rospy.Subscriber("cusub_cortex/mapper_out/start_gate", PoseStamped, self.start_gate_callback)
+        # rospy.Subscriber("cusub_perception/start_gate/small_pole_left_side", Bool, self.small_leg_callback)
+        # rospy.Subscriber("cusub_common/motor_controllers/pid/yaw/state", Float64, self.yaw_callback)
+        # # add depth knowledge
+        # self.depth_pub = rospy.Publisher("cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
+        # self.depth_sub = rospy.Subscriber("cusub_common/motor_controllers/pid/depth/state", Float64, self.depth_callback)
 
     def yaw_callback(self, msg):
         self.current_yaw = msg.data
