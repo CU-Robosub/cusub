@@ -10,16 +10,9 @@ from gazebo_msgs.srv import SetModelState
 import tf
 import argparse
 import time
+from cusub_print.cuprint import CUPrint, bcolors
 
-class bcolors: # For terminal colors
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+cuprint = CUPrint("Gazebo Mover", ros=False)
 
 def set_model_state(model_name, pose):
     rospy.wait_for_service('/gazebo/set_model_state')    
@@ -36,7 +29,7 @@ def main(noise, gazebo_paused):
     # Check we're in the file path we expect
     folder = os.getcwd()
     if folder[-7:] != "scripts":
-        print("Please run gazebo.py in the scripts folder")
+        cuprint("Please run gazebo.py in the scripts folder")
 
     # cd into the config folder
     os.chdir("../config")
@@ -81,7 +74,7 @@ def main(noise, gazebo_paused):
         ori = Quaternion(quat[0],quat[1],quat[2],quat[3])
         pose_in_world = Pose(Point(x,y,z), ori)
 
-        print("moving " + bcolors.HEADER + model + bcolors.ENDC)
+        cuprint("moving " + bcolors.HEADER + model + bcolors.ENDC)
         set_model_state(model, pose_in_world)
 
     with open('model_locs_noisy.yaml', 'w') as f:    
@@ -104,9 +97,9 @@ if __name__ == "__main__":
     parser.add_argument("-gp", "--gazebo_paused", type=str2bool, default=False, help='bool, indicate if gazebo is already paused. Default: false')
     args = parser.parse_args()
     if args.noise:
-        print("adding noise to gazebo locations")
+        cuprint("adding noise to gazebo locations")
     else:
-        print("NOT adding to gazebo locations")
+        cuprint("NOT adding to gazebo locations")
 
     rospy.init_node("stress_tester")
 

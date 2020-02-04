@@ -5,16 +5,9 @@ import os
 import yaml
 import numpy as np
 import argparse
+from cusub_print.cuprint import CUPrint, bcolors
 
-class bcolors: # For terminal colors
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+cuprint = CUPrint("Prior Generator", ros=False)
 
 def calculate_correct_priors(model_locs):
     priors = {}
@@ -23,11 +16,11 @@ def calculate_correct_priors(model_locs):
         mappings = model_locs["mappings"]
         leviathan = model_locs["leviathan/description"]
     except KeyError as e:
-        print(bcolors.FAIL + "Incorrectly formatted model_locs_noisy.yaml, missing: " + str(e) + bcolors.ENDC)
+        cuprint(bcolors.FAIL + "Incorrectly formatted model_locs_noisy.yaml, missing: " + str(e) + bcolors.ENDC)
         return None
     theta = leviathan[3] # sub's orientation in world frame
     for task in mappings.keys():
-        print("calculating " + bcolors.HEADER + task + bcolors.ENDC + " prior")
+        cuprint("calculating " + bcolors.HEADER + task + bcolors.ENDC + " prior")
         model = mappings[task]["model"]
         xdiff = model_locs[model][0] - leviathan[0]
         ydiff = model_locs[model][1] - leviathan[1]
@@ -51,13 +44,15 @@ def calculate_correct_priors(model_locs):
         priors[task] = [x_prior, y_prior, z_prior]
     return priors
 
-def apply_noise(priors, params, gauss=True, x_bias=True, y_bias=True, yaw_bias=True):
+def apply_noise(priors, leviathan, params, gauss=True, x_bias=True, y_bias=True, yaw_bias=True):
     """
     Applies noise to the priors
 
     params
     ------
     priors : dict
+    leviathan : list
+        [x,y,z,yaw]
     params : dict
     gauss : bool
         apply zero-mean gaussian random noise to all priors that don't indicate not to params?
@@ -76,17 +71,38 @@ def apply_noise(priors, params, gauss=True, x_bias=True, y_bias=True, yaw_bias=T
     x_default_noise = params["default_x_noise_std"]
     y_default_noise = params["default_y_noise_std"]
     z_default_noise = params["default_z_noise_std"]
-    yaw_default_noise = (np.pi/180) * params["default_yaw_noise_std_deg"]
 
-    # loop through all objects in model_locs.yaml
-    for model in model_locs.keys():
-        [x, y, z, yaw] = model_locs[model]
-        if noise:
-            # Check for additional noise
+    # loop through all tasks in priors
+    x_bias = np.random.normal(0, 4)
+    y_bias = np.random.normal(0, 4)
+    yaw_bias = np.random.normal(0,0.3)
+    rotation_matrix = np.array( \
+        [[np.cos(yaw_bias), -np.sin(yaw_bias)],
+        [np.sin(yaw_bias), np.cos(yaw_bias)]]
+        )
+    lev_x, lev_y = leviathan[0], leviathan[1]
+
+    noisy_priors = {}
+    for task in priors.keys():
+        [x, y, z] = priors[task]
+        if gauss:
             x += np.random.normal(0, x_default_noise)
             y += np.random.normal(0, y_default_noise)
             z += np.random.normal(0, z_default_noise)
-            yaw += np.random.normal(0, yaw_default_noise)
+        if x_bias:
+            x += x_bias
+        if y_bias:
+            y += y_bias
+        if yaw_bias:
+            # apply rotation on the prior
+            rotated_coords = np.dot( rotation_matrix, np.array([[x],[y]]) )
+            x = rotated_coords[0,0]
+            y = rotated_coords[1,0]
+        x = round( float(x), 2)
+        y = round( float(y), 2)
+        z = round( float(z), 2)
+        noisy_priors[task] = [x,y,z]
+    return noisy_priors
 
 def write_mission_config(mission_params, priors, new_file_name):
     for task in priors.keys():
@@ -98,7 +114,7 @@ def main(noise, gauss, x_bias, y_bias, yaw_bias):
     # Check we're in the file path we expect
     folder = os.getcwd()
     if folder[-7:] != "scripts":
-        print("Please run priors.py in the scripts folder")
+        cuprint("Please run priors.py in the scripts folder")
     
     # cd into the config folder
     os.chdir("../config")
@@ -115,11 +131,12 @@ def main(noise, gauss, x_bias, y_bias, yaw_bias):
     params = None
     with open('stress_tester.yaml') as f:
         params = yaml.load(f, Loader=yaml.FullLoader)["priors"]
+    leviathan = model_locs["leviathan/description"]
     if noise:
-        print("adding noise to priors")
-        noisy_priors = apply_noise(priors, params, gauss, x_bias, y_bias, yaw_bias)
+        cuprint("adding noise to priors")
+        noisy_priors = apply_noise(priors, leviathan, params, gauss, x_bias, y_bias, yaw_bias)
     else:
-        print("NOT adding noise to priors")
+        cuprint("NOT adding noise to priors")
         noisy_priors = priors
 
     # STEP 3: write the new mission_config
@@ -128,11 +145,11 @@ def main(noise, gauss, x_bias, y_bias, yaw_bias):
     active_mission_config = os.path.realpath("active_mission_config.yaml").split("/")[-1]
     tmp = active_mission_config.split(".")
     new_file_name = tmp[0] + "_noisy." + tmp[1]
-    print("creating config file: " + bcolors.HEADER + new_file_name + bcolors.ENDC)
+    cuprint("creating config file: " + bcolors.HEADER + new_file_name + bcolors.ENDC)
     write_mission_config(mission_params, noisy_priors, new_file_name)
 
     # STEP 4: Update the state machine's symlink
-    print("updating symlink in state_machine: " + bcolors.HEADER + "noisy_mission_config.yaml" + bcolors.ENDC)
+    cuprint("updating symlink in state_machine: " + bcolors.HEADER + "noisy_mission_config.yaml" + bcolors.ENDC)
     src = "../../../cusub_sim/stress_tester/config/" + new_file_name
     dst = "../../../cusub_cortex/state_machine/config/noisy_mission_config.yaml"
     os.symlink(src, dst + ".tmp")
@@ -153,8 +170,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Updates priors for a mission_config. Optionally adds noise to priors.')
     parser.add_argument("-n", "--noise", type=str2bool, default=True, help='bool, add noise to priors. Default: true')
     parser.add_argument("-g", "--gaussian", type=str2bool, default=True, help='bool, add gaussian noise to all priors. Default: true')
-    parser.add_argument("-x", "--x_noise", type=str2bool, default=True, help='bool, adds translational x noise to all priors. Default: true')
-    parser.add_argument("-y", "--y_noise", type=str2bool, default=True, help='bool, adds translational y noise to all priors. Default: true')
-    parser.add_argument("-yaw", "--yaw_noise", type=str2bool, default=True, help="bool, adds rotational noise to all priors about leviathan's truth pose. Default: true")
+    parser.add_argument("-x", "--x_noise", type=str2bool, default=False, help='bool, adds translational x noise to all priors. Default: true')
+    parser.add_argument("-y", "--y_noise", type=str2bool, default=False, help='bool, adds translational y noise to all priors. Default: true')
+    parser.add_argument("-yaw", "--yaw_noise", type=str2bool, default=False, help="bool, adds rotational noise to all priors about leviathan's truth pose. Default: true")
     args = parser.parse_args()
     main(args.noise, args.gaussian, args.x_noise, args.y_noise,args.yaw_noise)
