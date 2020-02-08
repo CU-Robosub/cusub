@@ -205,10 +205,19 @@ class Retrace(Objective):
             # do some timeout?
             userdata.outcome = "timed_out"
             return "not_found"
+
+        #This is an assumption that we only have one dobj, which we *should*
         dobj_num = dobj_nums[0]
+
+        # loop variables
         count = 0
         retraced_steps = 1
         len_dvec = len(self.listener.dobjects[dobj_num].dvectors)
+        last_sub_pt = self.listener.get_d(len_dvec-retraced_steps).sub_pt         
+        last_pose = Pose(last_sub_pt, self.cur_pose.orientation)
+
+        # Start Retrace: Set first waypoint
+        self.go_to_pose_non_blocking(last_pose,userdata.timeout_obj,move_mode="strafe")
         while not rospy.is_shutdown():
             if self.listener.check_new_dv(dobj_num) and count < self.retrace_hit_cnt: 
                 #found object again
@@ -223,9 +232,9 @@ class Retrace(Objective):
                         return "not_found"
                     # Goto Last dvector
                     # get last dvector sub_pt
-                    [subx,suby,subz] = self.listener.get_d(len_dvec-retraced_steps).sub_pt 
+                    last_sub_pt = self.listener.get_d(len_dvec-retraced_steps).sub_pt 
             
-                    last_pose = Pose(Point(subx, suby, subz), self.cur_pose.orientation)
+                    last_pose = Pose(last_sub_pt, self.cur_pose.orientation)
                     #set waypoint to this point. Give some distance to account for error in bearing and sub_pt
                     # Set waypoint
                     self.go_to_pose_non_blocking(last_pose,userdata.timeout_obj,move_mode="strafe")
