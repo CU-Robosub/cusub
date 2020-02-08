@@ -37,14 +37,14 @@ class Jiangshi(Task):
         self.search = Search(self.name, self.listener, search_classes, self.get_prior_param())
         self.approach = Approach(self.name, self.listener)
         self.slay = Slay(self.name)
-        self.Retrace = Retrace(self.name, self.listener)
+        self.retrace = Retrace(self.name, self.listener)
         self.backup = Backup(self.name)
 
     def link_objectives(self):
         with self:
             smach.StateMachine.add('Search', self.search, transitions={'found':'Approach', 'not_found':'manager'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
-            smach.StateMachine.add('Retrace', self.Retrace, transitions={'found':'Approach', 'not_found':'Search'}, \
+            smach.StateMachine.add('Retrace', self.retrace, transitions={'found':'Approach', 'not_found':'Search'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
             smach.StateMachine.add('Slay', self.slay, transitions={'slayed':'Backup', 'timed_out':'manager'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
@@ -192,10 +192,10 @@ class Retrace(Objective):
 
     target_class_id = "vampire_cute"
 
-
     def __init__(self, task_name, listener):
         super(Retrace, self).__init__(self.outcomes, task_name + "/Retrace")
         self.listener = listener
+        #TODO: add param
         self.retrace_hit_cnt = rospy.get_param("tasks/jianshi/retrace_hit_count")
 
     def execute(self, userdata):
@@ -218,6 +218,9 @@ class Retrace(Objective):
             else:
                 if self.check_reached_pose(last_pose):
                     retraced_steps += 1
+                    if (retraced_steps > len_dvec):
+                        #means we retraces all our steps. We're lost.
+                        return "not_found"
                     # Goto Last dvector
                     # get last dvector sub_pt
                     [subx,suby,subz] = self.listener.get_d(len_dvec-retraced_steps).sub_pt 

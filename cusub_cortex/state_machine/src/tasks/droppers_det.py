@@ -35,15 +35,15 @@ class Droppers(Task):
         darknet_cameras = [1,1,0,0,1,1] # front 3 occams + downcam
         self.search = Search(self.name, self.listener, search_classes, self.get_prior_param(), darknet_cameras=darknet_cameras)
         self.approach = Approach(self.name, self.listener, clients)
-        self.revisit = Revisit(self.name, self.listener)        
+        self.retrace = Retrace(self.name, self.listener)        
 
     def link_objectives(self):
         with self:
             smach.StateMachine.add('Search', self.search, transitions={'found':'Approach', 'not_found':'manager'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
-            smach.StateMachine.add('Revisit', self.revisit, transitions={'found':'Approach', 'not_found':'Search'}, \
+            smach.StateMachine.add('Retrace', self.retrace, transitions={'found':'Approach', 'not_found':'Search'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
-            smach.StateMachine.add('Approach', self.approach, transitions={'in_position':'manager', 'timed_out':'manager', 'lost_object':'Revisit'}, \
+            smach.StateMachine.add('Approach', self.approach, transitions={'in_position':'manager', 'timed_out':'manager', 'lost_object':'Retrace'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
             
 
@@ -208,8 +208,57 @@ class Backup(Objective):
 
 
 # TODO
-class Revisit(Objective):
+class Retrace(Objective):
     outcomes = ['found','not_found']
 
+    #TODO: confirm id names
+    target_class_ids = ["dropper", "wolf", "bat"]
+
+
     def __init__(self, task_name, listener):
-        super(Revisit, self).__init__(self.outcomes, task_name + "/Revisit")
+        super(Retrace, self).__init__(self.outcomes, task_name + "/Retrace")
+        self.listener = listener
+        #TODO: add param
+        self.retrace_hit_cnt = rospy.get_param("tasks/dropper/retrace_hit_count")
+
+    def execute(self, userdata):
+        self.smprint("executing R`etrace")
+        dobj_nums = self.listener.query_class(self.target_class_id)
+        if not len(dobj_nums): #shouldn't be possible
+            # do some timeout?
+            userdata.outcome = "timed_out"
+            return "not_found"
+        dobj_num = dobj_nums[0]
+        count = 0
+        retraced_steps = 1
+        len_dvec = len(self.listener.dobjects[dobj_num].dvectors)
+        while not rospy.is_shutdown():
+            if self.listener.check_new_dv(dobj_num) and count < self.retrace_hit_cnt: 
+                #found object again
+                count += 1
+            elif count >= self.retrace_hit_cnt:
+                return "found"
+            else:
+                if self.check_reached_pose(last_pose):
+                    retraced_steps += 1
+                    if (retraced_steps > len_dvec):
+                        #means we retraces all our steps. We're lost.
+                        return "not_found"
+                    # Goto Last dvector
+                    # get last dvector sub_pt
+                    [subx,suby,subz] = self.listener.get_d(len_dvec-retraced_steps).sub_pt 
+            
+                    last_pose = Pose(Point(subx, suby, subz), self.cur_pose.orientation)
+                    #set waypoint to this point. Give some distance to account for error in bearing and sub_pt
+                    # Set waypoint
+                    self.go_to_pose_non_blocking(last_pose,userdata.timeout_obj,move_mode="strafe")
+
+            if userdata.timeout_obj.timed_out:
+                self.yaw_client.disable()
+                self.drive_client.disable()
+                self.depth_client.disable()
+                userdata.outcome = "timed_out"
+                return "not_found"
+
+        #clean up if we are killed
+        return "not_found"
