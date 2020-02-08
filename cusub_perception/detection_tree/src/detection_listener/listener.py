@@ -52,6 +52,11 @@ class Dobject:
         first_dv = len(self.dvectors) - num
         return self.dvectors[first_dv:]
 
+    def get_d(self, index):
+        if index < 0 or index > len(self.dvectors)
+            return len(self.dvectors)
+        return self.dvectors[index]
+
 """
 Subscribes to dvector topic
 """

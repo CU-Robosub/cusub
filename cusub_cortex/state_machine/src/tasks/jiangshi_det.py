@@ -12,9 +12,12 @@ from tasks.task import Task, Objective
 from tasks.search import Search
 from tasks.pid_client import PIDClient
 import rospy
+import tf
 import smach
 import smach_ros
+from geometry_msgs.msg import Pose, Point
 from detection_listener.listener import DetectionListener
+from waypoint_navigator.srv import ToggleControl
 import numpy as np
 
 class Jiangshi(Task):
@@ -189,9 +192,11 @@ class Retrace(Objective):
 
     target_class_id = "vampire_cute"
 
+
     def __init__(self, task_name, listener):
         super(Retrace, self).__init__(self.outcomes, task_name + "/Retrace")
         self.listener = listener
+        self.retrace_hit_cnt = rospy.get_param("tasks/jianshi/retrace_hit_count")
 
     def execute(self, userdata):
         self.smprint("executing R`etrace")
@@ -201,23 +206,26 @@ class Retrace(Objective):
             userdata.outcome = "timed_out"
             return "not_found"
         dobj_num = dobj_nums[0]
-        # get last dvector sub_pt
-        [subx,suby,subz] = self.listener.dobjects.[dobj_num][-1].sub_pt 
-        [az, el, mag] = self.listener.get_avg_bearing(dobj_num, num_dv=5) # maybe check if we have at least 5?
-        # ....OR.....
-        # az = self.listener.dobjects.[dobj_num][-1].azimuth 
-        # el = self.listener.dobjects.[dobj_num][-1].elevation
-        # mag = self.listener.dobjects.[dobj_num][-1].magnitude
-        #set waypoint to this point. Give some distance to account for error in bearing and sub_pt
-        # Take control of waypoint_Nav
-        # Set waypoint
         count = 0
+        retraced_steps = 1
+        len_dvec = len(self.listener.dobjects[dobj_num].dvectors)
         while not rospy.is_shutdown():
-            if self.listener.check_new_dv(dobj_num) and count < 5: #assume we can get 5 hits quickly?
+            if self.listener.check_new_dv(dobj_num) and count < self.retrace_hit_cnt: 
                 #found object again
                 count += 1
-            else 
+            elif count >= self.retrace_hit_cnt:
                 return "found"
+            else:
+                if self.check_reached_pose(last_pose):
+                    retraced_steps += 1
+                    # Goto Last dvector
+                    # get last dvector sub_pt
+                    [subx,suby,subz] = self.listener.get_d(len_dvec-retraced_steps).sub_pt 
+            
+                    last_pose = Pose(Point(subx, suby, subz), self.cur_pose.orientation)
+                    #set waypoint to this point. Give some distance to account for error in bearing and sub_pt
+                    # Set waypoint
+                    self.go_to_pose_non_blocking(last_pose,userdata.timeout_obj,move_mode="strafe")
 
             if userdata.timeout_obj.timed_out:
                 self.yaw_client.disable()
