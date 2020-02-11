@@ -10,10 +10,9 @@ import time
 """
 sudo apt-get install qtcreator pyqt5-dev-tools
 
-Steps:
-Current problem: we can click the correct widget, but for some reason they still both move & orientation seems fucked up
+Shift or control to turn an object, control gives more resolution
 
-- add grids onto the image
+- add grids onto the image (probably make divewell_grided.png and swap the pixmap out)
 - convert + output a config file w/ priors
 - add ability to set the z value through a box for prior & sim_gt
 - add transdec sim + transdec real maps for each quadrant! (config files for each)
@@ -22,20 +21,24 @@ Current problem: we can click the correct widget, but for some reason they still
 
 class ClickableLabel(QLabel):
 
-   def __init__(self, figure, task, widget_size=(480, 640)):
+   def __init__(self, figure, task, rotation=0, widget_size=(480, 640)):
       super(ClickableLabel, self).__init__()
       self.being_dragged = False
+      self.rotation = rotation
       self.pixmap = QPixmap(figure)
       self.pixmap = self.pixmap.scaledToWidth(70)
       diag = (self.pixmap.width()**2 + self.pixmap.height()**2)**0.5
       self.setMinimumSize(diag, diag)
       self.setAlignment(Qt.AlignCenter)
-      self.setPixmap(self.pixmap)
-      self.rotation = 0
+
+      transform = QTransform()
+      transform.rotate(self.rotation)
+      pixmap = self.pixmap.transformed(transform, Qt.SmoothTransformation)   
+      self.setPixmap(pixmap)
+      
       self.widget_size = widget_size
       self.task = task
       self.setMaximumSize(80,80)
-      self.modified = False
       
    def mouseMoveEvent(self, e):
       self.being_dragged = True
@@ -51,12 +54,6 @@ class ClickableLabel(QLabel):
    def clear_being_dragged(self):
       self.being_dragged = False
 
-   def check_modified(self):
-      return self.modified
-
-   def clear_modified(self):
-      self.modified = False
-
    def mousePressEvent(self, event):
       modifiers = QApplication.keyboardModifiers()
 
@@ -65,11 +62,16 @@ class ClickableLabel(QLabel):
             self.rotation += 15
          else:
             self.rotation -= 15
-         transform = QTransform()
-         transform.rotate(self.rotation)
-         pixmap = self.pixmap.transformed(transform, Qt.SmoothTransformation)
-         
-         self.setPixmap(pixmap)
+      elif modifiers == Qt.ControlModifier:
+         if event.buttons() == Qt.LeftButton:
+            self.rotation += 5
+         else:
+            self.rotation -= 5
+
+      transform = QTransform()
+      transform.rotate(self.rotation)
+      pixmap = self.pixmap.transformed(transform, Qt.SmoothTransformation)
+      self.setPixmap(pixmap)
 
 class Cusub_GUI(QWidget):
    def __init__(self):
@@ -83,19 +85,69 @@ class Cusub_GUI(QWidget):
       label = QLabel()
       label.setPixmap(im)
 
-      # im2 = QPixmap("figures/purple.png")
-      # label2 = QLabel()
-      # label2.setPixmap(im2)
-
-      label2 = ClickableLabel("figures/red.png", "red")
-      label3 = ClickableLabel("figures/purple.png", "purple")
+      label2 = ClickableLabel("figures/red.png", "red", rotation=15)
+      label3 = ClickableLabel("figures/purple.png", "purple", rotation=180)
       label4 = ClickableLabel("figures/orange.png", "orange")
+
+      font = QFont("Arial",16)
+
+      self.active_task_label = QLabel(label2.task)
+      self.active_task_label.setFont(font)
+
+
+      self.edit_prior_depth_label = QLabel("Z prior: ")
+      self.edit_prior_depth_label.setFont(font)
+      self.edit_prior_depth = QLineEdit()
+      self.edit_prior_depth.setFont(font)
+      self.edit_prior_depth.setValidator(QDoubleValidator())
+      self.edit_prior_depth.setMaxLength(4)
+      # self.edit_prior_depth.setAlignment(Qt.AlignTop)
+
+      self.edit_sim_depth_label = QLabel("Z sim: ")
+      self.edit_sim_depth_label.setFont(font)
+      self.edit_sim_depth = QLineEdit()
+      self.edit_sim_depth.setFont(font)
+      self.edit_sim_depth.setValidator(QDoubleValidator())
+      self.edit_sim_depth.setMaxLength(4)
+      # self.edit_sim_depth.setAlignment(Qt.AlignTop)
+
+      map_label = QLabel("Divewell")
+      map_label.setFont(QFont("Arial", 24))
+      update_mission_config = QPushButton("Update mission config")
+      update_mission_config.setFont(font)
+      update_map_config = QPushButton("Update map config")
+      update_map_config.setFont(font)
+      check_box = QPushButton("Toggle names")
+      check_box.setFont(font)
+      check_box.clicked.connect(self.show_names)
+
+      grid_button = QPushButton("Show Grid")
+      grid_button.setFont(font)
+      grid_button.clicked.connect(self.show_grid)
       
       grid = QGridLayout()
+      
       grid.addWidget(label,0,0)
       grid.addWidget(label2, 0,0)
       grid.addWidget(label3, 0,0)
       grid.addWidget(label4, 0,0)
+      grid.addWidget(check_box, 0,1, alignment=Qt.AlignCenter)
+      grid.addWidget(grid_button, 0,1, alignment=Qt.AlignTop)
+
+      # Depth
+      flo = QFormLayout()
+      # grid.addWidget(flo, 0, 2)
+      grid.setColumnMinimumWidth(2, 100)
+      grid.setColumnMinimumWidth(3, 200)
+      grid.addWidget(self.active_task_label, 0,3)
+      grid.addWidget(self.edit_prior_depth_label, 0,2, alignment=Qt.AlignTop)
+      grid.addWidget(self.edit_sim_depth_label, 0,2, alignment=Qt.AlignBottom)
+      grid.addWidget(self.edit_prior_depth, 0,3, alignment=Qt.AlignTop)
+      grid.addWidget(self.edit_sim_depth, 0,3, alignment=Qt.AlignBottom)
+
+      grid.addWidget(map_label,1,0, alignment=Qt.AlignCenter)
+      grid.addWidget(update_mission_config, 2, 0)
+      grid.addWidget(update_map_config, 3, 0)
       self.setLayout(grid)
 
       self.setGeometry(0,0,480,640)
@@ -103,6 +155,7 @@ class Cusub_GUI(QWidget):
       
       self.setWindowTitle("Cusub GUI")
       self.show()
+      
 
       # Works!
       self.tasks[label2] = QPoint(80, 238)
@@ -110,6 +163,12 @@ class Cusub_GUI(QWidget):
       self.tasks[label4] = QPoint(200,200)
       for t in self.tasks.keys():
          t.move(self.tasks[t])
+
+   def show_names(self):
+      print("Checked!")
+
+   def show_grid(self):
+      print("Grid ON/OFF!")
       
    def eventFilter(self, obj, event):
       if self.dragged:
