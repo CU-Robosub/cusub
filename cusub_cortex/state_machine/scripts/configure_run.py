@@ -6,6 +6,10 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 import numpy as np
 import time
+import argparse
+from cusub_print.cuprint import CUPrint, bcolors
+import os
+import yaml
 
 """
 sudo apt-get install qtcreator pyqt5-dev-tools
@@ -18,6 +22,7 @@ Shift or control to turn an object, control gives more resolution
 - add transdec sim + transdec real maps for each quadrant! (config files for each)
 - connect to pipeline w/ symlinks etc
 """
+cuprint = CUPrint("Prior GUI", ros=False)
 
 class ClickableLabel(QLabel):
 
@@ -80,7 +85,11 @@ class ClickableLabel(QLabel):
          self.show_image()
 
 class Cusub_GUI(QWidget):
-   def __init__(self):
+   def __init__(self, map_name, map_config, mission_config):
+      self.map_config = map_config
+      self.mission_config = mission_config
+      self.map_name = map_name
+
       self.dragged = False
       self.tasks = {}
       self.show_images = True
@@ -89,7 +98,7 @@ class Cusub_GUI(QWidget):
       self.setAcceptDrops(True)
 
       self.main_label = QLabel()
-      im = QPixmap("figures/divewell.png")
+      im = QPixmap("figures/" + self.map_name + ".png")
       self.main_label.setPixmap(im)
       self.gridded = False
 
@@ -183,9 +192,9 @@ class Cusub_GUI(QWidget):
    def show_grid(self):
       self.gridded ^= 1
       if self.gridded:
-         im = QPixmap("figures/divewell_gridded.png")
+         im = QPixmap("figures/" + self.map_name + "_gridded.png")
       else:
-         im = QPixmap("figures/divewell.png")
+         im = QPixmap("figures/" + self.map_name + ".png")
       self.main_label.setPixmap(im)
       
    def eventFilter(self, obj, event):
@@ -209,9 +218,52 @@ class Cusub_GUI(QWidget):
             task.move(new_pos)
       e.setDropAction(Qt.MoveAction)
       e.accept()
-      
+
+def load_mission_config():
+   mission_config = None
+   with open("mission_config.yaml") as f:
+      mission_config = yaml.load(f, Loader=yaml.FullLoader)
+   return mission_config
+
+def load_map(map_arg):
+   os.chdir("../config/")
+   map_config = None
+   map_name = None
+   if map_arg == "a":
+      cuprint("loading " + bcolors.HEADER + "A" + bcolors.ENDC + " config")
+   elif map_arg == "b":
+      cuprint("loading " + bcolors.HEADER + "B" + bcolors.ENDC + " config")
+   elif map_arg == "c":
+      cuprint("loading " + bcolors.HEADER + "C" + bcolors.ENDC + " config")
+   elif map_arg == "d":
+      cuprint("loading " + bcolors.HEADER + "D" + bcolors.ENDC + " config")
+   elif map_arg == "f":
+      cuprint("loading " + bcolors.HEADER + "Finals" + bcolors.ENDC + " config")
+   elif map_arg == "dw":
+      cuprint("loading " + bcolors.HEADER + "Divewell" + bcolors.ENDC + " config")
+      map_name = "divewell"
+      with open("map_configs/divewell.yaml") as f:
+         map_config = yaml.load(f, Loader=yaml.FullLoader)
+   else:
+      raise(Exception("Unrecognized map option: " + str(map_arg)))
+   return map_name, map_config
 	
 if __name__ == '__main__':
+   folder = os.getcwd()
+   if folder[-7:] != "scripts":
+      cuprint("Please run configure_run.py in the scripts folder")
+
+   # Load args
+   parser = argparse.ArgumentParser(description='Place priors GUI')
+   parser.add_argument("-m", "--map", default="dw", type=str, help='map label: a, b, c, d, f (finals), dw (divewell). Default: dw')
+   args = parser.parse_args()
+
+   # Load configs
+   map_name, map_config = load_map(args.map.lower())
+   mission_config = load_mission_config()
+
+   # Load GUI
+   os.chdir("../scripts")
    app = QApplication(sys.argv)
-   ex = Cusub_GUI()
+   ex = Cusub_GUI(map_name, map_config, mission_config)
    sys.exit(app.exec_())
