@@ -31,14 +31,23 @@ class ClickableLabel(QLabel):
       self.setMinimumSize(diag, diag)
       self.setAlignment(Qt.AlignCenter)
 
-      transform = QTransform()
-      transform.rotate(self.rotation)
-      pixmap = self.pixmap.transformed(transform, Qt.SmoothTransformation)   
-      self.setPixmap(pixmap)
+      self.show_image()
       
       self.widget_size = widget_size
       self.task = task
       self.setMaximumSize(80,80)
+   
+   def show_name(self):
+      font = QFont("Arial",18)
+      self.setFont(font)
+      self.setText(self.task)
+      
+   
+   def show_image(self):
+      transform = QTransform()
+      transform.rotate(self.rotation)
+      pixmap = self.pixmap.transformed(transform, Qt.SmoothTransformation)   
+      self.setPixmap(pixmap)
       
    def mouseMoveEvent(self, e):
       self.being_dragged = True
@@ -62,28 +71,27 @@ class ClickableLabel(QLabel):
             self.rotation += 15
          else:
             self.rotation -= 15
+         self.show_image()
       elif modifiers == Qt.ControlModifier:
          if event.buttons() == Qt.LeftButton:
             self.rotation += 5
          else:
             self.rotation -= 5
-
-      transform = QTransform()
-      transform.rotate(self.rotation)
-      pixmap = self.pixmap.transformed(transform, Qt.SmoothTransformation)
-      self.setPixmap(pixmap)
+         self.show_image()
 
 class Cusub_GUI(QWidget):
    def __init__(self):
       self.dragged = False
       self.tasks = {}
+      self.show_images = True
       super(Cusub_GUI, self).__init__()
 
       self.setAcceptDrops(True)
 
-      im = QPixmap("divewell.png")
-      label = QLabel()
-      label.setPixmap(im)
+      self.main_label = QLabel()
+      im = QPixmap("figures/divewell.png")
+      self.main_label.setPixmap(im)
+      self.gridded = False
 
       label2 = ClickableLabel("figures/red.png", "red", rotation=15)
       label3 = ClickableLabel("figures/purple.png", "purple", rotation=180)
@@ -127,7 +135,7 @@ class Cusub_GUI(QWidget):
       
       grid = QGridLayout()
       
-      grid.addWidget(label,0,0)
+      grid.addWidget(self.main_label,0,0)
       grid.addWidget(label2, 0,0)
       grid.addWidget(label3, 0,0)
       grid.addWidget(label4, 0,0)
@@ -135,7 +143,6 @@ class Cusub_GUI(QWidget):
       grid.addWidget(grid_button, 0,1, alignment=Qt.AlignTop)
 
       # Depth
-      flo = QFormLayout()
       # grid.addWidget(flo, 0, 2)
       grid.setColumnMinimumWidth(2, 100)
       grid.setColumnMinimumWidth(3, 200)
@@ -151,7 +158,7 @@ class Cusub_GUI(QWidget):
       self.setLayout(grid)
 
       self.setGeometry(0,0,480,640)
-      label.installEventFilter(self)
+      self.main_label.installEventFilter(self)
       
       self.setWindowTitle("Cusub GUI")
       self.show()
@@ -165,10 +172,21 @@ class Cusub_GUI(QWidget):
          t.move(self.tasks[t])
 
    def show_names(self):
-      print("Checked!")
+      self.show_images ^= 1
+      if self.show_images:
+         for t in self.tasks.keys():
+            t.show_image()
+      else:
+         for t in self.tasks.keys():
+            t.show_name()
 
    def show_grid(self):
-      print("Grid ON/OFF!")
+      self.gridded ^= 1
+      if self.gridded:
+         im = QPixmap("figures/divewell_gridded.png")
+      else:
+         im = QPixmap("figures/divewell.png")
+      self.main_label.setPixmap(im)
       
    def eventFilter(self, obj, event):
       if self.dragged:
