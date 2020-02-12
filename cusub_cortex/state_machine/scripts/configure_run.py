@@ -40,7 +40,7 @@ class ClickableLabel(QLabel):
       
       self.widget_size = widget_size
       self.task = task
-      self.setMaximumSize(80,80)
+      self.setMaximumSize(100,100)
    
    def show_name(self):
       font = QFont("Arial",18)
@@ -102,13 +102,18 @@ class Cusub_GUI(QWidget):
       self.main_label.setPixmap(im)
       self.gridded = False
 
-      label2 = ClickableLabel("figures/red.png", "red", rotation=15)
-      label3 = ClickableLabel("figures/purple.png", "purple", rotation=180)
-      label4 = ClickableLabel("figures/orange.png", "orange")
+      for task in self.map_config["priors"].keys():
+         cuprint("placing " +bcolors.OKBLUE + task + bcolors.ENDC)
+         fig_name = task + ".png"
+         location = self.map_config["priors"][task]["qtlocation"]
+         qp = QPoint(location[0], location[1])
+         rot = location[2]
+         label = ClickableLabel("figures/" + fig_name, task, rotation=rot)
+         self.tasks[label] = qp
 
       font = QFont("Arial",16)
 
-      self.active_task_label = QLabel(label2.task)
+      self.active_task_label = QLabel("None Selected")
       self.active_task_label.setFont(font)
 
 
@@ -133,6 +138,7 @@ class Cusub_GUI(QWidget):
       update_mission_config = QPushButton("Update mission config")
       update_mission_config.setFont(font)
       update_map_config = QPushButton("Update map config")
+      update_map_config.clicked.connect(self.save_map_config)
       update_map_config.setFont(font)
       check_box = QPushButton("Toggle names")
       check_box.setFont(font)
@@ -145,9 +151,10 @@ class Cusub_GUI(QWidget):
       grid = QGridLayout()
       
       grid.addWidget(self.main_label,0,0)
-      grid.addWidget(label2, 0,0)
-      grid.addWidget(label3, 0,0)
-      grid.addWidget(label4, 0,0)
+      for t in self.tasks.keys():
+         grid.addWidget(t, 0,0)
+      # grid.addWidget(label3, 0,0)
+      # grid.addWidget(label4, 0,0)
       grid.addWidget(check_box, 0,1, alignment=Qt.AlignCenter)
       grid.addWidget(grid_button, 0,1, alignment=Qt.AlignTop)
 
@@ -172,13 +179,25 @@ class Cusub_GUI(QWidget):
       self.setWindowTitle("Cusub GUI")
       self.show()
       
-
-      # Works!
-      self.tasks[label2] = QPoint(80, 238)
-      self.tasks[label3] = QPoint(100,100)
-      self.tasks[label4] = QPoint(200,200)
       for t in self.tasks.keys():
          t.move(self.tasks[t])
+
+   def save_map_config(self):
+      for task in self.map_config["priors"].keys():
+         t = [x for x in self.tasks.keys() if x.task == task]
+         if not t:
+            cusub_print("couldn't locate " + task + " in self.tasks - there's a bug somewhere", warn=True)
+         t = t[0]
+         x = self.tasks[t].x()
+         y = self.tasks[t].y()
+         yaw = t.rotation
+         self.map_config["priors"][task]["qtlocation"] = [x,y,yaw]
+      
+      # print(os.getcwd())
+      filename = "../config/map_configs/" + self.map_name + ".yaml"
+      with open(filename, 'w') as f:
+        yaml.dump(self.map_config, f)
+      cuprint("map configuration saved")
 
    def show_names(self):
       self.show_images ^= 1
