@@ -116,7 +116,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -195,6 +195,7 @@ include_directories(
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
+
 include_directories(include ${catkin_INCLUDE_DIRS})
 add_library( tracking
   src/Tracking.cpp
@@ -206,10 +207,15 @@ add_library( tracking
   src/ImageData.cpp
   src/ImageTools.cpp
 )
+
+add_dependencies( tracking 
+  tracking_generate_messages_cpp 
+  ${catkin_EXPORTED_LIBRARIES})
+
+  # if(catkin_EXPORTED_LIBRARIES)
+# add_dependencies(tracking ${catkin_EXPORTED_LIBRARIES})
+  # endif()
 target_link_libraries(tracking ${catkin_LIBRARIES})
-if(catkin_EXPORTED_LIBRARIES)
-  add_dependencies(tracking ${catkin_EXPORTED_LIBRARIES})
-endif()
 
 add_executable(tracker_unit
   unit_tests/tracker_unit_test.cpp
@@ -223,6 +229,10 @@ add_executable(tracker_unit
   src/ImageTools.cpp
 )
 
+add_dependencies( tracker_unit 
+  tracking_generate_messages_cpp 
+  ${catkin_EXPORTED_LIBRARIES})
+  
 target_link_libraries(tracker_unit ${catkin_LIBRARIES})
 
 include_directories(include ${catkin_INCLUDE_DIRS})

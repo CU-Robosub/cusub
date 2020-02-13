@@ -21,3 +21,6 @@ cusub_perception/usbcam_ws/build
 # atom
 .tags
 .tags_swap
+
+# big files
+*.mp4

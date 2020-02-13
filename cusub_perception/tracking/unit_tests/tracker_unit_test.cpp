@@ -33,11 +33,7 @@ int main(int argc, char ** argv)
 
     cv::Mat image;
     cap >> image;
-    
-    cv::rectangle(image, bbox.roiRect(), cv::Scalar(0,0,255));
-    cv::imshow("initial", image);
-    cv::waitKey(0);
-    
+        
     tracking::ImageData imageData;
 
     tracking::KLTPointTracker * tracker = new tracking::KLTPointTracker();
@@ -47,34 +43,7 @@ int main(int argc, char ** argv)
     imageData.setImage(image);
     trackingPtr->objectDetected("vampire_fathead", bbox, imageData);
 
-    // full test with tracking object
-    if (trackingPtr != nullptr)
-    {
-        while(1)
-        {
-            cap >> image;
-            
-            if (image.empty())
-            {
-                break;
-            }
-            
-            imageData.setImage(image);
-            trackingPtr->newImage(imageData);
-
-            std::vector<tracking::BoundingBox> bboxs = trackingPtr->getBoxes(imageData.frameId());
-
-            for (tracking::BoundingBox box : bboxs)
-            {
-                cv::rectangle(image, box.roiRect(), cv::Scalar(0,0,255), 2);
-            } 
-
-            cv::imshow("Tracked Object", image);
-            cv::waitKey(0);
-        }
-    }
-
-    // more in depth debugging shown
+    // more in depth debugging
     if (tracker != nullptr)
     {
         cap = cv::VideoCapture(videoName); // reset cap
@@ -113,7 +82,7 @@ int main(int argc, char ** argv)
                 }
 
                 cv::imshow("Transformed points", image);
-                cv::waitKey(0);
+                cv::waitKey(20);
             }
             first = false;
 
