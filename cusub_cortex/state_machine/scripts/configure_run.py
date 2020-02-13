@@ -24,6 +24,7 @@ Should be pretty darn good after that - test the whole pipeline!
 - add transdec sim + transdec real maps for each quadrant! (config files for each)
 - connect to pipeline w/ symlinks etc
 """
+FIGURE_SIZE = 120
 cuprint = CUPrint("Prior GUI", ros=False)
 
 class ClickableLabel(QLabel):
@@ -43,7 +44,7 @@ class ClickableLabel(QLabel):
       
       self.widget_size = widget_size
       self.task = task
-      self.setMaximumSize(120,120)
+      self.setMaximumSize(FIGURE_SIZE, FIGURE_SIZE)
    
    def show_name(self):
       font = QFont("Arial",18)
@@ -233,28 +234,29 @@ class Cusub_GUI(QWidget):
       y_meters_per_pixel = y_len / y_pixels
 
       lev = [x for x in self.tasks.keys() if x.task == "leviathan"][0]
-      qt_lev_x = self.tasks[lev].x()
-      qt_lev_y = -self.tasks[lev].y()
+      qt_lev_x = self.tasks[lev].x() + self.map_config["map_dims"]["fig_qt_offset"][0]
+      qt_lev_y = self.tasks[lev].y() + self.map_config["map_dims"]["fig_qt_offset"][1]
+      qt_lev_y = -qt_lev_y # flip y
+
       qt_lev_rot = lev.rotation + 90 # leviathan's figure is offset by 90 deg
-      
+
       for t in self.tasks.keys():
          task_name = t.task
          if task_name == "leviathan":
             continue
 
-         qtx = self.tasks[t].x()
-         qty = -self.tasks[t].y()
+         qtx = self.tasks[t].x() + self.map_config["map_dims"]["fig_qt_offset"][0]
+         qty = self.tasks[t].y() + self.map_config["map_dims"]["fig_qt_offset"][1]
+         qty = -qty #flip y
 
          qtx_diff = qtx - qt_lev_x
          qty_diff = qty - qt_lev_y
+         qt_diff = np.linalg.norm([qtx_diff, qty_diff])
+         dist = qt_diff * x_meters_per_pixel
 
-         x_diff = qtx_diff * x_meters_per_pixel
-         y_diff = qty_diff * y_meters_per_pixel
-         dist = np.linalg.norm([x_diff, y_diff])
-
-         theta = (qt_lev_rot * (np.pi/180)) - np.arctan2(y_diff, x_diff)
-         x_prior = np.cos(theta) * dist
-         y_prior = np.sin(theta) * dist
+         theta = (qt_lev_rot * (np.pi/180)) - np.arctan2(qtx_diff, qty_diff)
+         x_prior = np.sin(theta) * dist
+         y_prior = np.cos(theta) * dist
          z_prior = self.map_config["priors"][task_name]["prior_depth"]
          
          x_prior = round(x_prior, 2)
@@ -268,8 +270,81 @@ class Cusub_GUI(QWidget):
         yaml.dump(self.mission_config, f)
       cuprint("mission config saved as " + bcolors.HEADER + "mission_config_generated.yaml" + bcolors.ENDC)
 
-      # Create a model_locs.yaml & save that as well
+      self.save_model_locs()
+
+   def save_model_locs(self):
+      x_pixels = self.map_config["map_dims"]["x_pixels"]
+      y_pixels = self.map_config["map_dims"]["y_pixels"]
+      x_len = self.map_config["map_dims"]["x_len"]
+      y_len = self.map_config["map_dims"]["y_len"]
       
+      x_meters_per_pixel = x_len / x_pixels
+      y_meters_per_pixel = y_len / y_pixels
+
+      center_x_world, center_y_world = self.map_config["map_dims"]["world_coords_of_top_left_corner_of_image"]
+
+      vert_axis_down = self.map_config["map_dims"]["image_vertical_axis_down"]
+      horiz_axis_right = self.map_config["map_dims"]["image_horizontal_axis_right"]
+
+      model_locs = {}
+      model_locs["mappings"] = {}
+      for t in self.tasks.keys():
+         qtx = self.tasks[t].x() + self.map_config["map_dims"]["fig_qt_offset"][0]
+         qty = self.tasks[t].y() + self.map_config["map_dims"]["fig_qt_offset"][1]
+
+         task_name = t.task
+         model_name = self.map_config["priors"][task_name]["sim_model"]
+
+         x = qtx * x_meters_per_pixel
+         y = qty * y_meters_per_pixel
+         z = self.map_config["sim_truth_depths"][model_name]
+         rot = t.rotation * (np.pi / 180)
+         if task_name == "leviathan":
+            rot += 90 * (np.pi/180) # flip leviathan 90 deg
+
+         x,y = self.transform_model_coord(x, \
+                                          y, \
+                                          vert_axis_down, \
+                                          horiz_axis_right, \
+                                          center_x_world, \
+                                          center_y_world)
+         
+         x = round(x, 2)
+         y = round(y, 2)
+         z = round(z, 2)
+         rot = round(rot, 2)
+
+         model_locs[model_name] = [x, y, z, rot]
+
+         if task_name != "leviathan":
+            mappings = {}
+            mappings["model"] = model_name
+            mappings["prior_z"] = self.map_config["priors"][task_name]["prior_depth"]
+            model_locs["mappings"][task_name] = mappings
+
+      filename = "../../../cusub_sim/stress_tester/config/model_locs.yaml"
+      with open(filename, 'w') as f:
+        yaml.dump(model_locs, f)
+
+   # transforms qt coord to world coord in gazebo
+   def transform_model_coord(self, horiz, vert, vert_axis_down, horiz_axis_right, center_x, center_y):
+      x, y = None, None
+      if "x" in vert_axis_down: # flip coords
+         x = vert
+         y = horiz
+      else:
+         x = horiz
+         y = vert
+      
+      if "-" in vert_axis_down:
+         x = -x
+      if "-" in horiz_axis_right:
+         y = -y
+      
+      x = x + center_x
+      y = y + center_y
+
+      return x, y
 
    def save_map_config(self):
       for task in self.map_config["priors"].keys():
@@ -318,7 +393,7 @@ class Cusub_GUI(QWidget):
 
    def dropEvent(self, e):
       self.dragged = True
-      new_pos = e.pos() - QPoint(50, 50)
+      new_pos = e.pos() - QPoint(54, 54)
       for task in self.tasks.keys():
          if task.check_dragged():
             task.clear_being_dragged()
