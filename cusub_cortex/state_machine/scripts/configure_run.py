@@ -16,7 +16,6 @@ sudo apt-get install qtcreator pyqt5-dev-tools
 
 Shift or control to turn an object, control gives more resolution
 Next: 
-   clicking selects, allows depth setting
    calculating of priors + outputting model_locs + mission_config_generated.yaml
    Undo button
 Should be pretty darn good after that - test the whole pipeline!
@@ -142,6 +141,7 @@ class Cusub_GUI(QWidget):
       map_label = QLabel(self.map_name.capitalize())
       map_label.setFont(QFont("Arial", 24))
       update_mission_config = QPushButton("Update mission config")
+      update_mission_config.clicked.connect(self.save_mission_config)
       update_mission_config.setFont(font)
       update_map_config = QPushButton("Update map config")
       update_map_config.clicked.connect(self.save_map_config)
@@ -179,7 +179,9 @@ class Cusub_GUI(QWidget):
       grid.addWidget(update_map_config, 3, 0)
       self.setLayout(grid)
 
-      self.setGeometry(0,0,480,640)
+      x_pixels = self.map_config["map_dims"]["x_pixels"]
+      y_pixels = self.map_config["map_dims"]["y_pixels"]
+      self.setGeometry(0,0,x_pixels,y_pixels)
       self.main_label.installEventFilter(self)
       
       self.setWindowTitle("Cusub GUI")
@@ -220,6 +222,54 @@ class Cusub_GUI(QWidget):
          cuprint("could not find model: " + model + " in map config file",warn=True)
       self.edit_prior_depth.setText(str(prior_z))
       self.edit_sim_depth.setText(str(sim_z))
+
+   def save_mission_config(self):
+      x_pixels = self.map_config["map_dims"]["x_pixels"]
+      y_pixels = self.map_config["map_dims"]["y_pixels"]
+      x_len = self.map_config["map_dims"]["x_len"]
+      y_len = self.map_config["map_dims"]["y_len"]
+
+      x_meters_per_pixel = x_len / x_pixels
+      y_meters_per_pixel = y_len / y_pixels
+
+      lev = [x for x in self.tasks.keys() if x.task == "leviathan"][0]
+      qt_lev_x = self.tasks[lev].x()
+      qt_lev_y = -self.tasks[lev].y()
+      qt_lev_rot = lev.rotation + 90 # leviathan's figure is offset by 90 deg
+      
+      for t in self.tasks.keys():
+         task_name = t.task
+         if task_name == "leviathan":
+            continue
+
+         qtx = self.tasks[t].x()
+         qty = -self.tasks[t].y()
+
+         qtx_diff = qtx - qt_lev_x
+         qty_diff = qty - qt_lev_y
+
+         x_diff = qtx_diff * x_meters_per_pixel
+         y_diff = qty_diff * y_meters_per_pixel
+         dist = np.linalg.norm([x_diff, y_diff])
+
+         theta = (qt_lev_rot * (np.pi/180)) - np.arctan2(y_diff, x_diff)
+         x_prior = np.cos(theta) * dist
+         y_prior = np.sin(theta) * dist
+         z_prior = self.map_config["priors"][task_name]["prior_depth"]
+         
+         x_prior = round(x_prior, 2)
+         y_prior = round(y_prior, 2)
+         z_prior = round(z_prior, 2)
+
+         self.mission_config["tasks"][task_name]["prior"] = [x_prior, y_prior, z_prior]
+
+      filename = "../config/" + "mission_config_generated.yaml"
+      with open(filename, 'w') as f:
+        yaml.dump(self.mission_config, f)
+      cuprint("mission config saved as " + bcolors.HEADER + "mission_config_generated.yaml" + bcolors.ENDC)
+
+      # Create a model_locs.yaml & save that as well
+      
 
    def save_map_config(self):
       for task in self.map_config["priors"].keys():
