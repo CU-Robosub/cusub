@@ -15,9 +15,12 @@ import yaml
 sudo apt-get install qtcreator pyqt5-dev-tools
 
 Shift or control to turn an object, control gives more resolution
+Next: 
+   clicking selects, allows depth setting
+   calculating of priors + outputting model_locs + mission_config_generated.yaml
+   Undo button
+Should be pretty darn good after that - test the whole pipeline!
 
-- add grids onto the image (probably make divewell_grided.png and swap the pixmap out)
-- convert + output a config file w/ priors
 - add ability to set the z value through a box for prior & sim_gt
 - add transdec sim + transdec real maps for each quadrant! (config files for each)
 - connect to pipeline w/ symlinks etc
@@ -26,8 +29,9 @@ cuprint = CUPrint("Prior GUI", ros=False)
 
 class ClickableLabel(QLabel):
 
-   def __init__(self, figure, task, rotation=0, widget_size=(480, 640)):
+   def __init__(self, figure, task, clicked_func, rotation=0, widget_size=(480, 640)):
       super(ClickableLabel, self).__init__()
+      self.clicked_func = clicked_func
       self.being_dragged = False
       self.rotation = rotation
       self.pixmap = QPixmap(figure)
@@ -40,7 +44,7 @@ class ClickableLabel(QLabel):
       
       self.widget_size = widget_size
       self.task = task
-      self.setMaximumSize(100,100)
+      self.setMaximumSize(120,120)
    
    def show_name(self):
       font = QFont("Arial",18)
@@ -83,6 +87,7 @@ class ClickableLabel(QLabel):
          else:
             self.rotation -= 5
          self.show_image()
+      self.clicked_func(self.task)
 
 class Cusub_GUI(QWidget):
    def __init__(self, map_name, map_config, mission_config):
@@ -108,13 +113,14 @@ class Cusub_GUI(QWidget):
          location = self.map_config["priors"][task]["qtlocation"]
          qp = QPoint(location[0], location[1])
          rot = location[2]
-         label = ClickableLabel("figures/" + fig_name, task, rotation=rot)
+         label = ClickableLabel("figures/" + fig_name, task, self.clicked_event, rotation=rot)
          self.tasks[label] = qp
 
       font = QFont("Arial",16)
 
       self.active_task_label = QLabel("None Selected")
       self.active_task_label.setFont(font)
+      self.active_task = None
 
 
       self.edit_prior_depth_label = QLabel("Z prior: ")
@@ -123,7 +129,7 @@ class Cusub_GUI(QWidget):
       self.edit_prior_depth.setFont(font)
       self.edit_prior_depth.setValidator(QDoubleValidator())
       self.edit_prior_depth.setMaxLength(4)
-      # self.edit_prior_depth.setAlignment(Qt.AlignTop)
+      self.edit_prior_depth.textChanged.connect(self.prior_depth_edited)
 
       self.edit_sim_depth_label = QLabel("Z sim: ")
       self.edit_sim_depth_label.setFont(font)
@@ -131,9 +137,9 @@ class Cusub_GUI(QWidget):
       self.edit_sim_depth.setFont(font)
       self.edit_sim_depth.setValidator(QDoubleValidator())
       self.edit_sim_depth.setMaxLength(4)
-      # self.edit_sim_depth.setAlignment(Qt.AlignTop)
+      self.edit_sim_depth.textChanged.connect(self.sim_depth_edited)
 
-      map_label = QLabel("Divewell")
+      map_label = QLabel(self.map_name.capitalize())
       map_label.setFont(QFont("Arial", 24))
       update_mission_config = QPushButton("Update mission config")
       update_mission_config.setFont(font)
@@ -181,6 +187,39 @@ class Cusub_GUI(QWidget):
       
       for t in self.tasks.keys():
          t.move(self.tasks[t])
+
+   def sim_depth_edited(self, text):
+      if self.active_task:
+         task_name = self.active_task
+         model = self.map_config["priors"][task_name]["sim_model"]
+         try: # partial text fails str -> float conversion
+            self.map_config["sim_truth_depths"][model] = float(text)
+         except ValueError:
+            pass
+
+   def prior_depth_edited(self, text):
+      if self.active_task:
+         task_name = self.active_task
+         try: # partial text fails str -> float conversion
+            if "prior_depth" in self.map_config["priors"][task_name].keys():
+               self.map_config["priors"][task_name]["prior_depth"] = float(text)
+         except ValueError:
+            pass
+   
+   def clicked_event(self, task_name):
+      self.active_task = task_name
+      self.active_task_label.setText(task_name)
+      prior_z = 0.0
+      if "prior_depth" in self.map_config["priors"][task_name].keys():
+         prior_z = self.map_config["priors"][task_name]["prior_depth"]
+      model = self.map_config["priors"][task_name]["sim_model"]
+      sim_z = 0.0
+      if model in self.map_config["sim_truth_depths"].keys():
+         sim_z = self.map_config["sim_truth_depths"][model]
+      else:
+         cuprint("could not find model: " + model + " in map config file",warn=True)
+      self.edit_prior_depth.setText(str(prior_z))
+      self.edit_sim_depth.setText(str(sim_z))
 
    def save_map_config(self):
       for task in self.map_config["priors"].keys():
