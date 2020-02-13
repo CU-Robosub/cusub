@@ -16,7 +16,6 @@ sudo apt-get install qtcreator pyqt5-dev-tools
 
 Shift or control to turn an object, control gives more resolution
 Next: 
-   calculating of priors + outputting model_locs + mission_config_generated.yaml
    Undo button
 Should be pretty darn good after that - test the whole pipeline!
 
@@ -24,7 +23,6 @@ Should be pretty darn good after that - test the whole pipeline!
 - add transdec sim + transdec real maps for each quadrant! (config files for each)
 - connect to pipeline w/ symlinks etc
 """
-FIGURE_SIZE = 120
 cuprint = CUPrint("Prior GUI", ros=False)
 
 class ClickableLabel(QLabel):
@@ -44,7 +42,7 @@ class ClickableLabel(QLabel):
       
       self.widget_size = widget_size
       self.task = task
-      self.setMaximumSize(FIGURE_SIZE, FIGURE_SIZE)
+      self.setMaximumSize(120, 120)
    
    def show_name(self):
       font = QFont("Arial",18)
@@ -87,6 +85,7 @@ class ClickableLabel(QLabel):
          else:
             self.rotation -= 5
          self.show_image()
+      print(self.rotation)
       self.clicked_func(self.task)
 
 class Cusub_GUI(QWidget):
@@ -160,13 +159,10 @@ class Cusub_GUI(QWidget):
       grid.addWidget(self.main_label,0,0)
       for t in self.tasks.keys():
          grid.addWidget(t, 0,0)
-      # grid.addWidget(label3, 0,0)
-      # grid.addWidget(label4, 0,0)
       grid.addWidget(check_box, 0,1, alignment=Qt.AlignCenter)
       grid.addWidget(grid_button, 0,1, alignment=Qt.AlignTop)
 
-      # Depth
-      # grid.addWidget(flo, 0, 2)
+      # Depth Adjustments
       grid.setColumnMinimumWidth(2, 100)
       grid.setColumnMinimumWidth(3, 200)
       grid.addWidget(self.active_task_label, 0,3)
@@ -236,9 +232,11 @@ class Cusub_GUI(QWidget):
       lev = [x for x in self.tasks.keys() if x.task == "leviathan"][0]
       qt_lev_x = self.tasks[lev].x() + self.map_config["map_dims"]["fig_qt_offset"][0]
       qt_lev_y = self.tasks[lev].y() + self.map_config["map_dims"]["fig_qt_offset"][1]
-      qt_lev_y = -qt_lev_y # flip y
 
-      qt_lev_rot = lev.rotation + 90 # leviathan's figure is offset by 90 deg
+      # qt_lev_rot = -lev.rotation + 90 # REAL
+      # qt_lev_rot = -90 # SIM
+      vert_axis_down = self.map_config["map_dims"]["image_vertical_axis_down"]
+      horiz_axis_right = self.map_config["map_dims"]["image_horizontal_axis_right"]
 
       for t in self.tasks.keys():
          task_name = t.task
@@ -247,16 +245,21 @@ class Cusub_GUI(QWidget):
 
          qtx = self.tasks[t].x() + self.map_config["map_dims"]["fig_qt_offset"][0]
          qty = self.tasks[t].y() + self.map_config["map_dims"]["fig_qt_offset"][1]
-         qty = -qty #flip y
 
          qtx_diff = qtx - qt_lev_x
          qty_diff = qty - qt_lev_y
-         qt_diff = np.linalg.norm([qtx_diff, qty_diff])
-         dist = qt_diff * x_meters_per_pixel
+         x_diff = qtx_diff * x_meters_per_pixel
+         y_diff = qty_diff * y_meters_per_pixel
 
-         theta = (qt_lev_rot * (np.pi/180)) - np.arctan2(qtx_diff, qty_diff)
-         x_prior = np.sin(theta) * dist
-         y_prior = np.cos(theta) * dist
+         dist = np.linalg.norm([x_diff, y_diff])
+
+         x_prior, y_prior = self.transform_model_coord(x_diff, y_diff, vert_axis_down, horiz_axis_right, 0, 0)
+
+         # For real life, use the actual angle of leviathan
+         # theta = np.arctan2(x_diff, y_diff)
+         # (qt_lev_rot * (np.pi/180)) - np.arctan2(qtx_diff, qty_diff) # REAL, relative
+         # x_prior = np.sin(theta) * dist
+         # y_prior = np.cos(theta) * dist
          z_prior = self.map_config["priors"][task_name]["prior_depth"]
          
          x_prior = round(x_prior, 2)
@@ -298,9 +301,9 @@ class Cusub_GUI(QWidget):
          x = qtx * x_meters_per_pixel
          y = qty * y_meters_per_pixel
          z = self.map_config["sim_truth_depths"][model_name]
-         rot = t.rotation * (np.pi / 180)
+         rot = -t.rotation * (np.pi / 180) # qt pos angle is clockwise
          if task_name == "leviathan":
-            rot += 90 * (np.pi/180) # flip leviathan 90 deg
+            rot += 180 * (np.pi/180) # flip leviathan 180 deg
 
          x,y = self.transform_model_coord(x, \
                                           y, \
@@ -357,7 +360,6 @@ class Cusub_GUI(QWidget):
          yaw = t.rotation
          self.map_config["priors"][task]["qtlocation"] = [x,y,yaw]
       
-      # print(os.getcwd())
       filename = "../config/map_configs/" + self.map_name + ".yaml"
       with open(filename, 'w') as f:
         yaml.dump(self.map_config, f)

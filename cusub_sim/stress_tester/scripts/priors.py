@@ -31,8 +31,8 @@ def calculate_correct_priors(model_locs):
         x_prior = float( rho * np.cos(alpha) )
         y_prior = float( rho * np.sin(alpha) )
         
-        if "fixed_z" in mappings[task].keys():
-            z_prior = float( mappings[task]["fixed_z"] )
+        if "prior_z" in mappings[task].keys():
+            z_prior = float( mappings[task]["prior_z"] )
         else:
             z_prior = float( model_locs[model][2] )
         
@@ -121,7 +121,7 @@ def main(noise, gauss, x_bias, y_bias, yaw_bias):
 
     # STEP 1: Open the data & calculate the correct priors
     model_locs = None
-    with open('model_locs_noisy.yaml') as f:
+    with open('noisy_model_locs.yaml') as f:
         model_locs = yaml.load(f, Loader=yaml.FullLoader)
     priors = calculate_correct_priors(model_locs)
     if priors == None:
@@ -140,21 +140,12 @@ def main(noise, gauss, x_bias, y_bias, yaw_bias):
         noisy_priors = priors
 
     # STEP 3: write the new mission_config
-    with open('active_mission_config.yaml') as f:
+    filename = '../../../cusub_cortex/state_machine/config/mission_config_generated.yaml'
+    with open(filename) as f:
         mission_params = yaml.load(f, Loader=yaml.FullLoader)
-    active_mission_config = os.path.realpath("active_mission_config.yaml").split("/")[-1]
-    tmp = active_mission_config.split(".")
-    new_file_name = tmp[0] + "_noisy." + tmp[1]
-    cuprint("creating config file: " + bcolors.HEADER + new_file_name + bcolors.ENDC)
+    new_file_name = '../../../cusub_cortex/state_machine/config/noisy_mission_config_generated.yaml'
+    cuprint("creating config file: " + bcolors.HEADER + "noisy_mission_config_generated.yaml" + bcolors.ENDC)
     write_mission_config(mission_params, noisy_priors, new_file_name)
-
-    # STEP 4: Update the state machine's symlink
-    cuprint("updating symlink in state_machine: " + bcolors.HEADER + "noisy_mission_config.yaml" + bcolors.ENDC)
-    src = "../../../cusub_sim/stress_tester/config/" + new_file_name
-    dst = "../../../cusub_cortex/state_machine/config/noisy_mission_config.yaml"
-    os.symlink(src, dst + ".tmp")
-    os.rename(dst + ".tmp", dst) # rename to overwrite existing file
-
 
 def str2bool(v):
     if isinstance(v, bool):

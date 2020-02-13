@@ -77,7 +77,7 @@ def main(noise, gazebo_paused):
         cuprint("moving " + bcolors.HEADER + model + bcolors.ENDC)
         set_model_state(model, pose_in_world)
 
-    with open('model_locs_noisy.yaml', 'w') as f:    
+    with open('noisy_model_locs.yaml', 'w') as f:    
         yaml.dump(noisy_positions, f)
 
 """ Accept all types of boolean commandline input """
