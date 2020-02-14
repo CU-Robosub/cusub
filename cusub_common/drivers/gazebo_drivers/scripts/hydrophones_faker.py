@@ -9,11 +9,13 @@ Simulates hydrophones in Gazebo
 --- meas noise ~N(u, sigma^2), with some offset u ~ U(-45,45)
 --- offset is preserved until sub moves position_delta meters away from that position
 --- or sub turns yaw_delta meters away from where the offset was calculated
------- this simulates the noise coming from a random direction
+------ this simulates the random fluctuations of the pinger signal at each position in transdec
 - only one object at a time can be the source of the measurements
---- available objects on cusub_common/fakehydro/object_options
---- current object on cusub_common/fakehydro/active
---- configured via service cusub_common/fakehydro/configure_active
+--- available objects on: cusub_common/hydrophones/debug_pinger_options
+--- current object on: cusub_common/hydrophones/active
+--- configured via service: cusub_common/hydrophones/switch_active_pinger
+--- check whether the noise is biased: cusub_common/hydrophones/debug_is_biased
+--- a pose msg for viewing in rviz is publish on: cusub_common/hydrophones/debug_measurements
 """
 import numpy as np
 import rospy
@@ -21,12 +23,14 @@ from nav_msgs.msg import Odometry
 from gazebo_drivers.msg import Hydrophones, PingerOptions
 from gazebo_drivers.srv import PingerSwitch
 from geometry_msgs.msg import PoseStamped
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, String
 import tf
+from cusub_print.cuprint import CUPrint, bcolors
 
 class HydroFaker:
     name = "HydroFaker"
     def __init__(self):
+        self.cuprint = CUPrint(self.name)
         self.cuprint("loading")
         objects = rospy.get_param("fakehydro/objects")
         self.object_positions = {}
@@ -47,6 +51,7 @@ class HydroFaker:
             self.active_obj = np.random.choice(self.object_positions.keys())
         self.print_pinger_status()
 
+        self.active_pub = rospy.Publisher("hydrophones/active", String, queue_size=10)
         self.bias_pub = rospy.Publisher("hydrophones/debug_is_biased", Bool, queue_size=10)
         self.options_pub = rospy.Publisher("hydrophones/debug_pinger_options", PingerOptions, queue_size=10)
         self.debug_pub = rospy.Publisher("hydrophones/debug_measurements", PoseStamped, queue_size=10)
@@ -118,6 +123,8 @@ class HydroFaker:
         self.pub.publish(msg)
         b = Bool(); b.data = self.biased
         self.bias_pub.publish(b)
+        s = String(); s.data = self.active_obj
+        self.active_pub.publish(s)
 
         # Debug pub
         pose_msg = PoseStamped()
@@ -163,22 +170,6 @@ class HydroFaker:
 
     def print_pinger_status(self):
         self.cuprint("active pinger set to " + bcolors.HEADER + self.active_obj + bcolors.ENDC)
-
-    def cuprint(self, string, warn=False):
-        if warn:
-            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
-        else:
-            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + string)
-
-class bcolors: # For terminal colors
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
 
 if __name__ == "__main__":
     rospy.init_node("fakehydro")
