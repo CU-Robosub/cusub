@@ -24,12 +24,12 @@ def calculate_correct_priors(model_locs):
         model = mappings[task]["model"]
         xdiff = model_locs[model][0] - leviathan[0]
         ydiff = model_locs[model][1] - leviathan[1]
-        psi = np.arctan2(ydiff, xdiff)
-        alpha = psi - theta
-        rho = np.linalg.norm([xdiff, ydiff])
+        # psi = np.arctan2(ydiff, xdiff)
+        # alpha = psi - theta
+        # rho = np.linalg.norm([xdiff, ydiff])
 
-        x_prior = float( rho * np.cos(alpha) )
-        y_prior = float( rho * np.sin(alpha) )
+        # x_prior = float( rho * np.cos(alpha) )
+        # y_prior = float( rho * np.sin(alpha) )
         
         if "prior_z" in mappings[task].keys():
             z_prior = float( mappings[task]["prior_z"] )
@@ -37,8 +37,8 @@ def calculate_correct_priors(model_locs):
             z_prior = float( model_locs[model][2] )
         
         # Nice numbers in the config
-        x_prior = round(x_prior, 2)
-        y_prior = round(y_prior, 2)
+        x_prior = round(xdiff, 2)
+        y_prior = round(ydiff, 2)
         z_prior = round(z_prior, 2)
         
         priors[task] = [x_prior, y_prior, z_prior]
