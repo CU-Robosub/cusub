@@ -16,12 +16,10 @@ sudo apt-get install qtcreator pyqt5-dev-tools
 
 Shift or control to turn an object, control gives more resolution
 Next: 
-   Undo button
-Should be pretty darn good after that - test the whole pipeline!
+   Rethink the process of pointing the sub down an access, making that the zero axis, all priors relaive to that
+Should be good after that!
 
-- add ability to set the z value through a box for prior & sim_gt
-- add transdec sim + transdec real maps for each quadrant! (config files for each)
-- connect to pipeline w/ symlinks etc
+Future ToDo: add transdec support
 """
 cuprint = CUPrint("Prior GUI", ros=False)
 
@@ -85,14 +83,14 @@ class ClickableLabel(QLabel):
          else:
             self.rotation -= 5
          self.show_image()
-      print(self.rotation)
       self.clicked_func(self.task)
 
 class Cusub_GUI(QWidget):
-   def __init__(self, map_name, map_config, mission_config):
+   def __init__(self, map_name, map_config, mission_config, simulation):
       self.map_config = map_config
       self.mission_config = mission_config
       self.map_name = map_name
+      self.simulation = simulation
 
       self.dragged = False
       self.tasks = {}
@@ -138,7 +136,12 @@ class Cusub_GUI(QWidget):
       self.edit_sim_depth.setMaxLength(4)
       self.edit_sim_depth.textChanged.connect(self.sim_depth_edited)
 
-      map_label = QLabel(self.map_name.capitalize())
+      map_name = self.map_name.capitalize()
+      if self.simulation:
+         map_name += " Simulation Run"
+      else:
+         map_name += " Hardware Run"
+      map_label = QLabel(map_name)
       map_label.setFont(QFont("Arial", 24))
       update_mission_config = QPushButton("Update mission config")
       update_mission_config.clicked.connect(self.save_mission_config)
@@ -233,8 +236,6 @@ class Cusub_GUI(QWidget):
       qt_lev_x = self.tasks[lev].x() + self.map_config["map_dims"]["fig_qt_offset"][0]
       qt_lev_y = self.tasks[lev].y() + self.map_config["map_dims"]["fig_qt_offset"][1]
 
-      # qt_lev_rot = -lev.rotation + 90 # REAL
-      # qt_lev_rot = -90 # SIM
       vert_axis_down = self.map_config["map_dims"]["image_vertical_axis_down"]
       horiz_axis_right = self.map_config["map_dims"]["image_horizontal_axis_right"]
 
@@ -253,13 +254,15 @@ class Cusub_GUI(QWidget):
 
          dist = np.linalg.norm([x_diff, y_diff])
 
-         x_prior, y_prior = self.transform_model_coord(x_diff, y_diff, vert_axis_down, horiz_axis_right, 0, 0)
+         if self.simulation: # Simulation coord frame never changes
+            x_prior, y_prior = self.transform_model_coord(x_diff, y_diff, vert_axis_down, horiz_axis_right, 0, 0)
+         else: # hardware frame changes, wherever we zero the IMU at
+            y_diff = -y_diff
+            qt_lev_rot = -lev.rotation + 90 # REAL
+            theta = np.arctan2(y_diff, x_diff) - (qt_lev_rot * (np.pi/180))
+            x_prior = np.cos(theta) * dist
+            y_prior = np.sin(theta) * dist
 
-         # For real life, use the actual angle of leviathan
-         # theta = np.arctan2(x_diff, y_diff)
-         # (qt_lev_rot * (np.pi/180)) - np.arctan2(qtx_diff, qty_diff) # REAL, relative
-         # x_prior = np.sin(theta) * dist
-         # y_prior = np.cos(theta) * dist
          z_prior = self.map_config["priors"][task_name]["prior_depth"]
          
          x_prior = round(x_prior, 2)
@@ -432,6 +435,16 @@ def load_map(map_arg):
    else:
       raise(Exception("Unrecognized map option: " + str(map_arg)))
    return map_name, map_config
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 	
 if __name__ == '__main__':
    folder = os.getcwd()
@@ -440,8 +453,17 @@ if __name__ == '__main__':
 
    # Load args
    parser = argparse.ArgumentParser(description='Place priors GUI')
-   parser.add_argument("-m", "--map", default="dw", type=str, help='map label: a, b, c, d, f (finals), dw (divewell). Default: dw')
+   parser._action_groups.pop()
+   required = parser.add_argument_group('required arguments')
+   optional = parser.add_argument_group('optional arguments')
+   required.add_argument("-s", "--simulation", type=str2bool, help="t/f, simulation run?", required=True)
+   optional.add_argument("-m", "--map", default="dw", type=str, help='map label: a, b, c, d, f (finals), dw (divewell). Default: dw')
    args = parser.parse_args()
+
+   if args.simulation:
+      cuprint("Simulation Run")
+   else:
+      cuprint("Hardware Run")
 
    # Load configs
    map_name, map_config = load_map(args.map.lower())
@@ -450,5 +472,5 @@ if __name__ == '__main__':
    # Load GUI
    os.chdir("../scripts")
    app = QApplication(sys.argv)
-   ex = Cusub_GUI(map_name, map_config, mission_config)
+   ex = Cusub_GUI(map_name, map_config, mission_config, args.simulation)
    sys.exit(app.exec_())

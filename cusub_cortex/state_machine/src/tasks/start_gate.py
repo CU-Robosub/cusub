@@ -54,7 +54,7 @@ class Attack(Objective):
     def __init__(self, task_name):
         name = task_name + "/Approach"
         super(Attack, self).__init__(self.outcomes, name)
-        self.smprint("loading")
+        self.cuprint("loading")
         # self.dist_behind = rospy.get_param('tasks/start_gate/dist_behind_gate', 1.0)
         # self.replan_threshold = rospy.get_param('tasks/start_gate/replan_thresh', 1.0)
         # self.leg_adjustment_meters = rospy.get_param('tasks/start_gate/third_leg_adjustment', 0.5)

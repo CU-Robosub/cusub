@@ -12,11 +12,18 @@ class bcolors: # For terminal colors
     UNDERLINE = '\033[4m'
 
 class CUPrint:
-    def __init__(self, name):
+    def __init__(self, name, ros=True):
         self.name = name
+        self.ros = ros
 
     def __call__(self, string, warn=False):
-        if warn:
-            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
+        if self.ros:
+            if warn:
+                rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
+            else:
+                rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + string)
         else:
-            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + string)
+            if warn:
+                print("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
+            else:
+                print("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + string)

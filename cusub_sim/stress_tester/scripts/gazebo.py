@@ -99,7 +99,7 @@ if __name__ == "__main__":
     if args.noise:
         cuprint("adding noise to gazebo locations")
     else:
-        cuprint("NOT adding to gazebo locations")
+        cuprint("NOT adding noise to gazebo locations")
 
     rospy.init_node("stress_tester")
 

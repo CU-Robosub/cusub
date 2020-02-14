@@ -26,7 +26,6 @@ tasks:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'uh_oh'
-  prior: [14, 11.75, -0.5]
   dist_behind_gate: 1.0
   third_leg_adjustment: 0.5
   replan_thresh: 1.0
@@ -35,65 +34,16 @@ tasks:
   do_style: True
   spin_carrot_rads: 0.7
 
- jiangshi:
-  manager_info:
-    timeout_secs: 0
-    outcome_not_found: 'skip'
-    outcome_timed_out: 'skip'
-  prior: [22.33, 15.28, -1.8]
-  seconds_in_position: 2
-  new_dv_check_rate: 30
-  mag_target: 152600 # target dvector magnitude
-  elev_target: 0.0 # 
-  elev_thresh: 0.05
-  slay_carrot_dist: 1
-
- triangle:
-  manager_info:
-    timeout_secs: 0
-    outcome_not_found: 'skip' # skip, later
-    outcome_timed_out: 'skip'
-  prior: [19.98, 17.64, -1.8]
-  do_orbit: true
-  orbit_right: true
-  strafe_carrot: 0.3
-  single_class_time: 1
-  target_vampire: 'vampire_fathead' # 'vampire_fathead', 'vampire_no_torso', 'vampire_flying' # TODO UPDATE
-  visual_servo: # approach and slay
-    goal_percentage_of_frame: 0.25   # Percentage of image for target class
-    slay_timeout: 10                 # How long the slay will last
-    slay_carrot: 0.7                 # controls the speed when slaying the buoy by adjusting drive setpoint
-    target_pixel_threshold: 50    # how close to our target do we need to be    
-  mikes_method:
-    do: false
-    go_over_jiangshi_depth: -0.7
-    meters_fwd: 2.0
-
  droppers:
   manager_info:
     timeout_secs: 0
     outcome_not_found: 'skip' # skip, later
     outcome_timed_out: 'skip'
-  prior: [27.03, 23.5, -1.25]
-
- octagon:
-  manager_info:
-    timeout_secs: 0
-    outcome_not_found: 'skip' # skip, later
-    outcome_timed_out: 'skip'
-  prior: [16.45, 44.65, -1.25]
-  target_pixel_threshold: 50   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
-  approach_depth: -1
-  depth_carrot: 0.5
-  drive_carrot: 2.0
-  octagon_height: 0.3
-  finish_depth: -1.5
-  finish_depth_thresh: 0.4
 
 mission_tasks: # Tasks To Do In Order
   # - startup
-  # - start_gate
+  - start_gate
   # - jiangshi
   # - triangle
-  - droppers
+  # - droppers
   # - octagon
