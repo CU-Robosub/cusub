@@ -14,7 +14,19 @@ PointTracker::Result KLTPointTracker::initialize(const cv::Mat &image, const Bou
 {
     cv::Mat imageCopy;
     cv::cvtColor(image, imageCopy, CV_BGR2GRAY);
-    cv::Mat croppedImage = imageCopy(roi.roiRect());
+    Result result;
+
+    cv::Rect roiRect = roi.roiRect();
+
+    if (!ImageTools::checkRoi(image, roiRect))
+    {
+        result.message = "Invalid ROI";
+        result.status = STATUS::Fail;
+
+        return result;
+    }
+
+    cv::Mat croppedImage = imageCopy(roiRect);
 
     // extract shi-tomasi image features
     cv::goodFeaturesToTrack(croppedImage, m_currentPoints, 100, 0.3, 7, cv::Mat(), 7, false, 0.04);
@@ -28,7 +40,6 @@ PointTracker::Result KLTPointTracker::initialize(const cv::Mat &image, const Bou
 
     m_currentImg = imageCopy;
 
-    Result result;
     if (m_currentPoints.size() > 2)
     {
         result.message = "Successfuly initialized KLT Point Tracker";

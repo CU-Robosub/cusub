@@ -25,3 +25,21 @@ void ImageTools::processImage(const cv::Mat &in, cv::Mat &out, const ImageTools:
         cv::cvtColor(out, out, cv::COLOR_BGR2RGB);
     }
 }
+
+/**
+ * @brief Checks if it is safe to crop the image to the roi
+ * 
+ * @param image 
+ * @param roi 
+ * @return true 
+ * @return false 
+ */
+bool ImageTools::checkRoi(const cv::Mat &image, const cv::Rect &roi)
+{
+    return (
+        roi.x > 0 && roi.y > 0 &&
+        roi.width > 0 && roi.height > 0 &&
+        roi.x + roi.width < image.cols &&
+        roi.y + roi.height < image.rows
+    );
+}

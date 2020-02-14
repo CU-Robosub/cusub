@@ -30,6 +30,7 @@ public:
     };
 
     static void processImage (const cv::Mat &in, cv::Mat &out, const Preprocessing &steps);
+    static bool checkRoi(const cv::Mat &image, const cv::Rect &roi);
 
 };
 

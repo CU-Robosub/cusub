@@ -23,6 +23,7 @@ public:
     ImageData(const ImageData &other);
     
     void setImage(const cv::Mat &image);
+    void setFrameId(const std::string &id);
 
     std::string frameId() const;
     bool empty();
@@ -34,6 +35,7 @@ public:
 private:
     bool m_empty;
     sensor_msgs::Image::ConstPtr m_image;
+    std::string m_frameId;
 
     cv::Mat rosImageToCV(const sensor_msgs::Image &image);
     // sensor_msgs::Image cvImagetoROS(const cv::Mat &image);

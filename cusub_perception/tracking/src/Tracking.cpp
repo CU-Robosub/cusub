@@ -28,8 +28,8 @@ void Tracking::onInit()
 
     NODELET_INFO("%s", m_imageTopicName.c_str());
     NODELET_INFO("%s", m_detectionTopicName.c_str());
-    if(m_debugMode) NODELET_INFO("true");
-    else NODELET_INFO("false");
+    if(m_debugMode) NODELET_INFO("Debug: true");
+    else NODELET_INFO("Debug: false");
 
     // initialize member variables
     m_nh = getNodeHandle();
@@ -93,6 +93,7 @@ std::vector<BoundingBox> Tracking::getBoxes(const std::string &framename)
 void Tracking::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr &bbs)
 {
     ImageData image = ImageData(bbs->image);
+    image.setFrameId(bbs->image_header.frame_id);
     for(darknet_ros_msgs::BoundingBox box : bbs->bounding_boxes)
     {
         if (box.probability > m_detectionThresh)
@@ -117,7 +118,7 @@ void Tracking::objectDetected(const std::string &classname, BoundingBox &bbox, c
     ObjectTracker * tracker = findTracker(image.frameId(), classname, bbox);
 
     if (tracker != nullptr)
-    {
+    {   
         updateTracker(tracker, bbox, image);
     }
     else
@@ -133,7 +134,7 @@ void Tracking::objectDetected(const std::string &classname, BoundingBox &bbox, c
         {
             m_objectMap[image.frameId()].push_back(new ObjectTracker(bbox, image, classname));
         }
-        std::cout << "new tracker for class: " << classname << std::endl;
+        std::cout << "new tracker for class: " << classname << " for frame: " << image.frameId() << std::endl;
     }
 }
 
@@ -177,25 +178,22 @@ void Tracking::updateTracker(ObjectTracker * objectTracker,const BoundingBox &bb
     else
     {
         // the detection box and the tracking box don't overlap at all, reset
-        if (objectTracker->currentBox().overlapArea(bbox) < 0 && 
+        if (objectTracker->currentBox().overlapArea(bbox) < 0 || 
             bbox.probability() > m_reseedThresh)
         {
-            std::cout << "Overlap area for " << objectTracker->classname() << ": " << objectTracker->currentBox().overlapArea(bbox) << std::endl;
+            // std::cout << "Overlap area for " << objectTracker->classname() << ": " << objectTracker->currentBox().overlapArea(bbox) << std::endl;
             BoundingBox box = bbox;
             objectTracker->initialize(box, image);
-        }
+        }        
     }
 }
 
 void Tracking::newImage(const ImageData &image)
 {
-    // for (std::pair<std::string, std::vector<ObjectTracker *> > iter : m_objectMap)
-    // {
     for (ObjectTracker * tracker : m_objectMap[image.frameId()])
     {
         tracker->updateImage(image);
     }
-    // }L
 
     if (m_publishBoxes)
     {

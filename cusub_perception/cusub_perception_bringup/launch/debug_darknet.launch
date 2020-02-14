@@ -1,0 +1,9 @@
+<launch>
+  <arg name="sub" default="leviathan" />
+  <group ns="$(arg sub)">
+    <node pkg="nodelet" type="nodelet" name="darknet_drawer_standalone_nodelet" args="manager" output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="darknet_drawer" args="load darknet_multiplexer/DarknetDrawer darknet_drawer_standalone_nodelet" output="screen">
+      <rosparam command="load" ns="class_names" file="$(find darknet_config)/yaml/class_names.txt"/>
+    </node>
+  </group>
+</launch>

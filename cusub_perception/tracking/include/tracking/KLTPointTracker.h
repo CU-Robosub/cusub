@@ -8,6 +8,7 @@
 #define KLTPOINTTRACKER_H
 
 #include "PointTracker.h"
+#include "ImageTools.h"
 #include <opencv2/imgproc.hpp>
 
 namespace tracking
