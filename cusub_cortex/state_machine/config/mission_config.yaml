@@ -49,12 +49,18 @@ tasks:
       timeout_secs: 0
       outcome_not_found: 'skip' # skip, later
       outcome_timed_out: 'skip'
+    seconds_in_position: 2
+    new_dv_check_rate: 30
+    mag_target: 152600 # target dvector magnitude
+    elev_target: 0.0
+    elev_thresh: 0.05 # how close elevation has to be
+    slay_carrot_dist: 1 # how far to go ahead to hit jiangshi
 
 mission_tasks: # Tasks To Do In Order
   # - startup
   # - start_gate
-  # - jiangshi
-  - droppers
+  - jiangshi
+  # - droppers
   # - triangle
   
   # - octagon
