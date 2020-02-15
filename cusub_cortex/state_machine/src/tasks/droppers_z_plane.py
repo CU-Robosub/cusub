@@ -81,7 +81,7 @@ class Approach(Objective):
         rospy.Subscriber("cusub_perception/mapper/task_poses", Detection, self.dropper_pose_callback)
         
     def execute(self, userdata):
-        self.smprint("executing")
+        self.cuprint("executing")
 
         # Check we've got a pose, if not return to lost_object which will return to pose of the detection
         if self.dropper_pose == None:
@@ -99,7 +99,7 @@ class Approach(Objective):
         self.drive_client.set_setpoint(drive_setpoint)
         self.strafe_client.set_setpoint(strafe_setpoint)
 
-        self.smprint("servoing")
+        self.cuprint("servoing")
         printed = False
         r = rospy.Rate(self.rate)
         while not rospy.is_shutdown():
@@ -217,15 +217,15 @@ class Drop(Approach): # share that code again...
         # rospy.Subscriber("cusub_cortex/mapper_out/start_gate", PoseStamped, self.dropper_pose_callback) # mapper
         rospy.Subscriber("cusub_perception/mapper/task_poses", Detection, self.dropper_pose_callback)
 
-        self.smprint("waiting for actuator service")
+        self.cuprint("waiting for actuator service")
         rospy.wait_for_service("cusub_common/activateActuator")
-        self.smprint("...connected")
+        self.cuprint("...connected")
         self.actuator_service = rospy.ServiceProxy("cusub_common/activateActuator", ActivateActuator)
 
     def execute(self, userdata):
         ret = super(Drop, self).execute(userdata)
         if ret == "in_position":
-            self.smprint("Bombs Away")
+            self.cuprint("Bombs Away")
             self.actuate_dropper(1)
             # self.actuate_dropper(2)
             return "dropped"

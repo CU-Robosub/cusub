@@ -1,6 +1,7 @@
 import rospy
 from std_msgs.msg import Float64, Bool
 from topic_tools.srv import MuxSelect
+from cusub_print.cuprint import CUPrint
 
 STANDARD_ROOT_TOPIC = "cusub_common/motor_controllers/pid/"
 
@@ -19,6 +20,7 @@ class PIDClient:
         root_topic : str
         """
         self.name = objective_name + "/" + axis.upper() + " Client"
+        self.cuprint = CUPrint(self.name)
         if axis not in ["drive", "strafe", "depth", "yaw"]:
             rospy.logerr("PID axis unrecognized: " + axis)
         if root_topic[-1] != "/":
@@ -66,10 +68,10 @@ class PIDClient:
 
             # Make rosservice call to switch mux
             new_topic = "/" + self.sub_name + "/cusub_common/motor_controllers/cv/" + self.axis + "/control_effort"
-            self.smprint("enabling " + self.axis + " PID loop")
+            self.cuprint("enabling " + self.axis + " PID loop")
             srv_name = "cusub_common/motor_controllers/" + self.axis + "_mux/select"
             rospy.wait_for_service(srv_name)
-            self.smprint("...enabled")
+            self.cuprint("...enabled")
             mux_select = rospy.ServiceProxy(srv_name, MuxSelect)
             try:
                 resp = mux_select(new_topic)
@@ -94,10 +96,10 @@ class PIDClient:
 
             # Make rosservice call to switch mux
             new_topic = "/" + self.sub_name + "/cusub_common/motor_controllers/pid/" + self.axis + "/control_effort"
-            self.smprint("disabling " + self.axis + " PID loop")
+            self.cuprint("disabling " + self.axis + " PID loop")
             srv_name = "cusub_common/motor_controllers/" + self.axis + "_mux/select"
             rospy.wait_for_service(srv_name)
-            self.smprint("...disabled")
+            self.cuprint("...disabled")
             mux_select = rospy.ServiceProxy(srv_name, MuxSelect)
             try:
                 resp = mux_select(new_topic)
@@ -114,7 +116,7 @@ class PIDClient:
             
     def set_setpoint(self, data, loop=True):
         if not self.enabled and not self.standard:
-            self.smprint("Setting setpoint but PID loop is not enabled!", warn=True)
+            self.cuprint("Setting setpoint but PID loop is not enabled!", warn=True)
         f = Float64()
         f.data = data
         if loop:
@@ -124,9 +126,9 @@ class PIDClient:
 
     def set_state(self, data, loop=False):
         if self.standard:
-            self.smprint("Setting state of a 'standard' PID loop, will be overided by robot_localization", warn=True)
+            self.cuprint("Setting state of a 'standard' PID loop, will be overided by robot_localization", warn=True)
         if not self.enabled and not self.standard:
-            self.smprint("Setting state but PID loop is not enabled!", warn=True)
+            self.cuprint("Setting state but PID loop is not enabled!", warn=True)
         f = Float64()
         f.data = data
         if loop:
@@ -141,19 +143,3 @@ class PIDClient:
             pub.publish(msg)
             count -= 1
             rospy.sleep(0.01)
-    
-    def smprint(self, string, warn=False):
-        if warn:
-            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
-        else:
-            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + string)
-
-class bcolors: # For terminal colors
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'

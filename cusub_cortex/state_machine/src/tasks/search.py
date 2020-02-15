@@ -30,16 +30,16 @@ class Search(Objective):
         self.tf_listener = tf.TransformListener()
 
     def execute(self, userdata):
-        self.smprint("executing")
+        self.cuprint("executing")
         self.configure_darknet_cameras(self.darknet_config)
         prior = self.get_odom_prior(self.prior_pose_param_str) # attempt to grab from mapper first --> we may already have localized it
-        # self.go_to_pose_non_blocking(prior)
+        self.go_to_pose_non_blocking(prior)
 
-        self.smprint("approaching prior, listening for detections of " + ", ".join(self.target_classes))
+        self.cuprint("approaching prior, listening for detections of " + ", ".join(self.target_classes))
         while not rospy.is_shutdown():
             # Check for detection
             if self.query_listener(): 
-                self.smprint("detected class")
+                self.cuprint("detected class")
                 userdata.outcome = "success"
                 return "found"
             # Check for timeout
@@ -49,8 +49,8 @@ class Search(Objective):
                 return "not_found"
             # Check for reaching the prior pose
             elif self.check_reached_pose(prior):
-                self.smprint("reached prior without any detections", warn=True)
-                self.smprint("spiral search functionality not implemented...quitting", warn=True)
+                self.cuprint("reached prior without any detections", warn=True)
+                self.cuprint("spiral search functionality not implemented...quitting", warn=True)
                 userdata.outcome = "not_found"
                 return "not_found"
 
@@ -82,16 +82,16 @@ class Search(Objective):
         p.pose.position.y = xyzframe_list[1]
         p.pose.position.z = xyzframe_list[2]
         if len(xyzframe_list) == 4:     # prior needs to be transformed
-            self.smprint("...transforming prior pose to odom")
+            self.cuprint("...transforming prior pose to odom")
             p.header.frame_id = xyzframe_list[3]
             p.header.stamp = rospy.Time()
             if not rospy.has_param("~robotname"):
                 raise("Launch file must specify private param 'robotname'")
             try:
                 odom_frame = '/'+ rospy.get_param("~robotname") + '/description/odom'
-                self.smprint("...waiting for transform: " + odom_frame + " -> /" + xyzframe_list[3])
+                self.cuprint("...waiting for transform: " + odom_frame + " -> /" + xyzframe_list[3])
                 self.tf_listener.waitForTransform(p.header.frame_id, odom_frame, p.header.stamp, rospy.Duration(5))
-                self.smprint("...found transform")
+                self.cuprint("...found transform")
                 p = self.tf_listener.transformPose(odom_frame, p)
             except (tf.ExtrapolationException, tf.ConnectivityException, tf.LookupException) as e:
                 rospy.logerr(e)

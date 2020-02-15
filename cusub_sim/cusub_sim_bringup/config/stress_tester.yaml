@@ -1,0 +1,9 @@
+std_noisy_default: 2
+
+tasks:
+  start_gate:
+    model: StartGate
+    yaw: -0.92
+    noise_std:
+      xy:
+      yaw_deg: 20

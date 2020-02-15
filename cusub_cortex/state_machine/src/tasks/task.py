@@ -18,6 +18,7 @@ import numpy as np
 import tf
 from state_machine.msg import TaskStatus
 from waypoint_navigator.srv import *
+from cusub_print.cuprint import CUPrint
 
 from optparse import OptionParser
 import inspect
@@ -35,6 +36,7 @@ class Task(smach.StateMachine):
     outcome = ["manager"]
 
     def __init__(self, name):
+        self.cuprint = CUPrint(name)
         self.name = name
         super(Task, self).__init__(
             outcomes=self.outcome,\
@@ -73,13 +75,6 @@ class Task(smach.StateMachine):
              The rosparam name of prior
         """
         return "tasks/" + self.name.lower() + "/prior"
-
-    def smprint(self, string, warn=False):
-        if warn:
-            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
-        else:
-            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + string)
-
 
 """
 Objectives are subtasks within a task
@@ -120,16 +115,12 @@ class Objective(smach.State):
         pose.position.z = 0
         self.cur_pose = pose
 
+        self.cuprint = CUPrint(objtv_name)
+
         super(Objective, self).__init__(
             outcomes=outcomes,\
             input_keys=['timeout_obj'],\
             output_keys=['timeout_obj', 'outcome'])
-
-    def smprint(self, string, warn=False):
-        if warn:
-            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
-        else:
-            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + string)
 
     def configure_darknet_cameras(self, camera_bool_list):
         """
@@ -147,14 +138,14 @@ class Objective(smach.State):
             1 success
             0 failed
         """
-        self.smprint("configuring darknet cameras")
+        self.cuprint("configuring darknet cameras")
         if not self.using_darknet:
             return False
         rospy.wait_for_service("cusub_perception/darknet_multiplexer/configure_active_cameras")
         try:
             darknet_config = rospy.ServiceProxy("cusub_perception/darknet_multiplexer/configure_active_cameras", DarknetCameras)
             resp1 = darknet_config(camera_bool_list)
-            self.smprint("...configured")
+            self.cuprint("...configured")
             return True
         except rospy.ServiceException, e:
             rospy.logerr("Darknet Camera Config Service call failed: %s"%e)
@@ -218,7 +209,7 @@ class Objective(smach.State):
         self.wayClient.cancel_all_goals()
         rospy.sleep(0.2)
         self.wayClient.send_goal(wpGoal)
-        self.smprint("goal sent to waypointNav")
+        self.cuprint("goal sent to waypointNav")
     
     def block_on_reaching_pose(self, target_pose, timeout_obj, replan_enabled=True):
         """
@@ -427,7 +418,7 @@ class Objective(smach.State):
                 adjusted_prior = [self.cur_pose.position.x + delta_x, \
                                   self.cur_pose.position.y + delta_y, \
                                   task_prior_pt.z]
-                self.smprint("updating prior for " + task)
+                self.cuprint("updating prior for " + task)
                 rospy.set_param(task_prior_name, adjusted_prior)
                 
 class Timeout():
@@ -435,7 +426,7 @@ class Timeout():
     @brief Timeout object for tasks
     """
     timer = None
-    name = "Timeout Object"
+    cuprint = CUPrint("Timeout Object")
 
     def set_new_time(self, seconds):
         """ In objectives reference like: userdata.timeout_obj.set_new_time(4) """
@@ -444,31 +435,15 @@ class Timeout():
         self.timed_out = False
         if seconds != 0:
             self.timer = rospy.Timer(rospy.Duration(seconds), self.timer_callback)
-            self.smprint("Next task time: " + str(seconds) + "s")    
+            self.cuprint("Next task time: " + str(seconds) + "s")    
         else:
-            self.smprint("No timeout monitoring on next task", warn=True)
+            self.cuprint("No timeout monitoring on next task", warn=True)
 
     def timer_callback(self, msg):
         self.timer.shutdown()
-        self.smprint("Task Timed Out", warn=True)
+        self.cuprint("Task Timed Out", warn=True)
         self.timed_out = True
 
     def timed_out(self):
         """ In objectives reference like: userdata.timeout_obj.timed_out """
         return self.timed_out
-
-    def smprint(self, string, warn=False):
-        if warn:
-            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
-        else:
-            rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + string)
-
-class bcolors: # For terminal colors
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'

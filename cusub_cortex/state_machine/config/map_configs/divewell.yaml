@@ -1,0 +1,30 @@
+map_dims:
+  fig_qt_offset:
+  - 54
+  - 54
+  image_horizontal_axis_right: +y
+  image_vertical_axis_down: +x
+  world_coords_of_top_left_corner_of_image:
+  - -9
+  - -6
+  x_len: 12
+  x_pixels: 480
+  y_len: 18
+  y_pixels: 720
+priors:
+  leviathan:
+    qtlocation:
+    - 19
+    - 602
+    - 45
+    sim_model: leviathan/description
+  start_gate:
+    prior_depth: -2.0
+    qtlocation:
+    - 331
+    - 32
+    - 120
+    sim_model: StartGate_1
+sim_truth_depths:
+  StartGate_1: -0.5
+  leviathan/description: 0.0
