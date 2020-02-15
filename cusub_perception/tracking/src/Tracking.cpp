@@ -68,7 +68,8 @@ void Tracking::setupSubscribers()
 
 bool Tracking::configureTracking(tracking::TrackingConfig::Request &req, tracking::TrackingConfig::Response &resp)
 {
-    m_detectionThresh = req.threshold;
+    m_detectionThresh = req.detection_thresh;
+    m_reseedThresh = req.reseed_thresh;
     return true;
 }
 

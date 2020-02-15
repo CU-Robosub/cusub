@@ -3,6 +3,7 @@
 # set to 0 to pass the darknet box directly through
 # set to 100 to go full tracking
 # usually want somewhere in between
-float32 threshold
+float32 detection_thresh
+float32 reseed_thresh
 ---
 bool success
