@@ -228,11 +228,11 @@ class Retrace(Objective):
         min_dis = float("Inf")
         index = 0
         for i in range(len(d_vectors)):
-            new_dis = self.get_distance(self.cur_pose.position, each.sub_pt)
+            new_dis = self.get_distance(self.cur_pose.position, d_vectors[i].sub_pt)
             if new_dis < min_dis:
                 min_dis = new_dis
                 index = i
-        return i
+        return index
 
     def execute(self, userdata):
         self.smprint("executing R`etrace")
@@ -264,11 +264,12 @@ class Retrace(Objective):
         #Start Retrace: Set first waypoint
         self.go_to_pose_non_blocking(last_pose, userdata.timeout_obj, move_mode="strafe")
         while not rospy.is_shutdown():
-            if self.listener.check_new_dvs() and count < self.retrace_hit_cnt: 
+            if self.listener.check_new_dvs(dobj_nums) != -1 and count < self.retrace_hit_cnt: 
                 #found object again
                 count += 1
-            elif count >= self.retrace_hit_cnt:
-                return "found"
+                if count >= self.retrace_hit_cnt:
+                    self.cancel_way_client_goal()
+                    return "found"
             else:
                 if self.check_reached_pose(last_pose):
                     retraced_steps[i] += 1
@@ -289,11 +290,10 @@ class Retrace(Objective):
                     self.go_to_pose_non_blocking(last_pose,userdata.timeout_obj,move_mode="strafe")
 
             if userdata.timeout_obj.timed_out:
-                self.yaw_client.disable()
-                self.drive_client.disable()
-                self.depth_client.disable()
+                self.cancel_way_client_goal()
                 userdata.outcome = "timed_out"
                 return "not_found"
+            rospy.sleep(.5)
 
         #clean up if we are killed
         return "not_found"
