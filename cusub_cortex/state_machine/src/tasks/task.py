@@ -106,8 +106,6 @@ class Objective(smach.State):
         self.started = False
         self.using_darknet = rospy.get_param("~using_darknet")
 
-        self.wayToggle = rospy.ServiceProxy('cusub_common/toggleWaypointControl', ToggleControl)
-
         # initialize the pose
         pose = Pose()
         pose.position.x = 0
@@ -121,6 +119,15 @@ class Objective(smach.State):
             outcomes=outcomes,\
             input_keys=['timeout_obj'],\
             output_keys=['timeout_obj', 'outcome'])
+
+    def toggle_waypoint_control(self, sm_take_control):
+        wayToggle = rospy.ServiceProxy('cusub_common/toggleWaypointControl', ToggleControl)
+        try:
+            res = wayToggle(not sm_take_control)
+            return True
+        except rospy.ServiceException, e:
+            self.cuprint("Toggling waypoint nav control failed: " + str(e), warn=True)
+            return False
 
     def configure_darknet_cameras(self, camera_bool_list):
         """
@@ -153,18 +160,6 @@ class Objective(smach.State):
 
     def go_to_pose(self, target_pose, timeout_obj, replan_enabled=True, move_mode="yaw"):
         """ @brief traverses to the target_pose given, blocks until reached
-
-        Combination of go_to_pose_non_blocking() and block_on_reaching_pose()
-
-        Call like (if replanning is possible, surround w/ while loop):
-        if self.go_to_pose(target_pose, userdata.timeout_obj):
-            if userdata.timeout_obj.timed_out:
-                userdata.outcome = "timedout"
-                return "done"
-            else: # Replan has been requested loop again
-                pass
-        else: # Pose reached successfully!
-            pass or break # from while, in the case of replan
 
         Parameters
         ----------

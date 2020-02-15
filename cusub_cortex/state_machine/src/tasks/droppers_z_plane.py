@@ -39,7 +39,6 @@ class Droppers(Task):
         darknet_cameras = [1,1,0,0,1,1] # front 3 occams + downcam
         self.search = Search(self.name, self.listener, search_classes, self.get_prior_param(), darknet_cameras=darknet_cameras)
         self.approach = Approach(self.name, clients)
-        self.dive = Dive(self.name, clients)
         self.drop = Drop(self.name, clients)
         self.revisit = Revisit(self.name, self.listener)
 
@@ -49,9 +48,7 @@ class Droppers(Task):
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
             smach.StateMachine.add('Revisit', self.revisit, transitions={'found':'Approach', 'not_found':'Search'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
-            smach.StateMachine.add('Approach', self.approach, transitions={'in_position':'Dive', 'timed_out':'manager', 'lost_object':'Revisit'}, \
-                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
-            smach.StateMachine.add('Dive', self.dive, transitions={'in_position':'Drop', 'timed_out':'manager', 'lost_object':'Revisit'}, \
+            smach.StateMachine.add('Approach', self.approach, transitions={'in_position':'Drop', 'timed_out':'manager', 'lost_object':'Revisit'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
             smach.StateMachine.add('Drop', self.drop, transitions={'dropped':'manager', 'timed_out':'manager', 'lost_object':'Revisit'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
@@ -68,10 +65,10 @@ class Approach(Objective):
         self.drive_client = clients["drive_client"]
         self.strafe_client = clients["strafe_client"]
 
-        self.xy_distance_thresh = 0.5 # rospy.get_param("")
+        self.xy_distance_thresh = rospy.get_param("tasks/droppers/xy_dist_thresh_app")
 
-        seconds = 2 #rospy.get_param("tasks/jiangshi/seconds_in_position")
-        self.rate = 30 #rospy.get_param("tasks/jiangshi/new_dv_check_rate")
+        seconds = rospy.get_param("tasks/droppers/seconds_in_position")
+        self.rate = 30
         self.count_target = seconds * self.rate
         self.count = 0
 
@@ -82,6 +79,7 @@ class Approach(Objective):
         
     def execute(self, userdata):
         self.cuprint("executing")
+        self.configure_darknet_cameras([0,0,0,0,0,1])
 
         # Check we've got a pose, if not return to lost_object which will return to pose of the detection
         if self.dropper_pose == None:
@@ -89,6 +87,7 @@ class Approach(Objective):
             if self.dropper_pose == None:
                 return "lost_object"
 
+        self.toggle_waypoint_control(True)
         self.drive_client.enable()
         self.strafe_client.enable()
 
@@ -164,37 +163,6 @@ class Approach(Objective):
     def check_new_pose(self):
         return self.new_pose_flag
 
-class Dive(Approach): # Inherit from Approach so we don't rewrite a lot of code...
-    outcomes = ['in_position','timed_out', 'lost_object']
-
-    target_class = "wolf"
-    
-    def __init__(self, task_name, clients):
-        name = task_name + "/Dive"
-        super(Approach, self).__init__(self.outcomes, name)
-        self.drive_client = clients["drive_client"]
-        self.strafe_client = clients["strafe_client"]
-        self.depth_client = PIDClient(name, "depth")
-
-        self.drop_depth = -2.3 # rospy.get_param("")
-
-        self.xy_distance_thresh = 0.3 # rospy.get_param("") # get the close
-
-        seconds = 2 #rospy.get_param("tasks/jiangshi/seconds_in_position")
-        self.rate = 30 #rospy.get_param("tasks/jiangshi/new_dv_check_rate")
-        self.count_target = seconds * self.rate
-        self.count = 0
-
-        self.dropper_pose = None
-        self.new_pose_flag = False
-        # rospy.Subscriber("cusub_cortex/mapper_out/start_gate", PoseStamped, self.dropper_pose_callback) # mapper
-        rospy.Subscriber("cusub_perception/mapper/task_poses", Detection, self.dropper_pose_callback)
-
-    def execute(self, userdata):
-        """ We esentially need everything that Approach does, except we want to change the depth """
-        self.depth_client.set_setpoint(self.drop_depth)
-        return super(Dive, self).execute(userdata) # Call approach/execute() since everything's the same
-
 class Drop(Approach): # share that code again...
     outcomes = ['dropped','timed_out', 'lost_object']
 
@@ -205,11 +173,13 @@ class Drop(Approach): # share that code again...
         super(Approach, self).__init__(self.outcomes, name)
         self.drive_client = clients["drive_client"]
         self.strafe_client = clients["strafe_client"]
+        self.depth_client = PIDClient(name, "depth")
 
-        self.xy_distance_thresh = 0.1 # rospy.get_param("") # get the close
+        self.xy_distance_thresh = rospy.get_param("tasks/droppers/xy_dist_thresh_drop")
+        self.drop_depth = rospy.get_param("tasks/droppers/drop_depth")
 
-        self.rate = 30 # rospy.get_parma(""")
-        self.count_target = 0 # once we're in position, drop
+        self.rate = 30
+        self.count_target = 0 # 0 since once we're in position, drop
         self.count = 0
 
         self.dropper_pose = None
@@ -223,6 +193,10 @@ class Drop(Approach): # share that code again...
         self.actuator_service = rospy.ServiceProxy("cusub_common/activateActuator", ActivateActuator)
 
     def execute(self, userdata):
+        self.cuprint("diving")
+        self.depth_client.set_setpoint(self.drop_depth)
+        rospy.sleep(1.5)
+
         ret = super(Drop, self).execute(userdata)
         if ret == "in_position":
             self.cuprint("Bombs Away")

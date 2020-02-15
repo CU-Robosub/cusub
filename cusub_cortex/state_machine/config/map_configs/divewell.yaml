@@ -12,19 +12,36 @@ map_dims:
   y_len: 18
   y_pixels: 720
 priors:
+  droppers:
+    prior_depth: -1.0
+    qtlocation:
+    - 186
+    - 310
+    - 0
+    sim_model: dropper_garlic_1
+  jiangshi:
+    prior_depth: -1.0
+    qtlocation:
+    - 42
+    - 101
+    - 0
+    sim_model: buoy_jiangshi_1
   leviathan:
     qtlocation:
-    - 19
-    - 602
-    - 45
+    - 166
+    - 625
+    - 0
     sim_model: leviathan/description
   start_gate:
     prior_depth: -2.0
     qtlocation:
-    - 331
-    - 32
+    - 335
+    - 36
     - 120
     sim_model: StartGate_1
 sim_truth_depths:
   StartGate_1: -0.5
+  buoy_jiangshi_1: -0.9
+  dropper_garlic_1: -3.5
+  droppers: -3.5
   leviathan/description: 0.0

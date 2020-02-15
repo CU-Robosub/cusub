@@ -156,6 +156,10 @@ class Cusub_GUI(QWidget):
       grid_button = QPushButton("Show Grid")
       grid_button.setFont(font)
       grid_button.clicked.connect(self.show_grid)
+
+      reload_button = QPushButton("Reload")
+      reload_button.setFont(font)
+      reload_button.clicked.connect(self.reload_mission_config)
       
       grid = QGridLayout()
       
@@ -164,6 +168,7 @@ class Cusub_GUI(QWidget):
          grid.addWidget(t, 0,0)
       grid.addWidget(check_box, 0,1, alignment=Qt.AlignCenter)
       grid.addWidget(grid_button, 0,1, alignment=Qt.AlignTop)
+      grid.addWidget(reload_button, 0,1, alignment=Qt.AlignBottom)
 
       # Depth Adjustments
       grid.setColumnMinimumWidth(2, 100)
@@ -189,6 +194,12 @@ class Cusub_GUI(QWidget):
       
       for t in self.tasks.keys():
          t.move(self.tasks[t])
+
+   def reload_mission_config(self):
+      os.chdir("../config/")
+      self.mission_config = load_mission_config()
+      os.chdir("../scripts/")
+      cuprint("reloaded mission config")
 
    def sim_depth_edited(self, text):
       if self.active_task:

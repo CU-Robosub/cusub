@@ -33,6 +33,8 @@ class Search(Objective):
         self.cuprint("executing")
         self.configure_darknet_cameras(self.darknet_config)
         prior = self.get_odom_prior(self.prior_pose_param_str) # attempt to grab from mapper first --> we may already have localized it
+        
+        self.toggle_waypoint_control(False)
         self.go_to_pose_non_blocking(prior)
 
         self.cuprint("approaching prior, listening for detections of " + ", ".join(self.target_classes))
@@ -41,6 +43,7 @@ class Search(Objective):
             if self.query_listener(): 
                 self.cuprint("detected class")
                 userdata.outcome = "success"
+                self.cancel_way_client_goal()
                 return "found"
             # Check for timeout
             elif userdata.timeout_obj.timed_out:
@@ -51,6 +54,7 @@ class Search(Objective):
             elif self.check_reached_pose(prior):
                 self.cuprint("reached prior without any detections", warn=True)
                 self.cuprint("spiral search functionality not implemented...quitting", warn=True)
+                self.cancel_way_client_goal()
                 userdata.outcome = "not_found"
                 return "not_found"
 
