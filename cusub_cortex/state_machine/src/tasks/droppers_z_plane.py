@@ -36,7 +36,7 @@ class Droppers(Task):
         strafe_client = PIDClient(self.name, "strafe")
         clients = {'drive_client' : drive_client, 'strafe_client' : strafe_client}
         search_classes = ["dropper_cover", "wolf"]
-        darknet_cameras = [1,1,0,0,1,1] # front 3 occams + downcam
+        darknet_cameras = [0,0,0,0,0,1] # front 3 occams + downcam
         self.search = Search(self.name, self.listener, search_classes, self.get_prior_param(), darknet_cameras=darknet_cameras)
         self.approach = Approach(self.name, clients)
         self.drop = Drop(self.name, clients)
@@ -80,6 +80,7 @@ class Approach(Objective):
     def execute(self, userdata):
         self.cuprint("executing")
         self.configure_darknet_cameras([0,0,0,0,0,1])
+        self.toggle_waypoint_control(True)
 
         # Check we've got a pose, if not return to lost_object which will return to pose of the detection
         if self.dropper_pose == None:
@@ -87,7 +88,6 @@ class Approach(Objective):
             if self.dropper_pose == None:
                 return "lost_object"
 
-        self.toggle_waypoint_control(True)
         self.drive_client.enable()
         self.strafe_client.enable()
 
