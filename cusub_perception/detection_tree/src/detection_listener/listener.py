@@ -5,7 +5,10 @@ from detection_tree.msg import Dvector
 import threading
 import numpy as np
 
-class Dobject:
+class Dobject(list):
+
+    def __getitem__(self, key):
+        return self.dvectors[key]
     
     def __init__(self, num, class_id):
         self.num = num
@@ -53,15 +56,18 @@ class Dobject:
         return self.dvectors[first_dv:]
 
     def get_d(self, index):
-        if index < 0 or index > len(self.dvectors)
+        if index < 0 or index > len(self.dvectors):
             return len(self.dvectors)
         return self.dvectors[index]
 
 """
 Subscribes to dvector topic
 """
-class DetectionListener:
-    
+class DetectionListener(list):
+
+    def __getitem__(self,key):
+        return self.dobjects[key]
+
     def __init__(self):
         self.dobjects = []
         self.new_dv_flags = []

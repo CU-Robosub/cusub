@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-from __future__ import division
+# -*- coding: utf-8 -*-
+from __future__ import division, print_function
 """
 Jiangshi Buoy Task, attempts to bump into the jiangshi buoy
 Objectives:
@@ -8,7 +9,7 @@ Objectives:
 - Slay
 - Back Up
 """
-from tasks.task import Task, Objective
+from tasks.task import Task, Objective, Timeout
 from tasks.search import Search
 from tasks.pid_client import PIDClient
 import rospy
@@ -16,9 +17,12 @@ import tf
 import smach
 import smach_ros
 from geometry_msgs.msg import Pose, Point
+from std_msgs.msg import Time
 from detection_listener.listener import DetectionListener
 from waypoint_navigator.srv import ToggleControl
 import numpy as np
+from cusub_print.cuprint import bcolors
+import sys
 
 class Jiangshi(Task):
     name = "Jiangshi"
@@ -67,6 +71,7 @@ class Approach(Objective):
         self.drive_client = PIDClient(name, "drive", "cusub_common/motor_controllers/mag_pid/")
         self.depth_client = PIDClient(name, "depth", "cusub_common/motor_controllers/elev_pid/")
 
+        self.retrace_timeout = rospy.get_param("tasks/jiangshi/retrace_timeout", 2)
         seconds = rospy.get_param("tasks/jiangshi/seconds_in_position", 2)
         self.rate = rospy.get_param("tasks/jiangshi/new_dv_check_rate", 30)
         self.count_target = seconds * self.rate
@@ -89,9 +94,10 @@ class Approach(Objective):
             self.cuprint("somehow no " + self.target_class_id + " classes found?", warn=True)
             return "lost_object"
         dobj_num = dobj_nums[0]
-        self.cuprint("located " + self.target_class_id + "'s dobject num: " + str(dobj_num))
+        self.cuprint("located " + self.target_class_id + "'s dobject num: " + bcolors.HEADER + str(dobj_num) + bcolors.ENDC)
         
-        # TODO start a watch dog timer on detections
+        # Start a watch dog timer on detections
+        watchdog_timer = Timeout(self.name)
 
         # Enable the PID loops
         self.yaw_client.enable()
@@ -103,12 +109,8 @@ class Approach(Objective):
         self.cuprint("servoing")
         r = rospy.Rate(self.rate)
         while not rospy.is_shutdown():
-            #check watchdog
-            #if self.watchdog = "expired":
-                #return "lost_object"
             if self.listener.check_new_dv(dobj_num):
-                #reset watchdog
-                #self.watchdog = "restart"
+                watchdog_timer.set_new_time(self.retrace_timeout, print_new_time=False)
                 [az, el, mag] = self.listener.get_avg_bearing(dobj_num, num_dv=5)
                 self.yaw_client.set_setpoint(az, loop=False)
                 self.drive_client.set_state(mag)
@@ -122,6 +124,12 @@ class Approach(Objective):
                         break
                 else:
                     self.count = 0
+            elif watchdog_timer.timed_out:
+                self.yaw_client.disable()
+                self.drive_client.disable()
+                self.depth_client.disable()
+                return "lost_object"
+
             if userdata.timeout_obj.timed_out:
                 self.yaw_client.disable()
                 self.drive_client.disable()
@@ -187,20 +195,19 @@ class Backup(Objective):
         return "backed_up"
 
 
-# TODO
 class Retrace(Objective):
     outcomes = ['found','not_found']
 
     target_class_id = "vampire_cute"
 
     def __init__(self, task_name, listener):
-        super(Retrace, self).__init__(self.outcomes, task_name + "/Rétrace".encode("utf-8"))
+        super(Retrace, self).__init__(self.outcomes, task_name + u"/Rétrace".encode("utf-8"))
         self.listener = listener
-        #TODO: add param
-        self.retrace_hit_cnt = rospy.get_param("tasks/jianshi/retrace_hit_count")
+        self.retrace_hit_cnt = rospy.get_param("tasks/jiangshi/retrace_hit_count")
+        self.retrace_back_in_time = rospy.get_param("tasks/jiangshi/retrace_back_in_time")
 
     def execute(self, userdata):
-        self.smprint("executing")
+        self.cuprint("executing")
         dobj_nums = self.listener.query_class(self.target_class_id)
         if not len(dobj_nums): #shouldn't be possible
             # do some timeout?
@@ -213,37 +220,48 @@ class Retrace(Objective):
         # loop variables
         count = 0
         retraced_steps = 1
-        len_dvec = len(self.listener.dobjects[dobj_num].dvectors)
-        last_sub_pt = self.listener.get_d(len_dvec-retraced_steps).sub_pt         
+        first_bc = self.listener[dobj_num][-1]
+
+        backup_time = first_bc.camera_header.stamp - rospy.Duration(self.retrace_back_in_time)
+        
+        breadcrumb_dvs = self.listener[dobj_num].get_dvectors_since_time(backup_time)
+
+        len_dvec = len(breadcrumb_dvs)
+        self.cuprint("breadcrumbs to follow since " + str(self.retrace_back_in_time) + " seconds ago:" + str(len_dvec))
+        last_sub_pt = breadcrumb_dvs[len_dvec-retraced_steps].sub_pt 
         last_pose = Pose(last_sub_pt, self.cur_pose.orientation)
 
         # Start Retrace: Set first waypoint
-        self.go_to_pose_non_blocking(last_pose,userdata.timeout_obj,move_mode="strafe")
+        self.go_to_pose_non_blocking(last_pose)
+        print("")
         while not rospy.is_shutdown():
             if self.listener.check_new_dv(dobj_num) and count < self.retrace_hit_cnt: 
                 #found object again
                 count += 1
             elif count >= self.retrace_hit_cnt:
+                self.cancel_way_client_goal()
                 return "found"
             else:
-                if self.check_reached_pose(last_pose):
+                dist = self.get_distance(self.cur_pose.position, last_pose.position)
+                self.cuprint("Breadcrumb #"+ bcolors.HEADER + str( retraced_steps)+ bcolors.ENDC+ " distance: " + bcolors.OKBLUE + str(dist) + bcolors.ENDC, print_prev_line=True)
+                #self.cuprint("distance to goal: "+ str())
+                if self.check_reached_pose(last_pose, 0.7):
+                    self.cancel_way_client_goal()
                     retraced_steps += 1
                     if (retraced_steps > len_dvec):
                         #means we retraces all our steps. We're lost.
                         return "not_found"
                     # Goto Last dvector
                     # get last dvector sub_pt
-                    last_sub_pt = self.listener.get_d(len_dvec-retraced_steps).sub_pt 
+                    last_sub_pt = breadcrumb_dvs[len_dvec-retraced_steps].sub_pt 
             
                     last_pose = Pose(last_sub_pt, self.cur_pose.orientation)
                     #set waypoint to this point. Give some distance to account for error in bearing and sub_pt
                     # Set waypoint
-                    self.go_to_pose_non_blocking(last_pose,userdata.timeout_obj,move_mode="strafe")
+                    self.go_to_pose_non_blocking(last_pose, log_print=False)
 
             if userdata.timeout_obj.timed_out:
-                self.yaw_client.disable()
-                self.drive_client.disable()
-                self.depth_client.disable()
+                self.cancel_way_client_goal()
                 userdata.outcome = "timed_out"
                 return "not_found"
 

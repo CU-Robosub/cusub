@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import rospy
 
 class bcolors: # For terminal colors
@@ -16,14 +17,21 @@ class CUPrint:
         self.name = name
         self.ros = ros
 
-    def __call__(self, string, warn=False):
+    def __call__(self, string, warn=False, print_prev_line=False):
+        
+        name_str = "[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] "
+        warn_str =  bcolors.WARNING +"[WARN] " + bcolors.ENDC
+        print_string = name_str
+        if warn:
+            print_string = print_string + warn_str
+        # if print_prev_line:
+            # print_string = "\033[F" + print_string
+
         if self.ros:
-            if warn:
-                rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
-            else:
-                rospy.loginfo("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + string)
+            if print_prev_line:
+                print("\033[F", end="")
+            rospy.loginfo(print_string + string)
         else:
-            if warn:
-                print("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
-            else:
-                print("[" + bcolors.OKGREEN + self.name + bcolors.ENDC + "] " + string)
+            if print_prev_line:
+                print("\033[F", end="")
+            print(print_string + string)
