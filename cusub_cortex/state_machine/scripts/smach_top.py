@@ -31,22 +31,9 @@ from tasks.startup_task import Startup
 from tasks.triangle import Triangle
 from tasks.octagon import Octagon
 # from tasks.debug_servo import Debug
+from cusub_print.cuprint import CUPrint, bcolors
 
-class bcolors: # For terminal colors
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-def smprint(string, warn=False):
-    if warn:
-        rospy.loginfo("[" + bcolors.OKGREEN + "Startup Script" + bcolors.ENDC + "] " + bcolors.WARNING +"[WARN] "+ string + bcolors.ENDC)
-    else:
-        rospy.loginfo("[" + bcolors.OKGREEN + "Startup Script" + bcolors.ENDC + "] " + string)
+cuprint = CUPrint("Startup Script")
 
 def createTransitionsForManager(task_list, final_outcome):
     transition_dict = {}
@@ -65,7 +52,7 @@ def loadStateMachines(task_list):
     sm_list = []
     for task in task_list:
         task_sm = None
-        smprint("Loading " + bcolors.HEADER + task.capitalize() + bcolors.ENDC + " state machine")
+        cuprint("Loading " + bcolors.HEADER + task.capitalize() + bcolors.ENDC + " state machine")
 
         if task == "start_gate":
             task_sm = StartGate()
@@ -105,26 +92,26 @@ def main():
     
     # All Objectives depend on the waypoint server so let's wait for it to initalize here
     wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
-    smprint("waiting for waypoint server")
+    cuprint("waiting for waypoint server")
     # wayClient.wait_for_server()
-    smprint("...connected")
+    cuprint("...connected")
 
     # Make sure the waypoint navigator is in control
     #toggle_waypoint = rospy.ServiceProxy('cusub_common/toggleWaypointControl', ToggleControl)
     #toggle_waypoint(True)
 
     if rospy.get_param('~using_darknet'):
-        smprint("waiting for darknet multiplexer server")
+        cuprint("waiting for darknet multiplexer server")
  #       rospy.wait_for_service("cusub_perception/darknet_multiplexer/configure_active_cameras")
-        smprint("...connected")
+        cuprint("...connected")
     else:
-        smprint("SM NOT using darknet configuration service.", warn=True)
+        cuprint("SM NOT using darknet configuration service.", warn=True)
 
     # initialize all of the state machines
-    smprint("waiting for rosparams")
+    cuprint("waiting for rosparams")
     while not rospy.has_param("mission_tasks") and not rospy.is_shutdown():
         rospy.sleep(1)
-    smprint("...found")
+    cuprint("...found")
 
     final_outcome = "mission_completed"
     sm_top = smach.StateMachine(outcomes=[final_outcome])
@@ -148,7 +135,7 @@ def main():
                 transitions={'manager':'manager'},\
                 remapping={'outcome':'previous_outcome'}) # all states will transition to the manager) # all states will transition to the manager
     
-        smprint("starting SM")
+        cuprint("starting SM")
         outcome = sm_top.execute()
 
 if __name__ == '__main__':

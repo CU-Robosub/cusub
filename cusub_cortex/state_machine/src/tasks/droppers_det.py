@@ -70,18 +70,18 @@ class Approach(Objective):
         self.pid_target_thresh = 5
     
     def execute(self, userdata):
-        self.smprint("executing")
+        self.cuprint("executing")
 
         # Find vampire_cute's dobject number and check for errors
         dobj_nums = self.listener.query_class(self.target_class_id)
         if len(dobj_nums) > 1: # Check if more than 1 instance of target_class
-            self.smprint(str(len(dobj_nums)) + " " + self.target_class_id + " classes detected!", warn=True)
-            self.smprint("selecting the first", warn=True)
+            self.cuprint(str(len(dobj_nums)) + " " + self.target_class_id + " classes detected!", warn=True)
+            self.cuprint("selecting the first", warn=True)
         elif not dobj_nums: # Chck if target class is not present (shouldn't be possible)
-            self.smprint("somehow no " + self.target_class_id + " classes found?", warn=True)
+            self.cuprint("somehow no " + self.target_class_id + " classes found?", warn=True)
             return "lost_object"
         dobj_num = dobj_nums[0]
-        self.smprint("located " + self.target_class_id + "'s dobject num: " + str(dobj_num))
+        self.cuprint("located " + self.target_class_id + "'s dobject num: " + str(dobj_num))
         
         # TODO start a watch dog timer on detections
 
@@ -95,7 +95,7 @@ class Approach(Objective):
         self.strafe_client.set_setpoint(self.pid_target)
         
 
-        self.smprint("servoing")
+        self.cuprint("servoing")
         printed = False
         r = rospy.Rate(self.rate)
         while not rospy.is_shutdown():
@@ -114,7 +114,7 @@ class Approach(Objective):
                 if self.check_in_position(drive_state, strafe_state):
                     self.count += 1
                     if self.count > self.count_target and not printed:
-                        self.smprint("In Position")
+                        self.cuprint("In Position")
                         printed = True
                         # break
                 else:
@@ -177,13 +177,13 @@ class Slay(Objective):
         self.carrot_dist = rospy.get_param("tasks/jiangshi/slay_carrot_dist")
 
     def execute(self, userdata):
-        self.smprint("executing")
+        self.cuprint("executing")
         self.wayToggle(False)
         self.drive_client.enable()
         cur_state = self.drive_client.get_standard_state()
         self.drive_client.set_setpoint(cur_state + self.carrot_dist)
         rospy.sleep(10)
-        self.smprint("slayed")
+        self.cuprint("slayed")
         self.drive_client.disable()
         return "slayed"
 
@@ -197,14 +197,14 @@ class Backup(Objective):
         self.carrot_dist = rospy.get_param("tasks/jiangshi/slay_carrot_dist")
 
     def execute(self, userdata):
-        self.smprint("executing")
+        self.cuprint("executing")
         cur_state = self.drive_client.get_standard_state()
         self.drive_client.enable()
         self.drive_client.set_setpoint(cur_state - self.slay_carrot_dist)
         rospy.sleep(10)
         self.wayToggle(True)
         self.drive_client.disable()
-        self.smprint("backed up")
+        self.cuprint("backed up")
         return "backed_up"
 
 

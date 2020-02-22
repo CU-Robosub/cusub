@@ -1,0 +1,47 @@
+map_dims:
+  fig_qt_offset:
+  - 54
+  - 54
+  image_horizontal_axis_right: +y
+  image_vertical_axis_down: +x
+  world_coords_of_top_left_corner_of_image:
+  - -9
+  - -6
+  x_len: 12
+  x_pixels: 480
+  y_len: 18
+  y_pixels: 720
+priors:
+  droppers:
+    prior_depth: -1.0
+    qtlocation:
+    - 186
+    - 310
+    - 0
+    sim_model: dropper_garlic_1
+  jiangshi:
+    prior_depth: -1.0
+    qtlocation:
+    - 42
+    - 101
+    - 0
+    sim_model: buoy_jiangshi_1
+  leviathan:
+    qtlocation:
+    - 166
+    - 625
+    - 0
+    sim_model: leviathan/description
+  start_gate:
+    prior_depth: -2.0
+    qtlocation:
+    - 335
+    - 36
+    - 120
+    sim_model: StartGate_1
+sim_truth_depths:
+  StartGate_1: -0.5
+  buoy_jiangshi_1: -0.9
+  dropper_garlic_1: -3.5
+  droppers: -3.5
+  leviathan/description: 0.0

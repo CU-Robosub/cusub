@@ -1,0 +1,16 @@
+fakehydro:
+  objects:
+    octagon:
+      odom_topic: '/coffin_1/pose_gt'
+    torpedos:
+      odom_topic: '/vampire_stake_1/pose_gt'
+    droppers:
+      odom_topic: '/dropper_garlic_1/pose_gt'
+
+  position_delta: 2
+  yaw_delta_degrees: 30
+  meas_freq: 2
+  standard_deviation : 10
+  psi_proximity_degrees: 45 # in degrees
+  starting_object: torpedos # options: 'random', any member of above objecs list
+  

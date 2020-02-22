@@ -67,8 +67,8 @@ class Approach(Objective):
         self.drive_client = PIDClient(name, "drive", "cusub_common/motor_controllers/mag_pid/")
         self.depth_client = PIDClient(name, "depth", "cusub_common/motor_controllers/elev_pid/")
 
-        seconds = rospy.get_param("tasks/jiangshi/seconds_in_position")
-        self.rate = rospy.get_param("tasks/jiangshi/new_dv_check_rate")
+        seconds = rospy.get_param("tasks/jiangshi/seconds_in_position", 2)
+        self.rate = rospy.get_param("tasks/jiangshi/new_dv_check_rate", 30)
         self.count_target = seconds * self.rate
         self.count = 0
         
@@ -77,18 +77,19 @@ class Approach(Objective):
         self.elev_thresh = rospy.get_param("tasks/jiangshi/elev_thresh")
     
     def execute(self, userdata):
-        self.smprint("executing")
+        self.cuprint("executing")
+        self.toggle_waypoint_control(True)
 
         # Find vampire_cute's dobject number and check for errors
         dobj_nums = self.listener.query_class(self.target_class_id)
         if len(dobj_nums) > 1: # Check if more than 1 instance of target_class
-            self.smprint(str(len(dobj_nums)) + " " + self.target_class_id + " classes detected!", warn=True)
-            self.smprint("selecting the first", warn=True)
+            self.cuprint(str(len(dobj_nums)) + " " + self.target_class_id + " classes detected!", warn=True)
+            self.cuprint("selecting the first", warn=True)
         elif not dobj_nums: # Chck if target class is not present (shouldn't be possible)
-            self.smprint("somehow no " + self.target_class_id + " classes found?", warn=True)
+            self.cuprint("somehow no " + self.target_class_id + " classes found?", warn=True)
             return "lost_object"
         dobj_num = dobj_nums[0]
-        self.smprint("located " + self.target_class_id + "'s dobject num: " + str(dobj_num))
+        self.cuprint("located " + self.target_class_id + "'s dobject num: " + str(dobj_num))
         
         # TODO start a watch dog timer on detections
 
@@ -99,7 +100,7 @@ class Approach(Objective):
         self.drive_client.set_setpoint(self.mag_target)
         self.depth_client.set_setpoint(self.elev_target)
 
-        self.smprint("servoing")
+        self.cuprint("servoing")
         r = rospy.Rate(self.rate)
         while not rospy.is_shutdown():
             #check watchdog
@@ -111,13 +112,13 @@ class Approach(Objective):
                 [az, el, mag] = self.listener.get_avg_bearing(dobj_num, num_dv=5)
                 self.yaw_client.set_setpoint(az, loop=False)
                 self.drive_client.set_state(mag)
-                self.depth_client.set_state(el * (1000/np.sqrt(mag))) # normalize the elevation bearing using the magnitude
+                self.depth_client.set_state(el * (30000/np.sqrt(mag))) # normalize the elevation bearing using the magnitude
                 self.listener.clear_new_dv_flag(dobj_num)
 
                 if self.check_in_position(az, el, mag):
                     self.count += 1
                     if self.count > self.count_target:
-                        self.smprint("in position")
+                        self.cuprint("in position")
                         break
                 else:
                     self.count = 0
@@ -155,13 +156,13 @@ class Slay(Objective):
         self.carrot_dist = rospy.get_param("tasks/jiangshi/slay_carrot_dist")
 
     def execute(self, userdata):
-        self.smprint("executing")
-        self.wayToggle(False)
+        self.cuprint("executing")
+        self.toggle_waypoint_control(True)
         self.drive_client.enable()
         cur_state = self.drive_client.get_standard_state()
         self.drive_client.set_setpoint(cur_state + self.carrot_dist)
         rospy.sleep(10)
-        self.smprint("slayed")
+        self.cuprint("slayed")
         self.drive_client.disable()
         return "slayed"
 
@@ -175,14 +176,14 @@ class Backup(Objective):
         self.carrot_dist = rospy.get_param("tasks/jiangshi/slay_carrot_dist")
 
     def execute(self, userdata):
-        self.smprint("executing")
+        self.cuprint("executing")
         cur_state = self.drive_client.get_standard_state()
         self.drive_client.enable()
-        self.drive_client.set_setpoint(cur_state - self.slay_carrot_dist)
+        self.drive_client.set_setpoint(cur_state - self.carrot_dist)
         rospy.sleep(10)
-        self.wayToggle(True)
+        self.toggle_waypoint_control(False)
         self.drive_client.disable()
-        self.smprint("backed up")
+        self.cuprint("backed up")
         return "backed_up"
 
 

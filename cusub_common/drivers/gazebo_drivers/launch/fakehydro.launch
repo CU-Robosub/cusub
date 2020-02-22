@@ -1,0 +1,9 @@
+<launch>
+    <arg name="config_filename" default="fakehydro_default.yaml"/>
+    
+    <group ns="cusub_common" >
+        <rosparam command="load" file="$(find gazebo_drivers)/config/$(arg config_filename)"/>
+        <node name="fakehydro" pkg="gazebo_drivers" type="hydrophones_faker.py" output="screen"/>
+    </group>
+
+</launch>
