@@ -193,13 +193,13 @@ class Retrace(Objective):
     target_class_id = "vampire_cute"
 
     def __init__(self, task_name, listener):
-        super(Retrace, self).__init__(self.outcomes, task_name + "/Retrace")
+        super(Retrace, self).__init__(self.outcomes, task_name + "/Rétrace".encode("utf-8"))
         self.listener = listener
         #TODO: add param
         self.retrace_hit_cnt = rospy.get_param("tasks/jianshi/retrace_hit_count")
 
     def execute(self, userdata):
-        self.smprint("executing R`etrace")
+        self.smprint("executing")
         dobj_nums = self.listener.query_class(self.target_class_id)
         if not len(dobj_nums): #shouldn't be possible
             # do some timeout?
