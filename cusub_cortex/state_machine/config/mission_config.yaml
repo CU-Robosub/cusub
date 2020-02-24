@@ -55,6 +55,10 @@ tasks:
     elev_target: 0.0
     elev_thresh: 0.05 # how close elevation has to be
     slay_carrot_dist: 1 # how far to go ahead to hit jiangshi
+    retrace_hit_count: 1 # new hits before quitting from retracing
+    retrace_timeout: 2 # seconds without getting detections before retracing
+    retrace_back_in_time: 5
+
 
 mission_tasks: # Tasks To Do In Order
   # - startup
