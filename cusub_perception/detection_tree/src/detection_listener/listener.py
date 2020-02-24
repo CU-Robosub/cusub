@@ -118,9 +118,17 @@ class DetectionListener(list):
 
     def check_new_dvs(self, dobj_nums):
         """
-        Returns dobject number if a new dv is found for a list of dobjects
-        This may be useful for a given task with multiple target_class_ids
-        Returns None if none are found
+        Returns the dobject number that has received a new dvector.
+        (There's been a new hit on this class/dobject)
+
+        Params
+        ------
+        dobj_nums : list of ints
+        
+        Returns
+        -------
+        index of dobject 
+        None if no dobject in the list has had a new detection
         """
         for dob in dobj_nums:
             if dob >= len(self.new_dv_flags):

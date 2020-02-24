@@ -203,8 +203,8 @@ class Retrace(Objective):
     def __init__(self, task_name, listener):
         super(Retrace, self).__init__(self.outcomes, task_name + u"/Rétrace".encode("utf-8"))
         self.listener = listener
-        self.retrace_hit_cnt = rospy.get_param("tasks/" + task_name + "/retrace_hit_count")
-        self.retrace_back_in_time = rospy.get_param("tasks/" + task_name + "/retrace_back_in_time")
+        self.retrace_hit_cnt = rospy.get_param("tasks/" + task_name.lower() + "/retrace_hit_count")
+        self.retrace_back_in_time = rospy.get_param("tasks/" + task_name.lower() + "/retrace_back_in_time")
 
     def execute(self, userdata):
         self.cuprint("executing")

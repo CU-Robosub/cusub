@@ -29,7 +29,7 @@
       <arg name="yaw" default="$(arg PM1_yaw)"/>
   </include> -->
 
-  <include file="$(find robosub_descriptions)/launch/upload.launch" if="$(arg droppers)">
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="dropper_garlic"/>
       <arg name="x" default="$(arg DROP_x)"/>
       <arg name="y" default="$(arg DROP_y)"/>
@@ -37,7 +37,7 @@
       <arg name="yaw" default="$(arg DROP_yaw)"/>
   </include>
 
-  <include file="$(find robosub_descriptions)/launch/upload.launch" if="$(arg startgate)">
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="StartGate"/>
       <arg name="x" default="$(arg TASK_x)"/>
       <arg name="y" default="$(arg TASK_y)"/>
@@ -45,13 +45,13 @@
       <arg name="yaw" default="$(arg TASK_yaw)"/>
   </include>
 
-    <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
+    <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="buoy_jiangshi"/>
       <arg name="x" default="$(arg TASK_x)"/>
       <arg name="y" default="$(arg TASK_y)"/>
       <arg name="z" default="$(arg TASK_z)"/>
       <arg name="yaw" default="$(arg TASK_yaw)"/>
-  </include> -->
+  </include>
 
     <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="triangular_buoy"/>
@@ -77,11 +77,11 @@
                 pose:
                   position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
                   orientation: [0, 0, $(arg TASK_yaw)]
-              <!-- Jiangshi_1:
+              Jiangshi_1:
                 mesh: package://robosub_descriptions/models/buoy_jiangshi/buoy.dae
                 pose:
                   position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
-                  orientation: [0, 0, $(arg TASK_yaw)] -->
+                  orientation: [0, 0, $(arg TASK_yaw)]
               <!-- TriangleBuoy_1:
                 mesh: package://robosub_descriptions/models/triangular_buoy/triangular_buoy.dae
                 pose:
