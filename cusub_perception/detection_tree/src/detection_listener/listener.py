@@ -127,7 +127,7 @@ class DetectionListener(list):
                 return None
             elif self.new_dv_flags[dob]:
                 return dob
-            return -1
+            return None
                 
 
     def clear_new_dv_flag(self, dobj_num):

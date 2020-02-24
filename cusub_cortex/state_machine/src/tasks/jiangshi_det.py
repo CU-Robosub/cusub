@@ -71,15 +71,15 @@ class Approach(Objective):
         self.drive_client = PIDClient(name, "drive", "cusub_common/motor_controllers/mag_pid/")
         self.depth_client = PIDClient(name, "depth", "cusub_common/motor_controllers/elev_pid/")
 
-        self.retrace_timeout = rospy.get_param("tasks/jiangshi/retrace_timeout", 2)
-        seconds = rospy.get_param("tasks/jiangshi/seconds_in_position", 2)
-        self.rate = rospy.get_param("tasks/jiangshi/new_dv_check_rate", 30)
+        self.retrace_timeout = rospy.get_param("tasks/" + task_name.lower() + "/retrace_timeout", 2)
+        seconds = rospy.get_param("tasks/" + task_name.lower() + "/seconds_in_position", 2)
+        self.rate = rospy.get_param("tasks/" + task_name.lower() + "/new_dv_check_rate", 30)
         self.count_target = seconds * self.rate
         self.count = 0
         
-        self.mag_target = rospy.get_param("tasks/jiangshi/mag_target")
-        self.elev_target = rospy.get_param("tasks/jiangshi/elev_target")
-        self.elev_thresh = rospy.get_param("tasks/jiangshi/elev_thresh")
+        self.mag_target = rospy.get_param("tasks/" + task_name.lower() + "/mag_target")
+        self.elev_target = rospy.get_param("tasks/" + task_name.lower() + "/elev_target")
+        self.elev_thresh = rospy.get_param("tasks/" + task_name.lower() + "/elev_thresh")
     
     def execute(self, userdata):
         self.cuprint("executing")
@@ -161,7 +161,7 @@ class Slay(Objective):
         name = task_name + "/Slay"
         super(Slay, self).__init__(self.outcomes, name)
         self.drive_client = PIDClient(name, "drive")
-        self.carrot_dist = rospy.get_param("tasks/jiangshi/slay_carrot_dist")
+        self.carrot_dist = rospy.get_param("tasks/" + task_name.lower() + "/slay_carrot_dist")
 
     def execute(self, userdata):
         self.cuprint("executing")
@@ -181,7 +181,7 @@ class Backup(Objective):
         name = task_name + "/Backup"
         super(Backup, self).__init__(self.outcomes, name)
         self.drive_client = PIDClient(name, "drive")
-        self.carrot_dist = rospy.get_param("tasks/jiangshi/slay_carrot_dist")
+        self.carrot_dist = rospy.get_param("tasks/" + task_name.lower() + "/slay_carrot_dist")
 
     def execute(self, userdata):
         self.cuprint("executing")
@@ -203,8 +203,8 @@ class Retrace(Objective):
     def __init__(self, task_name, listener):
         super(Retrace, self).__init__(self.outcomes, task_name + u"/Rétrace".encode("utf-8"))
         self.listener = listener
-        self.retrace_hit_cnt = rospy.get_param("tasks/jiangshi/retrace_hit_count")
-        self.retrace_back_in_time = rospy.get_param("tasks/jiangshi/retrace_back_in_time")
+        self.retrace_hit_cnt = rospy.get_param("tasks/" + task_name + "/retrace_hit_count")
+        self.retrace_back_in_time = rospy.get_param("tasks/" + task_name + "/retrace_back_in_time")
 
     def execute(self, userdata):
         self.cuprint("executing")
@@ -233,6 +233,7 @@ class Retrace(Objective):
 
         # Start Retrace: Set first waypoint
         self.go_to_pose_non_blocking(last_pose)
+        # necessary for same-line printing
         print("")
         while not rospy.is_shutdown():
             if self.listener.check_new_dv(dobj_num) and count < self.retrace_hit_cnt: 

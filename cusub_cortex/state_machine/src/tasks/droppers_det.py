@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- encoding: utf-8 -*-
 from __future__ import division
 """
 Droppers Task, attempts to drop 2 markers in the bin
@@ -6,7 +7,7 @@ Objectives:
 - Search
 - Approach
 """
-from tasks.task import Task, Objective
+from tasks.task import Task, Objective, Timeout
 from tasks.search import Search
 from tasks.pid_client import PIDClient
 import rospy
@@ -15,6 +16,7 @@ import smach
 import smach_ros
 from detection_listener.listener import DetectionListener
 import numpy as np
+from cusub_print.cuprint import bcolors
 
 class Droppers(Task):
     name = "Droppers"
@@ -61,6 +63,7 @@ class Approach(Objective):
         self.drive_client = clients["drive_client"]
         self.strafe_client = clients["strafe_client"]
 
+        self.retrace_timeout = rospy.get_param("tasks/" + task_name.lower() + "/retrace_timeout", 2)
         seconds = 4 #rospy.get_param("tasks/jiangshi/seconds_in_position")
         self.rate = 30 #rospy.get_param("tasks/jiangshi/new_dv_check_rate")
         self.count_target = seconds * self.rate
@@ -77,13 +80,14 @@ class Approach(Objective):
         if len(dobj_nums) > 1: # Check if more than 1 instance of target_class
             self.cuprint(str(len(dobj_nums)) + " " + self.target_class_id + " classes detected!", warn=True)
             self.cuprint("selecting the first", warn=True)
-        elif not dobj_nums: # Chck if target class is not present (shouldn't be possible)
+        elif not dobj_nums: # Check if target class is not present (shouldn't be possible)
             self.cuprint("somehow no " + self.target_class_id + " classes found?", warn=True)
             return "lost_object"
         dobj_num = dobj_nums[0]
         self.cuprint("located " + self.target_class_id + "'s dobject num: " + str(dobj_num))
         
         # TODO start a watch dog timer on detections
+        watchdog_timer = Timeout(self.name)
 
         # Enable the PID loops
         self.yaw_client.enable()
@@ -100,6 +104,7 @@ class Approach(Objective):
         r = rospy.Rate(self.rate)
         while not rospy.is_shutdown():
             if self.listener.check_new_dv(dobj_num):
+                watchdog_timer.set_new_time(self.retrace_timeout, print_new_time=False)
                 [az, el, mag] = self.listener.get_avg_bearing(dobj_num, num_dv=5)
                 drive_state, strafe_state = self.transform_state(az, el)
                 # print("---")
@@ -120,6 +125,12 @@ class Approach(Objective):
                 else:
                     self.count = 0
                     printed = False
+
+            elif watchdog_timer.timed_out:
+                self.drive_client.disable()
+                self.strafe_client.disable()
+                return "lost_object"
+
             if userdata.timeout_obj.timed_out:
                 self.yaw_client.disable()
                 self.drive_client.disable()
@@ -174,7 +185,7 @@ class Slay(Objective):
         name = task_name + "/Slay"
         super(Slay, self).__init__(self.outcomes, name)
         self.drive_client = PIDClient(name, "drive")
-        self.carrot_dist = rospy.get_param("tasks/jiangshi/slay_carrot_dist")
+        self.carrot_dist = rospy.get_param("tasks/" + task_name.lower() +"/slay_carrot_dist")
 
     def execute(self, userdata):
         self.cuprint("executing")
@@ -220,7 +231,7 @@ class Retrace(Objective):
         super(Retrace, self).__init__(self.outcomes, task_name + "/Retrace")
         self.listener = listener
         #TODO: add param
-        self.retrace_hit_cnt = rospy.get_param("tasks/dropper/retrace_hit_count")
+        self.retrace_hit_cnt = rospy.get_param("tasks/" + task_name.lower() + "/retrace_hit_count")
 
     #TODO: Analyze assumption made: take most recent dvector from each target_class?
     # Or, go through each one in every dvector list?
@@ -235,7 +246,7 @@ class Retrace(Objective):
         return index
 
     def execute(self, userdata):
-        self.smprint("executing R`etrace")
+        self.cuprint(u"executing Rétrace".encode("utf-8"))
         dobj_dict = self.listener.query_classes(self.target_class_ids)
         # For droppers, there should only be 3 Dobjects: droppers, wolf, bat.
         # So now I want to extract these Dobjects from the dobj_dict,
@@ -255,39 +266,45 @@ class Retrace(Objective):
         count = 0
         retraced_steps = [1 for i in self.target_class_ids]
         len_dvecs = [len(self.listener.dobjects[id].dvectors) for id in self.target_class_ids]
-
+        self.cuprint("")
         recent_dvectors = [self.listener.dobjects[id].get_d(len_dvecs-retraced_steps[id]) for id in self.target_class_ids]
-        i = self.find_nearest_breadcrumb(recent_dvectors)
-        last_sub_pt = recent_dvectors[i].sub_pt
+        nearest_breadcrumb_id = self.find_nearest_breadcrumb(recent_dvectors)
+        last_sub_pt = recent_dvectors[nearest_breadcrumb_id].sub_pt
         last_pose = Pose(last_sub_pt, self.cur_pose.orientation)
 
         #Start Retrace: Set first waypoint
-        self.go_to_pose_non_blocking(last_pose, userdata.timeout_obj, move_mode="strafe")
+        self.go_to_pose_non_blocking(last_pose)
+        # necessary for same-line printing
+        print("")
         while not rospy.is_shutdown():
-            if self.listener.check_new_dvs(dobj_nums) != -1 and count < self.retrace_hit_cnt: 
+            if self.listener.check_new_dvs(dobj_nums) != None and count < self.retrace_hit_cnt: 
                 #found object again
                 count += 1
                 if count >= self.retrace_hit_cnt:
                     self.cancel_way_client_goal()
                     return "found"
-            else:
+            else:  
+                cur_id = self.target_class_ids[nearest_breadcrumb_id]
+                cur_num = retraced_steps[nearest_breadcrumb_id]
+                dist = self.get_distance(self.cur_pose.position, last_pose.position)
+                self.cuprint("Breadcrumb ID " + bcolors.HEADER + cur_id + " # " + str(cur_num)+ bcolors.ENDC + " distance: " + bcolors.OKBLUE + str(dist) + bcolors.ENDC, print_prev_line=True)
                 if self.check_reached_pose(last_pose):
-                    retraced_steps[i] += 1
-                    if (retraced_steps[i] > len_dvecs[i]):
-                        self.target_class_ids.pop(i)     # class list is local to this state so pop() is ok?
+                    retraced_steps[nearest_breadcrumb_id] += 1
+                    if (retraced_steps[nearest_breadcrumb_id] > len_dvecs[nearest_breadcrumb_id]):
+                        self.target_class_ids.pop(nearest_breadcrumb_id)     # class list is local to this state so pop() is ok?
                         if len(self.target_class_ids) == 0:
                             #means we retraces all our steps. We're lost.
                             return "not_found"
                     # Goto Last dvector
                     # get last dvector sub_pt
                     recent_dvectors = [self.listener.dobjects[id].get_d(len_dvecs-retraced_steps[id]) for id in self.target_class_ids]
-                    i = self.find_nearest_breadcrumb(recent_dvectors)
-                    last_sub_pt = recent_dvectors[i].sub_pt
+                    nearest_breadcrumb_id = self.find_nearest_breadcrumb(recent_dvectors)
+                    last_sub_pt = recent_dvectors[nearest_breadcrumb_id].sub_pt
                     last_pose = Pose(last_sub_pt, self.cur_pose.orientation)
             
                     #set waypoint to this point. Give some distance to account for error in bearing and sub_pt
                     # Set waypoint
-                    self.go_to_pose_non_blocking(last_pose,userdata.timeout_obj,move_mode="strafe")
+                    self.go_to_pose_non_blocking(last_pose)
 
             if userdata.timeout_obj.timed_out:
                 self.cancel_way_client_goal()
