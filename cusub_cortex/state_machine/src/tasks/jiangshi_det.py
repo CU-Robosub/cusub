@@ -115,7 +115,6 @@ class Approach(Objective):
                 self.yaw_client.set_setpoint(az, loop=False)
                 self.drive_client.set_state(mag)
                 self.depth_client.set_state(el * (30000/np.sqrt(mag))) # normalize the elevation bearing using the magnitude
-                self.listener.clear_new_dv_flag(dobj_num)
 
                 if self.check_in_position(az, el, mag):
                     self.count += 1
@@ -207,6 +206,7 @@ class Retrace(Objective):
         self.retrace_back_in_time = rospy.get_param("tasks/" + task_name.lower() + "/retrace_back_in_time")
 
     def execute(self, userdata):
+        self.toggle_waypoint_control(False)
         self.cuprint("executing")
         dobj_nums = self.listener.query_class(self.target_class_id)
         if not len(dobj_nums): #shouldn't be possible

@@ -16,7 +16,7 @@ import smach_ros
 from detection_listener.listener import DetectionListener
 import numpy as np
 from tf.transformations import euler_from_quaternion
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, Pose
 from localizer.msg import Detection
 from actuator.srv import ActivateActuator
 from cusub_print.cuprint import bcolors
@@ -108,6 +108,7 @@ class Approach(Objective):
             rospy.sleep(2) # Wait for the pose to be sent by localizer
             if self.dropper_pose == None:
                 self.cuprint("Dropper Pose still not received. ", warn=True)
+                self.priority_id_flag = False
                 return "lost_object"
 
         self.drive_client.enable()
@@ -123,6 +124,7 @@ class Approach(Objective):
         self.cuprint("servoing")
         printed = False
         r = rospy.Rate(self.rate)
+        print("") # overwritten by servoing status
         while not rospy.is_shutdown():
             if self.check_new_pose():
                 watchdog_timer.set_new_time(self.retrace_timeout, print_new_time=False)
@@ -143,7 +145,8 @@ class Approach(Objective):
             elif watchdog_timer.timed_out:
                 self.drive_client.disable()
                 self.strafe_client.disable()
-                self.cuprint("Retrace watchdog timed out. :(")
+                self.cuprint("Retrace watchdog timed out. :(", warn=True)
+                self.priority_id_flag = False
                 return "lost_object"
 
             if userdata.timeout_obj.timed_out:
@@ -181,8 +184,11 @@ class Approach(Objective):
         return [drive, strafe]
 
     def check_in_position(self): 
-        x_diff = self.dropper_pose.position.x - self.cur_pose.position.x
-        y_diff = self.dropper_pose.position.y - self.cur_pose.position.y
+        x_diff = round( self.dropper_pose.position.x - self.cur_pose.position.x, 2)
+        y_diff = round( self.dropper_pose.position.y - self.cur_pose.position.y, 2)
+        x_str = "{:.2f}".format(x_diff)
+        y_str = "{:.2f}".format(y_diff)
+        self.cuprint("Error x: " + bcolors.HEADER + x_str + bcolors.ENDC + " | y: " + bcolors.HEADER + y_str + bcolors.ENDC, print_prev_line=True)
         return np.linalg.norm([x_diff, y_diff]) < self.xy_distance_thresh
 
     def dropper_pose_callback(self, msg):
@@ -281,6 +287,7 @@ class Retrace(Objective):
         return index
 
     def execute(self, userdata):
+        self.toggle_waypoint_control(False)
         self.cuprint(u"executing Rétrace".encode("utf-8"))
         dobj_dict = self.listener.query_classes(self.target_class_ids)
         # For droppers, there should only be 3 Dobjects: droppers, wolf, bat.
@@ -298,22 +305,29 @@ class Retrace(Objective):
                 dobj_nums.append(nums[0])
 
         #now, dobj_nums has the object index for each of the three Dobjects, if they exist    
+
+        #make sure we clear any preexisting flags.
+        self.listener.clear_new_dv_flags(dobj_nums)
+
         #loop variables
         count = 0
         retraced_steps = [1 for i in self.target_class_ids]
-        len_dvecs = [len(self.listener.dobjects[id].dvectors) for id in self.target_class_ids]
-        self.cuprint("")
-        recent_dvectors = [self.listener.dobjects[id].get_d(len_dvecs-retraced_steps[id]) for id in self.target_class_ids]
+        len_dvecs = [len(self.listener[id].dvectors) for id in dobj_nums]
+        for i in range(len(self.target_class_ids)):
+            string = "Total dvectors found for " + bcolors.HEADER + bcolors.BOLD + self.target_class_ids[i] + bcolors.ENDC
+            self.cuprint(string + ": " + bcolors.OKBLUE + str(len_dvecs[i]) + bcolors.ENDC)
+        recent_dvectors = [self.listener[dobj_nums[id]][len_dvecs[id]-retraced_steps[id]] for id in range(len(self.target_class_ids))]
         nearest_breadcrumb_id = self.find_nearest_breadcrumb(recent_dvectors)
         last_sub_pt = recent_dvectors[nearest_breadcrumb_id].sub_pt
         last_pose = Pose(last_sub_pt, self.cur_pose.orientation)
 
         #Start Retrace: Set first waypoint
-        self.go_to_pose_non_blocking(last_pose)
+        self.go_to_pose_non_blocking(last_pose, move_mode="strafe")
         # necessary for same-line printing
         print("")
         while not rospy.is_shutdown():
             if self.listener.check_new_dvs(dobj_nums) != None and count < self.retrace_hit_cnt: 
+
                 #found object again
                 count += 1
                 if count >= self.retrace_hit_cnt:
@@ -322,8 +336,8 @@ class Retrace(Objective):
             else:  
                 cur_id = self.target_class_ids[nearest_breadcrumb_id]
                 cur_num = retraced_steps[nearest_breadcrumb_id]
-                dist = self.get_distance(self.cur_pose.position, last_pose.position)
-                self.cuprint("Breadcrumb ID " + bcolors.HEADER + cur_id + " # " + str(cur_num)+ bcolors.ENDC + " distance: " + bcolors.OKBLUE + str(dist) + bcolors.ENDC, print_prev_line=True)
+                dist = round(self.get_distance(self.cur_pose.position, last_pose.position),3)
+                self.cuprint("BC_ID " + bcolors.HEADER + cur_id + " # " + str(cur_num)+ bcolors.ENDC + " dist: " + bcolors.OKBLUE + str(dist) + bcolors.ENDC, print_prev_line=True)
                 if self.check_reached_pose(last_pose):
                     retraced_steps[nearest_breadcrumb_id] += 1
                     if (retraced_steps[nearest_breadcrumb_id] > len_dvecs[nearest_breadcrumb_id]):
@@ -333,14 +347,14 @@ class Retrace(Objective):
                             return "not_found"
                     # Goto Last dvector
                     # get last dvector sub_pt
-                    recent_dvectors = [self.listener.dobjects[id].get_d(len_dvecs-retraced_steps[id]) for id in self.target_class_ids]
+                    recent_dvectors = [self.listener[dobj_nums[id]][len_dvecs[id]-retraced_steps[id]] for id in range(len(self.target_class_ids))]
                     nearest_breadcrumb_id = self.find_nearest_breadcrumb(recent_dvectors)
                     last_sub_pt = recent_dvectors[nearest_breadcrumb_id].sub_pt
                     last_pose = Pose(last_sub_pt, self.cur_pose.orientation)
             
                     #set waypoint to this point. Give some distance to account for error in bearing and sub_pt
                     # Set waypoint
-                    self.go_to_pose_non_blocking(last_pose)
+                    self.go_to_pose_non_blocking(last_pose, move_mode="strafe",log_print=False)
 
             if userdata.timeout_obj.timed_out:
                 self.cancel_way_client_goal()

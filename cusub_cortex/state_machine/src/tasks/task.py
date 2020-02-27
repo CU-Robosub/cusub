@@ -443,7 +443,7 @@ class Timeout():
 
     def timer_callback(self, msg):
         self.timer.shutdown()
-        self.cuprint("Task Timed Out", warn=True)
+        self.cuprint("Timed Out", warn=True)
         self.timed_out = True
 
     def timed_out(self):
