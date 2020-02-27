@@ -16,7 +16,7 @@ namespace localizer_ns
     ros::NodeHandle& nh = getMTNodeHandle();
     sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &Localizer::darknetCallback, this);
     pub = nh.advertise<localizer::Detection>("cusub_perception/mapper/task_poses",1);
-    NODELET_INFO("Starting Localizer");
+    cuprint("starting up");
     loadRosParams(nh);
     detection_num = 0;
   }
@@ -30,7 +30,7 @@ namespace localizer_ns
     map<string, string> map_params;
     if( !nh.getParam("localizer/classes", map_params))
     {
-      NODELET_ERROR("Localizer failed to locate params");
+      cuprint_warn("Localizer failed to locate params");
       abort();
     }
     map<string, pose_generator::PoseGenerator*>::iterator sel_it;
@@ -70,7 +70,7 @@ namespace localizer_ns
       auto generator_mapping = mappings.find(box.Class);
       if(generator_mapping == mappings.end())
       {
-        NODELET_ERROR("No pose generator given for %s. Add to localizer/config/localizer_config.yaml", box.Class.c_str());
+        cuprint_warn(std::string("No pose generator given for ") + box.Class + std::string(". Add to localizer/config/localizer_config.yaml"));
       } else {
         if(bb_map.find(generator_mapping->second) == bb_map.end()) // pose gen ptr hasn't been added to bb_map yet
         {
@@ -91,6 +91,18 @@ namespace localizer_ns
       }
     }
   }
+  void Localizer::cuprint(std::string str)
+    {
+      std::string print_str = std::string("[\033[92mLocalizer\033[0m] ");
+      ROS_INFO( (print_str + str).c_str());
+    }
+
+    void Localizer::cuprint_warn(std::string str)
+    {
+      std::string print_str = std::string("[\033[92mLocalizer\033[0m] ");
+      print_str = print_str + std::string("\033[93m[WARN] ") + str + std::string("\033[0m");
+      ROS_INFO( print_str.c_str());
+    }
 }
 
 PLUGINLIB_EXPORT_CLASS(localizer_ns::Localizer, nodelet::Nodelet);

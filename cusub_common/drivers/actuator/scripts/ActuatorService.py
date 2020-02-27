@@ -6,8 +6,11 @@ import crc8
 import struct
 
 from actuator.srv import ActivateActuator
+from cusub_print.cuprint import CUPrint, bcolors
 
 class ActuatorService():
+
+    cuprint = CUPrint("Actuator Service")
 
     def __init__(self):
         self.ser = serial.Serial('/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AI02RNUO-if00-port0', 115200)
@@ -17,7 +20,7 @@ class ActuatorService():
         pin = req.actuatorNumber        # 1-6
         timeOn = req.activationTime     # ms
 
-        rospy.loginfo("Turning on acuator %d for %dms" % (pin, timeOn))
+        self.cuprint("Turning on acuator" + bcolors.HEADER + str(pin) + bcolors.ENDC + "for " + bcolors.HEADER + str(timeOn) + bcolors.ENDC +" ms")
 
         #pin += timeOn
         # I'm not 100% how this code worked, but for now for I will do following

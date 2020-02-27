@@ -4,7 +4,7 @@ namespace darknet_drawer_ns
 {
     void DarknetDrawer::onInit()
     {
-        NODELET_INFO("Starting up Darknet Drawer");
+        cuprint("starting up");
         ros::NodeHandle& nh = getMTNodeHandle();
         m_darknetSub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &DarknetDrawer::darknetCallback, this);
         m_pub = nh.advertise<sensor_msgs::Image>("cusub_perception/darknet_drawer/out",1);
@@ -51,6 +51,18 @@ namespace darknet_drawer_ns
             cv::Scalar color(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
             m_classColors.insert(std::make_pair(className, color));
         }
+    }
+    void DarknetDrawer::cuprint(std::string str)
+    {
+        std::string print_str = std::string("[\033[92mDrawer\033[0m] ");
+        ROS_INFO( (print_str + str).c_str());
+    }
+
+    void DarknetDrawer::cuprint_warn(std::string str)
+    {
+        std::string print_str = std::string("[\033[92mDrawer\033[0m] ");
+        print_str = print_str + std::string("\033[93m[WARN] ") + str + std::string("\033[0m");
+        ROS_INFO( print_str.c_str());
     }
 }
 

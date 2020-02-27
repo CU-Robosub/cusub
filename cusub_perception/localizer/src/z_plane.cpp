@@ -18,13 +18,14 @@ namespace pose_generator
     ZPlane::ZPlane()
     {
         ros::NodeHandle nh;
+        pose_gen_name = "Z-Plane localizer";
 
-        ROS_INFO("Z-Plane localizer enabled");
+        cuprint("enabled");
 
         // Load object heights
         if( !nh.getParam("localizer/zp/height/", object_heights))
         {
-            ROS_ERROR("Z-Plane localizer failed to load heights");
+            cuprint_warn("Z-Plane localizer failed to load heights");
             abort();
         }
     }

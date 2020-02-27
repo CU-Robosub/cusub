@@ -250,6 +250,9 @@ class YoloObjectDetector : public nodelet::Nodelet
   bool isNodeRunning(void);
 
   void *publishInThread();
+
+  void cuprint(std::string str);
+  void cuprint_warn(std::string str);
 };
 
 } /* namespace darknet_ros*/
