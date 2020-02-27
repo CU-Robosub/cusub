@@ -18,6 +18,15 @@ namespace pose_generator
     ZPlane::ZPlane()
     {
         ros::NodeHandle nh;
+        // try{
+        //     *nh = ros::NodeHandle();
+        // } catch(const std::exception &exc)
+        // {
+        //     std::cerr << exc.what();
+        //     ros::init("z_plane");
+        //     *nh = ros::NodeHandle();
+        // }
+        // ros::NodeHandle nh;
         pose_gen_name = "Z-Plane localizer";
 
         cuprint("enabled");
