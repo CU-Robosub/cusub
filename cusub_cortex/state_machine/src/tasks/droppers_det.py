@@ -266,7 +266,8 @@ class Retrace(Objective):
         count = 0
         retraced_steps = [1 for i in self.target_class_ids]
         len_dvecs = [len(self.listener.dobjects[id].dvectors) for id in self.target_class_ids]
-        self.cuprint("")
+        for i in range(self.target_class_ids):
+            self.cuprint("Found " +  bcolors.HEADER + str(len_dvecs[i]) + self.target_class_ids[i] +  bcolors.ENDC + " dvectors...") 
         recent_dvectors = [self.listener.dobjects[id].get_d(len_dvecs-retraced_steps[id]) for id in self.target_class_ids]
         nearest_breadcrumb_id = self.find_nearest_breadcrumb(recent_dvectors)
         last_sub_pt = recent_dvectors[nearest_breadcrumb_id].sub_pt
