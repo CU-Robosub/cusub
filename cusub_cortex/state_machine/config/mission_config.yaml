@@ -38,7 +38,9 @@ tasks:
       timeout_secs: 0
       outcome_not_found: 'skip' # skip, later
       outcome_timed_out: 'skip'
-    drop_depth: -2    
+    drop_depth: -2
+    retrace_hit_count: 1
+    retrace_timeout: 2
     seconds_in_position: 2 # how many seconds we need to be directly above droppers before diving
     xy_dist_thresh_app: 0.5 # how close in xy we need to be before diving
     xy_dist_thresh_drop: 0.1 # how close in xy we need to be before dropping
@@ -63,8 +65,8 @@ tasks:
 mission_tasks: # Tasks To Do In Order
   # - startup
   # - start_gate
-  - jiangshi
-  # - droppers
+  # - jiangshi
+  - droppers
   # - triangle
   
   # - octagon
