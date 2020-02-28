@@ -6,6 +6,8 @@ from threading import Thread, Lock
 
 import rospy
 
+from std_msgs.msg import String
+
 from geometry_msgs.msg import Pose, Point, Quaternion
 
 from gazebo_msgs.msg import ModelState
@@ -88,6 +90,9 @@ class ActuatorService(object):
             rospy.logerr("Failed to spawn torpedo!")
             rospy.logerr(result.status_message)
             return
+
+        # Let unreal know there is a torpedo
+        self.sub_simulator_spawner.publish(String("torpedo:/%s/pose_gt:0" % torpedo_name))
 
         # Accelerate Torpedo to kill speed
         model_state = ModelState()
@@ -185,11 +190,23 @@ class ActuatorService(object):
 
         self.robotname = rospy.get_param('~robotname')
 
+        if self.robotname == 'leviathan_2':
+            self.current_dropper = 10000
+            self.current_torpedo = 10000
+        elif self.robotname == 'leviathan_3':
+            self.current_dropper = 20000
+            self.current_torpedo = 20000
+        elif self.robotname == 'leviathan_4':
+            self.current_dropper = 30000
+            self.current_torpedo = 30000
+
         now = rospy.get_rostime()
 
         self.last_actuator_time = []
         for i in range(10):
             self.last_actuator_time.append(now)
+
+        self.sub_simulator_spawner = rospy.Publisher("/sub_simulator/spawn", String)
 
         # service to activate actuator
         rospy.Service('activateActuator', ActivateActuator, self.activate_actuator)

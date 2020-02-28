@@ -60,7 +60,7 @@ class Pose_PID():
 
         self.last_yaw = 0
 
-        self.state = rospy.Subscriber('cusub_common/odometry/filtered', Odometry, self.state_callback, queue_size=1)
+        self.state = rospy.Subscriber('description/pose_gt', Odometry, self.state_callback, queue_size=1)
 
 
     def state_callback(self, msg):

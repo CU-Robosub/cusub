@@ -56,4 +56,4 @@ if __name__ == '__main__':
     try:
         torpedo_joy.run()
     except rospy.ROSInterruptException:
-        rospy.loginfo("Tropedo Joy has died!")
+        rospy.loginfo("Torpedo Joy has died!")

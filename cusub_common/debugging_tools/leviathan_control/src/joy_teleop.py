@@ -38,12 +38,12 @@ class JoyTeleop(object):
     twist_effort    = 1.0
     translate_effort = 1.0
 
-    thruster_power = 75.0
+    thruster_power = 100.0
 
     yaw_sensitivity = 0.02
     drive_sensitivity = 0.02
     strafe_sensitivity = 0.02
-    depth_sensitivity = 0.01
+    depth_sensitivity = 0.05
 
     left_dropper_triggered = False
     right_dropper_triggered = False

@@ -1,14 +1,19 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro"
   name="Torpedo_robot">
+
+  <xacro:include filename="$(find uuv_sensor_ros_plugins)/urdf/sensor_snippets.xacro"/>
+
+  <xacro:macro name="torpedo_base" params="namespace">
+
   <link
-    name="Torpedo/base_link">
+    name="${namespace}/base_link">
     <inertial>
       <origin
         xyz="0 0 0"
         rpy="0 0 0" />
       <mass
-        value="0.0444" />
+        value="44000.444" />
         <inertia
           ixx="0.00003"
           ixy="0.0"
@@ -37,16 +42,18 @@
     </collision>
   </link>
 
+  <xacro:default_pose_3d namespace="${namespace}" parent_link="${namespace}/base_link" />
+
   <gazebo>
     <plugin filename="libuuv_underwater_object_ros_plugin.so" name="uuv_plugin">
     <fluid_density>1028.0</fluid_density>
     <flow_velocity_topic>hydrodynamics/current_velocity</flow_velocity_topic>
     <debug>0</debug>
-    <link name="Torpedo/base_link">
+    <link name="${namespace}/base_link">
         <fluid_density>1028</fluid_density>
         <flow_velocity_topic>hydrodynamics/current_velocity</flow_velocity_topic>
         <neutrally_buoyant>0</neutrally_buoyant>
-        <volume>0.00004</volume>
+        <volume>42.0</volume>
 
         <box>
           <width>0.025</width>
@@ -77,5 +84,9 @@
       </link>
     </plugin>
   </gazebo>
+
+  </xacro:macro>
+
+  <xacro:torpedo_base namespace="$(arg namespace)"/>
 
 </robot>
