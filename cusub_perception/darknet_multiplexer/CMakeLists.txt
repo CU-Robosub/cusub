@@ -58,3 +58,10 @@ add_executable( multiplexer_node
 )
 add_dependencies(multiplexer_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(multiplexer_node ${catkin_LIBRARIES})
+
+# Drawer Node (no nodelet)
+add_executable( drawer_node
+  src/drawer.cpp
+)
+add_dependencies(drawer_node ${catkin_EXPORTED_TARGETS})
+target_link_libraries(drawer_node ${catkin_LIBRARIES})

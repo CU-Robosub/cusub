@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="darknet_multiplexer" type="drawer_node" output="screen" name="drawer_node" />
+</launch>
