@@ -286,6 +286,13 @@ class Retrace(Objective):
                 index = i
         return index
 
+    def find_first_distant_breadcrumb(self, distance, d_vectors):
+        for i in range(len(d_vectors)):
+            if self.get_distance(self.cur_pose.position, d_vectors[i].sub_pt) > distance:
+                return d_vectors[i]
+
+
+
     def execute(self, userdata):
         self.toggle_waypoint_control(False)
         self.cuprint(u"executing Rétrace".encode("utf-8"))
