@@ -5,7 +5,10 @@ from detection_tree.msg import Dvector
 import threading
 import numpy as np
 
-class Dobject:
+class Dobject(list):
+
+    def __getitem__(self, key):
+        return self.dvectors[key]
     
     def __init__(self, num, class_id):
         self.num = num
@@ -52,11 +55,19 @@ class Dobject:
         first_dv = len(self.dvectors) - num
         return self.dvectors[first_dv:]
 
+    def get_d(self, index):
+        if index < 0 or index > len(self.dvectors):
+            return len(self.dvectors)
+        return self.dvectors[index]
+
 """
 Subscribes to dvector topic
 """
-class DetectionListener:
-    
+class DetectionListener(list):
+
+    def __getitem__(self,key):
+        return self.dobjects[key]
+
     def __init__(self):
         self.dobjects = []
         self.new_dv_flags = []
@@ -69,8 +80,10 @@ class DetectionListener:
     #     num = msg.dobject_num
 
     # Query multiple classes
-    # Returns dictionary of class_ids : dobj_nums
     def query_classes(self, class_ids):
+        """
+        Returns dictionary of LISTs of dobjects for each class
+        """
         dobj_dict = {}
         for c in class_ids:
             dobj_nums = self.query_class(c)
@@ -103,10 +116,42 @@ class DetectionListener:
         if dobj_num >= len(self.new_dv_flags):
             return None
         else:
-            return self.new_dv_flags[dobj_num]
+            if self.new_dv_flags[dobj_num]:
+                self.clear_new_dv_flag(dobj_num)
+                return True
+            else:
+                return False
+
+    def check_new_dvs(self, dobj_nums):
+        """
+        Returns the dobject number that has received a new dvector.
+        (There's been a new hit on this class/dobject)
+
+        Params
+        ------
+        dobj_nums : list of ints
+        
+        Returns
+        -------
+        index of dobject 
+        None if no dobject in the list has had a new detection
+            or if input is invalid
+        """
+        for dob in dobj_nums:
+            if dob >= len(self.new_dv_flags):
+                return None
+            elif self.new_dv_flags[dob]:
+                self.clear_new_dv_flag(dob)
+                return dob
+        return None
+                
 
     def clear_new_dv_flag(self, dobj_num):
         self.new_dv_flags[dobj_num] = False
+
+    def clear_new_dv_flags(self, dobj_nums):
+        for dob in dobj_nums:
+            self.new_dv_flags[dob] = False
 
     def create_new_dobj(self, dobj_num, class_id, dv):
         self.dobjects.append(Dobject(dobj_num, class_id))

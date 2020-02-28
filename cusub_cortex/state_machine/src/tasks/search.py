@@ -5,6 +5,7 @@ from tasks.task import Objective
 from geometry_msgs.msg import PoseStamped
 import rospy
 import tf
+from cusub_print.cuprint import bcolors
 
 DARKNET_CAMERAS_DEFAULT=[1,1,1,1,1,0]
 
@@ -37,7 +38,8 @@ class Search(Objective):
         self.toggle_waypoint_control(False)
         self.go_to_pose_non_blocking(prior)
 
-        self.cuprint("approaching prior, listening for detections of " + ", ".join(self.target_classes))
+        classes_colored = [bcolors.HEADER + x + bcolors.ENDC for x in self.target_classes]
+        self.cuprint("approaching prior, listening for detections of " + ", ".join(classes_colored))
         while not rospy.is_shutdown():
             # Check for detection
             if self.query_listener(): 

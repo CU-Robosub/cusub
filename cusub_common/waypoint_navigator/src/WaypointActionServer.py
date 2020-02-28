@@ -25,7 +25,7 @@ class WaypointServer(WaypointNavigator):
 
     def advance_waypoint(self):
         """Called when waypoint reached"""
-        rospy.loginfo("Waypoint Reached!!!")
+        self.cuprint("Waypoint Reached!!!")
         self.waypoint = None
         self.do_freeze()
 
@@ -58,7 +58,7 @@ class WaypointServer(WaypointNavigator):
         self.waypoint, self.waypoint_yaw = self.get_waypoint_in_odom(goal.goal_pose)
         self.movement_mode = goal.movement_mode
 
-        rospy.loginfo(self.waypoint)
+        self.cuprint(str(self.waypoint))
 
         while self.waypoint is not None:
 
@@ -69,7 +69,7 @@ class WaypointServer(WaypointNavigator):
 
             if self.server.is_preempt_requested():
 
-                rospy.logwarn("Waypoint Preempt Received!")
+                self.cuprint("preempt received")
 
                 result = waypointResult()
                 result.complete = False
@@ -97,7 +97,6 @@ class WaypointServer(WaypointNavigator):
         super(WaypointServer, self).run()
 
 if __name__ == '__main__':
-    print("starting Action Server node")
     rospy.init_node('waypoint_action_server')
     WAYPOINT_SERVER = WaypointServer()
     try:
