@@ -80,8 +80,10 @@ class DetectionListener(list):
     #     num = msg.dobject_num
 
     # Query multiple classes
-    # Returns dictionary of class_ids : dobj_nums
     def query_classes(self, class_ids):
+        """
+        Returns dictionary of LISTs of dobjects for each class
+        """
         dobj_dict = {}
         for c in class_ids:
             dobj_nums = self.query_class(c)
@@ -114,7 +116,11 @@ class DetectionListener(list):
         if dobj_num >= len(self.new_dv_flags):
             return None
         else:
-            return self.new_dv_flags[dobj_num]
+            if self.new_dv_flags[dobj_num]:
+                self.clear_new_dv_flag(dobj_num)
+                return True
+            else:
+                return False
 
     def check_new_dvs(self, dobj_nums):
         """
@@ -129,17 +135,23 @@ class DetectionListener(list):
         -------
         index of dobject 
         None if no dobject in the list has had a new detection
+            or if input is invalid
         """
         for dob in dobj_nums:
             if dob >= len(self.new_dv_flags):
                 return None
             elif self.new_dv_flags[dob]:
+                self.clear_new_dv_flag(dob)
                 return dob
-            return None
+        return None
                 
 
     def clear_new_dv_flag(self, dobj_num):
         self.new_dv_flags[dobj_num] = False
+
+    def clear_new_dv_flags(self, dobj_nums):
+        for dob in dobj_nums:
+            self.new_dv_flags[dob] = False
 
     def create_new_dobj(self, dobj_num, class_id, dv):
         self.dobjects.append(Dobject(dobj_num, class_id))

@@ -10,6 +10,7 @@ from waypoint_navigator.srv import *
 
 from std_msgs.msg import Float64, Bool
 from nav_msgs.msg import Odometry
+from cusub_print.cuprint import CUPrint, bcolors
 
 YAW_MODE = 1
 STRAFE_MODE = 2
@@ -20,7 +21,7 @@ REACHED_THRESHOLD = 0.25
 class WaypointNavigator(object):
 
     def __init__(self):
-
+        self.cuprint = CUPrint("Waypoint Nav")
         self.waypointlist = []
 
         self.waypoint = None
@@ -30,7 +31,7 @@ class WaypointNavigator(object):
 
     def addWaypoint(self, req):
 
-        rospy.loginfo(req.waypoint)
+        self.cuprint("received waypoint req")
 
         self.waypointlist.append(req.waypoint)
         if(self.waypoint is None):
@@ -39,7 +40,7 @@ class WaypointNavigator(object):
         return []
     
     def toggleControl(self, req):
-        rospy.logwarn("Waypoint toggling control. Waypoint controlling: " + str(req.waypoint_controlling))
+        self.cuprint("toggling control: " + str(req.waypoint_controlling))
         self.controlling_pids = req.waypoint_controlling
         if(req.waypoint_controlling):
             self.waypoint = None
@@ -87,7 +88,7 @@ class WaypointNavigator(object):
         self.depth_pub.publish(msg)
 
     def advance_waypoint(self):
-        rospy.loginfo("Waypoint Reached!")
+        self.cuprint("waypoint reached!")
         if(len(self.waypointlist) > 0):
             self.waypoint = self.waypointlist[0]
 
@@ -96,7 +97,7 @@ class WaypointNavigator(object):
         if(dist < REACHED_THRESHOLD):
             self.advance_waypoint()
         else:
-            rospy.loginfo("distance: " + str(dist))
+            self.cuprint("distance: " + bcolors.HEADER + str(dist) + bcolors.ENDC, print_prev_line=True)
 
     def odometryCallback(self, odom):
 
@@ -242,13 +243,13 @@ class WaypointNavigator(object):
         self.yaw_state_sub = rospy.Subscriber("motor_controllers/pid/yaw/state", Float64, self.yawStateCallback)
         self.depth_state_sub = rospy.Subscriber("motor_controllers/pid/depth/state", Float64, self.depthStateCallback)
 
-        rospy.loginfo("waiting for drive state")
+        self.cuprint("waiting for drive state")
         rospy.wait_for_message("motor_controllers/pid/drive/state", Float64)
-        rospy.loginfo("waiting for depth state")
+        self.cuprint("waiting for depth state")
         rospy.wait_for_message("motor_controllers/pid/depth/state", Float64)
-        rospy.loginfo("waiting for yaw state")
+        self.cuprint("waiting for yaw state")
         rospy.wait_for_message("motor_controllers/pid/yaw/state", Float64)
-        rospy.loginfo("waiting for strafe state")
+        self.cuprint("waiting for strafe state")
         rospy.wait_for_message("motor_controllers/pid/strafe/state", Float64)
 
         # get current sub position to figure out how to get where we want
@@ -259,7 +260,7 @@ class WaypointNavigator(object):
 
         self.controlling_pids = True
 
-        rospy.loginfo("Opening Toggle Service")
+        self.cuprint("opening toggle service")
 
         s2 = rospy.Service('toggleWaypointControl', ToggleControl, self.toggleControl)
 

@@ -34,11 +34,11 @@ class CUPrint:
 
         if self.ros:
             if print_prev_line:
-                print("\033[F", end="")
+                print("\033[F\33[2K", end="")
             rospy.loginfo(print_string)
         else:
             if print_prev_line:
-                print("\033[F", end="")
+                print("\033[F\33[2K", end="")
             print(print_string)
         
         if print_prev_line:
