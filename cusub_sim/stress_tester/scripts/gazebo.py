@@ -93,7 +93,7 @@ def str2bool(v):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Moves gazebo models to match config/model_locs.yaml. Optionally adds noise to the locations.')
-    parser.add_argument("-n", "--noise", type=str2bool, default=False, help='bool, add noise to the gazebo model locations. Default: true')
+    parser.add_argument("-n", "--noise", type=str2bool, default=False, help='bool, add noise to the gazebo model locations. Default: false')
     parser.add_argument("-gp", "--gazebo_paused", type=str2bool, default=False, help='bool, indicate if gazebo is already paused. Default: false')
     args = parser.parse_args()
     if args.noise:
