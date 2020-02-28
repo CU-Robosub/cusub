@@ -35,7 +35,7 @@ char **detectionNames;
 
 void YoloObjectDetector::onInit()
 {
-  NODELET_INFO("[YoloObjectDetector] Node started.");
+  cuprint("starting up");
   nodeHandle_ = getMTPrivateNodeHandle();
   image_transport::ImageTransport imageTransport_(nodeHandle_);
   // Read parameters from config file.
@@ -75,9 +75,9 @@ bool YoloObjectDetector::readParameters()
   // Check if Xserver is running on Linux.
   if (XOpenDisplay(NULL)) {
     // Do nothing!
-    NODELET_INFO("[YoloObjectDetector] Xserver is running.");
+    cuprint("Xserver is running.");
   } else {
-    NODELET_INFO("[YoloObjectDetector] Xserver is not running.");
+    cuprint_warn("Xserver is not running.");
     viewImage_ = false;
   }
 
@@ -93,7 +93,7 @@ bool YoloObjectDetector::readParameters()
 
 void YoloObjectDetector::init(image_transport::ImageTransport& imageTransport_)
 {
-  NODELET_INFO("[YoloObjectDetector] init().");
+  // cuprint("init().");
 
   // Initialize deep network of darknet.
   std::string weightsPath;
@@ -405,8 +405,12 @@ void *YoloObjectDetector::detectInThread()
     //printf("\033[2J");
     //printf("\033[1;1H");
     //printf("%s", headers[(buffIndex_+2) % 3].frame_id.c_str());
-    printf("\nFPS:%.1f\n",fps_);
-    printf("Objects:\n\n");
+    char fps[256];
+    sprintf(fps, "\nFPS:%.1f\n", fps_);
+    std::string fps_str(fps);
+    cuprint(fps_str);
+    cuprint("Objects:\n\n");
+    // printf();
   }
   image display = buff_[(buffIndex_+2) % 3];
   image_to_ipl(buff_[(buffIndex_+2) % 3], ipl2_);
@@ -538,7 +542,7 @@ void YoloObjectDetector::setupNetwork(char *cfgfile, char *weightfile, char *dat
   demoThresh_ = thresh;
   demoHier_ = hier;
   fullScreen_ = fullscreen;
-  printf("YOLO V3\n");
+  cuprint("YOLO V3\n");
   net_ = load_network(cfgfile, weightfile, 0);
   set_batch_network(net_, 1);
 }
@@ -547,7 +551,7 @@ void YoloObjectDetector::yolo()
 {
   const auto wait_duration = std::chrono::milliseconds(2000);
   while (!getImageStatus() && ros::ok() ) {
-    printf("Waiting for image.\n");
+    cuprint("Waiting for image.\n");
     if (!isNodeRunning()) {
       return;
     }
@@ -741,6 +745,18 @@ void *YoloObjectDetector::publishInThread()
   return 0;
 }
 
+void YoloObjectDetector::cuprint(std::string str)
+{
+  std::string print_str = std::string("[\033[92mDarknet\033[0m] ");
+  ROS_INFO( (print_str + str).c_str());
+}
+
+void YoloObjectDetector::cuprint_warn(std::string str)
+{
+  std::string print_str = std::string("[\033[92mDarknet\033[0m] ");
+  print_str = print_str + std::string("\033[93m[WARN] ") + str + std::string("\033[0m");
+  ROS_INFO( print_str.c_str());
+}
 
 } /* namespace darknet_ros*/
 PLUGINLIB_EXPORT_CLASS(darknet_ros::YoloObjectDetector, nodelet::Nodelet);

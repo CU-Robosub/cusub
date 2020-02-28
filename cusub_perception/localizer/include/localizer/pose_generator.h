@@ -1,6 +1,7 @@
 #ifndef POSE_GENERATOR_CLASS_SRC_POSE_GENERATOR_CLASS_H_
 #define POSE_GENERATOR_CLASS_SRC_POSE_GENERATOR_CLASS_H_
 
+#include <string>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
 #include <sensor_msgs/Image.h>
@@ -30,6 +31,8 @@ namespace pose_generator
                 const vector<darknet_ros_msgs::BoundingBox>& bbs,
                 vector<localizer::Detection>& detections
             ){;}
+            std::string pose_gen_name;
+
         protected:
             void getPoseFromPoints(vector<Point3f>& truth_pts, vector<Point2f>& img_points, geometry_msgs::Pose& pose);
 
@@ -51,6 +54,8 @@ namespace pose_generator
             Mat occam_camera_matrix{3,3,DataType<double>::type, occam_camera_matrix_values.data()};
             Mat occam_dist_coefs{4,1, DataType<double>::type, occam_dist_coefs_values.data()};
 
+            void cuprint(std::string str);
+            void cuprint_warn(std::string str);
     };
 }
 

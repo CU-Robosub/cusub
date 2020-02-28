@@ -6,6 +6,7 @@ import numpy as np
 from std_msgs.msg import Float64MultiArray, Float64
 from pololu_controller.msg import MotorCommand
 from nav_msgs.msg import Odometry
+from cusub_print.cuprint import CUPrint
 
 
 # * Front: 0
@@ -21,6 +22,7 @@ from nav_msgs.msg import Odometry
 class PID_Pololu():
     ## The constructor.
     def __init__(self):
+        self.cuprint = CUPrint("PID Pololu Matrix")
 
         self.cmd_data = Float64MultiArray
         #self.effort_array = np.zeros([1,6])
@@ -43,7 +45,7 @@ class PID_Pololu():
         self.offset_array     = np.array([1420, 1420, 1420, 1420,
                                           1500, 1500, 1500, 1500])
 
-        rospy.logfatal(self.flip_motor_array)
+        # rospy.logfatal(self.flip_motor_array)
 
         ## Publisher for sending commands to the pololu
         self.motor_pub = rospy.Publisher('cusub_common/motor_controllers/pololu_control/command',
@@ -77,8 +79,10 @@ class PID_Pololu():
                                                 Float64,queue_size=1)
         self.yaw_setpoint_pub_data = Float64()
 
-        print "waiting for yaw"
+        self.cuprint("waiting for odom")
         msg = rospy.wait_for_message('cusub_common/odometry/filtered', Odometry)
+        self.cuprint("...received odom")
+
 
         orientation =  msg.pose.pose.orientation
         (roll, pitch, yaw) = tf.transformations.euler_from_quaternion([orientation.x,
@@ -87,7 +91,6 @@ class PID_Pololu():
                                                                        orientation.w])
         self.yaw_setpoint_pub_data = yaw
         self.yaw_setpoint_pub.publish(self.yaw_setpoint_pub_data)
-        print "set yaw setpoint"
 
     def roll_callback(self,msg): self.effort_array[0] = msg.data
 

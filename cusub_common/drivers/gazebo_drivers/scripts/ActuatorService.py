@@ -13,6 +13,8 @@ from gazebo_msgs.msg import ModelState
 from gazebo_msgs.srv import SpawnModel, SetModelState, DeleteModel
 from actuator.srv import ActivateActuator
 
+from cusub_print.cuprint import CUPrint
+
 """
 This is the simulator version of the actuator service
 """
@@ -27,6 +29,8 @@ class ActuatorService(object):
 
     mutex = Lock()
 
+    cuprint = CUPrint("Actuator Service")
+
     def __init__(self):
         pass
 
@@ -37,13 +41,13 @@ class ActuatorService(object):
         result = deleter(model_name)
 
         if not result.success:
-            rospy.logerr("Failed to despawn torpedo!")
-            rospy.logerr(result.status_message)
+            self.cuprint("Failed to despawn torpedo!", err=True)
+            self.cuprint(result.status_message, err=True)
             return
 
     def fire_torpedo(self, side):
 
-        rospy.loginfo("Simulating torpedo by spawning one.")
+        self.cuprint("Simulating torpedo by spawning one.")
 
         y = -0.163068 # right side
         if(side == 'left'):
@@ -73,8 +77,8 @@ class ActuatorService(object):
         )
 
         if not result.success:
-            rospy.logerr("Failed to spawn torpedo!")
-            rospy.logerr(result.status_message)
+            self.cuprint("Failed to spawn torpedo!", err=True)
+            self.cuprint(result.status_message, err=True)
             return
 
         # Accelerate Torpedo to kill speed
@@ -87,8 +91,8 @@ class ActuatorService(object):
         result = set_model_state(model_state)
 
         if not result.success:
-            rospy.logerr("Failed to launch torpedo!")
-            rospy.logerr(result.status_message)
+            self.cuprint("Failed to launch torpedo!", err=True)
+            self.cuprint(result.status_message, err=True)
             return
 
         despawn_torpedo_model = partial(self.despawn_torpedo,
@@ -116,7 +120,7 @@ class ActuatorService(object):
             #  call to override if we need to in simulator
             if pin == 1:
 
-                rospy.loginfo("Simulating droppers by spawning one.")
+                self.cuprint("Simulating droppers by spawning one.")
 
                 spawner = rospy.ServiceProxy('/gazebo/spawn_urdf_model', SpawnModel)
                 result = spawner(
@@ -142,8 +146,8 @@ class ActuatorService(object):
                 )
 
                 if not result.success:
-                    rospy.logerr("Failed to spawn dropper!")
-                    rospy.logerr(result.status_message)
+                    self.cuprint("Failed to spawn dropper!", err=True)
+                    self.cuprint(result.status_message, err=True)
 
                 self.current_dropper = self.current_dropper + 1
 
@@ -156,7 +160,7 @@ class ActuatorService(object):
                 self.fire_torpedo('right')
 
             else:
-                rospy.logerr("This actuator is not yet simulated!")
+                self.cuprint("This actuator is not yet simulated!", err=True)
 
         self.mutex.release()
         return []

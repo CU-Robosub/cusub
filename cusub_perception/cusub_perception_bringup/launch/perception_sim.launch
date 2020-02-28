@@ -35,10 +35,10 @@
         <remap from="/camera/rgb/image_raw"       to="cusub_perception/darknet_multiplexer/out"/>
     </node>
     <include file="$(find gazebo_drivers)/launch/fakeyolo.launch" if="$(arg fakeyolo)" >
-      <!-- <arg name="config_filename" value="fakeyolo_single_task.yaml" /> -->
       <arg name="config_filename" value="fakeyolo_2019.yaml" />
       <arg name="show_points" value="$(arg show_image)" />
     </include>
+
     <include file="$(find detection_tree)/launch/detection_tree.launch" >
       <arg name="manager_name" value="$(arg manager_name)" />
       <arg name="standalone" value="false" />

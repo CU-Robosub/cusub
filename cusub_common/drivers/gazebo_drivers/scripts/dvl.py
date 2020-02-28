@@ -40,4 +40,4 @@ if __name__ == '__main__':
     try:
         DVL_REMAP.run()
     except rospy.ROSInterruptException:
-        rospy.loginfo("Gazebo DVL driver died!")
+        rospy.logerr("Gazebo DVL driver died!")

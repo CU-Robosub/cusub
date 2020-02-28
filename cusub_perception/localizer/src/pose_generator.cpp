@@ -35,4 +35,22 @@ namespace pose_generator
         pose.position.y = tvec.at<double>(1) - 0.7; // added to correct for optical to odom bad transform
         pose.position.z = tvec.at<double>(2);
     }
+
+//     #define DETECTION_TREE_NAME             std::string("[\033[92mDetection Tree\033[0m] ")
+// #define DETECTION_TREE_WARN_START       std::string("\033[93m[WARN] ")
+// #define DETECTION_TREE_COLOR_START      std::string("\033[95m")
+// #define DETECTION_TREE_END              std::string("\033[0m")
+
+    void PoseGenerator::cuprint(std::string str)
+    {
+        std::string print_str = std::string("[\033[92m") + pose_gen_name + std::string("\033[0m] ");
+        ROS_INFO( (print_str + str).c_str());
+    }
+
+    void PoseGenerator::cuprint_warn(std::string str)
+    {
+        std::string print_str = std::string("[\033[92m") + pose_gen_name + std::string("\033[0m] ");
+        print_str = print_str + std::string("\033[93m[WARN] ") + str + std::string("\033[0m");
+        ROS_INFO( print_str.c_str());
+    }
 }

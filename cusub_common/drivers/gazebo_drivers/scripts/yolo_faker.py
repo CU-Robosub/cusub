@@ -46,6 +46,7 @@ from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 from darknet_ros_msgs.msg import BoundingBox, BoundingBoxes
 
 from cv_bridge import CvBridge
+from cusub_print.cuprint import CUPrint
 
 import cv2
 
@@ -77,6 +78,8 @@ class YOLOObjectClass(object):
         self._name = name
         self._color = color
         self._points = points
+        self.cuprint = CUPrint("Fakeyolo")
+        self.cuprint("starting up")
 
     @property
     def name(self):

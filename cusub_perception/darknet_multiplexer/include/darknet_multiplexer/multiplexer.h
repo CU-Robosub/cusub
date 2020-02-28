@@ -39,6 +39,8 @@ namespace darknet_multiplexer_ns
         std::vector<bool> activeCameras;
         int current_pub_index;
         bool firstImageReceived;
+        void cuprint(std::string str);
+        void cuprint_warn(std::string str);
     };
 }
 #endif

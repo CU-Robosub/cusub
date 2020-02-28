@@ -8,6 +8,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <string>
 
 namespace darknet_drawer_ns
 {
@@ -22,6 +23,8 @@ namespace darknet_drawer_ns
 
         std::map<std::string, cv::Scalar> m_classColors;
         void loadClassNames(const std::vector<std::string> &classNames);
+        void cuprint(std::string str);
+        void cuprint_warn(std::string str);
     };
 }
 

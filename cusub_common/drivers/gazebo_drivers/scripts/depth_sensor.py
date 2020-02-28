@@ -8,12 +8,14 @@ import rospy
 
 from sensor_msgs.msg import FluidPressure
 from geometry_msgs.msg import PoseWithCovarianceStamped
+from cusub_print.cuprint import CUPrint
 
 class DepthSensor(object):
     """
     This node republishes of the depth sensor fluid pressure
     from gazebo into a depth pose for sensor fusion
     """
+    cuprint = CUPrint("Gazebo Depth Sensor")
 
     depth_pose = None
     """PoseWithCovarianceStamped : Current depth pose"""
@@ -31,7 +33,7 @@ class DepthSensor(object):
     def pressure_callback(self, data):
         """Gets current pressure from gazebo"""
 
-        print "got pressure"
+        self.cuprint("got pressure")
         self.depth_odom_pose.header.stamp = rospy.Time.now()
         self.depth_odom_pose.header.seq += 1
 
@@ -83,9 +85,8 @@ class DepthSensor(object):
 
         rate = rospy.Rate(30)
 
+        self.cuprint("Publishing depth sensor data")
         while not rospy.is_shutdown():
-            print "test"
-
             depth_odom_pub.publish(self.depth_odom_pose)
             depth_map_pub.publish(self.depth_map_pose)
 
