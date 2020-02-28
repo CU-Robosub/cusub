@@ -13,11 +13,3 @@
     </description>
   </class>
 </library>
-
-<library path="lib/libget_classes">
-  <class name="darknet_multiplexer/GetClasses" type="darknet_get_classes_ns::GetClasses" base_class_type="nodelet::Nodelet">
-    <description>
-        Records the classes currently available in darknet for a period of time.
-    </description>
-  </class>
-</library>

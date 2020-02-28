@@ -1,5 +1,0 @@
-# Get the active classes in darknet
-duration monitor_time
-string[] frame_ids
----
-string[] classes

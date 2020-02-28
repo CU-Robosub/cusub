@@ -21,7 +21,6 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
 add_service_files(
    FILES
-   DarknetClasses.srv
    DarknetCameras.srv
 )
 
@@ -53,11 +52,9 @@ if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(drawer ${catkin_EXPORTED_LIBRARIES})
 endif()
 
-add_library( get_classes
-  src/get_classes.cpp
+# Multiplexer Node (no nodelet)
+add_executable( multiplexer_node
+  src/multiplexer.cpp
 )
-target_link_libraries(get_classes ${catkin_LIBRARIES})
-if(catkin_EXPORTED_LIBRARIES)
-  add_dependencies(get_classes ${catkin_EXPORTED_LIBRARIES})
-endif()
-add_dependencies(get_classes darknet_multiplexer_generate_messages_cpp)
+add_dependencies(multiplexer_node ${catkin_EXPORTED_TARGETS})
+target_link_libraries(multiplexer_node ${catkin_LIBRARIES})
