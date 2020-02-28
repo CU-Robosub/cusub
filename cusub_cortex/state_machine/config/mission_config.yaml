@@ -38,7 +38,9 @@ tasks:
       timeout_secs: 0
       outcome_not_found: 'skip' # skip, later
       outcome_timed_out: 'skip'
-    drop_depth: -2    
+    drop_depth: -2
+    retrace_hit_count: 1
+    retrace_timeout: 2
     seconds_in_position: 2 # how many seconds we need to be directly above droppers before diving
     xy_dist_thresh_app: 0.5 # how close in xy we need to be before diving
     xy_dist_thresh_drop: 0.1 # how close in xy we need to be before dropping
@@ -55,12 +57,16 @@ tasks:
     elev_target: 0.0
     elev_thresh: 0.05 # how close elevation has to be
     slay_carrot_dist: 1 # how far to go ahead to hit jiangshi
+    retrace_hit_count: 1 # new hits before quitting from retracing
+    retrace_timeout: 2 # seconds without getting detections before retracing
+    retrace_back_in_time: 5
+
 
 mission_tasks: # Tasks To Do In Order
   # - startup
   # - start_gate
-  - jiangshi
-  # - droppers
+  # - jiangshi
+  - droppers
   # - triangle
   
   # - octagon
