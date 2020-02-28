@@ -1,7 +1,5 @@
 <launch>
 
-  <arg name="startgate" default="false"/>
-
   <arg name="TASK_x" default="4.0"/>
   <arg name="TASK_y" default="0.0"/>
   <arg name="TASK_z" default="-0.5"/>
@@ -72,16 +70,16 @@
         output="screen">
         <rosparam subst_value="true">
             meshes:
-              StartGate_1:
+              <!-- StartGate_1:
                 mesh: package://robosub_descriptions/models/StartGate/StartGate.dae
                 pose:
                   position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
-                  orientation: [0, 0, $(arg TASK_yaw)]
-              Jiangshi_1:
+                  orientation: [0, 0, $(arg TASK_yaw)] -->
+              <!-- Jiangshi_1:
                 mesh: package://robosub_descriptions/models/buoy_jiangshi/buoy.dae
                 pose:
                   position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
-                  orientation: [0, 0, $(arg TASK_yaw)]
+                  orientation: [0, 0, $(arg TASK_yaw)] -->
               <!-- TriangleBuoy_1:
                 mesh: package://robosub_descriptions/models/triangular_buoy/triangular_buoy.dae
                 pose:
@@ -92,12 +90,11 @@
                 pose:
                   position: [$(arg PM1_x), $(arg PM1_y), $(arg PM1_z)]
                   orientation: [1.57, 0, $(arg PM1_yaw)] -->
-            <!-- meshes: 
               DropperGarlic_1:
                 mesh: package://robosub_descriptions/models/dropper_garlic/dropper_garlic.dae
                 pose:
                   position: [$(arg DROP_x), $(arg DROP_y), $(arg DROP_z)]
-                  orientation: [1.57, 0, $(arg DROP_yaw)] -->
+                  orientation: [1.57, 0, $(arg DROP_yaw)]
         </rosparam>
   </node>
 
