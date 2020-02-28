@@ -13,6 +13,11 @@ from gazebo_msgs.msg import ModelState
 from gazebo_msgs.srv import SpawnModel, SetModelState, DeleteModel
 from actuator.srv import ActivateActuator
 
+import xacro
+import sys
+import csv
+import os, rospkg
+
 """
 This is the simulator version of the actuator service
 """
@@ -49,18 +54,25 @@ class ActuatorService(object):
         if(side == 'left'):
             y=  0.163068
 
+        torpedo_name = ("torpedo_%d" % (self.current_torpedo))
+
+        rospack = rospkg.RosPack()
+        xacro_file_path = os.path.join(rospack.get_path("robosub_descriptions"), "models", "Torpedo", "Torpedo.xacro")
+        xacro.substitution_args_context['arg'] = {"namespace": torpedo_name}
+        doc = xacro.process_file(xacro_file_path)
+        urdf = doc.toxml()
+
         spawner = rospy.ServiceProxy('/gazebo/spawn_urdf_model', SpawnModel)
         result = spawner(
 
             # model_name
-            ("torpedo_%d" % (self.current_torpedo)),
+            torpedo_name,
 
-            # Get the dropper URDF from param
             # model_xml
-            rospy.get_param("~torpedoURDF"),
+            urdf, #rospy.get_param("~torpedoURDF"),
 
-            # robo_namespace'
-            ("torpedo_%d" % (self.current_torpedo)),
+            # robo_namespace
+            torpedo_name,
 
             # Spawn dropper just below sub
             # inital_pose
@@ -79,9 +91,9 @@ class ActuatorService(object):
 
         # Accelerate Torpedo to kill speed
         model_state = ModelState()
-        model_state.model_name = "torpedo_%d" % (self.current_torpedo)
-        model_state.twist.linear.z = 5
-        model_state.reference_frame = "torpedo_%d::Torpedo/base_link" % (self.current_torpedo)
+        model_state.model_name = torpedo_name
+        model_state.twist.linear.z = 10
+        model_state.reference_frame = "torpedo_%d::%s/base_link" % (self.current_torpedo, torpedo_name)
 
         set_model_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
         result = set_model_state(model_state)
@@ -92,8 +104,8 @@ class ActuatorService(object):
             return
 
         despawn_torpedo_model = partial(self.despawn_torpedo,
-                                        model_name=("torpedo_%d" % (self.current_torpedo)))
-        rospy.Timer(rospy.Duration(15), despawn_torpedo_model, oneshot=True)
+                                        model_name=torpedo_name)
+        rospy.Timer(rospy.Duration(3), despawn_torpedo_model, oneshot=True)
 
         self.current_torpedo = self.current_torpedo + 1
 
@@ -118,18 +130,26 @@ class ActuatorService(object):
 
                 rospy.loginfo("Simulating droppers by spawning one.")
 
+                dropper_name = ("dropper_%d" % (self.current_dropper))
+
+                rospack = rospkg.RosPack()
+                xacro_file_path = os.path.join(rospack.get_path("robosub_descriptions"), "models", "Torpedo", "Torpedo.xacro")
+                xacro.substitution_args_context['arg'] = {"namespace": dropper_name}
+                doc = xacro.process_file(xacro_file_path)
+                urdf = doc.toxml()
+
                 spawner = rospy.ServiceProxy('/gazebo/spawn_urdf_model', SpawnModel)
                 result = spawner(
 
                     # model_name
-                    ("dropper_%d" % (self.current_dropper)),
+                    dropper_name,
 
                     # Get the dropper URDF from param
                     # model_xml
-                    rospy.get_param("~dropperURDF"),
+                    urdf, #rospy.get_param("~dropperURDF"),
 
                     # robo_namespace'
-                    ("dropper_%d" % (self.current_dropper)),
+                    dropper_name,
 
                     # Spawn dropper just below sub
                     # inital_pose
