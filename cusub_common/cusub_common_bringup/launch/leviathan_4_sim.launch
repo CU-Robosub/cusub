@@ -1,0 +1,15 @@
+<launch>
+
+    <arg name="namespace" default="leviathan_4"/>
+    <group ns="$(arg namespace)">
+
+        <include file="$(find gazebo_drivers)/launch/leviathan_gazebo_drivers.launch">
+            <arg name="namespace" default="$(arg namespace)"/>
+        </include>
+
+        <include file="$(find motor_controllers)/launch/controller_matrix.launch">
+            <arg name="pid_type" default="sim"/>
+        </include>
+
+    </group>
+</launch>
