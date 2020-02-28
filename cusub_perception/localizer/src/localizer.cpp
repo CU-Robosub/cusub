@@ -11,6 +11,11 @@
 
 namespace localizer_ns
 {
+  Localizer::~Localizer()
+  {
+    delete sel_mappings["zp"];
+  }
+
   void Localizer::onInit()
   {
     cuprint("starting up");
