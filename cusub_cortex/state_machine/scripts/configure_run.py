@@ -14,11 +14,6 @@ import yaml
 """
 sudo apt-get install qtcreator pyqt5-dev-tools
 
-Shift or control to turn an object, control gives more resolution
-Next: 
-   Rethink the process of pointing the sub down an access, making that the zero axis, all priors relaive to that
-Should be good after that!
-
 Future ToDo: add transdec support
 """
 cuprint = CUPrint("Prior GUI", ros=False)

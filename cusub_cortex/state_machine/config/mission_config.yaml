@@ -61,12 +61,19 @@ tasks:
     retrace_timeout: 2 # seconds without getting detections before retracing
     retrace_back_in_time: 5
 
+  torpedos:
+    manager_info:
+      timeout_secs: 0
+      outcome_not_found: 'skip' # skip, later
+      outcome_timed_out: 'skip'
+
 
 mission_tasks: # Tasks To Do In Order
+  - torpedos
   # - startup
   # - start_gate
   # - jiangshi
-  - droppers
+  # - droppers
   # - triangle
   
   # - octagon
