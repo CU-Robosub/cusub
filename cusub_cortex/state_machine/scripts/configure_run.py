@@ -313,6 +313,8 @@ class Cusub_GUI(QWidget):
          rot = -t.rotation * (np.pi / 180) # qt pos angle is clockwise
          if task_name == "leviathan":
             rot += 180 * (np.pi/180) # flip leviathan 180 deg
+         if task_name == "torpedos":
+            rot += np.pi
 
          x,y = self.transform_model_coord(x, \
                                           y, \
