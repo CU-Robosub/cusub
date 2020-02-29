@@ -1,5 +1,9 @@
 cusub_documentation/build
 
+# Generated config files
+cusub_sim/stress_tester/config/*.yaml
+cusub_cortex/state_machine/config/mission_config_generated.yaml
+
 cusub_perception/Robosub_CV_C++/build
 cusub_preception/Robosub_CV_C++/devel
 cusub_perception/usb_cam_ws/devel
