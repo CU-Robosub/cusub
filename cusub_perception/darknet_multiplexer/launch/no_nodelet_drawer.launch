@@ -1,3 +1,5 @@
 <launch>
-    <node pkg="darknet_multiplexer" type="drawer_node" output="screen" name="drawer_node" />
+    <node pkg="darknet_multiplexer" type="drawer_node" output="screen" name="drawer_node">
+        <rosparam command="load" ns="class_names" file="$(find darknet_config)/yaml/class_names.txt"/>
+    </node>
 </launch>

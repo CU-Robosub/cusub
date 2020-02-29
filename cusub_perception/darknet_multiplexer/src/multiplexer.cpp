@@ -22,7 +22,7 @@ namespace darknet_multiplexer_ns
             ros::NodeHandle nh;
             cuprint("NOT running as a nodelet");
             init(nh);
-        }   
+        }
     }
 
     void Multiplexer::init(ros::NodeHandle& nh)

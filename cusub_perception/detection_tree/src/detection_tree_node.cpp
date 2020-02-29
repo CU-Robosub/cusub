@@ -6,22 +6,37 @@ using namespace cv;
 
 void DetectionTree::onInit()
 {
-    sub_name = "leviathan"; // TODO Pull from config
-    ros::NodeHandle& nh = getMTNodeHandle();
+    cuprint("starting up");
+        
+    if (is_nodelet)
+    {
+        ros::NodeHandle& nh = getMTNodeHandle();
+        cuprint("running as a nodelet.");
+        init(nh);
+    } else
+    {
+        ros::NodeHandle nh;
+        cuprint("NOT running as a nodelet");
+        init(nh);
+    }
+}
+
+void DetectionTree::init(ros::NodeHandle& nh)
+{
     dvector_num = 0;
-    
+    sub_name = "leviathan"; // TODO Pull from config
     debug_dv_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("cusub_perception/detection_tree/poses",10);
     debug_dobj_poses_pub = nh.advertise<geometry_msgs::PoseArray>("cusub_perception/detection_tree/dobjects",10);
     dvector_pub = nh.advertise<detection_tree::Dvector>("cusub_perception/detection_tree/dvectors",10);
     // Temporarily subscribe to all camera info topics
     for( auto topic_frame : camera_topic_frame_map)
     {
-        // det_print(string("Added Camera: ") + topic_frame.second);
+        // cuprint(string("Added Camera: ") + topic_frame.second);
         camera_info_subs.insert({topic_frame.second, nh.subscribe(topic_frame.first, 1, &DetectionTree::cameraInfoCallback, this)});
     }    
     darknet_sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &DetectionTree::darknetCallback, this);
     dobj_pub_timer = nh.createTimer(ros::Duration(0.5), &DetectionTree::dobjPubCallback, this); // TODO pull config
-    det_print(string("Loaded Detection Tree"));
+    cuprint(string("Loaded Detection Tree"));
 }
 
 /*
@@ -70,15 +85,15 @@ int DetectionTree::transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_p
             cam_quat_tf.normalize();
             odom_cam_pose.pose.orientation = tf2::toMsg(cam_quat_tf);
 
-            // det_print("------------------");
-            // det_print(string("yaw: ") + to_string(yaw * (180 / 3.1415)) + string(" deg"));
-            // det_print(string("pitch ") + to_string(pitch * (180 / 3.1415)) + string(" deg"));
+            // cuprint("------------------");
+            // cuprint(string("yaw: ") + to_string(yaw * (180 / 3.1415)) + string(" deg"));
+            // cuprint(string("pitch ") + to_string(pitch * (180 / 3.1415)) + string(" deg"));
         } else {
-            det_print_warn(string("Detection Tree missed transform. Throwing out detection."));
+            cuprint_warn(string("Detection Tree missed transform. Throwing out detection."));
             return -1;
         }
     } catch (tf::TransformException ex){
-        det_print_warn(string("Detection Tree Error in transform: ") + string(ex.what()));
+        cuprint_warn(string("Detection Tree Error in transform: ") + string(ex.what()));
         return -1;
     }
     return 0;
@@ -96,7 +111,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
     string frame_optical = bbs->image_header.frame_id;
     if( camera_info.find(frame_optical) == camera_info.end() )
     {
-        // det_print(string("Unreceived camera info: ") + frame_optical);
+        // cuprint(string("Unreceived camera info: ") + frame_optical);
         return;
     }
 
@@ -191,7 +206,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
 int DetectionTree::createDobject(detection_tree::Dvector* dv)
 {   
     string s = string("creating new dobj for ") + DETECTION_TREE_COLOR_START + dv->class_id + DETECTION_TREE_END;
-    det_print(s);
+    cuprint(s);
     Dobject* dobj = new Dobject;
     dobj->num = dobject_list.size();
     dobj->class_id = dv->class_id;
@@ -236,7 +251,7 @@ void DetectionTree::assignDobjScores(std::vector<detection_tree::Dvector*>& dv_l
                 double azimuth_diff = pow(dv->azimuth - average_az, 2);
                 double elevation_diff = pow(dv->azimuth - average_az, 2);
                 double distance = sqrt(azimuth_diff + elevation_diff);
-                // det_print(string("distance: ") + to_string(distance));
+                // cuprint(string("distance: ") + to_string(distance));
 
                 // Turn distance into a score
                 double score = 1 / distance;
@@ -331,19 +346,19 @@ void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfo ci)
     {
         if( itr_pair.first == frame_id )
         {
-            // det_print(string("Received : ") + frame_id.c_str());
+            // cuprint(string("Received : ") + frame_id.c_str());
             // TODO remove on actual sub
 
             camera_info.insert({frame_id + "_optical", ci}); // adding _optical is 100% a hack
             camera_info_subs[itr_pair.first].shutdown(); // unsubscribe
             if ( camera_info_subs.size() == camera_info.size() )
             {
-                det_print(string("All camera's info acquired"));
+                cuprint(string("All camera's info acquired"));
             }
             return;
         }
     }
-    det_print_warn(string("Unrecognized camera frame: ") + frame_id);
+    cuprint_warn(string("Unrecognized camera frame: ") + frame_id);
 }
 
 void DetectionTree::dobjPubCallback(const ros::TimerEvent&)
@@ -370,15 +385,29 @@ void DetectionTree::dobjPubCallback(const ros::TimerEvent&)
     }
 }
 
-void DetectionTree::det_print(std::string str)
+void DetectionTree::cuprint(std::string str)
 {
     ROS_INFO( (DETECTION_TREE_NAME + str).c_str());
 }
 
-void DetectionTree::det_print_warn(std::string str)
+void DetectionTree::cuprint_warn(std::string str)
 {
     string s = DETECTION_TREE_NAME + DETECTION_TREE_WARN_START  + str + DETECTION_TREE_END;
     ROS_INFO( s.c_str());
 }
 
+void DetectionTree::set_not_nodelet(void)
+{
+    is_nodelet = false;
+}
+
 PLUGINLIB_EXPORT_CLASS(det_tree_ns::DetectionTree, nodelet::Nodelet);
+
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "localizer_node");
+  det_tree_ns::DetectionTree dt;
+  dt.set_not_nodelet();
+  dt.onInit();
+  ros::spin();
+}

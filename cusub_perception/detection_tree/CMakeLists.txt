@@ -44,3 +44,10 @@ add_library( detection_tree_node
 src/detection_tree_node.cpp )
 add_dependencies(detection_tree_node detection_tree_generate_messages_cpp)
 target_link_libraries(detection_tree_node ${catkin_LIBRARIES})
+
+# Multiplexer Node (no nodelet)
+add_executable( detection_tree_node_no_nodelet
+  src/detection_tree_node.cpp
+)
+add_dependencies(detection_tree_node_no_nodelet ${catkin_EXPORTED_TARGETS})
+target_link_libraries(detection_tree_node_no_nodelet ${catkin_LIBRARIES})

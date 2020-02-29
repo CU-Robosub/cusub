@@ -44,7 +44,10 @@ namespace det_tree_ns
     {
         public:
             virtual void onInit();
+            void set_not_nodelet(void);
         private:
+            bool is_nodelet = true;
+            void init(ros::NodeHandle& nh);
             std::string sub_name;
             void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
             void cameraInfoCallback(const sensor_msgs::CameraInfo ci);
@@ -52,8 +55,8 @@ namespace det_tree_ns
             int createDobject(detection_tree::Dvector* dv);
             bool poseSolveDobject(Dobject* dobj, geometry_msgs::Pose& pose);
             void dobjPubCallback(const ros::TimerEvent&);
-            void det_print(std::string str);
-            void det_print_warn(std::string str);
+            void cuprint(std::string str);
+            void cuprint_warn(std::string str);
 
             // Dvector Association Functions
             void associateDvectors(std::vector<detection_tree::Dvector*>& dv_list, std::map<detection_tree::Dvector*, int>& dv_dobj_map);            

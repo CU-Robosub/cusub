@@ -26,9 +26,9 @@
     <!-- Multiplexer -->
     <node pkg="nodelet" type="nodelet" name="darknet_multiplexer" args="load darknet_multiplexer/Multiplexer $(arg manager_name)" output="screen" />
     <!-- Debug -->
-    <node pkg="nodelet" type="nodelet" name="darknet_drawer" args="load darknet_multiplexer/DarknetDrawer $(arg manager_name)" output="screen"/>
-    <!-- Get Darknet Classes Server -->
-    <!-- <node pkg="nodelet" type="nodelet" name="darknet_get_classes" args="load darknet_multiplexer/GetClasses $(arg manager_name)" output="screen"/> -->
+    <node pkg="nodelet" type="nodelet" name="darknet_drawer" args="load darknet_multiplexer/DarknetDrawer $(arg manager_name)" output="screen">
+      <rosparam command="load" ns="class_names" file="$(find darknet_config)/yaml/class_names.txt"/>
+    </node>
     <!-- Darknet -->
     <node pkg="nodelet" type="nodelet" name="darknet_ros" args="load darknet_ros/YoloObjectDetector $(arg manager_name)" output="screen" unless="$(arg fakeyolo)">
         <remap from="darknet_ros/bounding_boxes" to="cusub_perception/darknet_ros/bounding_boxes" />

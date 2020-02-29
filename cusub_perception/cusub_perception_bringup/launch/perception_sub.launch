@@ -20,14 +20,10 @@
     </include>
 
     <!-- Nodelets -->
-    
-    <!-- Occam -->
     <!-- Localizer -->
     <node pkg="nodelet" type="nodelet" name="localizer" args="load localizer/Localizer standalone_nodelet" output="screen" respawn="true"/>
     <!-- Camera Multiplexer -->
     <node pkg="nodelet" type="nodelet" name="darknet_multiplexer" args="load darknet_multiplexer/Multiplexer standalone_nodelet" output="screen" respawn="true"/>
-    <!-- Get Darknet Classes Server -->
-    <node pkg="nodelet" type="nodelet" name="darknet_get_classes" args="load darknet_multiplexer/GetClasses standalone_nodelet" output="screen" respawn="true"/>
     <!-- Darknet -->
     <node pkg="nodelet" type="nodelet" name="darknet_ros" args="load darknet_ros/YoloObjectDetector standalone_nodelet" output="screen" respawn="true">
         <remap from="darknet_ros/bounding_boxes"          to="cusub_perception/darknet_ros/bounding_boxes" />

@@ -24,8 +24,8 @@ namespace darknet_drawer_ns
         m_pub = nh.advertise<sensor_msgs::Image>("cusub_perception/darknet_drawer/out",1);
         // load the config
         std::vector<std::string> detectionClasses;
-        ros::NodeHandle nhPrivate = getPrivateNodeHandle();
-        if (nhPrivate.getParam("class_names", detectionClasses))
+        // ros::NodeHandle nhPrivate = getPrivateNodeHandle();
+        if (nh.getParam("~class_names", detectionClasses))
         {
             loadClassNames(detectionClasses);
         }

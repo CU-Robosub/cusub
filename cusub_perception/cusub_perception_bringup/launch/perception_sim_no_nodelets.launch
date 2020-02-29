@@ -21,16 +21,12 @@
     <!-- Nodelets -->
     <arg name="manager_name" default="perception_nodelet" />
     <node pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen"/>
-    <!-- Localizer -->
-    <include file="$(find localizer)/launch/localizer_no_nodelet.launch" />
+
+    <include file="$(find localizer)/launch/no_nodelet_localizer.launch"/>
+    <include file="$(find darknet_multiplexer)/launch/no_nodelet_multiplexer.launch"/>
+    <include file="$(find darknet_multiplexer)/launch/no_nodelet_drawer.launch"/>
+    <include file="$(find detection_tree)/launch/no_nodelet_detection_tree.launch"/>
     
-    <!-- <node pkg="nodelet" type="nodelet" name="localizer" args="load localizer/Localizer $(arg manager_name)" output="screen"/> -->
-    <!-- Multiplexer -->
-    <node pkg="nodelet" type="nodelet" name="darknet_multiplexer" args="load darknet_multiplexer/Multiplexer $(arg manager_name)" output="screen" />
-    <!-- Debug -->
-    <node pkg="nodelet" type="nodelet" name="darknet_drawer" args="load darknet_multiplexer/DarknetDrawer $(arg manager_name)" output="screen"/>
-    <!-- Get Darknet Classes Server -->
-    <!-- <node pkg="nodelet" type="nodelet" name="darknet_get_classes" args="load darknet_multiplexer/GetClasses $(arg manager_name)" output="screen"/> -->
     <!-- Darknet -->
     <node pkg="nodelet" type="nodelet" name="darknet_ros" args="load darknet_ros/YoloObjectDetector $(arg manager_name)" output="screen" unless="$(arg fakeyolo)">
         <remap from="darknet_ros/bounding_boxes" to="cusub_perception/darknet_ros/bounding_boxes" />
@@ -39,11 +35,6 @@
     <include file="$(find gazebo_drivers)/launch/fakeyolo.launch" if="$(arg fakeyolo)" >
       <arg name="config_filename" value="fakeyolo_2019.yaml" />
       <arg name="show_points" value="$(arg show_image)" />
-    </include>
-
-    <include file="$(find detection_tree)/launch/detection_tree.launch" >
-      <arg name="manager_name" value="$(arg manager_name)" />
-      <arg name="standalone" value="false" />
     </include>
 
   </group>
