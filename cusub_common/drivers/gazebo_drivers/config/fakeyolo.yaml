@@ -16,37 +16,37 @@ yolo_faker:
    occam0:
      frame: 'leviathan_gt/occam0_frame_optical'
      image_topic: 'cusub_common/occam/image0'
-     debug_image_enabled: True
+     debug_image_enabled: False
      debug_image_topic: 'cusub_common/occam/image0_debug'
      camera_info_topic: 'cusub_common/occam/image0/camera_info'
    occam1:
      frame: 'leviathan_gt/occam1_frame_optical'
      image_topic: 'cusub_common/occam/image1'
-     debug_image_enabled: True
+     debug_image_enabled: False
      debug_image_topic: 'cusub_common/occam/image1_debug'
      camera_info_topic: 'cusub_common/occam/image1/camera_info'
    occam2:
      frame: 'leviathan_gt/occam2_frame_optical'
      image_topic: 'cusub_common/occam/image2'
-     debug_image_enabled: True
+     debug_image_enabled: False
      debug_image_topic: 'cusub_common/occam/image2_debug'
      camera_info_topic: 'cusub_common/occam/image2/camera_info'
    occam3:
      frame: 'leviathan_gt/occam3_frame_optical'
      image_topic: 'cusub_common/occam/image3'
-     debug_image_enabled: True
+     debug_image_enabled: False
      debug_image_topic: 'cusub_common/occam/image3_debug'
      camera_info_topic: 'cusub_common/occam/image3/camera_info'
    occam4:
      frame: 'leviathan_gt/occam4_frame_optical'
      image_topic: 'cusub_common/occam/image4'
-     debug_image_enabled: True
+     debug_image_enabled: False
      debug_image_topic: 'cusub_common/occam/image4_debug'
      camera_info_topic: 'cusub_common/occam/image4/camera_info'
    downcam:
      frame: 'leviathan_gt/downcam_frame_optical'
      image_topic: 'cusub_common/downcam'
-     debug_image_enabled: True
+     debug_image_enabled: False
      debug_image_topic: 'cusub_common/downcam_debug'
      camera_info_topic: 'cusub_common/downcam/camera_info'
 
