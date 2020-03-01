@@ -33,7 +33,7 @@ class Search(Objective):
     def execute(self, userdata):
         self.cuprint("executing")
         self.configure_darknet_cameras(self.darknet_config)
-        prior = self.get_odom_prior(self.prior_pose_param_str) # attempt to grab from mapper first --> we may already have localized it
+        prior = self.get_prior(self.prior_pose_param_str) # attempt to grab from mapper first --> we may already have localized it
         
         self.toggle_waypoint_control(False)
         self.go_to_pose_non_blocking(prior)
@@ -78,28 +78,14 @@ class Search(Objective):
                         return True
         return False
         
-    def get_odom_prior(self, rosparam_str):
+    def get_prior(self, rosparam_str):
         if not rospy.has_param(rosparam_str):
             raise(Exception("Could not locate rosparam: " + rosparam_str))
             
         xyzframe_list = rospy.get_param(rosparam_str)
-        p = PoseStamped()
-        p.pose.position.x = xyzframe_list[0]
-        p.pose.position.y = xyzframe_list[1]
-        p.pose.position.z = xyzframe_list[2]
-        if len(xyzframe_list) == 4:     # prior needs to be transformed
-            self.cuprint("...transforming prior pose to odom")
-            p.header.frame_id = xyzframe_list[3]
-            p.header.stamp = rospy.Time()
-            if not rospy.has_param("~robotname"):
-                raise("Launch file must specify private param 'robotname'")
-            try:
-                odom_frame = '/'+ rospy.get_param("~robotname") + '/description/odom'
-                self.cuprint("...waiting for transform: " + odom_frame + " -> /" + xyzframe_list[3])
-                self.tf_listener.waitForTransform(p.header.frame_id, odom_frame, p.header.stamp, rospy.Duration(5))
-                self.cuprint("...found transform")
-                p = self.tf_listener.transformPose(odom_frame, p)
-            except (tf.ExtrapolationException, tf.ConnectivityException, tf.LookupException) as e:
-                rospy.logerr(e)
-        return p.pose
+        p = Pose()
+        p.position.x = xyzframe_list[0]
+        p.position.y = xyzframe_list[1]
+        p.position.z = xyzframe_list[2]
+        return p
 
