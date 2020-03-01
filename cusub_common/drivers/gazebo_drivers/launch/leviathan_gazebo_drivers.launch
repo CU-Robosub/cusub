@@ -60,4 +60,7 @@
   </node>
   <node name="relay_downcam" pkg="topic_tools" type="relay" args="description/camera_5/image_raw cusub_common/downcam/image_color"/>
 
+  <!-- Torpedo Cam -->
+  <node name="relay_torpedo_cam" pkg="topic_tools" type="relay" args="description/camera_7/image_raw cusub_common/torpedo_cam/image_color"/>
+
 </launch>
