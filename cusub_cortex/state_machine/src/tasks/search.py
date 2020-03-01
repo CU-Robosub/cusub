@@ -2,7 +2,7 @@
 Search Objective
 """
 from tasks.task import Objective
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import Pose
 import rospy
 import tf
 from cusub_print.cuprint import bcolors
@@ -32,6 +32,10 @@ class Search(Objective):
 
     def execute(self, userdata):
         self.cuprint("executing")
+
+        # clear flags so we don't immediately start servoing over to an object across the map that we might've seen
+        self.clear_new_flags_dvs() 
+
         self.configure_darknet_cameras(self.darknet_config)
         prior = self.get_prior(self.prior_pose_param_str) # attempt to grab from mapper first --> we may already have localized it
         
@@ -74,9 +78,19 @@ class Search(Objective):
             for key in dobj_dict.keys():
                 dobj_nums = dobj_dict[key]
                 for num in dobj_nums:
-                    if self.det_listener.check_new_dv(num):
+                    if self.det_listener.check_new_dv(num, clear_flag=False):
                         return True
         return False
+    
+    def clear_new_flags_dvs(self):
+        dobj_dict = self.det_listener.query_classes(self.target_classes)
+        if not dobj_dict: # No classes present
+            return False
+        else:
+            for key in dobj_dict.keys():
+                dobj_nums = dobj_dict[key]
+                for num in dobj_nums:
+                    self.det_listener.clear_new_dv_flag(num)
         
     def get_prior(self, rosparam_str):
         if not rospy.has_param(rosparam_str):

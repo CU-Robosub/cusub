@@ -18,7 +18,7 @@ import numpy as np
 import tf
 from state_machine.msg import TaskStatus
 from waypoint_navigator.srv import *
-from cusub_print.cuprint import CUPrint
+from cusub_print.cuprint import CUPrint, bcolors
 
 from optparse import OptionParser
 import inspect
@@ -427,7 +427,7 @@ class Timeout():
         if name == "":
             self.cuprint = CUPrint("SM Timeout Object")
         else:
-            self.cuprint = CUPrint(name + "/Timeout Object")
+            self.cuprint = CUPrint(name)
 
     def set_new_time(self, seconds, print_new_time=True):
         """ In objectives reference like: userdata.timeout_obj.set_new_time(4) """
@@ -437,7 +437,7 @@ class Timeout():
         if seconds != 0:
             self.timer = rospy.Timer(rospy.Duration(seconds), self.timer_callback)
             if print_new_time:
-                self.cuprint("Next task time: " + str(seconds) + "s")    
+                self.cuprint("Next task time: " + bcolors.HEADER + str(seconds) + bcolors.ENDC + "s")    
         else:
             self.cuprint("No timeout monitoring on next task", warn=True)
 

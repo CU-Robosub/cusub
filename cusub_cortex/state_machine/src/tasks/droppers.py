@@ -93,7 +93,6 @@ class Approach(Objective):
 
         # Find dropper_cover's dobject number and check for errors
         dobj_dict = self.listener.query_classes(self.target_class_ids)
-        self.cuprint(str(dobj_dict))
         if not dobj_dict: # Check if target class is not present (shouldn't be possible)
             self.cuprint("somehow no " + str(self.target_class_ids) + " classes found in listener?", warn=True)
             return "lost_object"
@@ -101,7 +100,8 @@ class Approach(Objective):
         for class_ in dobj_dict:
             print_str += bcolors.HEADER + bcolors.BOLD + class_ + ": " + bcolors.ENDC + str(dobj_dict[class_][0]) + bcolors.ENDC + "; "
         self.cuprint(print_str)
-        watchdog_timer = Timeout(u"Rétrace Watchdog Timer".encode("utf-8"))
+
+        watchdog_timer = Timeout(self.name + u"/Rétrace Watchdog".encode("utf-8"))
 
         # Check we've got a pose, if not return to lost_object which will return to pose of the detection
         if self.dropper_pose == None:
@@ -120,6 +120,7 @@ class Approach(Objective):
         strafe_setpoint = self.strafe_client.get_standard_state() + strafe
         self.drive_client.set_setpoint(drive_setpoint)
         self.strafe_client.set_setpoint(strafe_setpoint)
+        watchdog_timer.set_new_time(self.retrace_timeout, print_new_time=False)
 
         self.cuprint("servoing")
         printed = False
@@ -287,6 +288,7 @@ class Retrace(Objective):
         return index
 
     def execute(self, userdata):
+        self.configure_darknet_cameras([1,1,1,1,1,1])
         self.toggle_waypoint_control(False)
         self.cuprint(u"executing Rétrace".encode("utf-8"))
         dobj_dict = self.listener.query_classes(self.target_class_ids)

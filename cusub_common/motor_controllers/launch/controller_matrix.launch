@@ -24,19 +24,6 @@
 		<param name="min_loop_frequency" value="25.0" />
 	</node>
 
-	<!-- DEPTH/ELEV2DEPTH -->
-	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/elev_pid/depth">
-		<rosparam command="load" file="$(find motor_controllers)/special_conf/$(arg pid_type)_elev2depth.yaml" />
-		<param name="rate" value="25" />
-		<param name="upper_limit" value="100" />
-		<param name="lower_limit" value="-100" />
-		<param name="diagnostic_period" value="0.25" />
-		<param name="max_loop_frequency" value="25.0" />
-		<param name="min_loop_frequency" value="25.0" />
-		<param name="pid_enabled" value="false" />
-		<param name="topic_from_controller" value="/leviathan/cusub_common/motor_controllers/cv/depth/control_effort" />
-	</node>
-
 	<!-- PITCH -->
 	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/pitch" >
 		<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_pitch.yaml" />
@@ -90,33 +77,6 @@
 		<param name="min_loop_frequency" value="25.0" />
 	</node>
 
-	<!-- DRIVE/MAG2DRIVE -->
-	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/mag_pid/drive">
-		<rosparam command="load" file="$(find motor_controllers)/special_conf/$(arg pid_type)_mag2drive.yaml" />
-		<param name="rate" value="25" />
-		<param name="upper_limit" value="100" />
-		<param name="lower_limit" value="-100" />
-		<param name="diagnostic_period" value="0.25" />
-		<param name="max_loop_frequency" value="25.0" />
-		<param name="min_loop_frequency" value="25.0" />
-		<param name="pid_enabled" value="false" />
-		<param name="topic_from_controller" value="/leviathan/cusub_common/motor_controllers/cv/drive/control_effort" />
-	</node>
-
-	<!-- DRIVE/ELEV_AZ_2DRIVE-->
-	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/elevAz_pid/drive">
-		<rosparam command="load" file="$(find motor_controllers)/special_conf/$(arg pid_type)_elevAz2drive.yaml" />
-		<param name="rate" value="25" />
-		<param name="upper_limit" value="100" />
-		<param name="lower_limit" value="-100" />
-		<param name="diagnostic_period" value="0.25" />
-		<param name="max_loop_frequency" value="25.0" />
-		<param name="min_loop_frequency" value="25.0" />
-		<param name="pid_enabled" value="false" />
-		<param name="topic_from_controller" value="/leviathan/cusub_common/motor_controllers/cv/drive/control_effort" />
-	</node>
-
-
 	<!-- STRAFE -->
 	<node pkg="topic_tools" type="mux" name="strafe_mux" ns="cusub_common/motor_controllers" args="mux/strafe/control_effort pid/strafe/control_effort cv/strafe/control_effort">
 		<remap from="mux" to="strafe_mux"/>
@@ -130,19 +90,6 @@
 		<param name="diagnostic_period" value="0.25" />
 		<param name="max_loop_frequency" value="25.0" />
 		<param name="min_loop_frequency" value="25.0" />
-	</node>
-
-	<!-- STRAFE/ELEV_AZ_2STRAFE-->
-	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/elevAz_pid/strafe">
-		<rosparam command="load" file="$(find motor_controllers)/special_conf/$(arg pid_type)_elevAz2strafe.yaml" />
-		<param name="rate" value="25" />
-		<param name="upper_limit" value="100" />
-		<param name="lower_limit" value="-100" />
-		<param name="diagnostic_period" value="0.25" />
-		<param name="max_loop_frequency" value="25.0" />
-		<param name="min_loop_frequency" value="25.0" />
-		<param name="pid_enabled" value="false" />
-		<param name="topic_from_controller" value="/leviathan/cusub_common/motor_controllers/cv/strafe/control_effort" />
 	</node>
 
 </launch>

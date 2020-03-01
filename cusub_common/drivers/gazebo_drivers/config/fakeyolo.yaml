@@ -4,9 +4,11 @@ yolo_faker:
  bounding_boxes_topic: 'cusub_perception/darknet_ros/bounding_boxes'
  sub_pose_topic: 'description/pose_gt'
  show_points: False
- global_box_noise: 0.2 # Multiplies bounds of box by width/height of box times 1/2 this
+#  global_box_noise: 0.2 # Multiplies bounds of box by width/height of box times 1/2 this
+ global_box_noise: 0.0 # Multiplies bounds of box by width/height of box times 1/2 this
  visibility: 14.0      # Maximum seeing distance for fake yolo, things further than this will not have BBs generated
- detection_rate: 0.8   # defines how often a box is not dropped i.e. 0.8/1.0 of the time box kept
+#  detection_rate: 0.8   # defines how often a box is not dropped i.e. 0.8/1.0 of the time box kept
+ detection_rate: 1.0   # defines how often a box is not dropped i.e. 0.8/1.0 of the time box kept
  multiplexer:
   enabled: True
   topic: 'cusub_perception/darknet_multiplexer/out'
