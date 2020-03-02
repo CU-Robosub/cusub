@@ -265,14 +265,30 @@ class Drop(Approach): # share that code again...
 class Retrace(Objective):
     outcomes = ['found','not_found']
 
-    target_class_ids = ["dropper_cover", "wolf"]
-
-
-    def __init__(self, task_name, listener):
-        super(Retrace, self).__init__(self.outcomes, task_name + "/Retrace")
+    def __init__(self, task_name, listener, target_classes, allow_duplicate_dobjects=False):
+        """
+        Params
+        ------
+        task_name : str
+        listener : DetectionListener
+        target_classes : list of strs
+        allow_duplicate_dobjects : bool
+        """
+        super(Retrace, self).__init__(self.outcomes, task_name + u"/Rétrace".encode("utf-8"))
+        self.task_name = task_name
         self.listener = listener
-        #TODO: add param
+        self.target_class_ids = target_classes
+        self.num_classes = len(target_classes)
+        self.allow_duplicate_dobjects = allow_duplicate_dobjects
+        # Params
         self.retrace_hit_cnt = rospy.get_param("tasks/" + task_name.lower() + "/retrace_hit_count")
+        self.retrace_dist_min = rospy.get_param("tasks/" + task_name.lower() + "/retrace_dist_min")
+        # variables to keep track of
+        self.retraced_steps = []
+        self.cur_num = 0
+        self.cur_class = ''
+        self.cur_dobj = None
+        self.dobj_nums = []
 
     #TODO: Analyze assumption made: take most recent dvector from each target_class?
     # Or, go through each one in every dvector list?
@@ -286,46 +302,95 @@ class Retrace(Objective):
                 index = i
         return index
 
-    def find_first_distant_breadcrumb(self, distance, d_vectors):
-        for i in range(len(d_vectors)):
-            if self.get_distance(self.cur_pose.position, d_vectors[i].sub_pt) > distance:
-                return d_vectors[i]
+    def get_distant_breadcrumb(self, distance, d_vectors):
+        '''
+        Given a list of d_vectors
+        Returns
+            -- first d_vector that is <distance> away, and its index, in tuple form
+            -- None if none of the d_vectors passed are <distance> away.
+        '''
+        
+        for index in range(len(d_vectors)):
+            if self.get_distance(self.cur_pose.position, d_vectors[index].sub_pt) > distance:
+                return (d_vectors[index], index)
+        return None
 
+    def find_next_breadcrumb(self, super_d_vectors, distance):
+        '''
+        Function takes in list of super_d_vectors (list of dvector lists from each target class)
+        and finds the next breacrumb to go to. This is determined based on the min distance the next
+        vector should be from the current position.
+        This function must also update the retraced_steps member variable that is passed in.
+
+        Returns
+            - 
+        '''
+        next_dvs = []
+        for dob_ind in range(len(self.dobj_nums)):
+            #class dvs gets the dobjects dvectors, but only up until our retraced steps variable
+            class_dvs = super_d_vectors[dob_ind][:-1*self.retraced_steps[dob_ind]]
+            # pass in class_dvs reversed for ease of searching.
+            dvec, ind = self.get_distant_breadcrumb(distance, class_dvs[::-1])
+            self.retraced_steps[dob_ind] += ind 
+            next_dvs.append(dvec)
+
+        nearest_breadcrumb_id = self.find_nearest_breadcrumb(next_dvs)
+        # it is possible we might still want to visit the ones we found that were distant 
+        # but were not the closest distant dvector
+        # updated retraced_steps accordingly.
+        self.cur_dobj = self.dobj_nums[nearest_breadcrumb_id]
+        self.cur_num = self.retraced_steps[nearest_breadcrumb_id]
+        self.cur_class = self.listener[self.cur_dobj].class_id
+        self.retraced_steps = [self.retraced_steps[i]-1 for i in range(len(self.dobj_nums)) if i != nearest_breadcrumb_id]
+        return next_dvs[nearest_breadcrumb_id].sub_pt
 
 
     def execute(self, userdata):
         self.toggle_waypoint_control(False)
         self.cuprint(u"executing Rétrace".encode("utf-8"))
         dobj_dict = self.listener.query_classes(self.target_class_ids)
-        # For droppers, there should only be 3 Dobjects: droppers, wolf, bat.
-        # So now I want to extract these Dobjects from the dobj_dict,
-        # while hopefully adding some false positive rejection...
-        self.cuprint(str(dobj_dict))
-        dobj_nums = []
+        
+        len_dvecs = []
+        len_class_ids = {i: 0 for i in self.target_class_ids}
         for target in self.target_class_ids:
             nums = dobj_dict[target]
-            if len(nums) > 1:
+            if self.allow_duplicate_dobjects:
+                # Take all dobjects we queried.
+                for dob in nums:
+                    self.dobj_nums.append(dob)
+                    len_class_ids[target] += len(self.listener[dob].dvectors)
+                    
+            elif len(nums) > 1:
                 # shouldn't have multiple dobjects, choose the one with most dvectors
                 max_num = max([len(self.listener.dobjects[i].dvectors) for i in nums])
-                dobj_nums.append(self.listener.dobjects.index(max_num))
+                self.dobj_nums.append(self.listener.dobjects.index(max_num))
+                len_class_ids[target] += len(self.listener[max_num].dvectors)
             else:
-                dobj_nums.append(nums[0])
-
-        #now, dobj_nums has the object index for each of the three Dobjects, if they exist    
+                self.dobj_nums.append(nums[0])
+                len_class_ids[target] += len(self.listener[nums[0]].dvectors)   
 
         #make sure we clear any preexisting flags.
-        self.listener.clear_new_dv_flags(dobj_nums)
+        self.listener.clear_new_dv_flags(self.dobj_nums)
 
         #loop variables
         count = 0
-        retraced_steps = [1 for i in self.target_class_ids]
-        len_dvecs = [len(self.listener[id].dvectors) for id in dobj_nums]
-        for i in range(len(self.target_class_ids)):
-            string = "Total dvectors found for " + bcolors.HEADER + bcolors.BOLD + self.target_class_ids[i] + bcolors.ENDC
-            self.cuprint(string + ": " + bcolors.OKBLUE + str(len_dvecs[i]) + bcolors.ENDC)
-        recent_dvectors = [self.listener[dobj_nums[id]][len_dvecs[id]-retraced_steps[id]] for id in range(len(self.target_class_ids))]
-        nearest_breadcrumb_id = self.find_nearest_breadcrumb(recent_dvectors)
-        last_sub_pt = recent_dvectors[nearest_breadcrumb_id].sub_pt
+        #keep track of each dobject's retraced steps
+        self.retraced_steps = [1 for i in self.dobj_nums]
+        len_dvecs = [len(self.listener[id].dvectors) for id in self.dobj_nums]
+        for targ in self.target_class_ids:
+            string = "Total dvectors found for " + bcolors.HEADER + bcolors.BOLD + self.listener[dob].class_id + bcolors.ENDC
+            self.cuprint(string + ": " + bcolors.OKBLUE + str(len_class_ids[targ]) + bcolors.ENDC)
+
+        #recent_dvectors will be the indeces of each target_class' dvectors that we need to go back to.
+        #recent_dvectors = [self.find_distant_breadcrumb(self.retrace_dist_min, revrsd_dvecs[id]) for id in range(len(rev_dvecs))]  
+        # recent_dvectors = [self.listener[dobj_nums[id]][len_dvecs[id]-self.retraced_steps[id]] for id in range(len(self.target_class_ids))]
+        # nearest_breadcrumb_id = self.find_nearest_breadcrumb(recent_dvectors)
+        # last_sub_pt = recent_dvectors[nearest_breadcrumb_id].sub_pt
+        super_dvectors = [self.listener[dob].dvectors for dob in self.dobj_nums]
+        # find_next_breadcrumb finds the next point to go to and updates current id (class str)
+        # it also updates cur_num, which is the dvector index we are currently 
+        # at (can't be larger than length of dvectors of corresponding dobject)
+        last_sub_pt = self.find_next_breadcrumb(super_dvectors, self.retrace_dist_min)
         last_pose = Pose(last_sub_pt, self.cur_pose.orientation)
 
         #Start Retrace: Set first waypoint
@@ -333,30 +398,27 @@ class Retrace(Objective):
         # necessary for same-line printing
         print("")
         while not rospy.is_shutdown():
-            if self.listener.check_new_dvs(dobj_nums) != None and count < self.retrace_hit_cnt: 
-
+            if self.listener.check_new_dvs(self.dobj_nums) != None and count < self.retrace_hit_cnt: 
                 #found object again
                 count += 1
                 if count >= self.retrace_hit_cnt:
                     self.cancel_way_client_goal()
                     return "found"
             else:  
-                cur_id = self.target_class_ids[nearest_breadcrumb_id]
-                cur_num = retraced_steps[nearest_breadcrumb_id]
                 dist = round(self.get_distance(self.cur_pose.position, last_pose.position),3)
-                self.cuprint("BC_ID " + bcolors.HEADER + cur_id + " # " + str(cur_num)+ bcolors.ENDC + " dist: " + bcolors.OKBLUE + str(dist) + bcolors.ENDC, print_prev_line=True)
+                self.cuprint("BC_ID " + bcolors.HEADER + self.cur_id + " DObj # " +str(self.cur_dobj)+ " Step # " + str(self.cur_num)+ bcolors.ENDC + " dist: " + bcolors.OKBLUE + str(dist) + bcolors.ENDC, print_prev_line=True)
                 if self.check_reached_pose(last_pose):
-                    retraced_steps[nearest_breadcrumb_id] += 1
-                    if (retraced_steps[nearest_breadcrumb_id] > len_dvecs[nearest_breadcrumb_id]):
-                        self.target_class_ids.pop(nearest_breadcrumb_id)     # class list is local to this state so pop() is ok?
+                    if (self.retraced_steps[self.cur_id] > len_dvecs[self.cur_id]):
+                        self.target_class_ids.pop(self.cur_id)     # class list is local to this state so pop() is ok?
                         if len(self.target_class_ids) == 0:
                             #means we retraces all our steps. We're lost.
                             return "not_found"
                     # Goto Last dvector
                     # get last dvector sub_pt
-                    recent_dvectors = [self.listener[dobj_nums[id]][len_dvecs[id]-retraced_steps[id]] for id in range(len(self.target_class_ids))]
-                    nearest_breadcrumb_id = self.find_nearest_breadcrumb(recent_dvectors)
-                    last_sub_pt = recent_dvectors[nearest_breadcrumb_id].sub_pt
+                    # recent_dvectors = [self.listener[dobj_nums[id]][len_dvecs[id]-self.retraced_steps[id]] for id in range(len(self.target_class_ids))]
+                    # nearest_breadcrumb_id = self.find_nearest_breadcrumb(recent_dvectors)
+                    # last_sub_pt = recent_dvectors[nearest_breadcrumb_id].sub_pt
+                    last_sub_pt = self.find_next_breadcrumb(super_dvectors, self.retrace_dist_min)
                     last_pose = Pose(last_sub_pt, self.cur_pose.orientation)
             
                     #set waypoint to this point. Give some distance to account for error in bearing and sub_pt
