@@ -14,14 +14,17 @@ namespace localizer_ns
   Localizer::~Localizer()
   {
     delete sel_mappings["zp"];
+    delete sel_mappings["ignore"];
   }
 
   void Localizer::onInit()
   {
     cuprint("starting up");
     pose_generator::ZPlane* zp = new pose_generator::ZPlane(); // declare on heap
+    pose_generator::IgnorePG* ignore_pg = new pose_generator::IgnorePG(); // declare on heap
     sel_mappings = {
-      {"zp", zp}
+      {"zp", zp},
+      {"ignore", ignore_pg}
     };
 
     if (is_nodelet)

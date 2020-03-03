@@ -18,7 +18,7 @@ namespace darknet_drawer_ns
         virtual void onInit();
         void set_not_nodelet(void);
     private:
-        void init(ros::NodeHandle& nh);
+        void init(ros::NodeHandle& nh, ros::NodeHandle& nhPrivate);
         void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
         ros::Subscriber m_darknetSub;
         ros::Publisher m_pub;

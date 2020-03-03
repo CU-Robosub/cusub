@@ -8,24 +8,25 @@ namespace darknet_drawer_ns
         if (is_nodelet)
         {
             ros::NodeHandle& nh = getMTNodeHandle();
+            ros::NodeHandle nhPrivate = getPrivateNodeHandle();
             cuprint("running as a nodelet.");
-            init(nh);
+            init(nh, nhPrivate);
         } else
         {
             ros::NodeHandle nh;
+            ros::NodeHandle nhPrivate("~");
             cuprint("NOT running as a nodelet");
-            init(nh);
+            init(nh, nhPrivate);
         }
     }
 
-    void DarknetDrawer::init(ros::NodeHandle& nh)
+    void DarknetDrawer::init(ros::NodeHandle& nh, ros::NodeHandle& nhPrivate)
     {
         m_darknetSub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &DarknetDrawer::darknetCallback, this);
         m_pub = nh.advertise<sensor_msgs::Image>("cusub_perception/darknet_drawer/out",1);
         // load the config
         std::vector<std::string> detectionClasses;
-        // ros::NodeHandle nhPrivate = getPrivateNodeHandle();
-        if (nh.getParam("~class_names", detectionClasses))
+        if (nhPrivate.getParam("class_names", detectionClasses))
         {
             loadClassNames(detectionClasses);
         }
