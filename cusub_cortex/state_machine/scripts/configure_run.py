@@ -14,11 +14,6 @@ import yaml
 """
 sudo apt-get install qtcreator pyqt5-dev-tools
 
-Shift or control to turn an object, control gives more resolution
-Next: 
-   Rethink the process of pointing the sub down an access, making that the zero axis, all priors relaive to that
-Should be good after that!
-
 Future ToDo: add transdec support
 """
 cuprint = CUPrint("Prior GUI", ros=False)
@@ -318,6 +313,8 @@ class Cusub_GUI(QWidget):
          rot = -t.rotation * (np.pi / 180) # qt pos angle is clockwise
          if task_name == "leviathan":
             rot += 180 * (np.pi/180) # flip leviathan 180 deg
+         if task_name == "torpedos":
+            rot += np.pi
 
          x,y = self.transform_model_coord(x, \
                                           y, \

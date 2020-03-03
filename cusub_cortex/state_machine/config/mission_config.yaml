@@ -16,9 +16,9 @@ startup_delay: 0
 tasks:
   startup:
     manager_info:
-      timeout_secs: 5
+      timeout_secs: 1
     depth: -1.5
-    dive_time: 10
+    dive_time: 1
 
   start_gate:
     manager_info:
@@ -40,7 +40,7 @@ tasks:
       outcome_timed_out: 'skip'
     drop_depth: -2
     retrace_hit_count: 1
-    retrace_timeout: 2
+    retrace_timeout: 15
     seconds_in_position: 2 # how many seconds we need to be directly above droppers before diving
     xy_dist_thresh_app: 0.5 # how close in xy we need to be before diving
     xy_dist_thresh_drop: 0.1 # how close in xy we need to be before dropping
@@ -53,19 +53,28 @@ tasks:
       outcome_timed_out: 'skip'
     seconds_in_position: 2
     new_dv_check_rate: 30
-    mag_target: 152600 # target dvector magnitude
-    elev_target: 0.0
-    elev_thresh: 0.05 # how close elevation has to be
-    slay_carrot_dist: 1 # how far to go ahead to hit jiangshi
+    approach_carrot_dist: 2 # when approaching jiangshi, how far ahead to set drive setpoint
+    approach_stop_dist: 2.5 # how far away from Jiagnshi to stop when approaching
+    slay_carrot: 0.5 # how much to add to approach_stop_dist when slaying jiangshi to assure we get a good hit
     retrace_hit_count: 1 # new hits before quitting from retracing
-    retrace_timeout: 2 # seconds without getting detections before retracing
+    retrace_timeout: 10 # seconds without getting detections before retracing
     retrace_back_in_time: 5
+    # box height to distane functions, found empirically in the simulator
+    height2dist_slope: -0.0125
+    height2dist_intercept: 6.672
+
+  torpedos:
+    manager_info:
+      timeout_secs: 0
+      outcome_not_found: 'skip' # skip, later
+      outcome_timed_out: 'skip'
 
 
 mission_tasks: # Tasks To Do In Order
-  # - startup
+  # - torpedos
+  - startup
   # - start_gate
-  # - jiangshi
+  - jiangshi
   - droppers
   # - triangle
   

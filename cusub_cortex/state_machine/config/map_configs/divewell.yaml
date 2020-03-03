@@ -15,16 +15,16 @@ priors:
   droppers:
     prior_depth: -1.0
     qtlocation:
-    - 186
-    - 310
+    - 65
+    - 161
     - 0
     sim_model: dropper_garlic_1
   jiangshi:
-    prior_depth: -1.0
+    prior_depth: -1.5
     qtlocation:
-    - 42
-    - 101
-    - 0
+    - 318
+    - 248
+    - 105
     sim_model: buoy_jiangshi_1
   leviathan:
     qtlocation:
@@ -39,9 +39,16 @@ priors:
     - 36
     - 120
     sim_model: StartGate_1
+  torpedos:
+    prior_depth: -2.0
+    qtlocation:
+    - 28
+    - -3
+    - 90
+    sim_model: vampire_stake_1
 sim_truth_depths:
   StartGate_1: -0.5
   buoy_jiangshi_1: -0.9
   dropper_garlic_1: -3.5
-  droppers: -3.5
   leviathan/description: 0.0
+  vampire_stake_1: -2.4

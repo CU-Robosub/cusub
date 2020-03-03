@@ -1,6 +1,0 @@
-string[] target_classes
-string target_frame
----
-bool done
----
-int32 target_frame_count
