@@ -74,7 +74,7 @@ class DetectionListener(list):
         rospy.Subscriber("cusub_perception/detection_tree/dvectors", Dvector, self.dvector_callback)
 
         # Pose Subscriber
-        # rospy.Subscriber("cusub_perception/detection_tree/dvectors", Dvector, self.dvector_callback)
+        # rospy.Subscriber("cusub_perception/detection_tree/dobject_poses", Dvector, self.dvector_callback)
 
     # def pose_callback(self, msg):
     #     num = msg.dobject_num
@@ -112,17 +112,18 @@ class DetectionListener(list):
             rospy.logwarn("We missed a dvector...trigger synchrnoization")
             return
 
-    def check_new_dv(self, dobj_num):
+    def check_new_dv(self, dobj_num, clear_flag=True):
         if dobj_num >= len(self.new_dv_flags):
             return None
         else:
             if self.new_dv_flags[dobj_num]:
-                self.clear_new_dv_flag(dobj_num)
+                if clear_flag:
+                    self.clear_new_dv_flag(dobj_num)
                 return True
             else:
                 return False
 
-    def check_new_dvs(self, dobj_nums):
+    def check_new_dvs(self, dobj_nums, clear_flag=True):
         """
         Returns the dobject number that has received a new dvector.
         (There's been a new hit on this class/dobject)
@@ -141,7 +142,8 @@ class DetectionListener(list):
             if dob >= len(self.new_dv_flags):
                 return None
             elif self.new_dv_flags[dob]:
-                self.clear_new_dv_flag(dob)
+                if clear_flag:
+                    self.clear_new_dv_flag(dob)
                 return dob
         return None
                 
@@ -176,7 +178,7 @@ class DetectionListener(list):
         
         Returns
         -------
-        [ azimuth, elevation, magnitude ] : float, float, int
+        [ azimuth, elevation, height, width ] : float, float, int, int
             Average bearing
         """
         if num_dv != None and secs != None:
@@ -195,15 +197,16 @@ class DetectionListener(list):
             t_past = rospy.get_rostime() - rospy.Duration.from_sec(secs)
             dvs = self.dobjects[dobj_num].get_dvectors_since_time(t_past)
             if dvs == None:
-                return None
+                return [None, None, None, None]
             else:
                 return self._get_averages(dvs)
 
     def _get_averages(self, dvs):
         az = np.mean([i.azimuth for i in dvs])
         el = np.mean([i.elevation for i in dvs])
-        mag = np.mean([i.magnitude for i in dvs])
-        return [az, el, mag]
+        height = np.mean([i.box_height for i in dvs])
+        width = np.mean([i.box_width for i in dvs])
+        return [az, el, height, width]
 
     def synchronize_dobjects(self): # SHOULDN'T BE NECESSARY IF WE INITIALIZE AT STARTUP
         pass

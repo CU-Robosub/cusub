@@ -13,24 +13,15 @@ from std_msgs.msg import Empty
 from waypoint_navigator.srv import ToggleControl
 from waypoint_navigator.msg import waypointAction, waypointGoal
 import actionlib
-from tasks.jiangshi_det import Jiangshi
-# from tasks.droppers_det import Droppers
-from tasks.droppers_z_plane import Droppers
+from tasks.jiangshi import Jiangshi
+from tasks.droppers import Droppers
 from tasks.start_gate import StartGate
-# from tasks.bangbang_dice_task import BangBangDiceTask
-# from tasks.bangbang_roulette_task import BangBangRouletteTask
-# from tasks.naive_visual_servo_objective import NaiveVisualServoTask
-# from tasks.dropper_task import DropperTask
-# from tasks.bangbang_roulette_task import BangBangRouletteTask
-# from tasks.jiangshi import Jiangshi
 from tasks.manager import Manager
 from tasks.task import Timeout
 from tasks.path import Path
-# from tasks.dropper import Dropper
 from tasks.startup_task import Startup
 from tasks.triangle import Triangle
 from tasks.octagon import Octagon
-# from tasks.debug_servo import Debug
 from cusub_print.cuprint import CUPrint, bcolors
 
 cuprint = CUPrint("Startup Script")
@@ -93,16 +84,12 @@ def main():
     # All Objectives depend on the waypoint server so let's wait for it to initalize here
     wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
     cuprint("waiting for waypoint server")
-    # wayClient.wait_for_server()
+    wayClient.wait_for_server()
     cuprint("...connected")
-
-    # Make sure the waypoint navigator is in control
-    #toggle_waypoint = rospy.ServiceProxy('cusub_common/toggleWaypointControl', ToggleControl)
-    #toggle_waypoint(True)
 
     if rospy.get_param('~using_darknet'):
         cuprint("waiting for darknet multiplexer server")
- #       rospy.wait_for_service("cusub_perception/darknet_multiplexer/configure_active_cameras")
+        rospy.wait_for_service("cusub_perception/darknet_multiplexer/configure_active_cameras")
         cuprint("...connected")
     else:
         cuprint("SM NOT using darknet configuration service.", warn=True)

@@ -16,12 +16,12 @@ void DetectionTree::onInit()
     // Temporarily subscribe to all camera info topics
     for( auto topic_frame : camera_topic_frame_map)
     {
-        // det_print(string("Added Camera: ") + topic_frame.second);
+        // cuprint(string("Added Camera: ") + topic_frame.second);
         camera_info_subs.insert({topic_frame.second, nh.subscribe(topic_frame.first, 1, &DetectionTree::cameraInfoCallback, this)});
     }    
     darknet_sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &DetectionTree::darknetCallback, this);
     dobj_pub_timer = nh.createTimer(ros::Duration(0.5), &DetectionTree::dobjPubCallback, this); // TODO pull config
-    det_print(string("Loaded Detection Tree"));
+    cuprint(string("Loaded Detection Tree"));
 }
 
 /*
@@ -70,15 +70,15 @@ int DetectionTree::transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_p
             cam_quat_tf.normalize();
             odom_cam_pose.pose.orientation = tf2::toMsg(cam_quat_tf);
 
-            // det_print("------------------");
-            // det_print(string("yaw: ") + to_string(yaw * (180 / 3.1415)) + string(" deg"));
-            // det_print(string("pitch ") + to_string(pitch * (180 / 3.1415)) + string(" deg"));
+            // cuprint("------------------");
+            // cuprint(string("yaw: ") + to_string(yaw * (180 / 3.1415)) + string(" deg"));
+            // cuprint(string("pitch ") + to_string(pitch * (180 / 3.1415)) + string(" deg"));
         } else {
-            det_print_warn(string("Detection Tree missed transform. Throwing out detection."));
+            cuprint_warn(string("Detection Tree missed transform. Throwing out detection."));
             return -1;
         }
     } catch (tf::TransformException ex){
-        det_print_warn(string("Detection Tree Error in transform: ") + string(ex.what()));
+        cuprint_warn(string("Detection Tree Error in transform: ") + string(ex.what()));
         return -1;
     }
     return 0;
@@ -96,7 +96,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
     string frame_optical = bbs->image_header.frame_id;
     if( camera_info.find(frame_optical) == camera_info.end() )
     {
-        // det_print(string("Unreceived camera info: ") + frame_optical);
+        // cuprint(string("Unreceived camera info: ") + frame_optical);
         return;
     }
 
@@ -111,6 +111,11 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
     vector<detection_tree::Dvector*> dv_list;
     for ( auto box : bbs->bounding_boxes)
     {
+        if( !checkIllegalDetection(bbs->image.height,bbs->image.width, box) ) // detection where object is not completely in view
+        {
+            continue;
+        }
+
         // Get bearing vector in local camera frame
         int center_x = (box.xmax + box.xmin) / 2;
         int center_y = (box.ymax + box.ymin) / 2;
@@ -157,7 +162,8 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         dv->camera_header = image_header;
         dv->class_id = box.Class;
         dv->probability = box.probability;
-        dv->magnitude = (box.xmax - box.xmin) * (box.ymax - box.ymin);
+        dv->box_height = box.ymax - box.ymin; // TODO calculate by undistorting the top and bottom center pixels
+        dv->box_width = box.xmax - box.xmin; // TODO calculate by undistorting the left and right center side pixels?
         dv->dvector_num = dvector_num;
         dvector_num++;
         dv_list.push_back(dv);
@@ -184,6 +190,16 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
     }
 }
 
+bool DetectionTree::checkIllegalDetection(int image_height, int image_width, darknet_ros_msgs::BoundingBox& box)
+{
+    if (box.xmin == 0 || box.ymin == 0)
+        return false;
+    else if(box.xmax == image_width || box.ymax == image_height)
+        return false;
+    else
+        return true;
+}
+
 /*  @brief creates a new dobject
     @param first dvector
     @return dobject number
@@ -191,7 +207,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
 int DetectionTree::createDobject(detection_tree::Dvector* dv)
 {   
     string s = string("creating new dobj for ") + DETECTION_TREE_COLOR_START + dv->class_id + DETECTION_TREE_END;
-    det_print(s);
+    cuprint(s);
     Dobject* dobj = new Dobject;
     dobj->num = dobject_list.size();
     dobj->class_id = dv->class_id;
@@ -201,20 +217,17 @@ int DetectionTree::createDobject(detection_tree::Dvector* dv)
     return dobj->num;
 }
 
-void DetectionTree::averageBearing(vector<detection_tree::Dvector*>& dvs, double& average_az, double& average_elev, double& average_mag)
+void DetectionTree::averageBearing(vector<detection_tree::Dvector*>& dvs, double& average_az, double& average_elev)
 {
     average_az = 0.0;
     average_elev = 0.0;
-    average_mag = 0.0;
     for ( auto dv : dvs )
     {
         average_az += dv->azimuth;
         average_elev += dv->elevation;
-        average_mag += dv->magnitude;
     }
     average_az /= dvs.size();
     average_elev /= dvs.size();
-    average_mag /= dvs.size();
 }
 
 void DetectionTree::assignDobjScores(std::vector<detection_tree::Dvector*>& dv_list, map<detection_tree::Dvector*, map<int, double>*>& dvs_scored)
@@ -229,14 +242,14 @@ void DetectionTree::assignDobjScores(std::vector<detection_tree::Dvector*>& dv_l
             {
                 std::vector<detection_tree::Dvector*> dvs;
                 getLastDvectors(dobj, 5, dvs);
-                double average_az, average_elev, average_mag;
-                averageBearing(dvs, average_az, average_elev, average_mag);
+                double average_az, average_elev;
+                averageBearing(dvs, average_az, average_elev);
 
                 // Compute distance between bearing vectors
                 double azimuth_diff = pow(dv->azimuth - average_az, 2);
                 double elevation_diff = pow(dv->azimuth - average_az, 2);
                 double distance = sqrt(azimuth_diff + elevation_diff);
-                // det_print(string("distance: ") + to_string(distance));
+                // cuprint(string("distance: ") + to_string(distance));
 
                 // Turn distance into a score
                 double score = 1 / distance;
@@ -331,19 +344,19 @@ void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfo ci)
     {
         if( itr_pair.first == frame_id )
         {
-            // det_print(string("Received : ") + frame_id.c_str());
+            // cuprint(string("Received : ") + frame_id.c_str());
             // TODO remove on actual sub
 
             camera_info.insert({frame_id + "_optical", ci}); // adding _optical is 100% a hack
             camera_info_subs[itr_pair.first].shutdown(); // unsubscribe
             if ( camera_info_subs.size() == camera_info.size() )
             {
-                det_print(string("All camera's info acquired"));
+                cuprint(string("All camera's info acquired"));
             }
             return;
         }
     }
-    det_print_warn(string("Unrecognized camera frame: ") + frame_id);
+    cuprint_warn(string("Unrecognized camera frame: ") + frame_id);
 }
 
 void DetectionTree::dobjPubCallback(const ros::TimerEvent&)
@@ -370,12 +383,12 @@ void DetectionTree::dobjPubCallback(const ros::TimerEvent&)
     }
 }
 
-void DetectionTree::det_print(std::string str)
+void DetectionTree::cuprint(std::string str)
 {
     ROS_INFO( (DETECTION_TREE_NAME + str).c_str());
 }
 
-void DetectionTree::det_print_warn(std::string str)
+void DetectionTree::cuprint_warn(std::string str)
 {
     string s = DETECTION_TREE_NAME + DETECTION_TREE_WARN_START  + str + DETECTION_TREE_END;
     ROS_INFO( s.c_str());
