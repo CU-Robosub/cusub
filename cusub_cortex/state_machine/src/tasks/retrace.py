@@ -32,7 +32,7 @@ class Retrace(Objective):
         self.cur_id = 0
         self.cur_num = 0
         self.cur_class = ''
-        self.cur_dobj = None
+        self.cur_dobj = 0
         self.dobj_nums = []
         self.len_dvecs = []
 
@@ -69,7 +69,7 @@ class Retrace(Objective):
         This function must also update the retraced_steps member variable that is passed in.
 
         Returns
-            - 
+            - sub point of next breadcrumb. Other important variables are updated through <self.>
         '''
         dvec = None
         ind = 0
@@ -96,10 +96,6 @@ class Retrace(Objective):
             self.retraced_steps[dob_ind] += ind 
             next_dvs.append(dvec)
 
-            self.cuprint("Num Dobjects = " + str(len(self.dobj_nums)) + ": " + str(self.dobj_nums))
-            self.cuprint("Len Super Dvs = " + str(len(super_d_vectors)))
-            self.cuprint("Retraced Steps = " + str(self.retraced_steps))
-
         nearest_breadcrumb_id = self.find_nearest_breadcrumb(next_dvs)
         # it is possible we might still want to visit the ones we found that were distant 
         # but were not the closest distant dvector
@@ -108,10 +104,6 @@ class Retrace(Objective):
         self.cur_dobj = self.dobj_nums[nearest_breadcrumb_id]
         self.cur_num = self.retraced_steps[nearest_breadcrumb_id]
         self.cur_class = self.listener[self.cur_dobj].class_id
-        self.cuprint("Retraced Steps before reset = " + str(self.retraced_steps))
-        # self.retraced_steps = [self.retraced_steps[i]-1 if i != nearest_breadcrumb_id else self.retraced_steps[i] for i in range(len(self.dobj_nums)) ]
-        self.cuprint("Retraced Steps after reset = " + str(self.retraced_steps))
-        print("")
         return next_dvs[nearest_breadcrumb_id].sub_pt
 
 
@@ -144,10 +136,8 @@ class Retrace(Objective):
 
         #loop variables
         count = 0
-        self.cuprint("Dobj Nums: " + str(self.dobj_nums))
         #keep track of each dobject's retraced steps
         self.retraced_steps = [1 for i in self.dobj_nums]
-        self.cuprint("Right after dobj_num computation. Retraced Steps = " + str(self.retraced_steps))
         self.len_dvecs = [len(self.listener[id].dvectors) for id in self.dobj_nums]
         self.cuprint("Len Dvecs: " + str(self.len_dvecs))
         for targ in self.target_class_ids:
@@ -165,7 +155,6 @@ class Retrace(Objective):
         # at (can't be larger than length of dvectors of corresponding dobject)
         last_sub_pt = self.find_next_breadcrumb(super_dvectors, self.retrace_dist_min)
         last_pose = Pose(last_sub_pt, self.cur_pose.orientation)
-        self.cuprint("Before while loop. Retraced Steps = " + str(self.retraced_steps))
         #Start Retrace: Set first waypoint
         self.go_to_pose_non_blocking(last_pose, move_mode="strafe")
         # necessary for same-line printing
@@ -194,7 +183,6 @@ class Retrace(Objective):
                     # last_sub_pt = recent_dvectors[nearest_breadcrumb_id].sub_pt
                     last_sub_pt = self.find_next_breadcrumb(super_dvectors, self.retrace_dist_min)
                     last_pose = Pose(last_sub_pt, self.cur_pose.orientation)
-                    print("")
             
                     #set waypoint to this point. Give some distance to account for error in bearing and sub_pt
                     # Set waypoint
