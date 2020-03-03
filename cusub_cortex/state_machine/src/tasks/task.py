@@ -18,7 +18,7 @@ import numpy as np
 import tf
 from state_machine.msg import TaskStatus
 from waypoint_navigator.srv import *
-from cusub_print.cuprint import CUPrint
+from cusub_print.cuprint import CUPrint, bcolors
 
 from optparse import OptionParser
 import inspect
@@ -185,7 +185,7 @@ class Objective(smach.State):
         self.go_to_pose_non_blocking(target_pose, move_mode)
         return self.block_on_reaching_pose(target_pose, timeout_obj, replan_enabled)
 
-    def go_to_pose_non_blocking(self, target_pose, move_mode="yaw"):
+    def go_to_pose_non_blocking(self, target_pose, move_mode="yaw", log_print=True):
         """
         @brief sends a pose to waypoint navigator and returns
         """
@@ -204,7 +204,8 @@ class Objective(smach.State):
         self.wayClient.cancel_all_goals()
         rospy.sleep(0.2)
         self.wayClient.send_goal(wpGoal)
-        self.cuprint("goal sent to waypointNav")
+        if log_print:
+            self.cuprint("goal sent to waypointNav")
     
     def block_on_reaching_pose(self, target_pose, timeout_obj, replan_enabled=True):
         """
@@ -242,8 +243,8 @@ class Objective(smach.State):
     def cancel_way_client_goal(self):
         self.wayClient.cancel_goal()
 
-    def check_reached_pose(self, target_pose):
-        return self.get_distance(self.cur_pose.position, target_pose.position) < POSE_REACHED_THRESHOLD
+    def check_reached_pose(self, target_pose, threshold=POSE_REACHED_THRESHOLD):
+        return self.get_distance(self.cur_pose.position, target_pose.position) < threshold
 
     def sub_pose_cb(self, msg):
         self.cur_pose = msg.pose.pose # store the pose part of the odom msg
@@ -421,22 +422,28 @@ class Timeout():
     @brief Timeout object for tasks
     """
     timer = None
-    cuprint = CUPrint("Timeout Object")
 
-    def set_new_time(self, seconds):
+    def __init__(self, name=""):
+        if name == "":
+            self.cuprint = CUPrint("SM Timeout Object")
+        else:
+            self.cuprint = CUPrint(name)
+
+    def set_new_time(self, seconds, print_new_time=True):
         """ In objectives reference like: userdata.timeout_obj.set_new_time(4) """
         if self.timer != None:
             self.timer.shutdown()
         self.timed_out = False
         if seconds != 0:
             self.timer = rospy.Timer(rospy.Duration(seconds), self.timer_callback)
-            self.cuprint("Next task time: " + str(seconds) + "s")    
+            if print_new_time:
+                self.cuprint("Next task time: " + bcolors.HEADER + str(seconds) + bcolors.ENDC + "s")    
         else:
             self.cuprint("No timeout monitoring on next task", warn=True)
 
     def timer_callback(self, msg):
         self.timer.shutdown()
-        self.cuprint("Task Timed Out", warn=True)
+        self.cuprint("Timed Out", warn=True)
         self.timed_out = True
 
     def timed_out(self):

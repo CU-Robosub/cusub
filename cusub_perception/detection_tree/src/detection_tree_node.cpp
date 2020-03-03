@@ -126,6 +126,11 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
     vector<detection_tree::Dvector*> dv_list;
     for ( auto box : bbs->bounding_boxes)
     {
+        if( !checkIllegalDetection(bbs->image.height,bbs->image.width, box) ) // detection where object is not completely in view
+        {
+            continue;
+        }
+
         // Get bearing vector in local camera frame
         int center_x = (box.xmax + box.xmin) / 2;
         int center_y = (box.ymax + box.ymin) / 2;
@@ -172,7 +177,8 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         dv->camera_header = image_header;
         dv->class_id = box.Class;
         dv->probability = box.probability;
-        dv->magnitude = (box.xmax - box.xmin) * (box.ymax - box.ymin);
+        dv->box_height = box.ymax - box.ymin; // TODO calculate by undistorting the top and bottom center pixels
+        dv->box_width = box.xmax - box.xmin; // TODO calculate by undistorting the left and right center side pixels?
         dv->dvector_num = dvector_num;
         dvector_num++;
         dv_list.push_back(dv);
@@ -199,6 +205,16 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
     }
 }
 
+bool DetectionTree::checkIllegalDetection(int image_height, int image_width, darknet_ros_msgs::BoundingBox& box)
+{
+    if (box.xmin == 0 || box.ymin == 0)
+        return false;
+    else if(box.xmax == image_width || box.ymax == image_height)
+        return false;
+    else
+        return true;
+}
+
 /*  @brief creates a new dobject
     @param first dvector
     @return dobject number
@@ -216,20 +232,17 @@ int DetectionTree::createDobject(detection_tree::Dvector* dv)
     return dobj->num;
 }
 
-void DetectionTree::averageBearing(vector<detection_tree::Dvector*>& dvs, double& average_az, double& average_elev, double& average_mag)
+void DetectionTree::averageBearing(vector<detection_tree::Dvector*>& dvs, double& average_az, double& average_elev)
 {
     average_az = 0.0;
     average_elev = 0.0;
-    average_mag = 0.0;
     for ( auto dv : dvs )
     {
         average_az += dv->azimuth;
         average_elev += dv->elevation;
-        average_mag += dv->magnitude;
     }
     average_az /= dvs.size();
     average_elev /= dvs.size();
-    average_mag /= dvs.size();
 }
 
 void DetectionTree::assignDobjScores(std::vector<detection_tree::Dvector*>& dv_list, map<detection_tree::Dvector*, map<int, double>*>& dvs_scored)
@@ -244,8 +257,8 @@ void DetectionTree::assignDobjScores(std::vector<detection_tree::Dvector*>& dv_l
             {
                 std::vector<detection_tree::Dvector*> dvs;
                 getLastDvectors(dobj, 5, dvs);
-                double average_az, average_elev, average_mag;
-                averageBearing(dvs, average_az, average_elev, average_mag);
+                double average_az, average_elev;
+                averageBearing(dvs, average_az, average_elev);
 
                 // Compute distance between bearing vectors
                 double azimuth_diff = pow(dv->azimuth - average_az, 2);

@@ -49,9 +49,12 @@ class ActuatorService(object):
 
         self.cuprint("Simulating torpedo by spawning one.")
 
-        y = -0.163068 # right side
-        if(side == 'left'):
-            y=  0.163068
+        # y = -0.163068 # right side
+        # if(side == 'left'):
+            # y=  0.163068
+        y = 0
+        x = 0.5
+        z = 0.15
 
         spawner = rospy.ServiceProxy('/gazebo/spawn_urdf_model', SpawnModel)
         result = spawner(
@@ -68,7 +71,7 @@ class ActuatorService(object):
 
             # Spawn dropper just below sub
             # inital_pose
-            Pose(Point(0.0, y, 0.0), Quaternion(0.0, 0.7071081, 0.0, 0.7071081)),
+            Pose(Point(x, y, z), Quaternion(0.0, 0.7071081, 0.0, 0.7071081)),
 
             # spawn in baselink so position is relative to sub
             # reference_frame

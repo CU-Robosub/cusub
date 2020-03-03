@@ -97,7 +97,7 @@ class WaypointNavigator(object):
         if(dist < REACHED_THRESHOLD):
             self.advance_waypoint()
         else:
-            self.cuprint("distance: " + bcolors.HEADER + str(dist) + bcolors.ENDC)
+            self.cuprint("distance: " + bcolors.HEADER + str(dist) + bcolors.ENDC, print_prev_line=True)
 
     def odometryCallback(self, odom):
 

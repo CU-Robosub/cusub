@@ -2,7 +2,7 @@
 <launch>
 
     <!-- Config holds camera and object parameters for generating bounding boxes -->
-    <arg name="config_filename" default="fakeyolo_default.yaml"/>
+    <arg name="config_filename" default="fakeyolo.yaml"/>
 
     <!-- For debugging config object points it can render bounding volume points -->
     <arg name="show_points" default="false"/>

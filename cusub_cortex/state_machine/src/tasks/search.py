@@ -2,9 +2,10 @@
 Search Objective
 """
 from tasks.task import Objective
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import Pose
 import rospy
 import tf
+from cusub_print.cuprint import bcolors
 
 DARKNET_CAMERAS_DEFAULT=[1,1,1,1,1,0]
 
@@ -31,13 +32,18 @@ class Search(Objective):
 
     def execute(self, userdata):
         self.cuprint("executing")
+
+        # clear flags so we don't immediately start servoing over to an object across the map that we might've seen
+        self.clear_new_flags_dvs() 
+
         self.configure_darknet_cameras(self.darknet_config)
-        prior = self.get_odom_prior(self.prior_pose_param_str) # attempt to grab from mapper first --> we may already have localized it
+        prior = self.get_prior(self.prior_pose_param_str) # attempt to grab from mapper first --> we may already have localized it
         
         self.toggle_waypoint_control(False)
         self.go_to_pose_non_blocking(prior)
 
-        self.cuprint("approaching prior, listening for detections of " + ", ".join(self.target_classes))
+        classes_colored = [bcolors.HEADER + x + bcolors.ENDC for x in self.target_classes]
+        self.cuprint("approaching prior, listening for detections of " + ", ".join(classes_colored))
         while not rospy.is_shutdown():
             # Check for detection
             if self.query_listener(): 
@@ -72,32 +78,28 @@ class Search(Objective):
             for key in dobj_dict.keys():
                 dobj_nums = dobj_dict[key]
                 for num in dobj_nums:
-                    if self.det_listener.check_new_dv(num):
+                    if self.det_listener.check_new_dv(num, clear_flag=False):
                         return True
         return False
+    
+    def clear_new_flags_dvs(self):
+        dobj_dict = self.det_listener.query_classes(self.target_classes)
+        if not dobj_dict: # No classes present
+            return False
+        else:
+            for key in dobj_dict.keys():
+                dobj_nums = dobj_dict[key]
+                for num in dobj_nums:
+                    self.det_listener.clear_new_dv_flag(num)
         
-    def get_odom_prior(self, rosparam_str):
+    def get_prior(self, rosparam_str):
         if not rospy.has_param(rosparam_str):
             raise(Exception("Could not locate rosparam: " + rosparam_str))
             
         xyzframe_list = rospy.get_param(rosparam_str)
-        p = PoseStamped()
-        p.pose.position.x = xyzframe_list[0]
-        p.pose.position.y = xyzframe_list[1]
-        p.pose.position.z = xyzframe_list[2]
-        if len(xyzframe_list) == 4:     # prior needs to be transformed
-            self.cuprint("...transforming prior pose to odom")
-            p.header.frame_id = xyzframe_list[3]
-            p.header.stamp = rospy.Time()
-            if not rospy.has_param("~robotname"):
-                raise("Launch file must specify private param 'robotname'")
-            try:
-                odom_frame = '/'+ rospy.get_param("~robotname") + '/description/odom'
-                self.cuprint("...waiting for transform: " + odom_frame + " -> /" + xyzframe_list[3])
-                self.tf_listener.waitForTransform(p.header.frame_id, odom_frame, p.header.stamp, rospy.Duration(5))
-                self.cuprint("...found transform")
-                p = self.tf_listener.transformPose(odom_frame, p)
-            except (tf.ExtrapolationException, tf.ConnectivityException, tf.LookupException) as e:
-                rospy.logerr(e)
-        return p.pose
+        p = Pose()
+        p.position.x = xyzframe_list[0]
+        p.position.y = xyzframe_list[1]
+        p.position.z = xyzframe_list[2]
+        return p
 

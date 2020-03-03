@@ -61,6 +61,11 @@
     <origin xyz="0.38 -0.14 -0.12" rpy="0 0.3 0"/>
   </xacro:occam_camera_macro>
 
+  <xacro:occam_camera_macro robot_namespace="${namespace}" camera_id="7" frame="torpedo_cam_frame">
+    <axis xyz="0 0 1" />
+    <origin xyz="0.35 0.0 0.1" rpy="0 0.0 0"/>
+  </xacro:occam_camera_macro>
+
 <!--
   <xacro:regular_camera_plugin_macro
        namespace="${namespace}"

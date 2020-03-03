@@ -107,9 +107,12 @@ namespace localizer_ns
     for(auto generator_bbs_pair : bb_map)
     {
       vector<localizer::Detection> detections;
-      generator_bbs_pair.first->generatePose(bbs->image, generator_bbs_pair.second, detections);
-      for(auto detection : detections){
-        pub.publish(detection);
+      bool ret = generator_bbs_pair.first->generatePose(bbs->image, generator_bbs_pair.second, detections);
+      if(ret)
+      {
+        for(auto detection : detections){
+          pub.publish(detection);
+        }
       }
     }
   }

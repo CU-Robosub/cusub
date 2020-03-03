@@ -5,7 +5,10 @@ from detection_tree.msg import Dvector
 import threading
 import numpy as np
 
-class Dobject:
+class Dobject(list):
+
+    def __getitem__(self, key):
+        return self.dvectors[key]
     
     def __init__(self, num, class_id):
         self.num = num
@@ -52,25 +55,35 @@ class Dobject:
         first_dv = len(self.dvectors) - num
         return self.dvectors[first_dv:]
 
+    def get_d(self, index):
+        if index < 0 or index > len(self.dvectors):
+            return len(self.dvectors)
+        return self.dvectors[index]
+
 """
 Subscribes to dvector topic
 """
-class DetectionListener:
-    
+class DetectionListener(list):
+
+    def __getitem__(self,key):
+        return self.dobjects[key]
+
     def __init__(self):
         self.dobjects = []
         self.new_dv_flags = []
         rospy.Subscriber("cusub_perception/detection_tree/dvectors", Dvector, self.dvector_callback)
 
         # Pose Subscriber
-        # rospy.Subscriber("cusub_perception/detection_tree/dvectors", Dvector, self.dvector_callback)
+        # rospy.Subscriber("cusub_perception/detection_tree/dobject_poses", Dvector, self.dvector_callback)
 
     # def pose_callback(self, msg):
     #     num = msg.dobject_num
 
     # Query multiple classes
-    # Returns dictionary of class_ids : dobj_nums
     def query_classes(self, class_ids):
+        """
+        Returns dictionary of LISTs of dobjects for each class
+        """
         dobj_dict = {}
         for c in class_ids:
             dobj_nums = self.query_class(c)
@@ -99,14 +112,48 @@ class DetectionListener:
             rospy.logwarn("We missed a dvector...trigger synchrnoization")
             return
 
-    def check_new_dv(self, dobj_num):
+    def check_new_dv(self, dobj_num, clear_flag=True):
         if dobj_num >= len(self.new_dv_flags):
             return None
         else:
-            return self.new_dv_flags[dobj_num]
+            if self.new_dv_flags[dobj_num]:
+                if clear_flag:
+                    self.clear_new_dv_flag(dobj_num)
+                return True
+            else:
+                return False
+
+    def check_new_dvs(self, dobj_nums, clear_flag=True):
+        """
+        Returns the dobject number that has received a new dvector.
+        (There's been a new hit on this class/dobject)
+
+        Params
+        ------
+        dobj_nums : list of ints
+        
+        Returns
+        -------
+        index of dobject 
+        None if no dobject in the list has had a new detection
+            or if input is invalid
+        """
+        for dob in dobj_nums:
+            if dob >= len(self.new_dv_flags):
+                return None
+            elif self.new_dv_flags[dob]:
+                if clear_flag:
+                    self.clear_new_dv_flag(dob)
+                return dob
+        return None
+                
 
     def clear_new_dv_flag(self, dobj_num):
         self.new_dv_flags[dobj_num] = False
+
+    def clear_new_dv_flags(self, dobj_nums):
+        for dob in dobj_nums:
+            self.new_dv_flags[dob] = False
 
     def create_new_dobj(self, dobj_num, class_id, dv):
         self.dobjects.append(Dobject(dobj_num, class_id))
@@ -131,7 +178,7 @@ class DetectionListener:
         
         Returns
         -------
-        [ azimuth, elevation, magnitude ] : float, float, int
+        [ azimuth, elevation, height, width ] : float, float, int, int
             Average bearing
         """
         if num_dv != None and secs != None:
@@ -150,15 +197,16 @@ class DetectionListener:
             t_past = rospy.get_rostime() - rospy.Duration.from_sec(secs)
             dvs = self.dobjects[dobj_num].get_dvectors_since_time(t_past)
             if dvs == None:
-                return None
+                return [None, None, None, None]
             else:
                 return self._get_averages(dvs)
 
     def _get_averages(self, dvs):
         az = np.mean([i.azimuth for i in dvs])
         el = np.mean([i.elevation for i in dvs])
-        mag = np.mean([i.magnitude for i in dvs])
-        return [az, el, mag]
+        height = np.mean([i.box_height for i in dvs])
+        width = np.mean([i.box_width for i in dvs])
+        return [az, el, height, width]
 
     def synchronize_dobjects(self): # SHOULDN'T BE NECESSARY IF WE INITIALIZE AT STARTUP
         pass

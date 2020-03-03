@@ -50,6 +50,7 @@ namespace det_tree_ns
             void init(ros::NodeHandle& nh);
             std::string sub_name;
             void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
+            bool checkIllegalDetection(int image_height, int image_width, darknet_ros_msgs::BoundingBox& box);
             void cameraInfoCallback(const sensor_msgs::CameraInfo ci);
             int transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_pose, cv::Mat& bearing_vec, std_msgs::Header& image_header);
             int createDobject(detection_tree::Dvector* dv);
@@ -63,7 +64,7 @@ namespace det_tree_ns
             void assignDobjScores(std::vector<detection_tree::Dvector*>& dv_list, std::map<detection_tree::Dvector*, std::map<int, double>*>& dvs_scored);
             void setDobjProbabilityToZero(std::map<detection_tree::Dvector*, std::map<int, double>*>& dvs_scored, int dobj_num);
             detection_tree::Dvector* findBestMatch(std::map<detection_tree::Dvector*, std::map<int, double>*>& dvs_scored, int& matching_dobj);
-            void averageBearing(std::vector<detection_tree::Dvector*>& dvs, double& average_az, double& average_elev, double& average_mag);
+            void averageBearing(std::vector<detection_tree::Dvector*>& dvs, double& average_az, double& average_elev);
 
             int dvector_num;
             ros::Timer dobj_pub_timer; // timer to publish most recent dvector for all dobjs
