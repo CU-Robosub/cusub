@@ -38,7 +38,6 @@ namespace localizer_ns
     void cuprint_warn(std::string str);
     bool is_nodelet = true;
   };
-
     // Pose Generator Mappings
     map<string, pose_generator::PoseGenerator*> sel_mappings;
   
