@@ -6,8 +6,6 @@ using namespace cv;
 
 void DetectionTree::onInit()
 {
-    cuprint("starting up");
-        
     if (is_nodelet)
     {
         ros::NodeHandle& nh = getMTNodeHandle();
@@ -16,7 +14,7 @@ void DetectionTree::onInit()
     } else
     {
         ros::NodeHandle nh;
-        cuprint("NOT running as a nodelet");
+        cuprint("\033[95mNOT\033[0m running as nodelet");
         init(nh);
     }
 }
@@ -36,7 +34,6 @@ void DetectionTree::init(ros::NodeHandle& nh)
     }    
     darknet_sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &DetectionTree::darknetCallback, this);
     dobj_pub_timer = nh.createTimer(ros::Duration(0.5), &DetectionTree::dobjPubCallback, this); // TODO pull config
-    cuprint(string("Loaded Detection Tree"));
 }
 
 /*

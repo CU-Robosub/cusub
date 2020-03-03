@@ -19,7 +19,6 @@ namespace localizer_ns
 
   void Localizer::onInit()
   {
-    cuprint("starting up");
     pose_generator::ZPlane* zp = new pose_generator::ZPlane(); // declare on heap
     pose_generator::IgnorePG* ignore_pg = new pose_generator::IgnorePG(); // declare on heap
     sel_mappings = {
@@ -36,8 +35,8 @@ namespace localizer_ns
       loadRosParams(nh);
     }
     else
-    {
-      cuprint("running NOT as a nodelet");
+    { // NOT nodelet
+      cuprint("\033[95mNOT\033[0m running as nodelet");
       ros::NodeHandle nh;
       sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &Localizer::darknetCallback, this);
       pub = nh.advertise<localizer::Detection>("cusub_perception/mapper/task_poses",1);

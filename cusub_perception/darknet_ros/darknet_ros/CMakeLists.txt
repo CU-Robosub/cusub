@@ -153,9 +153,9 @@ if (CUDA_FOUND)
     ${OpenCV_LIBS}
   )
 
-  # cuda_add_executable(${PROJECT_NAME}
-  #    src/yolo_object_detector_node.cpp
-  #)
+  cuda_add_executable(${PROJECT_NAME}
+     src/yolo_object_detector_node.cpp
+  )
 
 else()
 
@@ -207,15 +207,15 @@ else()
     ${OpenCV_LIBS}
   )
 
-  # add_executable(${PROJECT_NAME}
-  #    src/yolo_object_detector_node.cpp
-  # )
+  add_executable(${PROJECT_NAME}
+     src/yolo_object_detector_node.cpp
+  )
 
 endif()
 
-# target_link_libraries(${PROJECT_NAME}
-#  ${PROJECT_NAME}_lib
-# )
+target_link_libraries(${PROJECT_NAME}
+  ${PROJECT_NAME}_lib
+)
 
 add_dependencies(${PROJECT_NAME}_lib
   darknet_ros_msgs_generate_messages_cpp

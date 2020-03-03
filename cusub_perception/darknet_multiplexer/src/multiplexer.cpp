@@ -10,8 +10,6 @@ namespace darknet_multiplexer_ns
 {
     void Multiplexer::onInit()
     {
-        cuprint("starting up");
-        
         if (is_nodelet)
         {
             ros::NodeHandle& nh = getMTNodeHandle();
@@ -20,7 +18,7 @@ namespace darknet_multiplexer_ns
         } else
         {
             ros::NodeHandle nh;
-            cuprint("NOT running as a nodelet");
+            cuprint("\033[95mNOT\033[0m running as nodelet");
             init(nh);
         }
     }

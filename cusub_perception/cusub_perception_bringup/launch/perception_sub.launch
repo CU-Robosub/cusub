@@ -20,11 +20,8 @@
     </include>
 
     <!-- Nodelets -->
-    <!-- Localizer -->
     <node pkg="nodelet" type="nodelet" name="localizer" args="load localizer/Localizer standalone_nodelet" output="screen" respawn="true"/>
-    <!-- Camera Multiplexer -->
     <node pkg="nodelet" type="nodelet" name="darknet_multiplexer" args="load darknet_multiplexer/Multiplexer standalone_nodelet" output="screen" respawn="true"/>
-    <!-- Darknet -->
     <node pkg="nodelet" type="nodelet" name="darknet_ros" args="load darknet_ros/YoloObjectDetector standalone_nodelet" output="screen" respawn="true">
         <remap from="darknet_ros/bounding_boxes"          to="cusub_perception/darknet_ros/bounding_boxes" />
         <remap from="/camera/rgb/image_raw"               to="/leviathan/cusub_perception/darknet_multiplexer/out"/>
@@ -33,6 +30,11 @@
     <node pkg="nodelet" type="nodelet" name="darknet_drawer" args="load darknet_multiplexer/DarknetDrawer standalone_nodelet" output="screen" if="$(arg debug_darknet)">
       <rosparam command="load" ns="class_names" file="$(find darknet_config)/yaml/class_names.txt"/>
     </node>
+
+    <include file="$(find detection_tree)/launch/detection_tree.launch" respawn="true">
+      <arg name="manager_name" value="$(arg standalone_nodelet)" />
+      <arg name="standalone" value="false" />
+    </include>
 
 
   </group>

@@ -9,11 +9,12 @@
 #include <darknet_ros/YoloObjectDetector.hpp>
 #include <ros/ros.h>
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
   ros::init(argc, argv, "darknet_ros");
-  ros::NodeHandle nodeHandle("~");
-  darknet_ros::YoloObjectDetector yoloObjectDetector(nodeHandle);
-
+  darknet_ros::YoloObjectDetector yolo;
+  yolo.set_not_nodelet();
+  yolo.onInit();
   ros::spin();
   return 0;
 }

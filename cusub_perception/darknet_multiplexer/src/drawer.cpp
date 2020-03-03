@@ -4,7 +4,6 @@ namespace darknet_drawer_ns
 {
     void DarknetDrawer::onInit()
     {
-        cuprint("starting up");
         if (is_nodelet)
         {
             ros::NodeHandle& nh = getMTNodeHandle();
@@ -15,7 +14,7 @@ namespace darknet_drawer_ns
         {
             ros::NodeHandle nh;
             ros::NodeHandle nhPrivate("~");
-            cuprint("NOT running as a nodelet");
+            cuprint("\033[95mNOT\033[0m running as nodelet");
             init(nh, nhPrivate);
         }
     }
