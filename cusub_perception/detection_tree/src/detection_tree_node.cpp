@@ -22,7 +22,7 @@ void DetectionTree::onInit()
 void DetectionTree::init(ros::NodeHandle& nh)
 {
     dvector_num = 0;
-    sub_name = "leviathan"; // TODO Pull from config
+    sub_name = ros::this_node::getNamespace();
     debug_dv_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("cusub_perception/detection_tree/poses",10);
     debug_dobj_poses_pub = nh.advertise<geometry_msgs::PoseArray>("cusub_perception/detection_tree/dobjects",10);
     dvector_pub = nh.advertise<detection_tree::Dvector>("cusub_perception/detection_tree/dvectors",10);
@@ -45,7 +45,7 @@ void DetectionTree::init(ros::NodeHandle& nh)
 int DetectionTree::transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_pose, cv::Mat& bearing_vec, std_msgs::Header& image_header)
 {
     // Transform bearing vector to odom frame
-    std::string sub_frame = "/" + sub_name + "/description/odom";
+    std::string sub_frame = sub_name + "/description/odom";
     geometry_msgs::PoseStamped odom_point_pose;
     size_t length = image_header.frame_id.length();
     string cam_frame = image_header.frame_id; //.substr(0, length-8); // trim _optical
@@ -374,7 +374,7 @@ void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfo ci)
 void DetectionTree::dobjPubCallback(const ros::TimerEvent&)
 {
     geometry_msgs::PoseArray pose_arr;
-    pose_arr.header.frame_id = "/" + sub_name + "/description/odom";
+    pose_arr.header.frame_id = sub_name + "/description/odom";
 
     for( auto dobj : dobject_list )
     {
