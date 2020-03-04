@@ -11,13 +11,37 @@
 
 namespace localizer_ns
 {
+  Localizer::~Localizer()
+  {
+    delete sel_mappings["zp"];
+    delete sel_mappings["ignore"];
+  }
+
   void Localizer::onInit()
   {
-    ros::NodeHandle& nh = getMTNodeHandle();
-    sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &Localizer::darknetCallback, this);
-    pub = nh.advertise<localizer::Detection>("cusub_perception/mapper/task_poses",1);
-    cuprint("starting up");
-    loadRosParams(nh);
+    pose_generator::ZPlane* zp = new pose_generator::ZPlane(); // declare on heap
+    pose_generator::IgnorePG* ignore_pg = new pose_generator::IgnorePG(); // declare on heap
+    sel_mappings = {
+      {"zp", zp},
+      {"ignore", ignore_pg}
+    };
+
+    if (is_nodelet)
+    {
+      cuprint("running as nodelet");
+      ros::NodeHandle& nh = getMTNodeHandle();
+      sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &Localizer::darknetCallback, this);
+      pub = nh.advertise<localizer::Detection>("cusub_perception/mapper/task_poses",1);
+      loadRosParams(nh);
+    }
+    else
+    { // NOT nodelet
+      cuprint("\033[95mNOT\033[0m running as nodelet");
+      ros::NodeHandle nh;
+      sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &Localizer::darknetCallback, this);
+      pub = nh.advertise<localizer::Detection>("cusub_perception/mapper/task_poses",1);
+      loadRosParams(nh);
+    }
     detection_num = 0;
   }
 
@@ -106,6 +130,19 @@ namespace localizer_ns
       print_str = print_str + std::string("\033[93m[WARN] ") + str + std::string("\033[0m");
       ROS_INFO( print_str.c_str());
     }
+    void Localizer::set_not_nodelet(void)
+    {
+      is_nodelet = false;
+    }
 }
 
 PLUGINLIB_EXPORT_CLASS(localizer_ns::Localizer, nodelet::Nodelet);
+
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "localizer_node");
+  localizer_ns::Localizer l;
+  l.set_not_nodelet();
+  l.onInit();
+  ros::spin();
+}

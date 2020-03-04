@@ -14,7 +14,7 @@
 #include <localizer/jiangshi_watershed.h>
 #include <localizer/z_plane.h>
 #include <geometry_msgs/Pose.h>
-#include "localizer/Detection.h"
+#include <localizer/Detection.h>
 
 using namespace std;
 
@@ -24,6 +24,8 @@ namespace localizer_ns
   {
   public:
     virtual void onInit();
+    ~Localizer();
+    void set_not_nodelet(void);
   private:
     void loadRosParams(ros::NodeHandle& nh);
     void darknetCallback(const darknet_ros_msgs::BoundingBoxesPtr bbs);
@@ -34,32 +36,16 @@ namespace localizer_ns
     int detection_num;
     void cuprint(std::string str);
     void cuprint_warn(std::string str);
+    bool is_nodelet = true;
   };
-
-  namespace pose_gen_decls
-  {
-    // Pose Generators Declarations
-    // pose_generator::StartGateHough sgh;
-    // pose_generator::JiangshiWatershed jw;
-    pose_generator::ZPlane zp;
-    pose_generator::IgnorePG ignore_pg;
-  }
-  // Pose Generator Mappings
-  map<string, pose_generator::PoseGenerator*> sel_mappings =  {
-    {"zp", &pose_gen_decls::zp},
-    {"ignore", &pose_gen_decls::ignore_pg}
-    // {"hough", &pose_gen_decls::sgh},
-    // {"bouy_pnp", &pose_gen_decls::sgh},
-    
-    // {"jiangshi_watershed", &pose_gen_decls::jw},
-    
-  };
+    // Pose Generator Mappings
+    map<string, pose_generator::PoseGenerator*> sel_mappings;
   
 }
 
 #endif
 
-/*  Steps to creating a New Pose Generator
+/*  OUTDATED Steps to creating a New Pose Generator
 
 1) Create header file in includes/localizer/, subclass PoseGenerator
 2) Create source file in src/

@@ -51,6 +51,15 @@ add_dependencies(localizer ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(localizer ${catkin_LIBRARIES})
 
+# Localizer Node (no nodelet)
+add_executable( localizer_node
+  src/localizer.cpp
+  src/pose_generator.cpp
+  src/z_plane.cpp
+)
+add_dependencies(localizer_node ${catkin_EXPORTED_TARGETS})
+target_link_libraries(localizer_node ${catkin_LIBRARIES})
+
 # Test files
 
 add_executable( start_gate_unit 

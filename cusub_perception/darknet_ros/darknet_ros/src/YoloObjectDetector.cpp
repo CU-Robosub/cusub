@@ -36,7 +36,12 @@ char **detectionNames;
 void YoloObjectDetector::onInit()
 {
   cuprint("starting up");
-  nodeHandle_ = getMTPrivateNodeHandle();
+
+  if (is_nodelet)
+    nodeHandle_ = getMTPrivateNodeHandle();
+  else
+    nodeHandle_ = ros::NodeHandle("~");
+
   image_transport::ImageTransport imageTransport_(nodeHandle_);
   // Read parameters from config file.
   if (!readParameters()) {
@@ -756,6 +761,11 @@ void YoloObjectDetector::cuprint_warn(std::string str)
   std::string print_str = std::string("[\033[92mDarknet\033[0m] ");
   print_str = print_str + std::string("\033[93m[WARN] ") + str + std::string("\033[0m");
   ROS_INFO( print_str.c_str());
+}
+
+void YoloObjectDetector::set_not_nodelet(void)
+{
+  is_nodelet = false;
 }
 
 } /* namespace darknet_ros*/

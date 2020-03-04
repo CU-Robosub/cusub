@@ -81,12 +81,14 @@ class YoloObjectDetector : public nodelet::Nodelet
    */
    explicit YoloObjectDetector();
    virtual void onInit();
+   void set_not_nodelet(void);
   /*!
    * Destructor.
    */
   ~YoloObjectDetector();
 
  private:
+  bool is_nodelet = true;
   /*!
    * Reads and verifies the ROS parameters.
    * @return true if successful.

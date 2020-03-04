@@ -44,7 +44,10 @@ namespace det_tree_ns
     {
         public:
             virtual void onInit();
+            void set_not_nodelet(void);
         private:
+            bool is_nodelet = true;
+            void init(ros::NodeHandle& nh);
             std::string sub_name;
             void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
             bool checkIllegalDetection(int image_height, int image_width, darknet_ros_msgs::BoundingBox& box);

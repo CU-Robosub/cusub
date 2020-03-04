@@ -18,7 +18,9 @@ namespace darknet_multiplexer_ns
     {
     public:
         virtual void onInit();
+        void set_not_nodelet(void);
     private:
+        void init(ros::NodeHandle& nh);
         bool configureActives(darknet_multiplexer::DarknetCameras::Request& request, darknet_multiplexer::DarknetCameras::Response& response);
         void publishFrame(const ros::TimerEvent& event);
         void occamCallback0(const sensor_msgs::ImagePtr image);
@@ -28,7 +30,6 @@ namespace darknet_multiplexer_ns
         void occamCallback4(const sensor_msgs::ImagePtr image);
         void downcamCallback(const sensor_msgs::ImagePtr image);
         void torpedoCallback(const sensor_msgs::ImagePtr image);
-        ros::NodeHandle nh;
         ros::Timer timer;
         ros::ServiceServer service;
         std::vector<ros::Subscriber> subs;
@@ -41,6 +42,7 @@ namespace darknet_multiplexer_ns
         bool firstImageReceived;
         void cuprint(std::string str);
         void cuprint_warn(std::string str);
+        bool is_nodelet = true;
     };
 }
 #endif

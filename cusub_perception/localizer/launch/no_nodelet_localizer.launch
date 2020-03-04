@@ -1,0 +1,4 @@
+<launch>
+    <rosparam command="load" file="$(find localizer)/config/localizer_config.yaml"/>
+    <node pkg="localizer" type="localizer_node" output="screen" name="localizer_node" />
+</launch>

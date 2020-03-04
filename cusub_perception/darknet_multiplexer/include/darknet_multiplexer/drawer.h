@@ -16,7 +16,9 @@ namespace darknet_drawer_ns
     {
     public:
         virtual void onInit();
+        void set_not_nodelet(void);
     private:
+        void init(ros::NodeHandle& nh, ros::NodeHandle& nhPrivate);
         void darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs);
         ros::Subscriber m_darknetSub;
         ros::Publisher m_pub;
@@ -25,6 +27,7 @@ namespace darknet_drawer_ns
         void loadClassNames(const std::vector<std::string> &classNames);
         void cuprint(std::string str);
         void cuprint_warn(std::string str);
+        bool is_nodelet = true;
     };
 }
 

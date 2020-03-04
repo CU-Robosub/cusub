@@ -4,18 +4,33 @@ namespace darknet_drawer_ns
 {
     void DarknetDrawer::onInit()
     {
-        cuprint("starting up");
-        ros::NodeHandle& nh = getMTNodeHandle();
+        if (is_nodelet)
+        {
+            ros::NodeHandle& nh = getMTNodeHandle();
+            ros::NodeHandle nhPrivate = getPrivateNodeHandle();
+            cuprint("running as a nodelet.");
+            init(nh, nhPrivate);
+        } else
+        {
+            ros::NodeHandle nh;
+            ros::NodeHandle nhPrivate("~");
+            cuprint("\033[95mNOT\033[0m running as nodelet");
+            init(nh, nhPrivate);
+        }
+    }
+
+    void DarknetDrawer::init(ros::NodeHandle& nh, ros::NodeHandle& nhPrivate)
+    {
         m_darknetSub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &DarknetDrawer::darknetCallback, this);
         m_pub = nh.advertise<sensor_msgs::Image>("cusub_perception/darknet_drawer/out",1);
         // load the config
         std::vector<std::string> detectionClasses;
-        ros::NodeHandle nhPrivate = getPrivateNodeHandle();
         if (nhPrivate.getParam("class_names", detectionClasses))
         {
             loadClassNames(detectionClasses);
         }
     }
+
     void DarknetDrawer::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPtr bbs)
     {
 
@@ -64,6 +79,20 @@ namespace darknet_drawer_ns
         print_str = print_str + std::string("\033[93m[WARN] ") + str + std::string("\033[0m");
         ROS_INFO( print_str.c_str());
     }
+
+    void DarknetDrawer::set_not_nodelet(void)
+    {
+      is_nodelet = false;
+    }
 }
 
- PLUGINLIB_EXPORT_CLASS(darknet_drawer_ns::DarknetDrawer, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(darknet_drawer_ns::DarknetDrawer, nodelet::Nodelet);
+
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "drawer_node");
+  darknet_drawer_ns::DarknetDrawer d;
+  d.set_not_nodelet();
+  d.onInit();
+  ros::spin();
+}

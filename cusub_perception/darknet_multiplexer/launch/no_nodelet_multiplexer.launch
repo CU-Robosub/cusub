@@ -1,0 +1,4 @@
+<launch>
+    <rosparam command="load" file="$(find darknet_multiplexer)/config/darknet_multiplexer.yaml"/>
+    <node pkg="darknet_multiplexer" type="multiplexer_node" output="screen" name="multiplexer_node" />
+</launch>

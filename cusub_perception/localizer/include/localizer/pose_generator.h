@@ -16,7 +16,7 @@
 #include <tf2/LinearMath/Scalar.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include "localizer/Detection.h"
+#include <localizer/Detection.h>
 
 using namespace cv;
 using namespace std;

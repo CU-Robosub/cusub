@@ -10,8 +10,21 @@ namespace darknet_multiplexer_ns
 {
     void Multiplexer::onInit()
     {
-        cuprint("starting up");
-        nh = getMTNodeHandle();
+        if (is_nodelet)
+        {
+            ros::NodeHandle& nh = getMTNodeHandle();
+            cuprint("running as a nodelet.");
+            init(nh);
+        } else
+        {
+            ros::NodeHandle nh;
+            cuprint("\033[95mNOT\033[0m running as nodelet");
+            init(nh);
+        }
+    }
+
+    void Multiplexer::init(ros::NodeHandle& nh)
+    {
         darknet_pub = nh.advertise<sensor_msgs::Image>("cusub_perception/darknet_multiplexer/out", 1);
         actives_pub = nh.advertise<std_msgs::UInt8MultiArray>("cusub_perception/darknet_multiplexer/actives", 1);
         int update_freq;
@@ -114,6 +127,21 @@ namespace darknet_multiplexer_ns
         print_str = print_str + std::string("\033[93m[WARN] ") + str + std::string("\033[0m");
         ROS_INFO( print_str.c_str());
     }
+
+    void Multiplexer::set_not_nodelet(void)
+    {
+      is_nodelet = false;
+    }
+
  }
 
  PLUGINLIB_EXPORT_CLASS(darknet_multiplexer_ns::Multiplexer, nodelet::Nodelet);
+
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "multiplexer_node");
+  darknet_multiplexer_ns::Multiplexer m;
+  m.set_not_nodelet();
+  m.onInit();
+  ros::spin();
+}

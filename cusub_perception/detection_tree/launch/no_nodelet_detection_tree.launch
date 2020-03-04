@@ -1,0 +1,4 @@
+<launch>
+    <rosparam command="load" file="$(find detection_tree)/config/detection_tree.yaml"/>
+    <node pkg="detection_tree" type="detection_tree_node_no_nodelet" name="detection_tree_node" output="screen"/>
+</launch>

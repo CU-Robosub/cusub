@@ -6,10 +6,23 @@ using namespace cv;
 
 void DetectionTree::onInit()
 {
-    sub_name = "leviathan"; // TODO Pull from config
-    ros::NodeHandle& nh = getMTNodeHandle();
+    if (is_nodelet)
+    {
+        ros::NodeHandle& nh = getMTNodeHandle();
+        cuprint("running as a nodelet.");
+        init(nh);
+    } else
+    {
+        ros::NodeHandle nh;
+        cuprint("\033[95mNOT\033[0m running as nodelet");
+        init(nh);
+    }
+}
+
+void DetectionTree::init(ros::NodeHandle& nh)
+{
     dvector_num = 0;
-    
+    sub_name = ros::this_node::getNamespace();
     debug_dv_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("cusub_perception/detection_tree/poses",10);
     debug_dobj_poses_pub = nh.advertise<geometry_msgs::PoseArray>("cusub_perception/detection_tree/dobjects",10);
     dvector_pub = nh.advertise<detection_tree::Dvector>("cusub_perception/detection_tree/dvectors",10);
@@ -21,7 +34,6 @@ void DetectionTree::onInit()
     }    
     darknet_sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &DetectionTree::darknetCallback, this);
     dobj_pub_timer = nh.createTimer(ros::Duration(0.5), &DetectionTree::dobjPubCallback, this); // TODO pull config
-    cuprint(string("Loaded Detection Tree"));
 }
 
 /*
@@ -33,7 +45,7 @@ void DetectionTree::onInit()
 int DetectionTree::transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_pose, cv::Mat& bearing_vec, std_msgs::Header& image_header)
 {
     // Transform bearing vector to odom frame
-    std::string sub_frame = "/" + sub_name + "/description/odom";
+    std::string sub_frame = sub_name + "/description/odom";
     geometry_msgs::PoseStamped odom_point_pose;
     size_t length = image_header.frame_id.length();
     string cam_frame = image_header.frame_id; //.substr(0, length-8); // trim _optical
@@ -362,7 +374,7 @@ void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfo ci)
 void DetectionTree::dobjPubCallback(const ros::TimerEvent&)
 {
     geometry_msgs::PoseArray pose_arr;
-    pose_arr.header.frame_id = "/" + sub_name + "/description/odom";
+    pose_arr.header.frame_id = sub_name + "/description/odom";
 
     for( auto dobj : dobject_list )
     {
@@ -394,4 +406,18 @@ void DetectionTree::cuprint_warn(std::string str)
     ROS_INFO( s.c_str());
 }
 
+void DetectionTree::set_not_nodelet(void)
+{
+    is_nodelet = false;
+}
+
 PLUGINLIB_EXPORT_CLASS(det_tree_ns::DetectionTree, nodelet::Nodelet);
+
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "localizer_node");
+  det_tree_ns::DetectionTree dt;
+  dt.set_not_nodelet();
+  dt.onInit();
+  ros::spin();
+}
