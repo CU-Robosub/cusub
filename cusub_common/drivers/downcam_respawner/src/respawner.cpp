@@ -8,15 +8,14 @@ void Respawner::onInit()
     ros::NodeHandle& nh = getMTNodeHandle();
     downcam_sub = nh.subscribe("cusub_common/downcam/image_color", 1, &Respawner::downcamCallback, this);
 
-    // ros::NodeHandle nh_private("~");
+    // Load timer period
     ros::NodeHandle& nh_private = getPrivateNodeHandle();
     watchdog_period = 5; // default
     nh_private.getParam("watchdog_period", watchdog_period);
-
     cuprint(std::string("timeout set to \033[95m") + std::to_string(watchdog_period) + std::string("\033[0ms"));
 
     cuprint("waiting for first downcam message");
-    // ros::topic::waitForMessage<sensor_msgs::Image>("cusub_common/downcam/image_color", ros::Duration(7));
+    ros::topic::waitForMessage<sensor_msgs::Image>("cusub_common/downcam/image_color", ros::Duration(7));
     timer = nh.createTimer(ros::Duration(watchdog_period), &Respawner::timerCallback, this);
     image_received = true;
 }
@@ -32,8 +31,7 @@ void Respawner::timerCallback(const ros::TimerEvent& event)
     if (!image_received)
     {
         cuprint_warn("no images received in last: " + std::to_string(watchdog_period) + std::string("s"));
-        // kill + respawn nodes
-        exit(0);
+        exit(0); // kill + respawn nodes
     } else
     {
         image_received = false;
