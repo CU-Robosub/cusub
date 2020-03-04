@@ -1,0 +1,7 @@
+<library path="lib/libdowncam_respawner_node">
+  <class name="downcam_respawner/Respawner" type="downcam_watcher_ns::Respawner" base_class_type="nodelet::Nodelet">
+    <description>
+      Monitors the downcam node, if images stop coming, kills and respawns the downcam
+    </description>
+  </class>
+</library>
