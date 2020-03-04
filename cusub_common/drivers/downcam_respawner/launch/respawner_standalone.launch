@@ -1,7 +1,9 @@
 <launch>
     <arg name="manager_name" value="downcam_respawner_manager" />
 
-    <node pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen"/>
-    <node pkg="nodelet" type="nodelet" name="downcam_respawner" args="load downcam_respawner/Respawner $(arg manager_name)" output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen" respawn="true"/>
+    <node pkg="nodelet" type="nodelet" name="downcam_respawner" args="load downcam_respawner/Respawner $(arg manager_name)" output="screen" respawn="true">
+        <param name="watchdog_period" value="5" />
+    </node>
 
 </launch>
