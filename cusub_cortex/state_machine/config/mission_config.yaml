@@ -40,6 +40,7 @@ tasks:
       outcome_timed_out: 'skip'
     drop_depth: -2
     retrace_hit_count: 1
+    retrace_dist_min: 1   # 1m is minimum delta between retraced breadcrumbs
     retrace_timeout: 2
     seconds_in_position: 2 # how many seconds we need to be directly above droppers before diving
     xy_dist_thresh_app: 0.5 # how close in xy we need to be before diving

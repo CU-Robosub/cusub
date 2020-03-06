@@ -1,5 +1,6 @@
+# -*- encoding: utf-8 -*-
 """
-Retrace Objective
+Rétrace Objective
 """
 from tasks.task import Objective
 from geometry_msgs.msg import Pose
@@ -88,13 +89,10 @@ class Retrace(Objective):
                 self.cuprint("reached end of a dobject's dvectors: Dobj " + str(self.dobj_nums[dob_ind]) + ' , ' + self.listener[self.dobj_nums[dob_ind]].class_id + ' , ' + str(len(class_dvs)) + ' , ' + str(self.retraced_steps[dob_ind]))
                 next_dvs.append(class_dvs[0])
                 self.retraced_steps[dob_ind] = self.len_dvecs[dob_ind] + 1  # plus one because it needs to be greater than to delete
-                continue
             else:
                 dvec, ind = next_bc[0], next_bc[1]
-                
-            
-            self.retraced_steps[dob_ind] += ind 
-            next_dvs.append(dvec)
+                self.retraced_steps[dob_ind] += ind 
+                next_dvs.append(dvec)
 
         nearest_breadcrumb_id = self.find_nearest_breadcrumb(next_dvs)
         # it is possible we might still want to visit the ones we found that were distant 
