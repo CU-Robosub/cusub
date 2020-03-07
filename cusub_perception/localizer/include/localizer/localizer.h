@@ -40,16 +40,17 @@ namespace localizer_ns
   {
     // Pose Generators Declarations
     // pose_generator::StartGateHough sgh;
-    // pose_generator::IgnorePG ignore_pg;
     // pose_generator::JiangshiWatershed jw;
     pose_generator::ZPlane zp;
+    pose_generator::IgnorePG ignore_pg;
   }
   // Pose Generator Mappings
   map<string, pose_generator::PoseGenerator*> sel_mappings =  {
-    {"zp", &pose_gen_decls::zp}
+    {"zp", &pose_gen_decls::zp},
+    {"ignore", &pose_gen_decls::ignore_pg}
     // {"hough", &pose_gen_decls::sgh},
     // {"bouy_pnp", &pose_gen_decls::sgh},
-    // {"ignore", &pose_gen_decls::ignore_pg},
+    
     // {"jiangshi_watershed", &pose_gen_decls::jw},
     
   };
