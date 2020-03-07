@@ -135,9 +135,9 @@ class Objective(smach.State):
 
         Params
         ------
-        camera_bool_list : list of bools, length 6
+        camera_bool_list : list of bools, length 6 OR 7
             Darknet active cameras, 1 for use
-            [ occam0, 1, 2, 3, 4, downcam ]
+            [ occam0, 1, 2, 3, 4, downcam ], optional [, torpedo]
 
         Returns
         -------

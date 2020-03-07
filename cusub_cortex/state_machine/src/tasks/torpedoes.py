@@ -94,3 +94,16 @@ class Approach(Objective):
         self.cuprint(print_str)
         
         watchdog_timer = Timeout(u"Rétrace Watchdog Timer".encode("utf-8"))
+
+
+class HoldTheBreath(Objective):
+    # config to use torpedo cam
+    # configure darknet cameras([0,0,0,0,0,0,1])
+
+    #nudge control on the torp cam. 
+    pass
+
+
+class TakeEmOut(Objective):
+    # call actuator service
+    pass

@@ -32,7 +32,7 @@ namespace darknet_multiplexer_ns
         ros::Timer timer;
         ros::ServiceServer service;
         std::vector<ros::Subscriber> subs;
-        std::vector<sensor_msgs::ImagePtr> recent_images = std::vector<sensor_msgs::ImagePtr>(6);
+        std::vector<sensor_msgs::ImagePtr> recent_images = std::vector<sensor_msgs::ImagePtr>(7);
         std::vector<bool> image_received = std::vector<bool>(7);
         ros::Publisher darknet_pub;
         ros::Publisher actives_pub;
