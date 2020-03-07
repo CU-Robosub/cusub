@@ -38,7 +38,7 @@ class Droppers(Task):
         strafe_client = PIDClient(self.name, "strafe")
         clients = {'drive_client' : drive_client, 'strafe_client' : strafe_client}
         search_classes = ["dropper_cover", "wolf"]
-        darknet_cameras = [0,0,0,0,0,1] # front 3 occams + downcam
+        darknet_cameras = [0,0,0,0,0,1] # downcam
         self.search = Search(self.name, self.listener, search_classes, self.get_prior_param(), darknet_cameras=darknet_cameras)
         self.approach = Approach(self.name, self.listener, clients)
         self.drop = Drop(self.name, self.listener, clients)
