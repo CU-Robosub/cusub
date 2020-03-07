@@ -1,0 +1,10 @@
+<launch>
+
+  <node pkg="rosbag" type="record" name="buoy_bag"
+    args="record -o /home/leviathan/bags/dvector/
+      /leviathan/cusub_common/occam/image0
+      /leviathan/cusub_perception/darknet_ros/bounding_boxes/
+      /leviathan/cusub_common/odometry/filtered"
+      />
+
+</launch>

@@ -1,7 +1,7 @@
 localizer:
   classes:
     start_gate_pole : ignore # hough, ...
-    vampire_cute : ignore
+    vampire_cute : zp
     path: zp
     vampire_fathead: ignore
     vampire_flying: ignore
@@ -22,6 +22,7 @@ localizer:
       dropper_cover: -4.2
       coffin: -3.3
       path: -4.4
+      vampire_cute: -3.3
   hough:
     three_legs : True  # true, false
   jiangshi_watershed:

@@ -43,7 +43,7 @@ tasks:
     retrace_timeout: 15
     seconds_in_position: 2 # how many seconds we need to be directly above droppers before diving
     xy_dist_thresh_app: 0.5 # how close in xy we need to be before diving
-    xy_dist_thresh_drop: 0.1 # how close in xy we need to be before dropping
+    xy_dist_thresh_drop: 0.35 # how close in xy we need to be before dropping
 
 
   jiangshi:
@@ -72,9 +72,9 @@ tasks:
 
 mission_tasks: # Tasks To Do In Order
   # - torpedos
-  - startup
+  # - startup
   # - start_gate
-  - jiangshi
+  # - jiangshi
   - droppers
   # - triangle
   

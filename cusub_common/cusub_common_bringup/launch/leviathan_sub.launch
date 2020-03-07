@@ -27,7 +27,7 @@
         <node pkg="motor_controllers" type="roll_pitch_zeroing.py" name="zero_roll_pitch" />
 
         <include file="$(find motor_controllers)/launch/controller_matrix.launch"/>
-        <include file="$(find depth_sensor)/launch/depth_sensor.launch" />
+        <!-- <include file="$(find depth_sensor)/launch/depth_sensor.launch" /> -->
         <include file="$(find dvl)/launch/dvl.launch"/>
         <include file="$(find pololu_controller)/launch/pololu_sub.launch"/>
         <include file="$(find sparton_imu)/launch/AHRS-8.launch"/>

@@ -94,11 +94,12 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
 {
     // Check if we've received this camera's info
     string frame_optical = bbs->image_header.frame_id;
-    if( camera_info.find(frame_optical) == camera_info.end() )
-    {
-        // cuprint(string("Unreceived camera info: ") + frame_optical);
-        return;
-    }
+    // if( camera_info.find(frame_optical) == camera_info.end() )
+    // {
+    //     cuprint_warn(string("Unreceived camera info: ") + frame_optical);
+    //     return;
+    // }
+    cuprint("RECEIVED HIT!");
 
     // Get matrices needed to calculate bearing to object
     sensor_msgs::CameraInfo ci = camera_info[bbs->image_header.frame_id];
@@ -111,59 +112,59 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
     vector<detection_tree::Dvector*> dv_list;
     for ( auto box : bbs->bounding_boxes)
     {
-        if( !checkIllegalDetection(bbs->image.height,bbs->image.width, box) ) // detection where object is not completely in view
-        {
-            continue;
-        }
+        // if( !checkIllegalDetection(bbs->image.height,bbs->image.width, box) ) // detection where object is not completely in view
+        // {
+        //     continue;
+        // }
 
-        // Get bearing vector in local camera frame
-        int center_x = (box.xmax + box.xmin) / 2;
-        int center_y = (box.ymax + box.ymin) / 2;
+        // // Get bearing vector in local camera frame
+        // int center_x = (box.xmax + box.xmin) / 2;
+        // int center_y = (box.ymax + box.ymin) / 2;
 
-        // Correct the center point for camera image scaling
-        if(bbs->image.height != ci.height || bbs->image.width != ci.width){
+        // // Correct the center point for camera image scaling
+        // if(bbs->image.height != ci.height || bbs->image.width != ci.width){
 
-            float scale_x = ((float) ci.width) / ((float) bbs->image.width);
-            float scale_y = ((float) ci.height) / ((float) bbs->image.height); 
-            center_x *= scale_x;
-            center_y *= scale_y;
+        //     float scale_x = ((float) ci.width) / ((float) bbs->image.width);
+        //     float scale_y = ((float) ci.height) / ((float) bbs->image.height); 
+        //     center_x *= scale_x;
+        //     center_y *= scale_y;
 
-        }
+        // }
 
-        Point2f pt(center_x, center_y);
+        // Point2f pt(center_x, center_y);
 
 
-        vector<cv::Point2f> pts = {pt};
-        vector<cv::Point2f> upts;
-        undistortPoints(pts, upts, K, D, cv::noArray(),  K);
-        vector<double> ray_points{ upts[0].x, upts[0].y, 1 };
-        Mat ray_point{3,1,cv::DataType<double>::type, ray_points.data()};
-        bearing_vec = Kinv * ray_point;
+        // vector<cv::Point2f> pts = {pt};
+        // vector<cv::Point2f> upts;
+        // undistortPoints(pts, upts, K, D, cv::noArray(),  K);
+        // vector<double> ray_points{ upts[0].x, upts[0].y, 1 };
+        // Mat ray_point{3,1,cv::DataType<double>::type, ray_points.data()};
+        // bearing_vec = Kinv * ray_point;
 
-        // Transform local bearing to bearing in odom
-        geometry_msgs::PoseStamped odom_cam_pose; // sub's position + orientation along odom bearing to object
-        std_msgs::Header image_header = bbs->image_header;
-        int ret = transformBearingToOdom(odom_cam_pose, bearing_vec, image_header);
-        if (ret) continue; // failed transform
-        debug_dv_pose_pub.publish(odom_cam_pose);
+        // // Transform local bearing to bearing in odom
+        // geometry_msgs::PoseStamped odom_cam_pose; // sub's position + orientation along odom bearing to object
+        // std_msgs::Header image_header = bbs->image_header;
+        // int ret = transformBearingToOdom(odom_cam_pose, bearing_vec, image_header);
+        // if (ret) continue; // failed transform
+        // debug_dv_pose_pub.publish(odom_cam_pose);
 
-        // Extract roll, pitch, yaw in odom frame
-        double roll_odom, pitch_odom, yaw_odom;
-        tf2::Quaternion odom_quat;
-        tf2::fromMsg(odom_cam_pose.pose.orientation, odom_quat);
-        tf2::Matrix3x3 m(odom_quat);
-        m.getRPY(roll_odom, pitch_odom, yaw_odom);
+        // // Extract roll, pitch, yaw in odom frame
+        // double roll_odom, pitch_odom, yaw_odom;
+        // tf2::Quaternion odom_quat;
+        // tf2::fromMsg(odom_cam_pose.pose.orientation, odom_quat);
+        // tf2::Matrix3x3 m(odom_quat);
+        // m.getRPY(roll_odom, pitch_odom, yaw_odom);
 
         // Create Dvector
         detection_tree::Dvector* dv = new detection_tree::Dvector; // we'll be storing it globally
-        dv->sub_pt = odom_cam_pose.pose.position;
-        dv->azimuth = yaw_odom;
-        dv->elevation = pitch_odom;
-        dv->camera_header = image_header;
+        // dv->sub_pt = odom_cam_pose.pose.position;
+        // dv->azimuth = yaw_odom;
+        // dv->elevation = pitch_odom;
+        // dv->camera_header = image_header;
         dv->class_id = box.Class;
-        dv->probability = box.probability;
-        dv->box_height = box.ymax - box.ymin; // TODO calculate by undistorting the top and bottom center pixels
-        dv->box_width = box.xmax - box.xmin; // TODO calculate by undistorting the left and right center side pixels?
+        // dv->probability = box.probability;
+        // dv->box_height = box.ymax - box.ymin; // TODO calculate by undistorting the top and bottom center pixels
+        // dv->box_width = box.xmax - box.xmin; // TODO calculate by undistorting the left and right center side pixels?
         dv->dvector_num = dvector_num;
         dvector_num++;
         dv_list.push_back(dv);
@@ -347,7 +348,8 @@ void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfo ci)
             // cuprint(string("Received : ") + frame_id.c_str());
             // TODO remove on actual sub
 
-            camera_info.insert({frame_id + "_optical", ci}); // adding _optical is 100% a hack
+            camera_info.insert({frame_id, ci}); // adding _optical is 100% a hack
+            // camera_info.insert({frame_id + "_optical", ci}); // adding _optical is 100% a hack
             camera_info_subs[itr_pair.first].shutdown(); // unsubscribe
             if ( camera_info_subs.size() == camera_info.size() )
             {

@@ -37,7 +37,7 @@ class Droppers(Task):
         drive_client = PIDClient(self.name, "drive")
         strafe_client = PIDClient(self.name, "strafe")
         clients = {'drive_client' : drive_client, 'strafe_client' : strafe_client}
-        search_classes = ["dropper_cover", "wolf"]
+        search_classes = ["vampire_cute"]
         darknet_cameras = [0,0,0,0,0,1] # front 3 occams + downcam
         self.search = Search(self.name, self.listener, search_classes, self.get_prior_param(), darknet_cameras=darknet_cameras)
         self.approach = Approach(self.name, self.listener, clients)
@@ -59,7 +59,7 @@ class Droppers(Task):
 class Approach(Objective):
     outcomes = ['in_position','timed_out', 'lost_object']
     
-    target_class_ids = ["dropper_cover", "wolf"]
+    target_class_ids = ["vampire_cute"]
 
     def __init__(self, task_name, listener, clients):
         name = task_name + "/Approach"
@@ -71,7 +71,7 @@ class Approach(Objective):
         # approach via any target class id
         # focus on the priority id onoce we detect it.
         self.priority_id_flag = False
-        self.priority_class_id = "wolf"
+        self.priority_class_id = "vampire_cute"
 
         self.xy_distance_thresh = rospy.get_param("tasks/droppers/xy_dist_thresh_app")
 
@@ -211,7 +211,7 @@ class Approach(Objective):
 class Drop(Approach): # share that code again...
     outcomes = ['dropped','timed_out', 'lost_object']
 
-    target_class = "wolf"
+    target_class = "vampire_cute"
     
     def __init__(self, task_name, listener, clients):
         name = task_name + "/Drop"
@@ -248,8 +248,8 @@ class Drop(Approach): # share that code again...
         ret = super(Drop, self).execute(userdata)
         if ret == "in_position":
             self.cuprint("Bombs Away")
-            self.actuate_dropper(1)
-            # self.actuate_dropper(2)
+            # self.actuate_dropper(1)
+            self.actuate_dropper(2)
             return "dropped"
         else:
             return ret
@@ -266,7 +266,7 @@ class Drop(Approach): # share that code again...
 class Retrace(Objective):
     outcomes = ['found','not_found']
 
-    target_class_ids = ["dropper_cover", "wolf"]
+    target_class_ids = ["vampire_cute"]
 
 
     def __init__(self, task_name, listener):
@@ -292,7 +292,7 @@ class Retrace(Objective):
         self.toggle_waypoint_control(False)
         self.cuprint(u"executing Rétrace".encode("utf-8"))
         dobj_dict = self.listener.query_classes(self.target_class_ids)
-        # For droppers, there should only be 3 Dobjects: droppers, wolf, bat.
+        # For droppers, there should only be 3 Dobjects: droppers, vampire_cute, bat.
         # So now I want to extract these Dobjects from the dobj_dict,
         # while hopefully adding some false positive rejection...
         self.cuprint(str(dobj_dict))
