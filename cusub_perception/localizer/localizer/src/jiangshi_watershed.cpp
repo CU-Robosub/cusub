@@ -125,10 +125,10 @@ namespace pose_generator
     bool JiangshiWatershed::generatePose(
         const sensor_msgs::Image& image, 
         const vector<darknet_ros_msgs::BoundingBox>& bbs,
-        vector<localizer::Detection>& detections
+        vector<localizer_msgs::Detection>& detections
         ){
 
-            localizer::Detection det;
+            localizer_msgs::Detection det;
             det.class_id = "jiangshi";
             det.pose.header.stamp = image.header.stamp;
             det.pose.header.frame_id = image.header.frame_id;

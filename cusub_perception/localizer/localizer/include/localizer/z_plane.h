@@ -30,7 +30,7 @@ namespace pose_generator
             bool generatePose(
                 const sensor_msgs::Image& image, 
                 const vector<darknet_ros_msgs::BoundingBox>& bbs,
-                vector<localizer::Detection>& detections
+                vector<localizer_msgs::Detection>& detections
             );
         protected:
             tf::TransformListener listener;

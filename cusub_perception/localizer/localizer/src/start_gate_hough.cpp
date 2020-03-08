@@ -78,10 +78,10 @@ namespace pose_generator
     bool StartGateHough::generatePose(
         const sensor_msgs::Image& image, 
         const vector<darknet_ros_msgs::BoundingBox>& bbs,
-        vector<localizer::Detection>& detections
+        vector<localizer_msgs::Detection>& detections
     ){
 
-        localizer::Detection det;
+        localizer_msgs::Detection det;
         det.class_id = "start_gate";
         det.pose.header.stamp = image.header.stamp;
         det.pose.header.frame_id = image.header.frame_id;

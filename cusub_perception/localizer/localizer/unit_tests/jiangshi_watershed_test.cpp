@@ -74,7 +74,7 @@ int main(int argc, char ** argv)
     img_bridge.toImageMsg(test_image);
 
     string class_id;
-    vector<localizer::Detection> detections;
+    vector<localizer_msgs::Detection> detections;
     if(jw.generatePose(test_image, bbs, detections))
     {
         cout << "localized pose!" <<endl;

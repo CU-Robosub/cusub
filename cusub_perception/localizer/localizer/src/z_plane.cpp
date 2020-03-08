@@ -52,12 +52,12 @@ namespace pose_generator
     bool ZPlane::generatePose(
         const sensor_msgs::Image& image, 
         const vector<darknet_ros_msgs::BoundingBox>& bbs,
-        vector<localizer::Detection>& detections
+        vector<localizer_msgs::Detection>& detections
         ){
 
             for(auto bounding_box : bbs){
 
-                localizer::Detection det;
+                localizer_msgs::Detection det;
                 det.class_id = bounding_box.Class; // Z-Plane localizer works on any object
                 det.pose.header.stamp = image.header.stamp;
 

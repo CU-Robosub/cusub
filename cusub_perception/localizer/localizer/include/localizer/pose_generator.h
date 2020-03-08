@@ -16,7 +16,7 @@
 #include <tf2/LinearMath/Scalar.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <localizer/Detection.h>
+#include <localizer_msgs/Detection.h>
 
 using namespace cv;
 using namespace std;
@@ -29,7 +29,7 @@ namespace pose_generator
             virtual bool generatePose(
                 const sensor_msgs::Image& image, 
                 const vector<darknet_ros_msgs::BoundingBox>& bbs,
-                vector<localizer::Detection>& detections
+                vector<localizer_msgs::Detection>& detections
             ){;}
             std::string pose_gen_name;
 

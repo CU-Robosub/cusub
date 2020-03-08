@@ -31,7 +31,7 @@ namespace localizer_ns
       cuprint("running as nodelet");
       ros::NodeHandle& nh = getMTNodeHandle();
       sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &Localizer::darknetCallback, this);
-      pub = nh.advertise<localizer::Detection>("cusub_perception/mapper/task_poses",1);
+      pub = nh.advertise<localizer_msgs::Detection>("cusub_perception/mapper/task_poses",1);
       loadRosParams(nh);
     }
     else
@@ -39,7 +39,7 @@ namespace localizer_ns
       cuprint("\033[95mNOT\033[0m running as nodelet");
       ros::NodeHandle nh;
       sub = nh.subscribe("cusub_perception/darknet_ros/bounding_boxes", 1, &Localizer::darknetCallback, this);
-      pub = nh.advertise<localizer::Detection>("cusub_perception/mapper/task_poses",1);
+      pub = nh.advertise<localizer_msgs::Detection>("cusub_perception/mapper/task_poses",1);
       loadRosParams(nh);
     }
     detection_num = 0;
@@ -108,7 +108,7 @@ namespace localizer_ns
     // Call generatePose on all PoseGenerators passing in vector of bounding boxes
     for(auto generator_bbs_pair : bb_map)
     {
-      vector<localizer::Detection> detections;
+      vector<localizer_msgs::Detection> detections;
       bool ret = generator_bbs_pair.first->generatePose(bbs->image, generator_bbs_pair.second, detections);
       if(ret)
       {

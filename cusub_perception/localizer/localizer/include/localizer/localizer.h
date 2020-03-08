@@ -14,7 +14,7 @@
 #include <localizer/jiangshi_watershed.h>
 #include <localizer/z_plane.h>
 #include <geometry_msgs/Pose.h>
-#include <localizer/Detection.h>
+#include <localizer_msgs/Detection.h>
 
 using namespace std;
 

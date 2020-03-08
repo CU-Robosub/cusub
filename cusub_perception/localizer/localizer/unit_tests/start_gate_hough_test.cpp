@@ -78,7 +78,7 @@ int main(int argc, char **argv)
 
     geometry_msgs::PoseStamped pose;
     string class_id;
-    vector<localizer::Detection> detections;
+    vector<localizer_msgs::Detection> detections;
     if(sgh.generatePose(test_image, bbs, detections))
     {
         cout << "localized pose!" <<endl;

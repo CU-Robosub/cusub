@@ -12,25 +12,14 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   cv_bridge
   image_transport
-  message_generation
   geometry_msgs
   std_msgs
   tf
-)
-
-add_message_files(
-  FILES
-  Detection.msg
-)
-
-generate_messages(
-  DEPENDENCIES
-  geometry_msgs
+  localizer_msgs
 )
 
 catkin_package(
   LIBRARIES localizer
-  DEPENDS message_runtime geometry_msgs
   CATKIN_DEPENDS cv_bridge image_transport nodelet roscpp sensor_msgs std_msgs
 )
 include_directories(include ${catkin_INCLUDE_DIRS})
@@ -46,7 +35,6 @@ if(catkin_EXPORTED_LIBRARIES)
 add_dependencies(localizer ${catkin_EXPORTED_LIBRARIES})
 endif()
 
-add_dependencies(localizer localizer_generate_messages_cpp)
 add_dependencies(localizer ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(localizer ${catkin_LIBRARIES})
