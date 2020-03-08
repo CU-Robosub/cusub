@@ -78,8 +78,6 @@ class YOLOObjectClass(object):
         self._name = name
         self._color = color
         self._points = points
-        self.cuprint = CUPrint("Fakeyolo")
-        self.cuprint("starting up")
 
     @property
     def name(self):
@@ -256,7 +254,8 @@ class YOLOFaker(object):
     """bool : Show debug bounding volume points"""
 
     def __init__(self):
-        pass
+        self.cuprint = CUPrint("Fake YOLO")
+        self.cuprint("starting up")
 
     def object_odom_callback(self, odom, obj):
         """ Object odometry

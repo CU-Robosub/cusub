@@ -15,7 +15,7 @@
     <node pkg="tf" type="static_transform_publisher" name="downcam_gt_broadcaster" args="0.0 0 -0.1 0 1.57 0 leviathan_gt/base_link leviathan_gt/downcam_frame_optical 50" />
 
     <rosparam command="load" file="$(find gazebo_drivers)/config/$(arg config_filename)"/>
-    <node name="fakeyolo" pkg="gazebo_drivers" type="yolo_faker.py">
+    <node name="fakeyolo" pkg="gazebo_drivers" type="yolo_faker.py" output="screen">
         <param name="~show_points" value="$(arg show_points)"/>
     </node>
 

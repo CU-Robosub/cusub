@@ -74,7 +74,7 @@ mission_tasks: # Tasks To Do In Order
   # - torpedos
   - startup
   # - start_gate
-  - jiangshi
+  # - jiangshi
   - droppers
   # - triangle
   
