@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
-from detection_tree.msg import Dvector
+from detection_tree_msgs.msg import Dvector
 import threading
 import numpy as np
 
