@@ -79,8 +79,8 @@ namespace darknet_multiplexer_ns
         image_received[6] = true; 
     }
 
-    bool Multiplexer::configureActives(darknet_multiplexer::DarknetCameras::Request& request,
-                                    darknet_multiplexer::DarknetCameras::Response& response)
+    bool Multiplexer::configureActives(darknet_multiplexer_msgs::DarknetCameras::Request& request,
+                                    darknet_multiplexer_msgs::DarknetCameras::Response& response)
                                     {
                                         if(request.actives.size() == activeCameras.size())
                                         {

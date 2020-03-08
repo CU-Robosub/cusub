@@ -11,26 +11,17 @@ find_package(catkin REQUIRED COMPONENTS
   nodelet
   roscpp
   sensor_msgs
-  message_generation
   std_msgs
   OpenCV
   cv_bridge
   darknet_ros_msgs
+  darknet_multiplexer_msgs
 )
-
-## Generate services in the 'srv' folder
-add_service_files(
-   FILES
-   DarknetCameras.srv
-)
-
-## Generate added messages and services with any dependencies listed here
-generate_messages()
 
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES darknet_multiplexer
-   CATKIN_DEPENDS nodelet roscpp sensor_msgs message_runtime
+   CATKIN_DEPENDS nodelet roscpp sensor_msgs
 #  DEPENDS system_lib
 )
 
@@ -38,11 +29,13 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 add_library( multiplexer
   src/multiplexer.cpp
 )
+add_dependencies(multiplexer
+  darknet_multiplexer_msgs_generate_messages_cpp
+)
 target_link_libraries(multiplexer ${catkin_LIBRARIES})
 if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(multiplexer ${catkin_EXPORTED_LIBRARIES})
 endif()
-add_dependencies(multiplexer darknet_multiplexer_generate_messages_cpp)
 
 add_library( drawer
   src/drawer.cpp
@@ -57,6 +50,9 @@ add_executable( multiplexer_node
   src/multiplexer.cpp
 )
 add_dependencies(multiplexer_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(multiplexer_node
+  darknet_multiplexer_msgs_generate_messages_cpp
+)
 target_link_libraries(multiplexer_node ${catkin_LIBRARIES})
 
 # Drawer Node (no nodelet)

@@ -6,7 +6,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <vector>
-#include <darknet_multiplexer/DarknetCameras.h>
+#include <darknet_multiplexer_msgs/DarknetCameras.h>
 #include <std_msgs/UInt8MultiArray.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core/core.hpp>
@@ -21,7 +21,7 @@ namespace darknet_multiplexer_ns
         void set_not_nodelet(void);
     private:
         void init(ros::NodeHandle& nh);
-        bool configureActives(darknet_multiplexer::DarknetCameras::Request& request, darknet_multiplexer::DarknetCameras::Response& response);
+        bool configureActives(darknet_multiplexer_msgs::DarknetCameras::Request& request, darknet_multiplexer_msgs::DarknetCameras::Response& response);
         void publishFrame(const ros::TimerEvent& event);
         void occamCallback0(const sensor_msgs::ImagePtr image);
         void occamCallback1(const sensor_msgs::ImagePtr image);

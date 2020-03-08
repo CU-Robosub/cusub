@@ -13,7 +13,6 @@
   <build_depend>nodelet</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
-  <build_depend>message_generation</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_export_depend>nodelet</build_export_depend>
   <build_export_depend>roscpp</build_export_depend>
@@ -22,9 +21,9 @@
   <exec_depend>nodelet</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
-  <exec_depend>message_runtime</exec_depend>
   
   <depend>darknet_ros_msgs</depend>
+  <depend>darknet_multiplexer_msgs</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
