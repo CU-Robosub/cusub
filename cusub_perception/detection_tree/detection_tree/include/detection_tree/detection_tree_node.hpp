@@ -34,7 +34,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/calib3d.hpp>
-#include <detection_tree/Dvector.h>
+#include <detection_tree_msgs/Dvector.h>
 
 // Camel case classes + functions, underscore variables + namespaces
 
@@ -53,18 +53,18 @@ namespace det_tree_ns
             bool checkIllegalDetection(int image_height, int image_width, darknet_ros_msgs::BoundingBox& box);
             void cameraInfoCallback(const sensor_msgs::CameraInfo ci);
             int transformBearingToOdom(geometry_msgs::PoseStamped& odom_cam_pose, cv::Mat& bearing_vec, std_msgs::Header& image_header);
-            int createDobject(detection_tree::Dvector* dv);
+            int createDobject(detection_tree_msgs::Dvector* dv);
             bool poseSolveDobject(Dobject* dobj, geometry_msgs::Pose& pose);
             void dobjPubCallback(const ros::TimerEvent&);
             void cuprint(std::string str);
             void cuprint_warn(std::string str);
 
             // Dvector Association Functions
-            void associateDvectors(std::vector<detection_tree::Dvector*>& dv_list, std::map<detection_tree::Dvector*, int>& dv_dobj_map);            
-            void assignDobjScores(std::vector<detection_tree::Dvector*>& dv_list, std::map<detection_tree::Dvector*, std::map<int, double>*>& dvs_scored);
-            void setDobjProbabilityToZero(std::map<detection_tree::Dvector*, std::map<int, double>*>& dvs_scored, int dobj_num);
-            detection_tree::Dvector* findBestMatch(std::map<detection_tree::Dvector*, std::map<int, double>*>& dvs_scored, int& matching_dobj);
-            void averageBearing(std::vector<detection_tree::Dvector*>& dvs, double& average_az, double& average_elev);
+            void associateDvectors(std::vector<detection_tree_msgs::Dvector*>& dv_list, std::map<detection_tree_msgs::Dvector*, int>& dv_dobj_map);            
+            void assignDobjScores(std::vector<detection_tree_msgs::Dvector*>& dv_list, std::map<detection_tree_msgs::Dvector*, std::map<int, double>*>& dvs_scored);
+            void setDobjProbabilityToZero(std::map<detection_tree_msgs::Dvector*, std::map<int, double>*>& dvs_scored, int dobj_num);
+            detection_tree_msgs::Dvector* findBestMatch(std::map<detection_tree_msgs::Dvector*, std::map<int, double>*>& dvs_scored, int& matching_dobj);
+            void averageBearing(std::vector<detection_tree_msgs::Dvector*>& dvs, double& average_az, double& average_elev);
 
             int dvector_num;
             ros::Timer dobj_pub_timer; // timer to publish most recent dvector for all dobjs

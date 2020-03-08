@@ -25,7 +25,7 @@ void DetectionTree::init(ros::NodeHandle& nh)
     sub_name = ros::this_node::getNamespace();
     debug_dv_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("cusub_perception/detection_tree/poses",10);
     debug_dobj_poses_pub = nh.advertise<geometry_msgs::PoseArray>("cusub_perception/detection_tree/dobjects",10);
-    dvector_pub = nh.advertise<detection_tree::Dvector>("cusub_perception/detection_tree/dvectors",10);
+    dvector_pub = nh.advertise<detection_tree_msgs::Dvector>("cusub_perception/detection_tree/dvectors",10);
     // Temporarily subscribe to all camera info topics
     for( auto topic_frame : camera_topic_frame_map)
     {
@@ -120,7 +120,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
 
     // Loop through boxes and generate dvectors
     Mat bearing_vec;
-    vector<detection_tree::Dvector*> dv_list;
+    vector<detection_tree_msgs::Dvector*> dv_list;
     for ( auto box : bbs->bounding_boxes)
     {
         if( !checkIllegalDetection(bbs->image.height,bbs->image.width, box) ) // detection where object is not completely in view
@@ -167,7 +167,7 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         m.getRPY(roll_odom, pitch_odom, yaw_odom);
 
         // Create Dvector
-        detection_tree::Dvector* dv = new detection_tree::Dvector; // we'll be storing it globally
+        detection_tree_msgs::Dvector* dv = new detection_tree_msgs::Dvector; // we'll be storing it globally
         dv->sub_pt = odom_cam_pose.pose.position;
         dv->azimuth = yaw_odom;
         dv->elevation = pitch_odom;
@@ -180,14 +180,14 @@ void DetectionTree::darknetCallback(const darknet_ros_msgs::BoundingBoxesConstPt
         dvector_num++;
         dv_list.push_back(dv);
     }
-    map<detection_tree::Dvector*, int> dv_dobj_map;
+    map<detection_tree_msgs::Dvector*, int> dv_dobj_map;
     associateDvectors(dv_list, dv_dobj_map);
 
     // Add dvectors to dobjects or create a new dobject
     // Publish dvectors
     for ( auto it = dv_dobj_map.begin(); it != dv_dobj_map.end(); it++ )
     {
-        detection_tree::Dvector* dv = it->first;
+        detection_tree_msgs::Dvector* dv = it->first;
         int dobj_num = it->second;
         // Create new dobject
         if( dobj_num == DOBJECT_NOT_FOUND)
@@ -216,7 +216,7 @@ bool DetectionTree::checkIllegalDetection(int image_height, int image_width, dar
     @param first dvector
     @return dobject number
 */
-int DetectionTree::createDobject(detection_tree::Dvector* dv)
+int DetectionTree::createDobject(detection_tree_msgs::Dvector* dv)
 {   
     string s = string("creating new dobj for ") + DETECTION_TREE_COLOR_START + dv->class_id + DETECTION_TREE_END;
     cuprint(s);
@@ -229,7 +229,7 @@ int DetectionTree::createDobject(detection_tree::Dvector* dv)
     return dobj->num;
 }
 
-void DetectionTree::averageBearing(vector<detection_tree::Dvector*>& dvs, double& average_az, double& average_elev)
+void DetectionTree::averageBearing(vector<detection_tree_msgs::Dvector*>& dvs, double& average_az, double& average_elev)
 {
     average_az = 0.0;
     average_elev = 0.0;
@@ -242,7 +242,7 @@ void DetectionTree::averageBearing(vector<detection_tree::Dvector*>& dvs, double
     average_elev /= dvs.size();
 }
 
-void DetectionTree::assignDobjScores(std::vector<detection_tree::Dvector*>& dv_list, map<detection_tree::Dvector*, map<int, double>*>& dvs_scored)
+void DetectionTree::assignDobjScores(std::vector<detection_tree_msgs::Dvector*>& dv_list, map<detection_tree_msgs::Dvector*, map<int, double>*>& dvs_scored)
 {
     for ( auto dv : dv_list )
     {
@@ -252,7 +252,7 @@ void DetectionTree::assignDobjScores(std::vector<detection_tree::Dvector*>& dv_l
         {
             if (dobj->class_id == dv->class_id) // class matches; score here
             {
-                std::vector<detection_tree::Dvector*> dvs;
+                std::vector<detection_tree_msgs::Dvector*> dvs;
                 getLastDvectors(dobj, 5, dvs);
                 double average_az, average_elev;
                 averageBearing(dvs, average_az, average_elev);
@@ -277,7 +277,7 @@ void DetectionTree::assignDobjScores(std::vector<detection_tree::Dvector*>& dv_l
    @param the dobject_number
    @return None
 */
-void DetectionTree::setDobjProbabilityToZero(map<detection_tree::Dvector*, map<int, double>*>& dvs_scored, int dobj_num)
+void DetectionTree::setDobjProbabilityToZero(map<detection_tree_msgs::Dvector*, map<int, double>*>& dvs_scored, int dobj_num)
 {
     for ( auto dv_it = dvs_scored.begin(); dv_it != dvs_scored.end(); dv_it++ )
     {
@@ -291,9 +291,9 @@ void DetectionTree::setDobjProbabilityToZero(map<detection_tree::Dvector*, map<i
     }
 }
 
-detection_tree::Dvector* DetectionTree::findBestMatch(map<detection_tree::Dvector*, map<int, double>*>& dvs_scored, int& matching_dobj)
+detection_tree_msgs::Dvector* DetectionTree::findBestMatch(map<detection_tree_msgs::Dvector*, map<int, double>*>& dvs_scored, int& matching_dobj)
 {
-    detection_tree::Dvector* best_matched_dv;
+    detection_tree_msgs::Dvector* best_matched_dv;
     double top_score = DOBJECT_PROBABILITY_ZERO;
     for ( auto dv_it = dvs_scored.begin(); dv_it != dvs_scored.end(); dv_it++ )
     {
@@ -321,16 +321,16 @@ detection_tree::Dvector* DetectionTree::findBestMatch(map<detection_tree::Dvecto
    @return the dobject number or -1 for new dobject
    @return map{ dv : dobj_num }
 */
-void DetectionTree::associateDvectors(std::vector<detection_tree::Dvector*>& dv_list, map<detection_tree::Dvector*, int>& dv_dobj_map)
+void DetectionTree::associateDvectors(std::vector<detection_tree_msgs::Dvector*>& dv_list, map<detection_tree_msgs::Dvector*, int>& dv_dobj_map)
 {
-    map<detection_tree::Dvector*, map<int, double>*> dvs_scored;
+    map<detection_tree_msgs::Dvector*, map<int, double>*> dvs_scored;
     assignDobjScores(dv_list, dvs_scored);
 
     // while we have more dvectors to assign
     while( dvs_scored.size() > 0)
     {
         int dobj_num_matched;
-        detection_tree::Dvector* dv = findBestMatch(dvs_scored, dobj_num_matched);
+        detection_tree_msgs::Dvector* dv = findBestMatch(dvs_scored, dobj_num_matched);
         dv_dobj_map.insert({dv, dobj_num_matched});
         dvs_scored.erase(dv);
         if( dobj_num_matched != DOBJECT_NOT_FOUND )

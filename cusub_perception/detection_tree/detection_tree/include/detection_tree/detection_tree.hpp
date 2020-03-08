@@ -6,16 +6,16 @@
 #include <std_msgs/Header.h>
 #include <string>
 #include <vector>
-#include <detection_tree/Dvector.h>
+#include <detection_tree_msgs/Dvector.h>
 
 typedef struct{
     int num; // dobject number
     std::string class_id;
     geometry_msgs::Pose pose;
-    std::vector<detection_tree::Dvector*> dvector_list;
+    std::vector<detection_tree_msgs::Dvector*> dvector_list;
 } Dobject;
 
-void getLastDvectors(Dobject* dobj, int num, std::vector<detection_tree::Dvector*>& dvs)
+void getLastDvectors(Dobject* dobj, int num, std::vector<detection_tree_msgs::Dvector*>& dvs)
 {
     int size = dobj->dvector_list.size();
     if( num > size )

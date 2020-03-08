@@ -14,25 +14,14 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   OpenCV
   cv_bridge
-  message_generation
+  detection_tree_msgs
 )
 
 catkin_python_setup()
 
-add_message_files(
-  FILES
-  Dvector.msg
-)
-
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  geometry_msgs
-)
-
 catkin_package(
   LIBRARIES detection_tree_node
-  CATKIN_DEPENDS nodelet roscpp message_runtime
+  CATKIN_DEPENDS nodelet roscpp
 )
 
 include_directories(
@@ -42,7 +31,6 @@ include_directories(
 
 add_library( detection_tree_node 
 src/detection_tree_node.cpp )
-add_dependencies(detection_tree_node detection_tree_generate_messages_cpp)
 target_link_libraries(detection_tree_node ${catkin_LIBRARIES})
 
 # Multiplexer Node (no nodelet)
