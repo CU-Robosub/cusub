@@ -18,10 +18,7 @@ from tasks.droppers import Droppers
 from tasks.start_gate import StartGate
 from tasks.manager import Manager
 from tasks.task import Timeout
-from tasks.path import Path
 from tasks.startup_task import Startup
-from tasks.triangle import Triangle
-from tasks.octagon import Octagon
 from cusub_print.cuprint import CUPrint, bcolors
 
 cuprint = CUPrint("Startup Script")
@@ -49,18 +46,10 @@ def loadStateMachines(task_list):
             task_sm = StartGate()
         elif task == "jiangshi":
             task_sm = Jiangshi()
-        elif task == "path0":
-            task_sm = Path("0")
-        elif task == "path1":
-            task_sm = Path("1")
         elif task == "droppers":
             task_sm = Droppers()
         elif task == "startup":
             task_sm = Startup()
-        elif task == "triangle":
-            task_sm = Triangle()
-        elif task == "octagon":
-            task_sm = Octagon()
         elif task == "debug":
             task_sm = Debug()
         else:

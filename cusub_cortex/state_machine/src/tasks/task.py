@@ -13,7 +13,7 @@ import math
 import actionlib
 from tf.transformations import euler_from_quaternion
 from std_msgs.msg import Empty
-from darknet_multiplexer.srv import DarknetCameras
+from darknet_multiplexer_msgs.srv import DarknetCameras
 import numpy as np
 import tf
 from state_machine.msg import TaskStatus

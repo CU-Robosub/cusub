@@ -17,7 +17,7 @@ from detection_listener.listener import DetectionListener
 import numpy as np
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import PoseStamped, Pose
-from localizer.msg import Detection
+from localizer_msgs.msg import Detection
 from actuator.srv import ActivateActuator
 from cusub_print.cuprint import bcolors
 

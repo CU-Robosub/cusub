@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>detection_tree</name>
+  <version>1.0.0</version>
+  <description>The detection_tree package</description>
+  <maintainer email="luke.barbier@colorado.edu">luke</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>darknet_ros_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_export_depend>darknet_ros_msgs</build_export_depend>
+  <build_export_depend>geometry_msgs</build_export_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <exec_depend>darknet_ros_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <depend>nodelet</depend>
+  <depend>tf</depend>
+  <depend>cv_bridge</depend>
+  <depend>detection_tree_msgs</depend>
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <nodelet plugin="${prefix}/nodelet_plugins.xml" />
+  </export>
+</package>
