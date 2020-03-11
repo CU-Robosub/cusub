@@ -11,14 +11,17 @@
 
 		<!-- Occam -->
 		<node pkg="nodelet" type="nodelet" name="occam" args="load ros_indigosdk/occam standalone_nodelet" output="screen" respawn="true">
-			<param name="frame_id" value="leviathan/description/occam"/>
+			<param name="frame_id" value="$(arg subname)/description/occam"/>
 		</node>
+		<include file="$(find ros_indigosdk)/launch/occam_all_camera_info.launch">
+			<arg name="subname" value="$(arg subname)" />
+		</include>
 
 		<!-- Down Cam -->
 		<include file="$(find pointgrey_camera_driver)/launch/camera.launch" />
 
 		<!-- Torpedo Camera -->
-		<node pkg="nodelet" type="nodelet" name="torpedocam" args="load cv_camera/CvCameraNodelet /leviathan/standalone_nodelet" ns="cusub_common" respawn="true"/>
+		<!-- <node pkg="nodelet" type="nodelet" name="torpedocam" args="load cv_camera/CvCameraNodelet /leviathan/standalone_nodelet" ns="cusub_common" respawn="true"/> -->
 		<!-- TODO Load/Unload scripts Nodelet crash debug -->
 
 	</group>

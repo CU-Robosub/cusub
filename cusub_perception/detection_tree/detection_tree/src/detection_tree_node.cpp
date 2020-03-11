@@ -27,6 +27,7 @@ void DetectionTree::init(ros::NodeHandle& nh)
     debug_dobj_poses_pub = nh.advertise<geometry_msgs::PoseArray>("cusub_perception/detection_tree/dobjects",10);
     dvector_pub = nh.advertise<detection_tree_msgs::Dvector>("cusub_perception/detection_tree/dvectors",10);
     // Temporarily subscribe to all camera info topics
+    cuprint("waiting for camera info");
     for( auto topic_frame : camera_topic_frame_map)
     {
         // cuprint(string("Added Camera: ") + topic_frame.second);
@@ -356,10 +357,8 @@ void DetectionTree::cameraInfoCallback(const sensor_msgs::CameraInfo ci)
     {
         if( itr_pair.first == frame_id )
         {
-            // cuprint(string("Received : ") + frame_id.c_str());
-            // TODO remove on actual sub
-
-            camera_info.insert({frame_id + "_optical", ci}); // adding _optical is 100% a hack
+            cuprint(string("Received : ") + frame_id.c_str());
+            camera_info.insert({frame_id + "_optical", ci});
             camera_info_subs[itr_pair.first].shutdown(); // unsubscribe
             if ( camera_info_subs.size() == camera_info.size() )
             {

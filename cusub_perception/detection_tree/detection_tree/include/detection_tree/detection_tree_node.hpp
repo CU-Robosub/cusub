@@ -82,15 +82,7 @@ namespace det_tree_ns
                {"/leviathan/cusub_common/occam/image3/camera_info", "leviathan/description/occam3_frame"},
                {"/leviathan/cusub_common/occam/image4/camera_info", "leviathan/description/occam4_frame"},
                {"/leviathan/cusub_common/downcam/camera_info", "leviathan/description/downcam_frame"}
-            }; // TODO move to launch file for configurability
-            // std::map<std::string, std::string> camera_topic_frame_map = {
-            //    {"/leviathan/cusub_common/occam/image0/camera_info", "leviathan/description/occam0_frame_optical"},
-            //    {"/leviathan/cusub_common/occam/image1/camera_info", "leviathan/description/occam1_frame_optical"},
-            //    {"/leviathan/cusub_common/occam/image2/camera_info", "leviathan/description/occam2_frame_optical"},
-            //    {"/leviathan/cusub_common/occam/image3/camera_info", "leviathan/description/occam3_frame_optical"},
-            //    {"/leviathan/cusub_common/occam/image4/camera_info", "leviathan/description/occam4_frame_optical"},
-            //    {"/leviathan/cusub_common/downcam/camera_info", "leviathan/description/downcam_frame_optical"}
-            // }; // TODO move to launch file for configurability
+            };
     };
 }
 

@@ -1,0 +1,17 @@
+<launch>
+    <arg name="occam_num" default="0" />
+    <arg name="pub_rate" default="1" />
+    <arg name="subname" default="leviathan" />
+
+    <group ns="cusub_common/occam">
+        <arg name="param_ns" value="occam$(arg occam_num)_params" />
+        <rosparam command="load" file="$(find ros_indigosdk)/config/occam$(arg occam_num)_params.yaml" ns="$(arg param_ns)" />
+        <node name="occam$(arg occam_num)_param_pub" pkg="ros_indigosdk" type="camera_info_pub.py" output="screen">
+            <param name="pub_rate" value="$(arg pub_rate)" />
+            <param name="camera_info_topic" value="image$(arg occam_num)/camera_info" />
+            <param name="camera_frame" value="$(arg subname)/description/occam$(arg occam_num)_frame" />
+            <param name="camera_info_namespace" value="$(arg param_ns)" />
+        </node>
+    </group>
+
+</launch>

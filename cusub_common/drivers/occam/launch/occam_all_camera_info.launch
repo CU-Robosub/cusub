@@ -1,0 +1,40 @@
+<launch>
+    <arg name="pub_rate" value="1" />
+    <arg name="subname" default="leviathan" />
+
+    <!-- OCCAM 0 -->
+    <include file="$(find ros_indigosdk)/launch/occamX_info.launch" >
+        <arg name="occam_num" value="0" />
+        <arg name="pub_rate" value="$(arg pub_rate)" />
+        <arg name="subname" value="$(arg subname)" />
+    </include>
+
+    <!-- OCCAM 1 -->
+    <include file="$(find ros_indigosdk)/launch/occamX_info.launch" >
+        <arg name="occam_num" value="1" />
+        <arg name="pub_rate" value="$(arg pub_rate)" />
+        <arg name="subname" value="$(arg subname)" />
+    </include>
+
+    <!-- OCCAM 2 -->
+    <include file="$(find ros_indigosdk)/launch/occamX_info.launch" >
+        <arg name="occam_num" value="2" />
+        <arg name="pub_rate" value="$(arg pub_rate)" />
+        <arg name="subname" value="$(arg subname)" />
+    </include>
+
+    <!-- OCCAM 3 -->
+    <include file="$(find ros_indigosdk)/launch/occamX_info.launch" >
+        <arg name="occam_num" value="3" />
+        <arg name="pub_rate" value="$(arg pub_rate)" />
+        <arg name="subname" value="$(arg subname)" />
+    </include>
+
+    <!-- OCCAM 4 -->
+    <include file="$(find ros_indigosdk)/launch/occamX_info.launch" >
+        <arg name="occam_num" value="4" />
+        <arg name="pub_rate" value="$(arg pub_rate)" />
+        <arg name="subname" value="$(arg subname)" />
+    </include>
+
+</launch>
