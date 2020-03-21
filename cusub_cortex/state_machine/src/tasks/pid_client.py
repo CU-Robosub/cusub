@@ -124,6 +124,16 @@ class PIDClient:
         else:
             self.setpoint_pub.publish(f)
 
+    def increment_setpoint(self, data, loop=True):
+        if not self.enabled and not self.standard:
+            self.cuprint("Trying to increment setpoint but PID loop is not enabled!", warn=True)
+        f = Float64()
+        f.data = data + self.get_standard_state()
+        if loop:
+            self.repeated_publish(self.setpoint_pub, f)
+        else:
+            self.setpoint_pub.publish(f)
+
     def set_state(self, data, loop=False):
         if self.standard:
             self.cuprint("Setting state of a 'standard' PID loop, will be overided by robot_localization", warn=True)

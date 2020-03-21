@@ -1,7 +1,7 @@
 localizer:
   classes:
-    start_gate_pole : hough # hough, ...
-    vampire_cute : jiangshi_watershed
+    start_gate_pole : ignore # hough, ...
+    vampire_cute : ignore
     path: zp
     vampire_fathead: ignore
     vampire_flying: ignore

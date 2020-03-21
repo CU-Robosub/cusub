@@ -1,8 +1,8 @@
 <launch>
 
     <!-- <arg name="config_filename" default="noisy_mission_config.yaml"/> -->
-    <!-- <arg name="config_filename" default="noisy_mission_config_generated.yaml"/> -->
     <arg name="config_filename" default="mission_config_generated.yaml"/>
+    <!-- <arg name="config_filename" default="mission_config_2020.yaml"/> -->
     
     <arg name="configure_darknet" default="true"/> <!-- Tells SM whether or not to configure darknet cameras per task -->
     <arg name="sub" default="leviathan" />

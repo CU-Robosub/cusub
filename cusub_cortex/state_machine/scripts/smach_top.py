@@ -16,7 +16,7 @@ import actionlib
 from tasks.jiangshi_det import Jiangshi
 # from tasks.droppers_det import Droppers
 from tasks.droppers_z_plane import Droppers
-from tasks.start_gate import StartGate
+from tasks.start_gate_det import StartGate
 # from tasks.bangbang_dice_task import BangBangDiceTask
 # from tasks.bangbang_roulette_task import BangBangRouletteTask
 # from tasks.naive_visual_servo_objective import NaiveVisualServoTask

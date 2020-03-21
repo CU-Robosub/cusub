@@ -1,0 +1,30 @@
+StartGate_1:
+- 1.33
+- -0.1
+- -0.5
+- -4.71
+buoy_jiangshi_1:
+- -7.17
+- -4.15
+- -0.9
+- 0.0
+dropper_garlic_1:
+- -7.33
+- 4.25
+- -3.5
+- 0.0
+leviathan/description:
+- -2.92
+- -0.92
+- 0.0
+- 0.26
+mappings:
+  droppers:
+    model: dropper_garlic_1
+    prior_z: -1.0
+  jiangshi:
+    model: buoy_jiangshi_1
+    prior_z: -1.0
+  start_gate:
+    model: StartGate_1
+    prior_z: -2.0

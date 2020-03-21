@@ -29,13 +29,13 @@
       <arg name="yaw" default="$(arg PM1_yaw)"/>
   </include> -->
 
-  <include file="$(find robosub_descriptions)/launch/upload.launch" if="$(arg droppers)">
+  <!-- <include file="$(find robosub_descriptions)/launch/upload.launch" if="$(arg droppers)">
       <arg name="obstacle" default="dropper_garlic"/>
       <arg name="x" default="$(arg DROP_x)"/>
       <arg name="y" default="$(arg DROP_y)"/>
       <arg name="z" default="$(arg DROP_z)"/>
       <arg name="yaw" default="$(arg DROP_yaw)"/>
-  </include>
+  </include> -->
 
   <include file="$(find robosub_descriptions)/launch/upload.launch" if="$(arg startgate)">
       <arg name="obstacle" default="StartGate"/>

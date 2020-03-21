@@ -1,0 +1,59 @@
+manager_task_status_pub_rate: 1
+mission_tasks:
+- start_gate
+startup_delay: 0
+tasks:
+  droppers:
+    drop_depth: -2
+    manager_info:
+      outcome_not_found: skip
+      outcome_timed_out: skip
+      timeout_secs: 0
+    prior:
+    - -4.4
+    - 5.18
+    - -1.0
+    seconds_in_position: 2
+    xy_dist_thresh_app: 0.5
+    xy_dist_thresh_drop: 0.1
+  jiangshi:
+    elev_target: 0.0
+    elev_thresh: 0.05
+    mag_target: 152600
+    manager_info:
+      outcome_not_found: skip
+      outcome_timed_out: skip
+      timeout_secs: 0
+    new_dv_check_rate: 30
+    prior:
+    - -4.25
+    - -3.23
+    - -1.0
+    seconds_in_position: 2
+    slay_carrot_dist: 1
+  start_gate:
+    center_pole_target: 200
+    do_style: true
+    elev_target: 0.0
+    elev_thresh: 0.05
+    mag_target: 390
+    manager_info:
+      outcome_not_found: skip
+      outcome_timed_out: uh_oh
+      timeout_secs: 0
+    new_dv_check_rate: 30
+    prior:
+    - 4.25
+    - 0.83
+    - -2.0
+    seconds_in_position: 2
+    slay_carrot_dist: 1
+    spin_carrot_rads: 0.7
+    strafe_carrot: 0.008
+    strafe_right: false
+  startup:
+    depth: -1.5
+    dive_time: 10
+    manager_info:
+      timeout_secs: 5
+using_sim_params: true
