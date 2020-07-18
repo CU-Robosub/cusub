@@ -59,10 +59,12 @@ class StartGate(Task):
         drive_client = PIDClient(self.name, "drive")
         strafe_client = PIDClient(self.name, "strafe")
         depth_client = PIDClient(self.name, "depth")
+        yaw_client = PIDClient(self.name, "yaw")
         clients = {
             "drive_client": drive_client,
             "strafe_client": strafe_client,
-            "depth_client": depth_client
+            "depth_client": depth_client,
+            "yaw_client": yaw_client
         }
 
         search_classes = ["start_gate_pole"]
@@ -97,6 +99,7 @@ class Approach(Objective):
         self.drive_client = clients["drive_client"]
         self.strafe_client = clients["strafe_client"]
         self.depth_client = clients["depth_client"]
+        self.yaw_client = clients["yaw_client"]
         self.listener = listener
 
         self.retrace_timeout = rospy.get_param("tasks/start_gate/retrace_timeout", 15)
@@ -137,6 +140,7 @@ class Approach(Objective):
         self.drive_client.enable()
         self.strafe_client.enable()
         self.depth_client.enable()
+        self.yaw_client.enable()
 
         self.drive_client.set_setpoint(self.mag_target)
         self.depth_client.set_setpoint(-1.5)
@@ -149,8 +153,16 @@ class Approach(Objective):
         while not rospy.is_shutdown():
             if self.listener.check_new_dv(dobj_num):
                 watchdog_timer.set_new_time(self.retrace_timeout, print_new_time=False)
+
+                bearing_arr = self.ret_bearing(dobj_nums)
+
+                az = bearing_arr[0]
+                el = bearing_arr[1]
+                mag = bearing_arr[2]
                 
-                drive_setpoint = self.drive_client.get_standard_state() + 0.8
+                drive_setpoint = self.drive_client.get_standard_state()
+                strafe_setpoint = self.strafe_client.get_standard_state() + 1.5
+
                 self.cuprint(str(self.count))
 
                 self.count += 1
@@ -171,15 +183,32 @@ class Approach(Objective):
                 return "not_found"
                 
             self.drive_client.set_setpoint(drive_setpoint, loop=False)
+            self.strafe_client.set_setpoint(strafe_setpoint, loop=False)
             self.depth_client.set_setpoint(-1.5, loop=False)
+            self.yaw_client.set_setpoint(az, loop=False)
             r.sleep()
 
         watchdog_timer.timer.shutdown()
         self.drive_client.disable()
         self.depth_client.disable()
+        self.yaw_client.disable()
         return "found_pole"
 
 
+    def ret_bearing(self, dobj_nums):
+        [az_l, el_l, height_l, width_l] = self.listener.get_avg_bearing(self.pole_l, num_dv=5)
+        [az_r, el_r, height_r, width_r] = self.listener.get_avg_bearing(self.pole_r, num_dv=5)
+        [az_c, el_c, height_c, width_c] = self.listener.get_avg_bearing(self.pole_c, num_dv=5)
+        mag_l = height_l * width_l
+        mag_r = height_r * width_r
+        mag_c = height_c * width_c
+        az = az_c
+        el = el_c
+        mag = np.sqrt(mag_c)
+
+        return [az, el, mag]
+    
+    
     def eval_startgate_poles(self, dobj_nums):
         [az_0, el_0, height_0, width_0] = self.listener.get_avg_bearing(dobj_nums[0], num_dv=5)
         [az_1, el_1, height_1, width_1] = self.listener.get_avg_bearing(dobj_nums[1], num_dv=5)
