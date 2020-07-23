@@ -29,7 +29,7 @@ tasks:
     seconds_in_position: 2 # how many seconds we need to be directly above droppers before diving
     new_dv_check_rate: 30
     mag_target: 390
-    center_pole_target: 200
+    center_pole_target: 180
     elev_target: 0.0
     elev_thresh: 0.05
     strafe_right: false

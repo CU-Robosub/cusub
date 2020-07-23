@@ -28,8 +28,8 @@ priors:
     sim_model: buoy_jiangshi_1
   leviathan:
     qtlocation:
-    - 250
-    - 216
+    - 36
+    - 276
     - 180
     sim_model: leviathan/description
   start_gate:
