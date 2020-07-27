@@ -28,11 +28,10 @@ tasks:
     retrace_timeout: 15
     seconds_in_position: 2 # how many seconds we need to be directly above droppers before diving
     new_dv_check_rate: 30
-    mag_target: 390
-    center_pole_target: 180
+    mag_target: 75
     elev_target: 0.0
     elev_thresh: 0.05
-    strafe_right: false
+    enter_right: false
     strafe_carrot: 0.008
     spin_carrot_rads: 0.7
 
