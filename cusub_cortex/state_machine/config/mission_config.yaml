@@ -33,7 +33,7 @@ tasks:
     elev_thresh: 0.05
     enter_right: false
     strafe_carrot: 0.008
-    spin_carrot_rads: 0.7
+    spin_carrot_rads: 1.3
 
   droppers:
     manager_info:

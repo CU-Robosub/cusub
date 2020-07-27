@@ -130,6 +130,7 @@ class Approach(Objective):
 
         self.mag_target = rospy.get_param("tasks/start_gate/mag_target")
         self.enter_right = rospy.get_param("tasks/start_gate/enter_right")
+        self.spin_carrot = rospy.get_param("tasks/start_gate/spin_carrot_rads")
 
 
     def execute(self, userdata):
@@ -183,7 +184,6 @@ class Approach(Objective):
 
                 self.cuprint("CHECK POSITION: " + str(self.count) + " / " + str(self.count_target), print_prev_line=True)
 
-                # self.cuprint(str(abs(self.mag_target - mag)))
                 if (0.9 * self.mag_target) <= mag <= (1.1 * self.mag_target):
                     self.count += 1
                     drive_setpoint += 0.01
@@ -243,11 +243,11 @@ class Approach(Objective):
         self.depth_client.enable()
         self.yaw_client.enable()
 
-    def PID_all_set_setpoint(self, drive_in, strafe_in, depth_in, yaw_in):
-        self.strafe_client.set_setpoint(drive_in, loop=False)
-        self.strafe_client.set_setpoint(strafe_in, loop=False)
-        self.depth_client.set_setpoint(depth_in, loop=False)
-        self.yaw_client.set_setpoint(yaw_in, loop=False)
+    def PID_all_set_setpoint(self, drive_sp, strafe_sp, depth_sp, yaw_sp):
+        self.drive_client.set_setpoint(drive_sp, loop=False)
+        self.strafe_client.set_setpoint(strafe_sp, loop=False)
+        self.depth_client.set_setpoint(depth_sp, loop=False)
+        self.yaw_client.set_setpoint(yaw_sp, loop=False)
 
     
     def ret_bearing(self, dobj_nums):
@@ -401,6 +401,7 @@ class Center_Orbit(Approach):
                 az_c = bearing_arr[5]
 
                 drive_setpoint = self.drive_client.get_standard_state()
+                strafe_setpoint = self.strafe_client.get_standard_state()
 
                 self.cuprint("CHECK POSITION: " + str(self.count) + " / " + str(self.count_target), print_prev_line=True)
 
@@ -419,9 +420,9 @@ class Center_Orbit(Approach):
                     else:
                         self.count = 0
                         if self.yaw_client.get_standard_state() < 0:
-                            strafe_setpoint = self.strafe_client.get_standard_state() - 0.8
+                            strafe_setpoint = self.strafe_client.get_standard_state() - 0.75
                         else:
-                            strafe_setpoint = self.strafe_client.get_standard_state() + 0.8
+                            strafe_setpoint = self.strafe_client.get_standard_state() + 0.75
                 else:
                     if abs(abs(az_l) - abs(az_c)) < 0.08:
                         self.count += 1
@@ -474,6 +475,8 @@ class Enter_With_Style(Approach):
         # Initialize Startgate Pole values
         self.pole_l = self.pole_r = self.pole_c = -1
 
+        self.cuprint("num_of_poles: " + str(self.num_of_poles), warn=True)
+
         # Find start_gate pole dobject number and check for errors
         dobj_nums = self.listener.query_class(self.target_class_id)
         if len(dobj_nums) > 0: # Check if more than 1 instance of target class
@@ -482,6 +485,82 @@ class Enter_With_Style(Approach):
             self.cuprint("somehow no " + str(self.target_class_id) + " classes found in listener?", warn=True)
             return "lost_object"
 
+        # DOBJECT NUMBER
+        self.cuprint(str(dobj_nums), warn=True)
+        dobj_num = dobj_nums[0]
+        if len(dobj_nums) == 3:
+            self.eval_startgate_poles(dobj_nums)
+            dobj_num = self.pole_c
+
+        watchdog_timer = Timeout(self.name + u"/Rétrace Watchdog".encode("utf-8"))
+
+        # Enable the PID loops
+        self.PID_enable()
+
+        watchdog_timer.set_new_time(self.retrace_timeout, print_new_time=False)
+
+        self.cuprint("servoing")
+        r = rospy.Rate(self.rate)
+        print("") # overwritten by servoing status
+        while not rospy.is_shutdown():
+            seeing_num_of_poles = self.listener.query_class(self.target_class_id)
+
+            if self.listener.check_new_dv(dobj_num) or (self.num_of_poles == 3):
+                watchdog_timer.set_new_time(self.retrace_timeout, print_new_time=False)
+
+                bearing_arr = self.ret_bearing(dobj_nums)
+
+                az = bearing_arr[0]
+                el = bearing_arr[1]
+                mag = bearing_arr[2]
+                
+                drive_setpoint = self.drive_client.get_standard_state()
+                strafe_setpoint = self.strafe_client.get_standard_state()
+
+                self.cuprint("mag: " + str(mag) + " - CHECK POSITION: " + str(self.count) + " / " + str(self.count_target), print_prev_line=True)
+
+                if self.mag_target <= mag <= (1.33 * self.mag_target):
+                    self.count += 1
+                    drive_setpoint += 0.01
+                    if self.count > self.count_target:
+                        self.drive_client.set_setpoint(self.drive_client.get_standard_state() + 6.0, loop=False)
+                        rospy.sleep(10)
+
+                        radians_turned = 0
+                        while radians_turned < 4*np.pi:
+                            self.drive_client.set_setpoint(self.drive_client.get_standard_state())
+                            yaw_setpoint = self.yaw_client.get_standard_state() + self.spin_carrot
+                            radians_turned += self.spin_carrot
+                            self.yaw_client.set_setpoint(yaw_setpoint, loop=False)
+                            rospy.sleep(1)
+
+                        self.yaw_client.set_setpoint(0, loop=False)
+                        self.cuprint("finished")
+                        break
+                elif (self.mag_target - mag) > 0:
+                    if self.count:
+                        drive_setpoint += 0.3
+                    else:
+                        drive_setpoint += 0.6
+                else:
+                    self.count = 0
+                    drive_setpoint -= 0.2
+
+            elif watchdog_timer.timed_out:
+                self.PID_disable()
+                self.cuprint("Retrace watchdog timed out.", warn=True)
+                return "lost object"
+
+            if userdata.timeout_obj.timed_out:
+                watchdog_timer.timer.shutdown()
+                userdata.outcome = "timed_out"
+                return "not_found"
+                
+            self.PID_all_set_setpoint(drive_setpoint, strafe_setpoint, -1.5, az)
+            r.sleep()
+
+        watchdog_timer.timer.shutdown()
+        self.PID_disable()
         return "finished"
 
 
