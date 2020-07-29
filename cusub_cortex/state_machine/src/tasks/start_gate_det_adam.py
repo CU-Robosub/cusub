@@ -144,11 +144,7 @@ class Approach(Objective):
 
         # Find start_gate pole dobject number and check for errors
         dobj_nums = self.listener.query_class(self.target_class_id)
-        if len(dobj_nums) > 0: # Check if more than 1 instance of target class
-            self.cuprint(str(len(dobj_nums)) + " " + self.target_class_id + " classe(s) detected!", warn=True)
-        elif not dobj_nums: # Check if target class is not present (shouldn't be possible)
-            self.cuprint("somehow no " + str(self.target_class_id) + " classes found in listener?", warn=True)
-            return "lost_object"
+        self.target_class_print(dobj_nums)
 
         # DOBJECT NUMBER
         self.cuprint(str(dobj_nums), warn=True)
@@ -248,6 +244,13 @@ class Approach(Objective):
         self.strafe_client.set_setpoint(strafe_sp, loop=False)
         self.depth_client.set_setpoint(depth_sp, loop=False)
         self.yaw_client.set_setpoint(yaw_sp, loop=False)
+
+    def target_class_print(self, dobj_nums):
+        if len(dobj_nums) > 0: # Check if more than 1 instance of target class
+            self.cuprint(str(len(dobj_nums)) + " " + self.target_class_id + " classe(s) detected!", warn=True)
+        elif not dobj_nums: # Check if target class is not present (shouldn't be possible)
+            self.cuprint("somehow no " + str(self.target_class_id) + " classes found in listener?", warn=True)
+            return "lost_object"
 
     
     def ret_bearing(self, dobj_nums):
@@ -361,11 +364,7 @@ class Center_Orbit(Approach):
 
         # Find start_gate pole dobject number and check for errors
         dobj_nums = self.listener.query_class(self.target_class_id)
-        if len(dobj_nums) > 0: # Check if more than 1 instance of target class
-            self.cuprint(str(len(dobj_nums)) + " " + self.target_class_id + " classe(s) detected!", warn=True)
-        elif not dobj_nums: # Check if target class is not present (shouldn't be possible)
-            self.cuprint("somehow no " + str(self.target_class_id) + " classes found in listener?", warn=True)
-            return "lost_object"
+        self.target_class_print(dobj_nums)
 
         # DOBJECT NUMBER
         self.cuprint(str(dobj_nums), warn=True)
@@ -406,46 +405,32 @@ class Center_Orbit(Approach):
                 self.cuprint("CHECK POSITION: " + str(self.count) + " / " + str(self.count_target), print_prev_line=True)
 
                 if self.enter_right:
-                    if abs(abs(az_r) - abs(az_c)) < 0.08:
-                        self.count += 1
-                        if self.count > self.count_target:
-                            self.cuprint("centered")
-                            rospy.sleep(5)
-                            break
-                    elif abs(abs(az_r) - abs(az_c)) < 0.18:
-                        if self.yaw_client.get_standard_state() < 0:
-                            strafe_setpoint = self.strafe_client.get_standard_state() - 0.25
-                        else:
-                            strafe_setpoint = self.strafe_client.get_standard_state() + 0.25
-                    else:
-                        self.count = 0
-                        if self.yaw_client.get_standard_state() < 0:
-                            strafe_setpoint = self.strafe_client.get_standard_state() - 0.75
-                        else:
-                            strafe_setpoint = self.strafe_client.get_standard_state() + 0.75
+                    pole_az = az_r
                 else:
-                    if abs(abs(az_l) - abs(az_c)) < 0.08:
-                        self.count += 1
-                        if self.count > self.count_target:
-                            self.cuprint("centered")
-                            rospy.sleep(5)
-                            break
-                    elif abs(abs(az_l) - abs(az_c)) < 0.18:
-                        if self.yaw_client.get_standard_state() < 0:
-                            strafe_setpoint = self.strafe_client.get_standard_state() + 0.25
-                        else:
-                            strafe_setpoint = self.strafe_client.get_standard_state() - 0.25
-                    else:
-                        self.count = 0
-                        if self.yaw_client.get_standard_state() < 0:
-                            strafe_setpoint = self.strafe_client.get_standard_state() + 0.75
-                        else:
-                            strafe_setpoint = self.strafe_client.get_standard_state() - 0.75
+                    pole_az = az_l
 
-            elif watchdog_timer.timed_out:
-                self.PID_disable()
-                self.cuprint("Retrace watchdog timed out.", warn=True)
-                return "lost object"
+                if abs(abs(pole_az) - abs(az_c)) < 0.08:
+                    self.count += 1
+                    if self.count > self.count_target:
+                        self.cuprint("centered")
+                        rospy.sleep(5)
+                        break
+                elif abs(abs(pole_az) - abs(az_c)) < 0.18:
+                    if self.yaw_client.get_standard_state() < 0:
+                        strafe_setpoint = self.strafe_client.get_standard_state() + 0.25
+                    else:
+                        strafe_setpoint = self.strafe_client.get_standard_state() - 0.25
+                else:
+                    self.count = 0
+                    if self.yaw_client.get_standard_state() < 0:
+                        strafe_setpoint = self.strafe_client.get_standard_state() + 0.75
+                    else:
+                        strafe_setpoint = self.strafe_client.get_standard_state() - 0.75
+
+            # elif watchdog_timer.timed_out:
+            #     self.PID_disable()
+            #     self.cuprint("Retrace watchdog timed out.", warn=True)
+            #     return "lost object"
 
             if userdata.timeout_obj.timed_out:
                 watchdog_timer.timer.shutdown()
@@ -479,11 +464,7 @@ class Enter_With_Style(Approach):
 
         # Find start_gate pole dobject number and check for errors
         dobj_nums = self.listener.query_class(self.target_class_id)
-        if len(dobj_nums) > 0: # Check if more than 1 instance of target class
-            self.cuprint(str(len(dobj_nums)) + " " + self.target_class_id + " classe(s) detected!", warn=True)
-        elif not dobj_nums: # Check if target class is not present (shouldn't be possible)
-            self.cuprint("somehow no " + str(self.target_class_id) + " classes found in listener?", warn=True)
-            return "lost_object"
+        self.target_class_print(dobj_nums)
 
         # DOBJECT NUMBER
         self.cuprint(str(dobj_nums), warn=True)
@@ -527,7 +508,7 @@ class Enter_With_Style(Approach):
                         rospy.sleep(10)
 
                         radians_turned = 0
-                        while radians_turned < 4*np.pi:
+                        while radians_turned < 8*np.pi:
                             self.drive_client.set_setpoint(self.drive_client.get_standard_state())
                             yaw_setpoint = self.yaw_client.get_standard_state() + self.spin_carrot
                             radians_turned += self.spin_carrot
