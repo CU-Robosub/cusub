@@ -25,13 +25,14 @@ tasks:
       timeout_secs: 0
       outcome_not_found: 'skip' # skip, later
       outcome_timed_out: 'uh_oh'
-    retrace_timeout: 15
     seconds_in_position: 2 # how many seconds we need to be directly above droppers before diving
     new_dv_check_rate: 30
     mag_target: 75
-    enter_right: false
-    strafe_carrot: 0.008
+    enter_right: true
     spin_carrot_rads: 1.0
+    retrace_hit_count: 1 # new hits before quitting from retracing
+    retrace_timeout: 15 # seconds without getting detections before retracing
+    retrace_back_in_time: 5
 
   droppers:
     manager_info:
