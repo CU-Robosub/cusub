@@ -9,6 +9,7 @@ Objectives:
 - Approach 2 Poles
 - Approach 3 Poles
 - Center Orbit
+- Center Strafe
 - Enter / Style
 """
 
@@ -62,6 +63,7 @@ class StartGate(Task):
         self.approach_3_poles = Approach_3_Poles(self.name, self.listener, clients)
 
         self.center_orbit = Center_Orbit(self.name, self.listener, clients)
+        self.center_strafe = Center_Strafe(self.name, self.listener, clients)
         self.enter_with_style = Enter_With_Style(self.name, self.listener, clients)
 
         self.retrace = Retrace(self.name, self.listener)
@@ -80,7 +82,10 @@ class StartGate(Task):
             smach.StateMachine.add('Approach_3_Poles', self.approach_3_poles, transitions={'in_position':'Center_Orbit', 'timed_out':'manager', 'lost_object':'Retrace'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
-            smach.StateMachine.add('Center_Orbit', self.center_orbit, transitions={'centered':'Enter_With_Style', 'timed_out':'manager', 'lost_object':'Retrace'}, \
+            smach.StateMachine.add('Center_Orbit', self.center_orbit, transitions={'centered':'Center_Strafe', 'timed_out':'manager', 'lost_object':'Retrace'}, \
+                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
+
+            smach.StateMachine.add('Center_Strafe', self.center_strafe, transitions={'ready_to_enter':'Enter_With_Style', 'timed_out':'manager', 'lost_object':'Retrace'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
             smach.StateMachine.add('Enter_With_Style', self.enter_with_style, transitions={'finished':'manager', 'timed_out':'manager', 'lost_object':'Retrace'}, \
@@ -124,7 +129,12 @@ class Approach(Objective):
 
         # Find start_gate pole dobject number and check for errors
         self.dobj_nums = self.listener.query_class(self.target_class_id)
-        self.target_class_print()
+        
+        if len(self.dobj_nums) > 0: # Check if more than 1 instance of target class
+            self.cuprint(str(len(self.dobj_nums)) + " " + self.target_class_id + " classe(s) detected!", warn=True)
+        elif not self.dobj_nums: # Check if target class is not present (shouldn't be possible)
+            self.cuprint("somehow no " + str(self.target_class_id) + " classes found in listener?", warn=True)
+            return "lost_object"
 
         # DOBJECT NUMBER
         dobj_num = self.dobj_nums[0]
@@ -150,31 +160,18 @@ class Approach(Objective):
 
                 bearing_arr = self.ret_bearing()
 
-                az = bearing_arr[0]
-                el = bearing_arr[1]
-                mag = bearing_arr[2]
+                self.az = bearing_arr[0]
+                self.el = bearing_arr[1]
+                self.mag = bearing_arr[2]
                 
-                drive_setpoint = self.drive_client.get_standard_state()
-                strafe_setpoint = self.strafe_client.get_standard_state()
+                self.drive_setpoint = self.drive_client.get_standard_state()
+                self.strafe_setpoint = self.strafe_client.get_standard_state()
+                self.yaw_setpoint = self.yaw_client.get_standard_state()
 
-                self.cuprint(str(mag) + " - CHECK POSITION: " + str(self.count) + " / " + str(self.count_target), warn=True, print_prev_line=True)
+                self.cuprint("CHECK POSITION: " + str(self.count) + " / " + str(self.count_target), warn=True, print_prev_line=True)
 
-                if (0.9 * self.mag_target) <= mag <= (1.1 * self.mag_target):
-                    self.count += 1
-                    drive_setpoint += 0.15
-                    if self.count > self.count_target:
-                        self.cuprint("in position")
-                        self.drive_client.set_setpoint(drive_setpoint, loop=False)
-                        rospy.sleep(5)
-                        break
-                elif (self.mag_target - mag) > 0:
-                    if self.count:
-                        drive_setpoint += 0.2
-                    else:
-                        drive_setpoint += 0.4
-                else:
-                    self.count = 0
-                    drive_setpoint -= 0.3
+                if self.action_func():
+                    break
 
             elif watchdog_timer.timed_out:
                 self.PID_disable()
@@ -198,7 +195,7 @@ class Approach(Objective):
                     self.cuprint("Detected 3rd Pole")
                     break
                 
-            self.PID_all_set_setpoint(drive_setpoint, strafe_setpoint, -1.5, az)
+            self.PID_all_set_setpoint(self.drive_setpoint, self.strafe_setpoint, -1.5, self.yaw_setpoint)
             r.sleep()
 
         watchdog_timer.timer.shutdown()
@@ -212,10 +209,10 @@ class Approach(Objective):
         self.yaw_client.enable()
 
     def PID_disable(self):
-        self.drive_client.enable()
-        self.strafe_client.enable()
-        self.depth_client.enable()
-        self.yaw_client.enable()
+        self.drive_client.disable()
+        self.strafe_client.disable()
+        self.depth_client.disable()
+        self.yaw_client.disable()
 
     def PID_all_set_setpoint(self, drive_sp, strafe_sp, depth_sp, yaw_sp):
         self.drive_client.set_setpoint(drive_sp, loop=False)
@@ -223,16 +220,30 @@ class Approach(Objective):
         self.depth_client.set_setpoint(depth_sp, loop=False)
         self.yaw_client.set_setpoint(yaw_sp, loop=False)
 
-    def target_class_print(self):
-        if len(self.dobj_nums) > 0: # Check if more than 1 instance of target class
-            self.cuprint(str(len(self.dobj_nums)) + " " + self.target_class_id + " classe(s) detected!", warn=True)
-        elif not self.dobj_nums: # Check if target class is not present (shouldn't be possible)
-            self.cuprint("somehow no " + str(self.target_class_id) + " classes found in listener?", warn=True)
-            return "lost_object"
+    def rospy_sleep(self, secs):
+        rospy.sleep(secs)
+
+    def action_func(self):
+        self.yaw_setpoint = self.az
+        # If within 10% of magnitude target
+        if (0.9 * self.mag_target) <= self.mag <= (1.1 * self.mag_target):
+            self.count += 1
+            self.drive_setpoint += 0.15
+            if self.count > self.count_target:
+                self.cuprint("in position")
+                self.drive_client.set_setpoint(self.drive_setpoint, loop=False)
+                rospy.sleep(5)
+                return True
+        elif (self.mag_target - self.mag) > 0:
+            if self.count:
+                self.drive_setpoint += 0.2
+            else:
+                self.drive_setpoint += 0.4
+        else:
+            self.count = 0
+            self.drive_setpoint -= 0.3
     
     def ret_bearing(self):
-        az_l = az_r = az_c = -1
-
         if self.num_of_poles == 1:
             [az, el, height, width] = self.listener.get_avg_bearing(self.dobj_nums[0], num_dv=5)
             mag = np.sqrt(height * width)
@@ -243,39 +254,18 @@ class Approach(Objective):
             
             az = ((az_0 + az_1)/2)
             el = ((el_0 + el_1)/2)
-            
-            mag_0 = height_0 * width_0
-            mag_1 = height_1 * width_1
-            mag = np.sqrt(((mag_0 + mag_1)/2))
+            mag = np.sqrt(((height_0 * width_0) + (height_1 * width_1)) / 2)
 
         if self.num_of_poles == 3:
-            [az_l, el_l, height_l, width_l] = self.listener.get_avg_bearing(self.pole_l, num_dv=5)
-            [az_r, el_r, height_r, width_r] = self.listener.get_avg_bearing(self.pole_r, num_dv=5)
-            [az_c, el_c, height_c, width_c] = self.listener.get_avg_bearing(self.pole_c, num_dv=5)
-
-            mag_l = height_l * width_l
-            mag_r = height_r * width_r
-            mag_c = height_c * width_c
-
-            if self.enter_right:
-                az = ((az_c + az_r)/2)
-                el = ((el_c + el_r)/2)
-                mag = np.sqrt((mag_c + mag_r)/2)
-            else:
-                az = ((az_c + az_l)/2)
-                el = ((el_c + el_l)/2)
-                mag = np.sqrt((mag_c + mag_l)/2)
+            [az, el, height, width] = self.listener.get_avg_bearing(self.pole_c, num_dv=5)
+            mag = np.sqrt(height * width)
             
-        return [az, el, mag, az_l, az_r, az_c]
+        return [az, el, mag]
     
     def eval_startgate_poles(self):
         [az_0, el_0, height_0, width_0] = self.listener.get_avg_bearing(self.dobj_nums[0], num_dv=5)
         [az_1, el_1, height_1, width_1] = self.listener.get_avg_bearing(self.dobj_nums[1], num_dv=5)
         [az_2, el_2, height_2, width_2] = self.listener.get_avg_bearing(self.dobj_nums[2], num_dv=5)
-
-        mag_0 = height_0 * width_0
-        mag_1 = height_1 * width_1
-        mag_2 = height_2 * width_2
 
         az_dict = {
             float(az_0): self.dobj_nums[0],
@@ -328,106 +318,60 @@ class Center_Orbit(Approach):
         super(Center_Orbit, self).__init__(task_name, listener, clients)
 
     def execute(self, userdata):
-        self.cuprint("executing")
-        self.toggle_waypoint_control(True)
+        ret = super(Center_Orbit, self).execute(userdata)
+        if ret == "found_pole":
+            return "centered"
+        else:
+            return ret
 
-        # Initialize Startgate Pole values
-        self.pole_l = self.pole_r = self.pole_c = -1
+    def action_func(self):
+        self.yaw_setpoint = self.az
+        if -0.03 < self.az < 0.03:
+            self.count += 1
+            if self.count > self.count_target:
+                self.cuprint("centered")
+                self.yaw_client.set_setpoint(0, loop=False)
+                return True
+        elif abs(self.az) < 0.15:
+            if self.az < 0:
+                self.strafe_setpoint = self.strafe_client.get_standard_state() + 0.25
+            else:
+                self.strafe_setpoint = self.strafe_client.get_standard_state() - 0.25
+        else:
+            self.count = 0
+            if self.az < 0:
+                self.strafe_setpoint = self.strafe_client.get_standard_state() + 0.60
+            else:
+                self.strafe_setpoint = self.strafe_client.get_standard_state() - 0.60
 
-        # Find start_gate pole dobject number and check for errors
-        self.dobj_nums = self.listener.query_class(self.target_class_id)
-        self.target_class_print()
 
-        # DOBJECT NUMBER
-        dobj_num = self.dobj_nums[0]
-        if len(self.dobj_nums) == 3:
-            self.eval_startgate_poles()
-            dobj_num = self.pole_c
+class Center_Strafe(Approach):
+    outcomes = ['ready_to_enter', 'timed_out', 'lost_object']
+    num_of_poles = 3
 
-        watchdog_timer = Timeout(self.name + u"/Rétrace Watchdog".encode("utf-8"))
+    def __init__(self, task_name, listener, clients):
+        super(Center_Strafe, self).__init__(task_name, listener, clients)
 
-        # Enable the PID loops
-        self.PID_enable()
+    def execute(self, userdata):
+        ret = super(Center_Strafe, self).execute(userdata)
+        if ret == "found_pole":
+            return "ready_to_enter"
+        else:
+            return ret
 
-        watchdog_timer.set_new_time(self.retrace_timeout, print_new_time=False)
-
-        self.cuprint("servoing")
-        r = rospy.Rate(self.rate)
-        print("") # overwritten by servoing status
-        while not rospy.is_shutdown():
-            seeing_num_of_poles = self.listener.query_class(self.target_class_id)
-
-            if self.listener.check_new_dv(dobj_num) or (self.num_of_poles == 3):
-                watchdog_timer.set_new_time(self.retrace_timeout, print_new_time=False)
-
-                bearing_arr = self.ret_bearing()
-
-                az = bearing_arr[0]
-                el = bearing_arr[1]
-                mag = bearing_arr[2]
-                az_l = bearing_arr[3]
-                az_r = bearing_arr[4]
-                az_c = bearing_arr[5]
-                
-                drive_setpoint = self.drive_client.get_standard_state()
-                strafe_setpoint = self.strafe_client.get_standard_state()
-
-                # self.cuprint("CHECK POSITION: " + str(self.count) + " / " + str(self.count_target), warn=True, print_prev_line=True)
-
-                if self.enter_right:
-                    pole_az = az_r
-                    small_az_diff = 0.22
-                    big_az_diff = 0.26
-                    pole_az_thresh = -0.35
-                    pole_az_guard = -0.40
-                    small_inc = 0.40
-                    large_inc = 0.80
-                else:
-                    pole_az = az_l
-                    small_az_diff = 0.16
-                    big_az_diff = 0.20
-                    pole_az_thresh = 0
-                    pole_az_guard = -0.40
-                    small_inc = 0.20
-                    large_inc = 0.75
-
-                self.cuprint(str(abs(abs(pole_az) - abs(az_c))) + " - " + str(pole_az) + " - CHECK POSITION: " + str(self.count) + " / " + str(self.count_target), warn=True, print_prev_line=True)
-
-                if abs(abs(pole_az) - abs(az_c)) < small_az_diff:
-                    self.count += 1
-                    if self.count > self.count_target:
-                        self.cuprint("centered")
-                        self.yaw_client.set_setpoint(0, loop=False)
-                        rospy.sleep(5)
-                        break
-                elif abs(abs(pole_az) - abs(az_c)) < big_az_diff:
-                    if pole_az < pole_az_thresh:
-                        strafe_setpoint = self.strafe_client.get_standard_state() + small_inc
-                    else:
-                        strafe_setpoint = self.strafe_client.get_standard_state() - small_inc
-                else:
-                    self.count = 0
-                    if pole_az < pole_az_thresh:
-                        strafe_setpoint = self.strafe_client.get_standard_state() + large_inc
-                    else:
-                        strafe_setpoint = self.strafe_client.get_standard_state() - large_inc
-
-            elif watchdog_timer.timed_out:
-                self.PID_disable()
-                self.cuprint("Retrace watchdog timed out.", warn=True)
-                return "lost object"
-
-            if userdata.timeout_obj.timed_out:
-                watchdog_timer.timer.shutdown()
-                userdata.outcome = "timed_out"
-                return "not_found"
-                
-            self.PID_all_set_setpoint(drive_setpoint, strafe_setpoint, -1.5, az)
-            r.sleep()
-
-        watchdog_timer.timer.shutdown()
-        self.PID_disable()
-        return "centered"
+    def action_func(self):
+        self.yaw_setpoint = 0
+        if self.enter_right:
+            self.strafe_setpoint = self.strafe_client.get_standard_state() + 0.70
+        else:
+            self.strafe_setpoint = self.strafe_client.get_standard_state() - 0.60
+        
+        self.count += 1
+        if self.count > self.count_target:
+            self.cuprint("ready_to_enter")
+            self.yaw_client.set_setpoint(0, loop=False)
+            self.rospy_sleep(10)
+            return True
 
 
 class Enter_With_Style(Approach):
@@ -438,92 +382,26 @@ class Enter_With_Style(Approach):
         super(Enter_With_Style, self).__init__(task_name, listener, clients)
 
     def execute(self, userdata):
-        self.cuprint("executing")
-        self.toggle_waypoint_control(True)
+        ret = super(Enter_With_Style, self).execute(userdata)
+        if ret == "found_pole":
+            return "finished"
+        else:
+            return ret
 
-        # Initialize Startgate Pole values
-        self.pole_l = self.pole_r = self.pole_c = -1
-
-        # Find start_gate pole dobject number and check for errors
-        self.dobj_nums = self.listener.query_class(self.target_class_id)
-        self.target_class_print()
-
-        # DOBJECT NUMBER
-        dobj_num = self.dobj_nums[0]
-        if len(self.dobj_nums) == 3:
-            self.eval_startgate_poles()
-            dobj_num = self.pole_c
-
-        watchdog_timer = Timeout(self.name + u"/Rétrace Watchdog".encode("utf-8"))
-
-        # Enable the PID loops
-        self.PID_enable()
-
-        watchdog_timer.set_new_time(self.retrace_timeout, print_new_time=False)
-
-        self.cuprint("servoing")
-        r = rospy.Rate(self.rate)
-        print("") # overwritten by servoing status
-        while not rospy.is_shutdown():
-            seeing_num_of_poles = self.listener.query_class(self.target_class_id)
-
-            if self.listener.check_new_dv(dobj_num) or (self.num_of_poles == 3):
-                watchdog_timer.set_new_time(self.retrace_timeout, print_new_time=False)
-
-                bearing_arr = self.ret_bearing()
-
-                az = bearing_arr[0]
-                el = bearing_arr[1]
-                mag = bearing_arr[2]
-                
-                drive_setpoint = self.drive_client.get_standard_state()
-                strafe_setpoint = self.strafe_client.get_standard_state()
-
-                self.cuprint("CHECK POSITION: " + str(self.count) + " / " + str(self.count_target), warn=True, print_prev_line=True)
-
-                if self.mag_target <= mag <= (1.33 * self.mag_target):
-                    self.count += 1
-                    drive_setpoint += 0.01
-                    if self.count > self.count_target:
-                        self.drive_client.set_setpoint(self.drive_client.get_standard_state() + 6.0, loop=False)
-                        rospy.sleep(10)
-
-                        radians_turned = 0
-                        while radians_turned < 8*np.pi:
-                            self.drive_client.set_setpoint(self.drive_client.get_standard_state())
-                            yaw_setpoint = self.yaw_client.get_standard_state() + self.spin_carrot
-                            radians_turned += self.spin_carrot
-                            self.yaw_client.set_setpoint(yaw_setpoint, loop=False)
-                            rospy.sleep(1)
-
-                        self.yaw_client.set_setpoint(0, loop=False)
-                        self.cuprint("finished")
-                        break
-                elif (self.mag_target - mag) > 0:
-                    if self.count:
-                        drive_setpoint += 0.3
-                    else:
-                        drive_setpoint += 0.6
-                else:
-                    self.count = 0
-                    drive_setpoint -= 0.2
-
-            elif watchdog_timer.timed_out:
-                self.PID_disable()
-                self.cuprint("Retrace watchdog timed out.", warn=True)
-                return "lost object"
-
-            if userdata.timeout_obj.timed_out:
-                watchdog_timer.timer.shutdown()
-                userdata.outcome = "timed_out"
-                return "not_found"
-                
-            self.PID_all_set_setpoint(drive_setpoint, strafe_setpoint, -1.5, az)
-            r.sleep()
-
-        watchdog_timer.timer.shutdown()
-        self.PID_disable()
-        return "finished"
+    def action_func(self):
+        if self.mag_target <= self.mag and 1.0 <= abs(self.az):
+            self.count += 1
+            if self.count > self.count_target:
+                self.cuprint("finished")
+                self.rospy_sleep(5)
+                # NOT SURE HOW TO ADD ROTATION FOR STYLE. I tried iterating the yaw setpoint,
+                # but it kept timing out
+                return True
+        else:
+            if self.count:
+                self.drive_setpoint += 0.4
+            else:
+                self.drive_setpoint += 0.6
 
 
 class Retrace(Objective):
