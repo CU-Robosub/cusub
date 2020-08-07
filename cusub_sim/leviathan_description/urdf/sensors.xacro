@@ -26,6 +26,96 @@
     <origin xyz="0 0 0" rpy="0 0 -1.57"/>
   </xacro:default_imu>
 
+  <!-- PING  -->
+  <xacro:macro name="multibeam_sonar_2d"
+    params="namespace suffix parent_link topic mass update_rate
+      samples fov range_min range_max range_stddev mesh
+      *inertia *origin *visual">
+    <!-- Sensor link -->
+    <link name="${namespace}/sonar${suffix}_link">
+      <inertial>
+        <xacro:insert_block name="inertia" />
+        <mass value="${mass}" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+      </inertial>
+
+      <xacro:insert_block name="visual" />
+      <xacro:no_collision/>
+    </link>
+
+  <joint name="${namespace}_sonar${suffix}_joint" type="revolute">
+    <xacro:insert_block name="origin" />
+    <parent link="${parent_link}" />
+    <child link="${namespace}/sonar${suffix}_link" />
+    <limit upper="0" lower="0" effort="0" velocity="0" />
+    <axis xyz="1 0 0"/>
+  </joint>
+
+  <gazebo reference="${namespace}/sonar${suffix}_link">
+    <sensor type="gpu_ray" name="sonar${suffix}">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>${update_rate}</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>${samples}</samples>
+            <resolution>1</resolution>
+            <min_angle>-${0.5*fov}</min_angle>
+            <max_angle>${0.5*fov}</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>${samples}</samples>
+            <resolution>1</resolution>
+            <min_angle>-${0.5*fov}</min_angle>
+            <max_angle> ${0.5*fov}</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>${range_min}</min>
+          <max>${range_max}</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>${range_stddev}</stddev>
+        </noise>
+      </ray>
+      <plugin name="sonar${suffix}_controller" filename="libgazebo_ros_velodyne_gpu_laser.so">
+        <topicName>${topic}</topicName>
+        <frameName>sonar${suffix}_link</frameName>
+          <min_range>${range_min}</min_range>
+          <max_range>${range_max}</max_range>
+          <gaussianNoise>0.0</gaussianNoise>
+      </plugin>
+    </sensor>
+  </gazebo>
+  </xacro:macro>
+
+  <xacro:multibeam_sonar_2d
+    namespace="${namespace}"
+    suffix=""
+    parent_link="${namespace}/base_link"
+    topic="sonar"
+    mass="0.02"
+    update_rate="15"
+    samples="32"
+    fov="0.523599"
+    range_min="1.0"
+    range_max="30.0"
+    range_stddev="0.027"
+    mesh="">
+    <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+    <origin xyz="0 0 0" rpy="0 0 0.0"/>
+    <visual>
+      <geometry>
+        <mesh filename="file://$(find uuv_sensor_ros_plugins)/meshes/p900.dae" scale="1 1 1"/>
+      </geometry>
+    </visual> 
+    </xacro:multibeam_sonar_2d>
+
+  <!--
   <xacro:occam_camera_macro robot_namespace="${namespace}" camera_id="0" frame="occam0_frame">
     <axis xyz="0 0 0" />
     <origin xyz="0.055 0 0.22" rpy="0 0 0"/>
@@ -64,6 +154,17 @@
   <xacro:occam_camera_macro robot_namespace="${namespace}" camera_id="7" frame="torpedo_cam_frame">
     <axis xyz="0 0 1" />
     <origin xyz="0.35 0.0 0.1" rpy="0 0.0 0"/>
+  </xacro:occam_camera_macro>-->
+
+  <!-- Stereo Down -->
+  <xacro:occam_camera_macro robot_namespace="${namespace}" camera_id="8" frame="stereo_down_left_cam_frame">
+    <axis xyz="0 0 1" />
+    <origin xyz="0.0  0.05 -0.1" rpy="0 1.57 0"/>
+  </xacro:occam_camera_macro>
+
+  <xacro:occam_camera_macro robot_namespace="${namespace}" camera_id="9" frame="stereo_down_right_cam_frame">
+    <axis xyz="0 0 1" />
+    <origin xyz="0.0 -0.05 -0.1" rpy="0 1.57 0"/>
   </xacro:occam_camera_macro>
 
 <!--

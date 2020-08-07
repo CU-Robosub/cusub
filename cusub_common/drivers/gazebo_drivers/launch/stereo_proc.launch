@@ -1,0 +1,22 @@
+<launch>
+
+    <group ns="/leviathan/description">
+
+        <node ns="camera_8" pkg="gazebo_drivers" type="yaml_to_camera_info_publisher.py" name="camera_8_info">
+            <rosparam command="load" file="$(find gazebo_drivers)/config/camera_8.yaml"/>
+        </node>
+        <node ns="camera_9" pkg="gazebo_drivers" type="yaml_to_camera_info_publisher.py" name="camera_9_info">
+            <rosparam command="load" file="$(find gazebo_drivers)/config/camera_9.yaml"/>
+        </node>
+
+        <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc" output="screen">
+            <param name="approximate_sync" value="True" />
+            <remap from="left/image_raw" to="camera_8/image_raw"/>
+            <remap from="right/image_raw" to="camera_9/image_raw"/>
+            <remap from="left/camera_info" to="camera_8/camera_info_2"/>
+            <remap from="right/camera_info" to="camera_9/camera_info_2"/>
+        </node>
+
+    </group>
+
+</launch>

@@ -14,6 +14,7 @@ from waypoint_navigator.srv import ToggleControl
 from waypoint_navigator.msg import waypointAction, waypointGoal
 import actionlib
 from tasks.jiangshi import Jiangshi
+from tasks.torpedos import Torpedos
 from tasks.droppers import Droppers
 from tasks.start_gate import StartGate
 from tasks.manager import Manager
@@ -46,6 +47,8 @@ def loadStateMachines(task_list):
             task_sm = StartGate()
         elif task == "jiangshi":
             task_sm = Jiangshi()
+        elif task == "torpedos":
+            task_sm = Torpedos()
         elif task == "droppers":
             task_sm = Droppers()
         elif task == "startup":

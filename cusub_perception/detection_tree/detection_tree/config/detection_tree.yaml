@@ -1,4 +1,5 @@
 detection_tree:
   dobjects_per_class:
     vampire_cute : 1
+    dracula : 1
     start_gate_pole: 2

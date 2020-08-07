@@ -98,18 +98,18 @@ namespace darknet_multiplexer_ns
         bool frame_published = false;
         while( !frame_published && ros::ok())
         {
-        if( activeCameras[current_pub_index] )
-        {
-            if ( image_received[current_pub_index] ) { 
-                darknet_pub.publish(recent_images[current_pub_index]); 
-            }
-            else {
-                // NODELET_WARN_THROTTLE(1, "DM waiting for image%d", current_pub_index);
-                break;
-            }
-            frame_published = true;
-        } 
-        current_pub_index = (current_pub_index + 1) % activeCameras.size();
+            if( activeCameras[current_pub_index] )
+            {
+                if ( image_received[current_pub_index] ) { 
+                    darknet_pub.publish(recent_images[current_pub_index]); 
+                }
+                else {
+                    // NODELET_WARN_THROTTLE(1, "DM waiting for image%d", current_pub_index);
+                    break;
+                }
+                frame_published = true;
+            } 
+            current_pub_index = (current_pub_index + 1) % activeCameras.size();
         }
         std_msgs::UInt8MultiArray msg;
         for(int i=0;i<activeCameras.size();i++) { msg.data.push_back(activeCameras[i]); }

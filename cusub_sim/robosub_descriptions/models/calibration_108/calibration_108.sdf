@@ -1,0 +1,22 @@
+<?xml version='1.0'?>
+<sdf version="1.6">
+<model name="calibration_108">
+  <static>true</static>
+    <link name="link">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://calibration_108/calibration_108.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://calibration_108/calibration_108.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>
