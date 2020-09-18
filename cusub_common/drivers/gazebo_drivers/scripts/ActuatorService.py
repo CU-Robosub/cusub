@@ -97,7 +97,7 @@ class ActuatorService(object):
         # Accelerate Torpedo to kill speed
         model_state = ModelState()
         model_state.model_name = torpedo_name
-        model_state.twist.linear.z = 10
+        model_state.twist.linear.z = 1
         model_state.reference_frame = "torpedo_%d::%s/base_link" % (self.current_torpedo, torpedo_name)
 
         set_model_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
@@ -169,6 +169,9 @@ class ActuatorService(object):
                 if not result.success:
                     rospy.logerr("Failed to spawn dropper!")
                     rospy.logerr(result.status_message)
+
+                # Let unreal know there is a torpedo
+                self.sub_simulator_spawner.publish(String("torpedo:/%s/pose_gt:0" % dropper_name))
 
                 self.current_dropper = self.current_dropper + 1
 
