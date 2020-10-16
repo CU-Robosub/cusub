@@ -118,6 +118,8 @@ class Approach(Objective):
 
         self.mag_target = rospy.get_param("tasks/start_gate/mag_target")
         self.enter_right = rospy.get_param("tasks/start_gate/enter_right")
+        self.enter_right_strafe_amt = rospy.get_param("tasks/start_gate/enter_right_strafe_amt")
+        self.enter_left_strafe_amt = rospy.get_param("tasks/start_gate/enter_left_strafe_amt")
         self.spin_carrot = rospy.get_param("tasks/start_gate/spin_carrot_rads")
 
     def execute(self, userdata):
@@ -362,9 +364,9 @@ class Center_Strafe(Approach):
     def action_func(self):
         self.yaw_setpoint = 0
         if self.enter_right:
-            self.strafe_setpoint = self.strafe_client.get_standard_state() + 0.70
+            self.strafe_setpoint = self.strafe_client.get_standard_state() + self.enter_right_strafe_amt
         else:
-            self.strafe_setpoint = self.strafe_client.get_standard_state() - 0.60
+            self.strafe_setpoint = self.strafe_client.get_standard_state() + self.enter_left_strafe_amt
         
         self.count += 1
         if self.count > self.count_target:
@@ -392,10 +394,20 @@ class Enter_With_Style(Approach):
         if self.mag_target <= self.mag and 1.0 <= abs(self.az):
             self.count += 1
             if self.count > self.count_target:
+                self.cuprint("entered startgate")
+
+                radians_turned = 0
+                current_yaw = self.yaw_client.get_standard_state()
+                while radians_turned < 4*np.pi and not rospy.is_shutdown():
+                    previous_yaw = current_yaw
+                    current_yaw = self.yaw_client.get_standard_state() + self.spin_carrot
+                    diff_yaw = current_yaw - previous_yaw
+                    if abs(diff_yaw) < np.pi:
+                        radians_turned += diff_yaw
+                    self.yaw_client.set_setpoint(current_yaw, loop=False)
+
                 self.cuprint("finished")
-                self.rospy_sleep(5)
-                # NOT SURE HOW TO ADD ROTATION FOR STYLE. I tried iterating the yaw setpoint,
-                # but it kept timing out
+
                 return True
         else:
             if self.count:

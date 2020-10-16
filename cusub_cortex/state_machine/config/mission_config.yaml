@@ -29,6 +29,8 @@ tasks:
     new_dv_check_rate: 30
     mag_target: 75
     enter_right: false
+    enter_right_strafe_amt: 0.56
+    enter_left_strafe_amt: -0.48
     spin_carrot_rads: 1.0
     retrace_hit_count: 1 # new hits before quitting from retracing
     retrace_timeout: 15 # seconds without getting detections before retracing
