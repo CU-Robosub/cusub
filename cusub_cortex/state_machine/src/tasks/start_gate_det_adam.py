@@ -63,8 +63,9 @@ class StartGate(Task):
         self.approach_3_poles = Approach_3_Poles(self.name, self.listener, clients)
 
         self.center_orbit = Center_Orbit(self.name, self.listener, clients)
-        self.center_strafe = Center_Strafe(self.name, self.listener, clients)
-        self.enter_with_style = Enter_With_Style(self.name, self.listener, clients)
+        self.side_orbit = Side_Orbit(self.name, self.listener, clients)
+        self.enter_side = Enter_Side(self.name, self.listener, clients)
+        self.style = Style(self.name, self.listener, clients)
 
         self.retrace = Retrace(self.name, self.listener)
 
@@ -82,13 +83,16 @@ class StartGate(Task):
             smach.StateMachine.add('Approach_3_Poles', self.approach_3_poles, transitions={'in_position':'Center_Orbit', 'timed_out':'manager', 'lost_object':'Retrace'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
-            smach.StateMachine.add('Center_Orbit', self.center_orbit, transitions={'centered':'Center_Strafe', 'timed_out':'manager', 'lost_object':'Retrace'}, \
+            smach.StateMachine.add('Center_Orbit', self.center_orbit, transitions={'centered':'Side_Orbit', 'timed_out':'manager', 'lost_object':'Retrace'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
-            smach.StateMachine.add('Center_Strafe', self.center_strafe, transitions={'ready_to_enter':'Enter_With_Style', 'timed_out':'manager', 'lost_object':'Retrace'}, \
+            smach.StateMachine.add('Side_Orbit', self.side_orbit, transitions={'ready_to_enter':'Enter_Side', 'timed_out':'manager', 'lost_object':'Retrace'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
-            smach.StateMachine.add('Enter_With_Style', self.enter_with_style, transitions={'finished':'manager', 'timed_out':'manager', 'lost_object':'Retrace'}, \
+            smach.StateMachine.add('Enter_Side', self.enter_side, transitions={'entered':'Style', 'timed_out':'manager', 'lost_object':'Retrace'}, \
+                remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
+
+            smach.StateMachine.add('Style', self.style, transitions={'finished':'manager', 'timed_out':'manager', 'lost_object':'Retrace'}, \
                 remapping={'timeout_obj':'timeout_obj', 'outcome':'outcome'})
 
             smach.StateMachine.add('Retrace', self.retrace, transitions={'found':'Approach', 'not_found':'Search'}, \
@@ -118,9 +122,11 @@ class Approach(Objective):
 
         self.mag_target = rospy.get_param("tasks/start_gate/mag_target")
         self.enter_right = rospy.get_param("tasks/start_gate/enter_right")
-        self.enter_right_strafe_amt = rospy.get_param("tasks/start_gate/enter_right_strafe_amt")
-        self.enter_left_strafe_amt = rospy.get_param("tasks/start_gate/enter_left_strafe_amt")
+        self.right_increment_amt = rospy.get_param("tasks/start_gate/right_increment_amt")
+        self.left_increment_amt = rospy.get_param("tasks/start_gate/left_increment_amt")
         self.spin_carrot = rospy.get_param("tasks/start_gate/spin_carrot_rads")
+
+        self.before_enter_drive = 0
 
     def execute(self, userdata):
         self.cuprint("executing")
@@ -162,9 +168,21 @@ class Approach(Objective):
 
                 bearing_arr = self.ret_bearing()
 
-                self.az = bearing_arr[0]
-                self.el = bearing_arr[1]
-                self.mag = bearing_arr[2]
+                self.az = bearing_arr[0]    # az for center pole when 3 poles detected
+                self.el = bearing_arr[1]    # el for center pole when 3 poles detected
+                self.mag = bearing_arr[2]   # mag for center pole when 3 poles detected
+                self.az_l = bearing_arr[3]
+                self.az_r = bearing_arr[4]
+                self.mag_l = bearing_arr[5]
+                self.mag_r = bearing_arr[6]
+
+                # Transform pole az into the subframe
+                self.trans_left_az = self.az_l - self.yaw_client.get_standard_state()
+                self.trans_center_az = self.az - self.yaw_client.get_standard_state()
+                self.trans_right_az = self.az_r - self.yaw_client.get_standard_state()
+                # az between the left/center & right/center poles to enter
+                self.enter_left_az = (((self.trans_left_az) + (self.trans_center_az)) / 2) + self.yaw_client.get_standard_state()
+                self.enter_right_az = (((self.trans_right_az) + (self.trans_center_az)) / 2) + self.yaw_client.get_standard_state()
                 
                 self.drive_setpoint = self.drive_client.get_standard_state()
                 self.strafe_setpoint = self.strafe_client.get_standard_state()
@@ -217,20 +235,19 @@ class Approach(Objective):
         self.yaw_client.disable()
 
     def PID_all_set_setpoint(self, drive_sp, strafe_sp, depth_sp, yaw_sp):
+        self.yaw_client.set_setpoint(yaw_sp, loop=False)
         self.drive_client.set_setpoint(drive_sp, loop=False)
         self.strafe_client.set_setpoint(strafe_sp, loop=False)
         self.depth_client.set_setpoint(depth_sp, loop=False)
-        self.yaw_client.set_setpoint(yaw_sp, loop=False)
 
     def rospy_sleep(self, secs):
         rospy.sleep(secs)
 
     def action_func(self):
         self.yaw_setpoint = self.az
-        # If within 10% of magnitude target
-        if (0.9 * self.mag_target) <= self.mag <= (1.1 * self.mag_target):
+        if (0.95 * self.mag_target) <= self.mag <= (1.05 * self.mag_target):
             self.count += 1
-            self.drive_setpoint += 0.15
+            self.drive_setpoint += 0.01
             if self.count > self.count_target:
                 self.cuprint("in position")
                 self.drive_client.set_setpoint(self.drive_setpoint, loop=False)
@@ -238,14 +255,20 @@ class Approach(Objective):
                 return True
         elif (self.mag_target - self.mag) > 0:
             if self.count:
-                self.drive_setpoint += 0.2
+                self.drive_setpoint += 0.15
             else:
-                self.drive_setpoint += 0.4
+                self.drive_setpoint += 0.20
         else:
             self.count = 0
-            self.drive_setpoint -= 0.3
+            self.drive_setpoint -= 0.10
     
     def ret_bearing(self):
+        az_l = 0
+        az_r = 0
+
+        mag_l = 0
+        mag_r = 0
+
         if self.num_of_poles == 1:
             [az, el, height, width] = self.listener.get_avg_bearing(self.dobj_nums[0], num_dv=5)
             mag = np.sqrt(height * width)
@@ -260,9 +283,13 @@ class Approach(Objective):
 
         if self.num_of_poles == 3:
             [az, el, height, width] = self.listener.get_avg_bearing(self.pole_c, num_dv=5)
+            [az_l, el_l, height_l, width_l] = self.listener.get_avg_bearing(self.pole_l, num_dv=5)
+            [az_r, el_r, height_r, width_r] = self.listener.get_avg_bearing(self.pole_r, num_dv=5)
             mag = np.sqrt(height * width)
+            mag_l = np.sqrt(height_l * width_l)
+            mag_r = np.sqrt(height_r * width_r)
             
-        return [az, el, mag]
+        return [az, el, mag, az_l, az_r, mag_l, mag_r]
     
     def eval_startgate_poles(self):
         [az_0, el_0, height_0, width_0] = self.listener.get_avg_bearing(self.dobj_nums[0], num_dv=5)
@@ -328,92 +355,117 @@ class Center_Orbit(Approach):
 
     def action_func(self):
         self.yaw_setpoint = self.az
-        if -0.03 < self.az < 0.03:
+        if (abs(abs(self.mag_l) - abs(self.mag_r)) < 8) and (abs(self.mag_l) > 95) and (abs(self.mag_r) > 95):
             self.count += 1
             if self.count > self.count_target:
                 self.cuprint("centered")
-                self.yaw_client.set_setpoint(0, loop=False)
+                self.yaw_client.set_setpoint(self.az, loop=False)
+                self.rospy_sleep(5)
                 return True
-        elif abs(self.az) < 0.15:
-            if self.az < 0:
-                self.strafe_setpoint = self.strafe_client.get_standard_state() + 0.25
-            else:
-                self.strafe_setpoint = self.strafe_client.get_standard_state() - 0.25
         else:
-            self.count = 0
-            if self.az < 0:
-                self.strafe_setpoint = self.strafe_client.get_standard_state() + 0.60
+            if self.mag_r > self.mag_l:
+                self.strafe_setpoint = self.strafe_client.get_standard_state() - 0.45
             else:
-                self.strafe_setpoint = self.strafe_client.get_standard_state() - 0.60
+                self.strafe_setpoint = self.strafe_client.get_standard_state() + 0.45
 
 
-class Center_Strafe(Approach):
+class Side_Orbit(Approach):
     outcomes = ['ready_to_enter', 'timed_out', 'lost_object']
     num_of_poles = 3
 
     def __init__(self, task_name, listener, clients):
-        super(Center_Strafe, self).__init__(task_name, listener, clients)
+        super(Side_Orbit, self).__init__(task_name, listener, clients)
 
     def execute(self, userdata):
-        ret = super(Center_Strafe, self).execute(userdata)
+        ret = super(Side_Orbit, self).execute(userdata)
         if ret == "found_pole":
             return "ready_to_enter"
         else:
             return ret
 
     def action_func(self):
-        self.yaw_setpoint = 0
         if self.enter_right:
-            self.strafe_setpoint = self.strafe_client.get_standard_state() + self.enter_right_strafe_amt
+            self.yaw_setpoint = self.enter_right_az
+            if (abs(self.trans_center_az) > 0.28):
+                self.count += 1
+            else:
+                self.strafe_setpoint = self.strafe_client.get_standard_state() + 0.30
         else:
-            self.strafe_setpoint = self.strafe_client.get_standard_state() + self.enter_left_strafe_amt
-        
-        self.count += 1
+            self.yaw_setpoint = self.enter_left_az
+            if (abs(self.trans_left_az) < 0.14) and (abs(self.trans_center_az) > 0.19):
+                self.count += 1
+            else:
+                self.strafe_setpoint = self.strafe_client.get_standard_state() - 0.30
+
         if self.count > self.count_target:
             self.cuprint("ready_to_enter")
-            self.yaw_client.set_setpoint(0, loop=False)
-            self.rospy_sleep(10)
+            self.rospy_sleep(5)
             return True
 
 
-class Enter_With_Style(Approach):
+class Enter_Side(Approach):
+    outcomes = ['entered', 'timed_out', 'lost_object']
+    num_of_poles = 3
+
+    def __init__(self, task_name, listener, clients):
+        super(Enter_Side, self).__init__(task_name, listener, clients)
+
+    def execute(self, userdata):
+        ret = super(Enter_Side, self).execute(userdata)
+        if ret == "found_pole":
+            return "entered"
+        else:
+            return ret
+
+    def action_func(self):
+        if self.count == 0:
+            self.before_enter_drive = self.drive_client.get_standard_state()
+            self.count += 1
+
+        if self.drive_client.get_standard_state() > (self.before_enter_drive + 5):
+            self.count += 1
+            if self.count > self.count_target:
+                self.cuprint("entered")
+                self.rospy_sleep(5)
+                return True
+        else:
+            if self.enter_right:
+                self.yaw_setpoint = self.enter_right_az
+            else:
+                self.yaw_setpoint = self.enter_left_az
+            self.drive_setpoint += 1
+
+
+
+
+class Style(Approach):
     outcomes = ['finished', 'timed_out', 'lost_object']
     num_of_poles = 3
 
     def __init__(self, task_name, listener, clients):
-        super(Enter_With_Style, self).__init__(task_name, listener, clients)
+        super(Style, self).__init__(task_name, listener, clients)
 
     def execute(self, userdata):
-        ret = super(Enter_With_Style, self).execute(userdata)
+        ret = super(Style, self).execute(userdata)
         if ret == "found_pole":
             return "finished"
         else:
             return ret
 
     def action_func(self):
-        if self.mag_target <= self.mag and 1.0 <= abs(self.az):
-            self.count += 1
-            if self.count > self.count_target:
-                self.cuprint("entered startgate")
+        radians_turned = 0
+        current_yaw = self.yaw_client.get_standard_state()
+        while radians_turned < 4*np.pi and not rospy.is_shutdown():
+            previous_yaw = current_yaw
+            current_yaw = self.yaw_client.get_standard_state() + self.spin_carrot
+            diff_yaw = current_yaw - previous_yaw
+            if abs(diff_yaw) < np.pi:
+                radians_turned += diff_yaw
+            self.yaw_client.set_setpoint(current_yaw, loop=False)
+        
+        self.cuprint("finished")
+        return True
 
-                radians_turned = 0
-                current_yaw = self.yaw_client.get_standard_state()
-                while radians_turned < 4*np.pi and not rospy.is_shutdown():
-                    previous_yaw = current_yaw
-                    current_yaw = self.yaw_client.get_standard_state() + self.spin_carrot
-                    diff_yaw = current_yaw - previous_yaw
-                    if abs(diff_yaw) < np.pi:
-                        radians_turned += diff_yaw
-                    self.yaw_client.set_setpoint(current_yaw, loop=False)
-
-                self.cuprint("finished")
-
-                return True
-        else:
-            if self.count:
-                self.drive_setpoint += 0.4
-            else:
-                self.drive_setpoint += 0.6
 
 
 class Retrace(Objective):
