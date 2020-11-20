@@ -28,8 +28,8 @@ priors:
     sim_model: buoy_jiangshi_1
   leviathan:
     qtlocation:
-    - 186
-    - 164
+    - 208
+    - 143
     - 180
     sim_model: leviathan/description
   start_gate:
@@ -37,7 +37,7 @@ priors:
     qtlocation:
     - 204
     - 349
-    - 270
+    - 315
     sim_model: StartGate_1
   torpedos:
     prior_depth: -2.0

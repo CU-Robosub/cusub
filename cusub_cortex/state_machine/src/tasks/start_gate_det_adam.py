@@ -157,6 +157,8 @@ class Approach(Objective):
 
         watchdog_timer.set_new_time(self.retrace_timeout, print_new_time=False)
 
+        self.drive_setpoint = self.drive_client.get_standard_state()
+
         self.cuprint("servoing")
         r = rospy.Rate(self.rate)
         print("") # overwritten by servoing status
@@ -176,19 +178,20 @@ class Approach(Objective):
                 self.mag_l = bearing_arr[5]
                 self.mag_r = bearing_arr[6]
 
-                # Transform pole az into the subframe
-                self.trans_left_az = self.az_l - self.yaw_client.get_standard_state()
-                self.trans_center_az = self.az - self.yaw_client.get_standard_state()
-                self.trans_right_az = self.az_r - self.yaw_client.get_standard_state()
-                # az between the left/center & right/center poles to enter
-                self.enter_left_az = (((self.trans_left_az) + (self.trans_center_az)) / 2) + self.yaw_client.get_standard_state()
-                self.enter_right_az = (((self.trans_right_az) + (self.trans_center_az)) / 2) + self.yaw_client.get_standard_state()
-                
-                self.drive_setpoint = self.drive_client.get_standard_state()
-                self.strafe_setpoint = self.strafe_client.get_standard_state()
-                self.yaw_setpoint = self.yaw_client.get_standard_state()
+                self.drive_state = self.drive_client.get_standard_state()   
+                # self.strafe_setpoint = self.strafe_client.get_standard_state()
+                self.strafe_state = self.strafe_client.get_standard_state()
+                self.yaw_state = self.yaw_client.get_standard_state()
 
-                self.cuprint("CHECK POSITION: " + str(self.count) + " / " + str(self.count_target), warn=True, print_prev_line=True)
+                # Transform pole az into the subframe
+                self.trans_left_az = self.az_l - self.yaw_state
+                self.trans_center_az = self.az - self.yaw_state
+                self.trans_right_az = self.az_r - self.yaw_state
+                # az between the left/center & right/center poles to enter
+                self.enter_left_az = (((self.trans_left_az) + (self.trans_center_az)) / 2) + self.yaw_state
+                self.enter_right_az = (((self.trans_right_az) + (self.trans_center_az)) / 2) + self.yaw_state
+
+                # self.cuprint("CHECK POSITION: " + str(self.count) + " / " + str(self.count_target), warn=True, print_prev_line=True)
 
                 if self.action_func():
                     break
@@ -244,10 +247,11 @@ class Approach(Objective):
         rospy.sleep(secs)
 
     def action_func(self):
+        self.strafe_setpoint = self.strafe_state
         self.yaw_setpoint = self.az
         if (0.95 * self.mag_target) <= self.mag <= (1.05 * self.mag_target):
             self.count += 1
-            self.drive_setpoint += 0.01
+            # self.drive_setpoint = self.drive_state + 0.01
             if self.count > self.count_target:
                 self.cuprint("in position")
                 self.drive_client.set_setpoint(self.drive_setpoint, loop=False)
@@ -255,12 +259,12 @@ class Approach(Objective):
                 return True
         elif (self.mag_target - self.mag) > 0:
             if self.count:
-                self.drive_setpoint += 0.15
+                self.drive_setpoint = self.drive_state + 0.15
             else:
-                self.drive_setpoint += 0.20
+                self.drive_setpoint = self.drive_state + 0.20
         else:
             self.count = 0
-            self.drive_setpoint -= 0.10
+            self.drive_setpoint = self.drive_state - 0.10
     
     def ret_bearing(self):
         az_l = 0
@@ -354,8 +358,10 @@ class Center_Orbit(Approach):
             return ret
 
     def action_func(self):
+        # self.cuprint("diff: " + str(abs(abs(self.mag_l) - abs(self.mag_r))) + " - left: " + str(abs(self.mag_l)) + " - right: " + str(abs(self.mag_r)), warn=True, print_prev_line=False)
+
         self.yaw_setpoint = self.az
-        if (abs(abs(self.mag_l) - abs(self.mag_r)) < 8) and (abs(self.mag_l) > 95) and (abs(self.mag_r) > 95):
+        if (abs(abs(self.mag_l) - abs(self.mag_r)) < 22) and (abs(self.mag_l) > 70) and (abs(self.mag_r) > 70):
             self.count += 1
             if self.count > self.count_target:
                 self.cuprint("centered")
@@ -364,9 +370,9 @@ class Center_Orbit(Approach):
                 return True
         else:
             if self.mag_r > self.mag_l:
-                self.strafe_setpoint = self.strafe_client.get_standard_state() - 0.45
+                self.strafe_setpoint = self.strafe_state - 0.45
             else:
-                self.strafe_setpoint = self.strafe_client.get_standard_state() + 0.45
+                self.strafe_setpoint = self.strafe_state + 0.45
 
 
 class Side_Orbit(Approach):
@@ -384,18 +390,20 @@ class Side_Orbit(Approach):
             return ret
 
     def action_func(self):
+        self.cuprint("left: " + str(abs(self.trans_left_az)) + " - center: " + str(abs(self.trans_center_az)), warn=True, print_prev_line=False)
+
         if self.enter_right:
             self.yaw_setpoint = self.enter_right_az
             if (abs(self.trans_center_az) > 0.28):
                 self.count += 1
             else:
-                self.strafe_setpoint = self.strafe_client.get_standard_state() + 0.30
+                self.strafe_setpoint = self.strafe_state + 0.30
         else:
             self.yaw_setpoint = self.enter_left_az
-            if (abs(self.trans_left_az) < 0.14) and (abs(self.trans_center_az) > 0.19):
+            if (abs(self.trans_left_az) < 0.19) and (abs(self.trans_center_az) > 0.19):
                 self.count += 1
             else:
-                self.strafe_setpoint = self.strafe_client.get_standard_state() - 0.30
+                self.strafe_setpoint = self.strafe_state - 0.30
 
         if self.count > self.count_target:
             self.cuprint("ready_to_enter")
@@ -418,11 +426,12 @@ class Enter_Side(Approach):
             return ret
 
     def action_func(self):
+        self.strafe_setpoint = self.strafe_state
         if self.count == 0:
-            self.before_enter_drive = self.drive_client.get_standard_state()
+            self.before_enter_drive = self.drive_state
             self.count += 1
 
-        if self.drive_client.get_standard_state() > (self.before_enter_drive + 5):
+        if self.drive_state > (self.before_enter_drive + 5):
             self.count += 1
             if self.count > self.count_target:
                 self.cuprint("entered")
@@ -433,7 +442,7 @@ class Enter_Side(Approach):
                 self.yaw_setpoint = self.enter_right_az
             else:
                 self.yaw_setpoint = self.enter_left_az
-            self.drive_setpoint += 1
+            self.drive_setpoint = self.drive_state + 1
 
 
 
