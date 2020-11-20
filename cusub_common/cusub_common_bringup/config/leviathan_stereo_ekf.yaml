@@ -164,7 +164,7 @@ pose0_rejection_threshold: 1
 #       rolldot,pitchdot,yawdot,
 #       xddot,yddot,zddot
 
-twist0: 'dvl'
+twist0: 'stereo_odometer/twist'
 twist0_config: [false, false, false,
                 false, false, false,
                 true,  true,  false,
