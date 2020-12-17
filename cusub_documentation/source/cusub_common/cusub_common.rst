@@ -52,6 +52,13 @@ Drivers
     drivers/pololu_controller
     drivers/sparton_imu
 
+
+.. autoclass:: Console
+    :members:
+
+.. autoclass:: JoyTeleop
+    :members:
+
 :doc:`gazebo_drivers <drivers/gazebo_drivers>`
 
 :doc:`actuator <drivers/actuator>`
@@ -77,6 +84,7 @@ the exceptions being motor_controllers and occam due to their large topic list:
 ::
     <sub_name>/cusub_common/motor_controllers/<topics>
     <sub_name>/cusub_common/occam/<topics>
+
 
 Known Issues
 ############

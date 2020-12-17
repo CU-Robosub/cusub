@@ -18,7 +18,25 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../cusub_sim/leviathan_gazebo_drivers/scripts/'))
+#sys.path.insert(0, os.path.abspath('../../cusub_sim/leviathan_gazebo_drivers/scripts/'))
+#sys.path.append(os.path.abspath('../../cusub_sim/stress_tester/scripts/'))
+#sys.path.append(os.path.abspath('../../cusub_sim/cusub_sim_bringup/scripts/'))
+#sys.path.append(os.path.abspath('../../cusub_sim/robosub_descriptions/src/'))
+#sys.path.append(os.path.abspath('../../cusub_common/waypoint_navigator/src/'))
+#sys.path.append(os.path.abspath('../../cusub_common/drivers/gazebo_drivers/scripts/'))
+#sys.path.append(os.path.abspath('../../cusub_common/drivers/occam/'))
+#sys.path.insert(1, os.path.abspath('../../cusub_common/drivers/occam/scripts/'))
+#
+#sys.path.append(os.path.abspath('../../cusub_common/debugging_tools/console/scripts/'))
+#from console import *
+
+#sys.path.append(os.path.abspath('../../cusub_common/debugging_tools/leviathan_control/src/'))
+#from joy_teleop import Joyteleop
+
+
+modulenames = set(sys.modules) & set(globals())
+allmodules = [sys.modules[name] for name in modulenames]
+print(allmodules)
 
 
 # -- Project information -----------------------------------------------------

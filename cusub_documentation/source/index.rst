@@ -41,6 +41,13 @@ The software is structered loosly around the Open System Interconnect Model (OSI
    cusub_cortex/cusub_cortex
    git_rules
 
+.. autoclass:: Console
+    :members:
+
+.. autoclass:: JoyTeleop
+    :members:
+
+
 
 
 Indices and tables

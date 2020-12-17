@@ -2,7 +2,8 @@
 Getting Started with CUSub
 **************************
 This guide assumes you have an understanding of ROS build environments and git version controlling.
-some :ref:`helpful-resources` helpful resources can be found at the ned of this page.
+some :ref:`helpful-resources` helpful resources can be found at the end of this page.
+
 
 
 Setting up your workspace
@@ -17,8 +18,11 @@ The CUSub software stack consists of 4 meta-packages that contain all the runtim
 
 :doc:`\cusub_cortex`: Top level logic for controlling the sub including the state machine, global mapper, and bringup scripts for running the entire system as a whole.
 
+.. note::
+    To set up the cusub with Docker, use the Docker file in the repo. 
 
-in order to setup the CUSub workspace clone the repo into the src folder of you catkin_ws
+
+In order to setup the CUSub workspace clone the repo into the src folder of you catkin_ws
 ::
 
     cd ~/<your_catkin_ws>/src
@@ -76,6 +80,10 @@ To get started working with the sub it is not necessary to build the perception 
 ::
 
     catkin build cusub_cortex
+
+
+Building ROS from source with virtualenv
+##################################################
 
 
 .. _helpful-resources:
