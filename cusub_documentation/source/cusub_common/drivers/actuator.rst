@@ -1,6 +1,6 @@
-==============
+================
 ActuatorService
-==============
+================
 
 .. class:: ActuatorService
 
@@ -10,7 +10,7 @@ ActuatorService
 
 **Services**
 
-* *service_name*, *type*
+* *service_name*, *service_class*
 * :code:`activateActuator`, *ActivateActuator*
 
 actuator_activate

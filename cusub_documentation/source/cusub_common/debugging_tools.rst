@@ -1,6 +1,6 @@
-==============
+================
 Debugging Tools
-==============
+================
 stub for information about the debugging tools for the sub.
 
 This package will be combined into one package soon.
@@ -83,7 +83,7 @@ joy_teleop
 
 **Service Proxies**
 
-* *service_name*, *type*
+* *service_name*, *service_class*
 * :code:`toggleWaypointControl`, *ToggleControl*
 * :code:`activateActuator`, *ActivateActuator*
 
@@ -119,7 +119,7 @@ key_teleop
 
 **Service Proxies**
 
-* *service_name*, *type*
+* *service_name*, *service_class*
 * :code:`toggleWaypointControl`, *ToggleControl*
 * :code:`activateActuator`, *ActivateActuator*
 
@@ -164,7 +164,7 @@ fun_teleop
 
 
 teleop_setpoints
-------------
+-----------------
 
 .. class:: Motor_Controller
 

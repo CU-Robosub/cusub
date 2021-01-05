@@ -14,7 +14,7 @@ auto_exposure
 
 **Services**
 
-* *service_name*, *type*
+* *service_name*, *service_class*
 * :code:`activateActuator`, *ActivateActuator*
 
 camera_info_pub
@@ -35,7 +35,7 @@ camera_set_server
 
 **Services**
 
-* *service_name*, *type*
+* *service_name*, *service_class*
 * :code:`/occam/image0/set_camera_info`, *SetCameraInfo*
 * :code:`/occam/image1/set_camera_info`, *SetCameraInfo*
 * :code:`/occam/image2/set_camera_info`, *SetCameraInfo*

@@ -1,6 +1,6 @@
-==============
+==================
 WaypointNavigator
-==============
+==================
 
 .. contents:: Contents
 
@@ -19,10 +19,9 @@ WaypointNavigator
 * :code:`motor_controllers/pid/depth/state`, *Float64*
 
 
-
 **Publishers**
 
-
+* *topic_name*, *type*
 * :code:`motor_controllers/pid/depth/setpoint`, *Float64*
 * :code:`motor_controllers/pid/drive/setpoint`, *Float64*
 * :code:`motor_controllers/pid/strafe/setpoint`, *Float64*
@@ -31,6 +30,7 @@ WaypointNavigator
 
 **Services**
 
+* *service_name*, *service_class*
 * :code:`addWaypoint`
 * :code:`toggleWaypointControl`
 :ref:`Message Types<message_types>`
@@ -60,8 +60,9 @@ Calibrate magnetometer for uuv simulator.
 
 **Services**
 
+* *service_name*, *service_class*
 * :code:`calibrateMagnetometer`
-
+:ref:`Message Types<message_types>`
 
 .. _message_types:
 

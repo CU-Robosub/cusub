@@ -100,13 +100,13 @@ ActuatorService
 
 **Services**
 
-* *service_name*, *type*
+* *service_name*, *service_class*
 * :code:`activateActuator`, *ActivateActuator*
 
 
 **Service Proxies**
 
-* *service_name*, *type*
+* *service_name*, *service_class*
 * :code:`/gazebo/spawn_urdf_model`, *SpawnModel*
 * :code:`/gazebo/delete_model`, *DeleteModel*
 * :code:`/gazebo/set_model_state`, *SetModelState*
@@ -124,7 +124,7 @@ CameraInfoPublisher
 
 **Service Proxies**
 
-* *topic_name*, *type*
+* *service_name*, *service_class*
 * :code:`~camera_info_topic`, *CameraInfo*
 
 
@@ -169,7 +169,7 @@ hydrophones_faker
 
 **Services**
 
-* *service_name*, *type*
+* *service_name*, *service_class*
 * :code:`hydrophones/switch_active_pinger`, *PingerSwitch*
 
 **Publishers**

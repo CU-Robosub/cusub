@@ -12,7 +12,7 @@ DVL
 
 **Services**
 
-* *service_name*, *type*
+* *service_name*, *service_class*
 * :code:`activateActuator`, *ActivateActuator*
 
 Defined Message Types
