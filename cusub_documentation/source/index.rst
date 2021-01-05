@@ -9,7 +9,7 @@ Welcome to CU RoboSub's software documentation!
 Welcome to the CU Robosub software documentation page.
 The goal for this site is to provide a centralized location for all software related documentation to be stored, this includes: installation, deployment, code style, comment style, repository rules, ROS topic interfaces, as well as many more pertinent details for developing code for the sub.
 
-If you have any questions or concerns be sure to attend our regulary scheduled `Software meetings <https://www.colorado.edu/studentgroups/roboticsclub/robosub/robosub-calendar>`_ or ask questions within the `software channel <https://cu-robotics.slack.com/messages/C1DR5UJHG/>`_ of our slack  
+If you have any questions or concerns be sure to attend our regulary scheduled `Software meetings <https://www.colorado.edu/studentgroups/roboticsclub/robosub/robosub-calendar>`_ or ask questions within the `software channel <https://cu-robotics.slack.com/messages/C1DR5UJHG/>`_ of our slack
 
 
 *******************************
@@ -28,7 +28,7 @@ The software is structered loosly around the Open System Interconnect Model (OSI
    :alt: robosub interconnect model diagram
 
 
-   
+
 .. toctree::
    :maxdepth: 3
    :caption: Contents:
@@ -39,14 +39,9 @@ The software is structered loosly around the Open System Interconnect Model (OSI
    cusub_common/cusub_common
    cusub_perception/cusub_perception
    cusub_cortex/cusub_cortex
+   hardware_specs
+   documentation
    git_rules
-
-.. autoclass:: Console
-    :members:
-
-.. autoclass:: JoyTeleop
-    :members:
-
 
 
 

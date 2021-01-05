@@ -18,26 +18,46 @@
 
 import os
 import sys
-#sys.path.insert(0, os.path.abspath('../../cusub_sim/leviathan_gazebo_drivers/scripts/'))
-#sys.path.append(os.path.abspath('../../cusub_sim/stress_tester/scripts/'))
-#sys.path.append(os.path.abspath('../../cusub_sim/cusub_sim_bringup/scripts/'))
-#sys.path.append(os.path.abspath('../../cusub_sim/robosub_descriptions/src/'))
-#sys.path.append(os.path.abspath('../../cusub_common/waypoint_navigator/src/'))
-#sys.path.append(os.path.abspath('../../cusub_common/drivers/gazebo_drivers/scripts/'))
-#sys.path.append(os.path.abspath('../../cusub_common/drivers/occam/'))
-#sys.path.insert(1, os.path.abspath('../../cusub_common/drivers/occam/scripts/'))
-#
-#sys.path.append(os.path.abspath('../../cusub_common/debugging_tools/console/scripts/'))
-#from console import *
+import subprocess
+"""
+For Breathe and Doxygen documentation on readthedocs
+Ref: Breathe Documentation "RUNNING ON READ THE DOCS" (https://breathe.readthedocs.io/en/latest/readthedocs.html)
+"""
 
-#sys.path.append(os.path.abspath('../../cusub_common/debugging_tools/leviathan_control/src/'))
-#from joy_teleop import Joyteleop
+# -- Breathe Build for c++ documentation -----------------------------------------------------
 
+# Check if build directories exists, if not, create them.
+if not os.path.exists('../dox_build'):
+    os.makedirs('../dox_build')
+if not os.path.exists('../dox_build/xml'):
+    os.makedirs('../dox_build/xml')
+
+
+def run_doxygen(folder):
+    """Run the doxygen make command in the designated folder"""
+    try:
+        return_code = subprocess.call(
+            "cd %s; doxygen Doxyfile" % folder, shell=True
+        )
+        if return_code < 0:
+            sys.stderr.write("doxygen error: %s" % return_code)
+    except OSError as e:
+        sys.stderr.write("doxygen execution failed: %s" % e)
+
+
+# Generate doxygen xml
+run_doxygen("../")
+
+# Tell Breathe what projects to add
+breathe_projects = {
+    "localizer": os.path.abspath('../dox_build/xml/'),
+    "tracking": os.path.abspath('../dox_build/xml/'),
+}
+breathe_default_project = "localizer"
 
 modulenames = set(sys.modules) & set(globals())
 allmodules = [sys.modules[name] for name in modulenames]
 print(allmodules)
-
 
 # -- Project information -----------------------------------------------------
 
@@ -50,7 +70,6 @@ version = u''
 # The full version, including alpha/beta/rc tags
 release = u'0.0.1'
 
-
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -61,16 +80,11 @@ release = u'0.0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.mathjax'
+    'sphinx.ext.intersphinx', 'sphinx.ext.viewcode', 'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon', 'sphinx.ext.mathjax', 'breathe'
 ]
 
-intersphinx_mapping = {
-    'cusub_sim': ('~/robosub_ws/src/cusub_sim/', None)
-}
+intersphinx_mapping = {'cusub_sim': ('~/robosub_ws/src/cusub_sim/', None)}
 
 # Tell sphinx what the primary language being documented is.
 primary_domain = 'py'
@@ -105,7 +119,6 @@ exclude_patterns = []
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
 
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -134,12 +147,10 @@ html_static_path = ['_static']
 #
 # html_sidebars = {}
 
-
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'CU_RoboSubdoc'
-
 
 # -- Options for LaTeX output ------------------------------------------------
 
@@ -165,20 +176,19 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'CU_RoboSub.tex', u'CU\\_RoboSub Documentation',
-     u'Jeff Venicx', 'manual'),
+    (
+        master_doc, 'CU_RoboSub.tex', u'CU\\_RoboSub Documentation',
+        u'Jeff Venicx', 'manual'
+    ),
 ]
-
 
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'cu_robosub', u'CU_RoboSub Documentation',
-     [author], 1)
+    (master_doc, 'cu_robosub', u'CU_RoboSub Documentation', [author], 1)
 ]
-
 
 # -- Options for Texinfo output ----------------------------------------------
 
@@ -186,11 +196,11 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'CU_RoboSub', u'CU_RoboSub Documentation',
-     author, 'CU_RoboSub', 'One line description of project.',
-     'Miscellaneous'),
+    (
+        master_doc, 'CU_RoboSub', u'CU_RoboSub Documentation', author,
+        'CU_RoboSub', 'One line description of project.', 'Miscellaneous'
+    ),
 ]
-
 
 # -- Options for Epub output -------------------------------------------------
 
@@ -208,7 +218,6 @@ epub_title = project
 
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
-
 
 # -- Extension configuration -------------------------------------------------
 
