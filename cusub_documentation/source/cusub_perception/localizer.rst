@@ -55,3 +55,40 @@ Writing a New Server
 ####################
 
 There are 2 parts to localizing server: **ros front end** and **image analyzing backend**. The ros front end is located in **localizer/scripts/<class>_servers/**. It will receive a ClassicalBoxes2Poses.msg and use its image analyzing backend (located in **localizer/src/classical_cv/**) to locate its object. We recommend writing the backend first to prototype your classical cv method. Try to keep pixel analysis solely in the backend. For example, if using the popular `pnp technique <https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html>`_ then your backend may find pixels while your front end calls cv2.solvePnP and returns the pose.
+
+
+Reference
+####################
+
+Localizer
+---------------
+
+.. doxygenfile:: localizer.h
+    :project: localizer
+    :sections: public-type innernamespace innerclass func private-func
+
+
+jiangshi_watershed
+--------------------
+
+.. doxygenfile:: jiangshi_watershed.h
+    :project: localizer
+    :sections: public-type innernamespace innerclass func private-func
+
+
+pose_generator
+--------------------
+
+.. doxygenfile:: pose_generator.h
+    :project: localizer
+    :sections: public-type innernamespace innerclass func private-func
+
+
+start_gate_hough
+--------------------
+
+.. doxygenfile:: start_gate_hough.h
+    :project: localizer
+    :sections: public-type innernamespace innerclass func private-func
+
+
