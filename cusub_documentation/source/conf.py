@@ -81,7 +81,7 @@ release = u'0.0.1'
 # ones.
 extensions = [
     'sphinx.ext.intersphinx', 'sphinx.ext.viewcode', 'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon', 'sphinx.ext.mathjax', 'breathe'
+    'sphinx.ext.napoleon', 'sphinx.ext.mathjax', 'breathe', 'recommonmark'
 ]
 
 intersphinx_mapping = {'cusub_sim': ('~/robosub_ws/src/cusub_sim/', None)}

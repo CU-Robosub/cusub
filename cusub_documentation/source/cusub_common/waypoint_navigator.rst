@@ -54,6 +54,7 @@ Calibrate magnetometer for uuv simulator.
 
 **Subscribers**
 
+* *topic_name*, *type*
 * :code:`odometry/filtered`, *Odometry*
 * :code:`imu`, *Imu*
 
