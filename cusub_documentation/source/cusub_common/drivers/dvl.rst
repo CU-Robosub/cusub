@@ -6,6 +6,7 @@ DVL
 
 **Publishers**
 
+* *topic_name*, *type*
 * :code:`dvl`, *TwistWithCovarianceStamped*
 * :code:`dvl/depth`, *Float64MultiArray*
 

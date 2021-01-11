@@ -17,6 +17,7 @@ Depth Sensor
 
 **Publishers**
 
+* *topic_name*, *type*
 * :code:`depth_odom`, *PoseWithCovarianceStamped*
 * :code:`depth_map`, *PoseWithCovarianceStamped*
 * :code:`/kill_switch`, *Bool*

@@ -122,7 +122,7 @@ Reads in the state transitions from the mission_config parameters
 
 **Publishers**
 
-* *topic_name*,*type*
+* *topic_name*, *type*
 * :code:`cusub_cortex/state_machine/task_status`, *TaskStatus*
 
 **Services**
