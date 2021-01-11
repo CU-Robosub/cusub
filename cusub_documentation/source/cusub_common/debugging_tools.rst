@@ -12,7 +12,7 @@ This package will be combined into one package soon.
 Console 
 ---------------
 
-.. class:: Console
+.. class:: Console(master=None)
 
 
 * starts `tkinter <https://docs.python.org/3/library/tkinter.html>`_ GUI for logging
@@ -53,7 +53,7 @@ Leviathan Control
 joy_teleop
 ------------
 
-.. class:: JoyTeleop
+.. class:: JoyTeleop(object)
 
 * Allows joystick teleoperation of submarine
 * starts ROS node :code:`joy_teleop`
@@ -91,7 +91,7 @@ joy_teleop
 key_teleop
 ------------
 
-.. class:: key_teleop
+.. class:: def key_teleop
 
 * Allows keyboard teleoperation of submarine
 * starts ROS node :code:`key_teleop`

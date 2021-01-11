@@ -39,7 +39,7 @@ WaypointNavigator
 WaypointActionServer
 -----------------------
 
-.. class:: WaypointActionServer
+.. class:: WaypointServer
 
 * Launched by :code:`waypoint_navigator.launch`, :code:`leviathan_sub.launch`
 * Starts ROS node :code:`waypoint_action_server`

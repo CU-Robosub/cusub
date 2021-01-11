@@ -45,7 +45,7 @@ which gazebo will not publish.
 
 
 
-.. class:: YOLOObjectClass
+.. class:: YOLOObjectClass(name, color, points)
 
     Detection class object
 
@@ -54,7 +54,7 @@ which gazebo will not publish.
     to be classified rather than classifying the object as a whole.
 
 
-.. class:: YOLOObject
+.. class:: YOLOObject(frame_id, classes)
 
     Holds object information required for bounding box generation
 
@@ -63,7 +63,7 @@ which gazebo will not publish.
     Holds camera information required for bounding box generation
 
 
-.. class:: YOLOFaker
+.. class:: YOLOFaker(object)
 
     YOLO Faker Node
 
