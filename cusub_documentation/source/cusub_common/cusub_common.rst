@@ -82,6 +82,7 @@ Currently the majority of topics will be placed under this namespace:
 
 the exceptions being motor_controllers and occam due to their large topic list:
 ::
+
     <sub_name>/cusub_common/motor_controllers/<topics>
     <sub_name>/cusub_common/occam/<topics>
 

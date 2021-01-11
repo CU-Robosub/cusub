@@ -30,6 +30,7 @@ Configuration
 
 In mission_config/config/mission_config.yaml, in a class's object_localizer tag, provide the **darknet class** and **server or list of servers** (in order of priority) for the localizer client to call. Example:
 ::
+
     tasks:
      start_gate:
       prior: [4,-1,-1.5]
