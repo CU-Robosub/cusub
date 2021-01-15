@@ -3,6 +3,9 @@ State Machine
 ==============
 
 
+.. image:: ./../../assets/State_Machine.png
+
+
 smach_top
 -----------------
 

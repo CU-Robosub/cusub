@@ -38,7 +38,7 @@ def run_doxygen(folder):
     try:
         return_code = subprocess.call(
             "cd %s; doxygen Doxyfile" % folder, shell=True
-        )
+            )
         if return_code < 0:
             sys.stderr.write("doxygen error: %s" % return_code)
     except OSError as e:
@@ -52,7 +52,7 @@ run_doxygen("../")
 breathe_projects = {
     "localizer": os.path.abspath('../dox_build/xml/'),
     "tracking": os.path.abspath('../dox_build/xml/'),
-}
+    }
 breathe_default_project = "localizer"
 
 modulenames = set(sys.modules) & set(globals())
@@ -81,8 +81,8 @@ release = u'0.0.1'
 # ones.
 extensions = [
     'sphinx.ext.intersphinx', 'sphinx.ext.viewcode', 'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon', 'sphinx.ext.mathjax', 'breathe', 'recommonmark'
-]
+    'sphinx.ext.napoleon', 'sphinx.ext.mathjax', 'breathe'
+    ]
 
 intersphinx_mapping = {'cusub_sim': ('~/robosub_ws/src/cusub_sim/', None)}
 
@@ -170,7 +170,7 @@ latex_elements = {
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
-}
+    }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
@@ -179,8 +179,8 @@ latex_documents = [
     (
         master_doc, 'CU_RoboSub.tex', u'CU\\_RoboSub Documentation',
         u'Jeff Venicx', 'manual'
-    ),
-]
+        ),
+    ]
 
 # -- Options for manual page output ------------------------------------------
 
@@ -188,7 +188,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     (master_doc, 'cu_robosub', u'CU_RoboSub Documentation', [author], 1)
-]
+    ]
 
 # -- Options for Texinfo output ----------------------------------------------
 
@@ -199,8 +199,8 @@ texinfo_documents = [
     (
         master_doc, 'CU_RoboSub', u'CU_RoboSub Documentation', author,
         'CU_RoboSub', 'One line description of project.', 'Miscellaneous'
-    ),
-]
+        ),
+    ]
 
 # -- Options for Epub output -------------------------------------------------
 
