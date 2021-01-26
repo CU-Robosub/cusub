@@ -1,7 +1,11 @@
 
 
-Check out the [latest documentation](https://robosub.readthedocs.io/en/latest/). (Work in Progress)
+Check out the [latest documentation](https://cusub.readthedocs.io/en/latest/). (Work in Progress)
 
+
+Robosub Model
+--------------
+![Robot Model](./cusub_documentation/source/images/robosub_system_interconnect_model.jpg)
 
 
 
