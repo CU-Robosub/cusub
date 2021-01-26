@@ -1,6 +1,6 @@
-***************
-CUSub Percetion
-***************
+******************
+CUSub Perception
+******************
 
 Running Perception
 ##################
@@ -16,6 +16,7 @@ System Packages
     darknet_config
     darknet_ros
     localizer
+    tracking
 
 :doc:`cusub_perception_bringup <cusub_perception_bringup>`
 
@@ -24,6 +25,8 @@ System Packages
 :doc:`darknet ros <darknet_ros>`
 
 :doc:`localizer <localizer>`
+
+:doc:`tracking <tracking>`
 
 
 ROS Topic Interface

@@ -1,5 +1,6 @@
-**********
+***************
 darknet_config
-**********
+***************
 
-stub for darknet cv documentation
+Refer to the documentation of `configuring darknet <https://github.com/AlexeyAB/darknet/wiki>`_.
+
