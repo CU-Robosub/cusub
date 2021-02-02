@@ -86,25 +86,25 @@ class CamAdjust:
                 c1i = self.cam1_info.pop(0)
             while self.compare_times(c1,c2i,self.cam2_info[0]):
                 c2i = self.cam2_info.pop(0)
-            print('')
-            print(c1.header.stamp.secs-c2.header.stamp.secs + (c1.header.stamp.nsecs-c2.header.stamp.nsecs)*10**(-9))
+            # print('')
+            # print(c1.header.stamp.secs-c2.header.stamp.secs + (c1.header.stamp.nsecs-c2.header.stamp.nsecs)*10**(-9))
             t1 = c1.header.stamp.secs-c1i.header.stamp.secs + (c1.header.stamp.nsecs-c1i.header.stamp.nsecs)*10**(-9)
             t2 = c1.header.stamp.secs-c2i.header.stamp.secs + (c1.header.stamp.nsecs-c2i.header.stamp.nsecs)*10**(-9)
-            if t1 > 5:
-                print('')
-                print(t1)
-                print('vs')
-                print(c1.header.stamp.secs-self.cam1_info[0].header.stamp.secs + (c1.header.stamp.nsecs-self.cam1_info[0].header.stamp.nsecs)*10**(-9))
-                print('')
-            else:
-                print(t1)
-            if t2 > 5:
-                print('')
-                print(t2)
-                print('vs')
-                print(c1.header.stamp.secs-self.cam2_info[0].header.stamp.secs + (c1.header.stamp.nsecs-self.cam2_info[0].header.stamp.nsecs)*10**(-9))
-            else:
-                print(t2)
+            # if t1 > 5:
+            #     print('')
+            #     print(t1)
+            #     print('vs')
+            #     print(c1.header.stamp.secs-self.cam1_info[0].header.stamp.secs + (c1.header.stamp.nsecs-self.cam1_info[0].header.stamp.nsecs)*10**(-9))
+            #     print('')
+            # else:
+            #     print(t1)
+            # if t2 > 5:
+            #     print('')
+            #     print(t2)
+            #     print('vs')
+            #     print(c1.header.stamp.secs-self.cam2_info[0].header.stamp.secs + (c1.header.stamp.nsecs-self.cam2_info[0].header.stamp.nsecs)*10**(-9))
+            # else:
+            #     print(t2)
             c2.header.stamp = c1.header.stamp
             c1i.header.stamp = c1.header.stamp
             c2i.header.stamp = c1.header.stamp

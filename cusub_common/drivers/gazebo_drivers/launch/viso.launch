@@ -16,7 +16,7 @@
 
         <param name="base_link_frame_id" value="leviathan/description/base_link"/>
         <param name="publish_tf" value="true"/>
-        <param name="odom_frame_id" value="world"/>
+        <param name="odom_frame_id" value="leviathan/description/odom"/>
 
     </node>
 

@@ -17,6 +17,9 @@
             <remap from="right/camera_info" to="camera_9/camera_info_adj"/>
         </node>
 
+        <node pkg="stress_tester" type="cam_adjust.py" name="cam_adj_node"/>
+
     </group>
+
 
 </launch>

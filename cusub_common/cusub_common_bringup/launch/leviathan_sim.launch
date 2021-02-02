@@ -6,14 +6,14 @@
             <remap from="odometry/filtered"  to="odometry/filtered_map" />
         </node>
 
-        <node name="leviathan_stereo_ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true" ns="cusub_common">
+        <!-- <node name="leviathan_stereo_ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true" ns="cusub_common">
             <rosparam command="load" file="$(find cusub_common_bringup)/config/leviathan_stereo_ekf.yaml" />
-            <!-- <remap from="odometry/filtered"  to="odometry/filtered_stereo" /> -->
-        </node>
-
-        <!-- <node name="leviathan_ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true" ns="cusub_common">
-            <rosparam command="load" file="$(find cusub_common_bringup)/config/leviathan_ekf.yaml" />
+            <remap from="odometry/filtered"  to="odometry/filtered_stereo" />
         </node> -->
+
+        <node name="leviathan_ekf" pkg="robot_localization" type="ekf_localization_node" clear_params="true" ns="cusub_common">
+            <rosparam command="load" file="$(find cusub_common_bringup)/config/leviathan_ekf.yaml" />
+        </node>
 
         <node pkg="tf" type="static_transform_publisher" name="leviathan_depth_odom_broadcaster"
               args="0 0 0 0 0 0 leviathan/description/odom leviathan/description/depth_odom_frame 100"/>
@@ -22,7 +22,7 @@
               args="0 0 0 0 0 0 leviathan/description/map leviathan/description/depth_map_frame 100"/>
 
         <!-- <node pkg="tf" type="static_transform_publisher" name="leviathan_depth_stereo_broadcaster"
-                args="0 0 0 0 0 0 leviathan/description/stereo leviathan/description/depth_stereo_frame 100"/> -->
+                args="0 0 0 0 0 0 leviathan/description/odom_stereo leviathan/description/odom_depth_stereo_frame 100"/> -->
 
         <include file="$(find gazebo_drivers)/launch/leviathan_gazebo_drivers.launch"/>
 
