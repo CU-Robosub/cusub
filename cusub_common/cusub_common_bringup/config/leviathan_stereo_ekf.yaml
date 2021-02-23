@@ -58,11 +58,11 @@ publish_acceleration: false
 #     3a. Set your "world_frame" to your map_frame value
 #     3b. MAKE SURE something else is generating the odom->base_link transform. Note that this can even be another state
 #         estimation node from robot_localization! However, that instance should *not* fuse the global data.
-map_frame: leviathan/description/map                # Defaults to "map" if unspecified
-odom_frame: leviathan/description/odom              # Defaults to "odom" if unspecified
-base_link_frame: leviathan/description/base_link  # Defaults to "base_link" if unspecified
-world_frame: leviathan/description/odom           # Defaults to the value of odom_frame if unspecified
-
+map_frame: leviathan/description/map # Defaults to "map" if unspecified
+odom_frame: leviathan/description/odom_stereo # Defaults to "odom" if unspecified
+base_link_frame: leviathan/description/base_link # Defaults to "base_link" if unspecified
+world_frame: leviathan/description/odom_stereo # Defaults to the value of odom_frame if unspecified
+# prettier-ignore
 initial_state: [0.0,  0.0,  0.0,
                 0.0,  0.0,  0.0,
                 0.0,  0.0,  0.0,
@@ -124,17 +124,17 @@ initial_state: [0.0,  0.0,  0.0,
 # odom0_twist_rejection_threshold: 1
 #
 # # Further input parameter examples
-# odom1: "stereo_odometer/odometry"
-# odom1_config: [true, true, true,
-#                false, false, false,
-#                false, false, false,
-#                false, false, false,
-#                false, false, false]
-# odom1_differential: true
-# odom1_relative: true
-# odom1_queue_size: 2
+odom1: "stereo_odometer/odometry"
+odom1_config: [false, false, true,
+               false, false, false,
+               true, true, false,
+               false, false, false,
+               false, false, false]
+odom1_differential: true
+odom1_relative: true
+odom1_queue_size: 2
 # odom1_pose_rejection_threshold: 2
-# odom1_twist_rejection_threshold: 0.2
+odom1_twist_rejection_threshold: 0.2
 # odom1_nodelay: false
 
 # order: x,y,z,
@@ -143,9 +143,8 @@ initial_state: [0.0,  0.0,  0.0,
 #       rolldot,pitchdot,yawdot,
 #       xddot,yddot,zddot
 
-
-
 pose0: "depth_odom"
+# prettier-ignore
 pose0_config: [false,  false, true,
                false, false, false,
                false, false, false,
@@ -157,31 +156,31 @@ pose0_queue_size: 5
 pose0_rejection_threshold: 1
 # pose0_nodelay: false
 
-
 # order: x,y,z,
 #       roll, pitch, yaw,
 #       xdot,ydot,zdot,
 #       rolldot,pitchdot,yawdot,
 #       xddot,yddot,zddot
 
-twist0: 'stereo_odometer/twist'
-twist0_config: [false, false, false,
-                false, false, false,
-                true,  true,  false,
-                false, false, false,
-                false, false, false]
-twist0_queue_size: 3
-twist0_rejection_threshold: 2
+# twist0: "stereo_odometer"
+# # prettier-ignore
+# twist0_config: [false, false, false,
+#                 false, false, false,
+#                 true,  true,  false,
+#                 false, false, false,
+#                 false, false, false]
+# twist0_queue_size: 3
+# twist0_rejection_threshold: 2
 #twist0_nodelay: false
 
-
 # order: x,y,z,
 #       roll, pitch, yaw,
 #       xdot,ydot,zdot,
 #       rolldot,pitchdot,yawdot,
 #       xddot,yddot,zddot
 
-imu0: 'imu'
+imu0: "imu"
+# prettier-ignore
 imu0_config: [false, false, false,
               true,  true,  true,
               false, false, false,
@@ -212,7 +211,6 @@ imu0_queue_size: 3
 # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
 imu0_remove_gravitational_acceleration: true
 
-
 # [ADVANCED] The process noise covariance matrix can be difficult to tune, and can vary for each application, so it is
 # exposed as a configuration parameter. This matrix represents the noise we add to the total error after each
 # prediction step. The better the omnidirectional motion model matches your system, the smaller these values can be.
@@ -221,6 +219,7 @@ imu0_remove_gravitational_acceleration: true
 # to be larger, which will cause the filter to trust the incoming measurement more during correction. The values are
 # ordered as x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az. Defaults to the matrix below if
 # unspecified.
+# prettier-ignore
 process_noise_covariance: [0.05, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
                             0,    0.05, 0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
                             0,    0,    0.06, 0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,

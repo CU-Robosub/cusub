@@ -4,13 +4,6 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Odometry1
-        - /Odometry2
-        - /Image11
-        - /Image21
-        - /Downcam1
-        - /PoseArray1
-        - /Odometry3
         - /Odometry3/Shape1
       Splitter Ratio: 0.5
     Tree Height: 597
@@ -561,7 +554,7 @@ Visualization Manager:
           Value: true
         Value: false
       Enabled: true
-      Keep: 100
+      Keep: 1
       Name: Odometry
       Position Tolerance: 0.10000000149011612
       Shape:
@@ -574,7 +567,7 @@ Visualization Manager:
         Shaft Length: 1
         Shaft Radius: 0.05000000074505806
         Value: Arrow
-      Topic: /leviathan/cusub_common/odometry/filtered_stereo
+      Topic: /stereo_odometer/odometry
       Unreliable: false
       Value: true
   Enabled: true
