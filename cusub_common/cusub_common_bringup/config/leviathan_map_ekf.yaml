@@ -173,27 +173,27 @@ pose1_rejection_threshold: 100
 #       rolldot,pitchdot,yawdot,
 #       xddot,yddot,zddot
 
-# twist0: 'dvl'
-# twist0_config: [false, false, false,
-#                 false, false, false,
-#                 true,  true,  false,
-#                 false, false, false,
-#                 false, false, false]
-# twist0_queue_size: 3
-# twist0_rejection_threshold: 2
-# #twist0_nodelay: false
+twist0: 'dvl'
+twist0_config: [false, false, false,
+                false, false, false,
+                true,  true,  false,
+                false, false, false,
+                false, false, false]
+twist0_queue_size: 3
+twist0_rejection_threshold: 2
+#twist0_nodelay: false
 
-odom0: "/stereo_odometer/odometry"
-odom0_config: [true, true, false,
-               false, false, false,
-               false, false, false,
-               false, false, false,
-               false, false, false]
-# odom1_differential: true
-# odom1_relative: true
-odom0_queue_size: 3
-# odom0_pose_rejection_threshold: 2
-# odom0_twist_rejection_threshold: 1 
+# odom0: "/stereo_odometer/odometry"
+# odom0_config: [true, true, false,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false]
+# # odom1_differential: true
+# # odom1_relative: true
+# odom0_queue_size: 3
+# # odom0_pose_rejection_threshold: 2
+# # odom0_twist_rejection_threshold: 1 
 
 
 # order: x,y,z,

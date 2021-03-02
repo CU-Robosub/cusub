@@ -15,8 +15,8 @@ priors:
   droppers:
     prior_depth: -1.0
     qtlocation:
-    - 182
-    - 300
+    - 173
+    - 156
     - 0
     sim_model: dropper_garlic_1
   jiangshi:
