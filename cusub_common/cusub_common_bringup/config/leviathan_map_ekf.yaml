@@ -183,17 +183,17 @@ pose1_rejection_threshold: 100
 # twist0_rejection_threshold: 2
 # #twist0_nodelay: false
 
-odom1: "/stereo_odometer/odometry"
-odom1_config: [true, true, false,
+odom0: "/stereo_odometer/odometry"
+odom0_config: [true, true, false,
                false, false, false,
                false, false, false,
                false, false, false,
                false, false, false]
 # odom1_differential: true
 # odom1_relative: true
-odom1_queue_size: 3
-odom1_pose_rejection_threshold: 0.5
-odom1_twist_rejection_threshold: 0.5 
+odom0_queue_size: 3
+# odom0_pose_rejection_threshold: 2
+# odom0_twist_rejection_threshold: 1 
 
 
 # order: x,y,z,

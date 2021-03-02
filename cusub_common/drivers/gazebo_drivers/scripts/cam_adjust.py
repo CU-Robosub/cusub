@@ -19,6 +19,7 @@ def parse_yaml(filename):
     stream = open(filename, 'r')
     calib_data = yaml.load(stream)
     cam_info = CameraInfo()
+    cam_info.header.frame_id = "leviathan/description/stereo_down_right_cam_frame_optical"
     cam_info.width = calib_data['image_width']
     cam_info.height = calib_data['image_height']
     cam_info.K = calib_data['camera_matrix']['data']
