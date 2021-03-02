@@ -2,4 +2,10 @@
 config
 *******
 
-stub for dsecribing how the config package works
+
+
+
+Configuration for mapper and state machine.
+
+
+

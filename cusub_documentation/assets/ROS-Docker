@@ -1,0 +1,23 @@
+# This is an auto generated Dockerfile for ros:desktop-full
+# generated from docker_images/create_ros_image.Dockerfile.em
+#FROM osrf/ros:melodic-desktop-bionic
+FROM nvidia/cuda:10.0-cudnn7-runtime-ubuntu18.04SHELL ["/bin/bash", "-c"]ENV DEBIAN_FRONTEND=noninteractiveRUN apt-get updateRUN apt-get install -y --no-install-recommends \
+    lsb-releaseRUN echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list
+RUN apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654RUN apt-get update# install ros packages
+RUN apt-get install -y --no-install-recommends \
+    ros-melodic-desktop-full=1.4.1-0*# Install protobuf dependencies
+RUN apt-get install -y --no-install-recommends \
+    protobuf-compiler protobuf-c-compiler# Install catkin tools
+RUN apt-get install -y --no-install-recommends \
+    python-catkin-tools python-rosdep \
+    python-rosinstall python-rosinstall-generator \
+    python-wstool build-essential python-rosdepRUN apt-get install -y --no-install-recommends \
+    ros-melodic-pid ros-melodic-robot-localization ros-melodic-joyRUN echo "source /opt/ros/melodic/setup.sh" >> ~/.bashrc# Create Catkin workspace
+RUN mkdir -p ~/catkin_ws/src# Grab latest sub code and get submodules
+RUN cd ~/catkin_ws/src && \
+    git clone https://github.com/CU-Robosub/cusub.git
+RUN cd ~/catkin_ws/src/cusub && \
+    git submodule init && git submodule update
+RUN source /opt/ros/melodic/setup.sh && cd ~/catkin_ws/ && \
+    catkin config --blacklist jetson_csi_cam && catkin buildRUN apt-get install -y --no-install-recommends \
+    tmux xtermRUN rm -rf /var/lib/apt/lists/*

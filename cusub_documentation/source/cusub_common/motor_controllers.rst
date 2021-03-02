@@ -2,15 +2,14 @@
 motor_controllers
 *****************
 
-top level overview of how the motor controller is built
-
-PID
-___
-description of PID references
+Top level overview of how the motor controller is built
 
 
 BangBang
 ________
+
+.. class:: BangBang
+
 
 This is a simple Bang Bang controller node.  It will command a preset control effort when the input state is above or below a certain amount of the setpoint.
 
