@@ -4,6 +4,7 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /Odometry1
         - /Odometry3/Shape1
       Splitter Ratio: 0.5
     Tree Height: 597
@@ -25,7 +26,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: Image1
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -331,7 +332,7 @@ Visualization Manager:
         Shaft Length: 1
         Shaft Radius: 0.05000000074505806
         Value: Arrow
-      Topic: /leviathan/cusub_common/odometry/filtered
+      Topic: /leviathan/cusub_common/odometry/filtered_map
       Unreliable: false
       Value: true
     - Angle Tolerance: 0.10000000149011612
@@ -643,5 +644,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1920
-  X: 1920
+  X: 0
   Y: 27

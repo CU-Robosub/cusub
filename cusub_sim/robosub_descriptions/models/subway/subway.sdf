@@ -1,0 +1,39 @@
+<?xml version='1.0'?>
+<sdf version="1.6">
+<model name="vampire_stake">
+
+    <pose>0 0 1.5 0 0 0</pose>
+
+    <link name="base_link">
+      <inertial>
+        <origin
+          xyz="0.0 0.0 0.0"
+          rpy="0 0 0" />
+        <mass
+          value="1.0" />
+        <inertia
+          ixx="1.0"
+          ixy="0.0"
+          ixz="0.0"
+          iyy="1.0"
+          iyz="0.0"
+          izz="1.0" />
+      </inertial>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://subway/subway.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://subway/subway.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+  </model>
+</sdf>

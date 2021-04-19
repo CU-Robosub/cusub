@@ -19,21 +19,23 @@
   <!-- Start the a underwater world simulation scenario -->
   <include file="$(find robosub_descriptions)/launch/divewell.launch"/>
 
-  <include file="$(find robosub_descriptions)/launch/upload.launch">
+  <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="vampire_stake"/>
       <arg name="x" default="$(arg TASK_x)"/>
       <arg name="y" default="$(arg TASK_y)"/>
       <arg name="z" default="$(arg TASK_z)"/>
       <arg name="yaw" default="$(arg TASK_yaw)"/>
-  </include>
+  </include> -->
 
-  <include file="$(find robosub_descriptions)/launch/upload.launch">
+  <node name="spawn_subway" pkg="gazebo_ros" type="spawn_model" args="-file $(find robosub_descriptions)/models/subway/subway.sdf -sdf -model subway -z 0 -x 0 -y 0 -Y 0"/>
+
+  <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="dropper_garlic"/>
       <arg name="x" default="$(arg DROP_x)"/>
       <arg name="y" default="$(arg DROP_y)"/>
       <arg name="z" default="$(arg DROP_z)"/>
       <arg name="yaw" default="$(arg DROP_yaw)"/>
-  </include>
+  </include> -->
 
   <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="StartGate"/>
@@ -43,13 +45,13 @@
       <arg name="yaw" default="$(arg TASK_yaw)"/>
   </include> -->
 
-    <include file="$(find robosub_descriptions)/launch/upload.launch">
+    <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="buoy_jiangshi"/>
       <arg name="x" default="$(arg TASK_x)"/>
       <arg name="y" default="$(arg TASK_y)"/>
       <arg name="z" default="$(arg TASK_z)"/>
       <arg name="yaw" default="$(arg TASK_yaw)"/>
-  </include>
+  </include> -->
 
     <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="triangular_buoy"/>
@@ -63,13 +65,13 @@
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
 	   output="screen" ns="/triangular_buoy_1" args="joint_state_controller buoy_velocity_controller"/>
   <node pkg="rostopic" type="rostopic" name="bouy_speed" args="pub /triangular_buoy_1/buoy_velocity_controller/command std_msgs/Float64 &quot;data: 0.4&quot;"/> -->
-
+<!-- 
   <node name="publish_world_models"
         pkg="uuv_assistants"
         type="publish_world_models.py"
         output="screen">
         <rosparam subst_value="true">
-            meshes:
+            meshes: -->
               <!-- StartGate_1:
                 mesh: package://robosub_descriptions/models/StartGate/StartGate.dae
                 pose:
@@ -90,17 +92,17 @@
                 pose:
                   position: [$(arg PM1_x), $(arg PM1_y), $(arg PM1_z)]
                   orientation: [1.57, 0, $(arg PM1_yaw)] -->
-              vampire_stake_1:
+              <!-- vampire_stake_1:
                 mesh: package://robosub_descriptions/models/vampire_stake/vampire_board.dae
                 pose:
                   position: [$(arg TASK_x), $(arg TASK_y), $(arg TASK_z)]
-                  orientation: [0, 0, $(arg TASK_yaw)]
-              DropperGarlic_1:
+                  orientation: [0, 0, $(arg TASK_yaw)] -->
+              <!-- DropperGarlic_1:
                 mesh: package://robosub_descriptions/models/dropper_garlic/dropper_garlic.dae
                 pose:
                   position: [$(arg DROP_x), $(arg DROP_y), $(arg DROP_z)]
-                  orientation: [1.57, 0, $(arg DROP_yaw)]
-        </rosparam>
-  </node>
+                  orientation: [1.57, 0, $(arg DROP_yaw)] -->
+        <!-- </rosparam>
+  </node> -->
 
 </launch>
