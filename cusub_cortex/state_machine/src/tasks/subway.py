@@ -10,7 +10,11 @@ import os
 import rospy
 from sensor_msgs.msg import Image
 
-
+def rotate_image(image, angle):
+  image_center = tuple(np.array(image.shape[1::-1]) / 2)
+  rot_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
+  result = cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
+  return result
 
 
 class Subway:
@@ -26,15 +30,25 @@ class Subway:
         self.raw_images = [np.load(self.saved_names[i]) for i in range(5)]
         self.rect_images = [i for i in range(5)]
         self.resize_images = [i for i in range(5)]
+        self.stiched_image = None
 
+        self.top_points = [[0,0],[0,0]]
+        self.tidx = 0
+        self.top_names = ["Top Left", "Bottom Left"]
         self.points = [[0,0] for i in range(4)]
         self.pointName = ['Top Left','Top Right', 'Bottom Right', 'Bottom Left']
         self.pidx = 0
 
+        self.image_names = ['Longside1','Shortside2','Longside3','Shortside4','Topface5']
+
         self.get()
+        self.rot_top()
         self.rect()
         self.resize()
-        self.stitch()
+        self.stitch('BeforeRotate')
+        self.askRotate()
+        self.stitch('Final Stitch')
+
 
 
     def forward_callback(self,msg):
@@ -71,23 +85,55 @@ class Subway:
         print('Hello')
 
     def click_event(self,event, x, y, flags, params):
-        if event == cv2.EVENT_LBUTTONDOWN:
-            if self.pidx == 4:
-                return
-    
+        if event == cv2.EVENT_LBUTTONDOWN:    
             print(x, ' ', y)
             self.points[self.pidx] = [x,y]
             print(self.pointName[self.pidx]+":"+str((x,y)))
-    
-        # checking for right mouse clicks     
-        if event==cv2.EVENT_RBUTTONDOWN:
-            self.pidx = (self.pidx + 1)%5
-            if self.pidx == 4:
+
+            self.pidx = (self.pidx + 1)%4
+            if self.pidx == 0:
                 print('Below are the current Points. Exit image if ok. Right click to scroll back through points')
                 print(self.pointName)
                 print(self.points)
-            else:
-                print("Now Click on " + self.pointName[self.pidx])
+            print("Now Click on " + self.pointName[self.pidx])
+    
+        # checking for right mouse clicks     
+        if event==cv2.EVENT_RBUTTONDOWN:
+            self.pidx = (self.pidx + 1)%4
+            print("Now Click on " + self.pointName[self.pidx])
+
+    def click_event_top(self,event, x, y, flags, params):
+        if event == cv2.EVENT_LBUTTONDOWN:    
+            print(x, ' ', y)
+            self.top_points[self.tidx] = [x,y]
+            print(self.top_names[self.tidx]+":"+str((x,y)))
+
+            self.tidx = (self.tidx + 1)%2
+            if self.tidx == 0:
+                print('Below are the current Points. Exit image if ok.')
+                print(self.top_names)
+                print(self.top_points)
+            print("Now Click on " + self.top_names[self.tidx])
+        if event==cv2.EVENT_RBUTTONDOWN:
+            self.tidx = (self.tidx + 1)%2
+            print("Now Click on " + self.top_names[self.tidx])
+    
+    
+    def rot_top(self):
+        img = self.raw_images[4]
+        cv2.imshow("Top before rotation",img)
+        cv2.setMouseCallback("Top before rotation", self.click_event_top)
+        cv2.waitKey()
+
+        x = self.top_points[0][1] - self.top_points[1][1]
+        y = self.top_points[0][0] - self.top_points[1][0]
+
+        ang = np.arctan2(y,x)
+        ang = -(ang * 180.0)/np.pi
+
+        self.raw_images[4] = rotate_image(self.raw_images[4],ang)
+
+
 
     
     def construct_rect(self,img,pts):
@@ -124,8 +170,8 @@ class Subway:
         for i in range(5):
             self.pidx = 0
             img = self.raw_images[i]
-            cv2.imshow('image',img)
-            cv2.setMouseCallback('image', self.click_event)
+            cv2.imshow(self.image_names[i],img)
+            cv2.setMouseCallback(self.image_names[i], self.click_event)
             cv2.waitKey()
 
             self.rect_images[i] = self.construct_rect(img,self.points)
@@ -151,15 +197,40 @@ class Subway:
             w = 250 + ((i+1)%2) * 250
             self.resize_images[i] = self.resize_helper(self.rect_images[i],h,w)
 
-    def stitch(self):
-        stitched_img = np.zeros((500,1500,3), np.uint8)
+    def stitch(self,name):
+        stitched_img = np.ones((500,1500,3), np.uint8)*255
         stitched_img[250:,:250,:] = self.resize_images[3]
         stitched_img[250:,250:750,:] = self.resize_images[2]
         stitched_img[:250,250:750,:] = self.resize_images[4]
         stitched_img[250:,750:1000,:] = self.resize_images[1]
         stitched_img[250:,1000:,:] = self.resize_images[0]
-        cv2.imshow('stitch',stitched_img)
+        cv2.imshow(name,stitched_img)
         cv2.waitKey()
+
+    def askRotate(self):
+        while True:
+            rotate = int(raw_input("How much do we need to rotate the top?(Enter 0 for none, 1 for 90, 2 for 180, 3 for 270) All angles are counterclockwise\n"))
+            if not(0<= rotate < 4):
+                continue
+            if rotate == 0:
+                break
+
+            for i in range(rotate):
+                self.rect_images[4] = np.rot90(self.rect_images[4])
+            self.resize_images[4] = self.resize_helper(self.rect_images[4],250,500)
+            
+            cv2.imshow('New top face',self.resize_images[4])
+            cv2.waitKey()
+
+            good = -1
+            while not(good==0 or good==1):
+                good = int(raw_input("Is this good? 1 for yes 0 for no\n"))
+            if good == 1:
+                break
+
+
+
+
 
 
             
