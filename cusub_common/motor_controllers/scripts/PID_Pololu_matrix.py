@@ -3,7 +3,7 @@ from __future__ import division
 import rospy
 import tf
 import numpy as np
-from std_msgs.msg import Float64MultiArray, Float64
+from std_msgs.msg import Float64MultiArray, Float64, Bool
 from pololu_controller.msg import MotorCommand
 from nav_msgs.msg import Odometry
 
@@ -22,25 +22,27 @@ class PID_Pololu():
     ## The constructor.
     def __init__(self):
 
-        self.cmd_data = Float64MultiArray
+        self.cmd_data = Float64MultiArray()
         #self.effort_array = np.zeros([1,6])
         self.effort_array = [0, 0, 0, 0, 0, 0]
         self.motor_array = np.empty([8,6])
 
+        self.gripper_state = False
+
         '''roll, pitch, yaw, depth, drive, strafe'''
-        self.motor_array[0] = [ 1,  1,    0, -.5,   0,   0] #Front Right
-        self.motor_array[1] = [-1,  1,    0, -.5,   0,   0] #Front Left
-        self.motor_array[2] = [ 1, -1,    0, -.5,   0,   0] #Back Right
-        self.motor_array[3] = [-1, -1,    0, -.5,   0,   0] #Back Left
-        self.motor_array[4] = [ 0,  0, -0.5,   0,   0,  .5] #Front
-        self.motor_array[5] = [ 0,  0,  0.5,   0,   0,  .5] #Back
-        self.motor_array[6] = [ 0,  0,  0.2,   0, -.8,   0] #Left -.65
-        self.motor_array[7] = [ 0,  0, -0.2,   0, -.8,   0] #Right -.8
+        self.motor_array[0] = [ 1,  1,    0, -.5,   0,-0.1] #Front Right
+        self.motor_array[1] = [-1,  1,    0, -.5,   0, 0.1] #Front Left
+        self.motor_array[2] = [ 1, -1,    0, -.5,   0,-0.1] #Back Right
+        self.motor_array[3] = [-1, -1,    0, -.5,   0, 0.1] #Back Left
+        self.motor_array[4] = [ 0,  0,    0,   0,   0,   0] #Front
+        self.motor_array[5] = [ 0,  0,    0,   0,   0,   0] #Back
+        self.motor_array[6] = [ 0,  0,  0.5,   0, -.8,   0] #Left -.65
+        self.motor_array[7] = [ 0,  0, -0.5,   0, -.8,   0] #Right -.8
 
         '''FR, FL, BR, BL,  F,  B,  L,  R'''
         self.flip_motor_array = np.array(rospy.get_param("flip_motor_array"))
         self.scale_array      = np.array([5, 5, 5, 5, 5, 5, 5, 5])
-        self.offset_array     = np.array([1420, 1420, 1420, 1420,
+        self.offset_array     = np.array([1500, 1500, 1500, 1500,
                                           1500, 1500, 1500, 1500])
 
         rospy.logfatal(self.flip_motor_array)
@@ -51,8 +53,8 @@ class PID_Pololu():
 
         rospy.Timer(rospy.Duration(.02), self.motor_publish)
 
-        ## The Float array to be sent to the pololu command
-        self.cmd_data = Float64MultiArray()
+        self.gripper_sub = rospy.Subscriber('cusub_common/motor_controllers/gripper_state', Bool, self.gripper_callback)
+
         ## Subscriber for the roll pid topic
         self.roll_sub = rospy.Subscriber('cusub_common/motor_controllers/pid/roll/control_effort',
                                          Float64, self.roll_callback)
@@ -101,16 +103,21 @@ class PID_Pololu():
 
     def strafe_callback(self,msg): self.effort_array[5] = msg.data
 
+    def gripper_callback(self,msg): self.gripper_state = msg.data
+
     def motor_publish(self, event):
         motor_transform =   np.sum(self.effort_array * self.motor_array, 1)
         motor_transform = motor_transform * self.scale_array
         motor_transform = motor_transform * self.flip_motor_array
         motor_transform = motor_transform + self.offset_array
 
-        command_order = [ 4, 0, 1, 2, 3, 5, 6, 7]
+        command_order = [0, 1, 2, 3, 4, 5, 6, 7]
         arr = []
         for i in command_order:
             arr.append(motor_transform[i])
+
+	# GRIPPER HACK
+	arr.append(1200+600*self.gripper_state)
 
         self.cmd_data.data = arr
         self.motor_pub.publish(self.cmd_data)

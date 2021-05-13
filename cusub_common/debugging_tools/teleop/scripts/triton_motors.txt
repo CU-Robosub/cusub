@@ -1,0 +1,5 @@
+q: back left
+w: back right
+e: front
+d: front right
+

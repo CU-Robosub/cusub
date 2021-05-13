@@ -1,12 +1,13 @@
 # Pololu based motors
 
-map: [2, 1, 9, 4, 7, 9, 5, 3, 0, 4]
+map: [3, 1, 6, 2, 9, 7, 0, 8, 9, 9]
 
 port_name: /dev/serial/by-id/usb-Pololu_Corporation_Pololu_Mini_Maestro_12-Channel_USB_Servo_Controller_00211116-if00
 
+# DNE
 front:
   pololu_id: 12
-  motor_id: 0
+  motor_id: 4
   init: 1500
   min: 1000
   max: 2000
@@ -23,7 +24,7 @@ front_right:
   init: 1500
   min: 1000
   max: 2000
-  reverse: true
+  reverse: false
   calibration:
     min_pulse: 1000
     min_angle: -180
@@ -32,11 +33,11 @@ front_right:
 
 front_left:
   pololu_id: 12
-  motor_id: 2
+  motor_id: 1
   init: 1500
   min: 1000
   max: 2000
-  reverse: true
+  reverse: false
   calibration:
     min_pulse: 1000
     min_angle: -180
@@ -69,6 +70,7 @@ back_left:
     max_pulse: 2000
     max_angle: 180
 
+#DNE
 back:
   pololu_id: 12
   motor_id: 4
@@ -84,7 +86,7 @@ back:
 
 left:
   pololu_id: 12
-  motor_id: 9
+  motor_id: 2
   init: 1500
   min: 1000
   max: 2000
@@ -97,7 +99,7 @@ left:
 
 right:
   pololu_id: 12
-  motor_id: 8
+  motor_id: 5
   init: 1500
   min: 1000
   max: 2000

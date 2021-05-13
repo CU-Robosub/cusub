@@ -25,7 +25,9 @@ import serial
 # * right: 8
 
 class Controller():
+
     def __init__(self):
+
         self.map = rospy.get_param("pololu_controller/map")
         port = rospy.get_param("pololu_controller/port_name")
         baud = rospy.get_param("pololu_controller/baud_rate")
@@ -94,6 +96,7 @@ def signal_handler(singnal, frame):
     m.kill_all()
     print("\nprogram exited gracefully")
     sys.exit(0)
+
 def main():
     rospy.init_node('Controller')
 
