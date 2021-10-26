@@ -19,6 +19,7 @@ from tasks.start_gate import StartGate
 from tasks.manager import Manager
 from tasks.task import Timeout
 from tasks.startup_task import Startup
+from tasks.waypoint_test import WaypointTest
 from cusub_print.cuprint import CUPrint, bcolors
 
 cuprint = CUPrint("Startup Script")
@@ -52,6 +53,8 @@ def loadStateMachines(task_list):
             task_sm = Startup()
         elif task == "debug":
             task_sm = Debug()
+        elif task == 'go_waypoint':
+            task_sm = WaypointTest()
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 
