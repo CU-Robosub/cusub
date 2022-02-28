@@ -25,6 +25,10 @@ class PIDClient:
             rospy.logerr("PID axis unrecognized: " + axis)
         if root_topic[-1] != "/":
             root_topic = root_topic + "/"
+        
+        if axis in ["drive", "strafe"]:
+            axis = axis + "_vel"
+            
         self.root_topic = root_topic
         self.axis = axis
         self.enabled = False

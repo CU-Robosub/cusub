@@ -63,8 +63,8 @@
 	</node>
 
 	<!-- DRIVE -->
-	<node pkg="topic_tools" type="mux" name="drive_mux" ns="cusub_common/motor_controllers" args="mux/drive_vel/control_effort pid/drive_vel/control_effort cv/drive_vel/control_effort">
-		<remap from="mux" to="drive_mux"/>
+	<node pkg="topic_tools" type="mux" name="drive_vel_mux" ns="cusub_common/motor_controllers" args="mux/drive_vel/control_effort pid/drive_vel/control_effort cv/drive_vel/control_effort">
+		<remap from="mux" to="drive_vel_mux"/>
 		<param name="initial_topic " value="pid/drive_vel/control_effort" />
 	</node>
 	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/drive_vel">
@@ -78,8 +78,8 @@
 	</node>
 
 	<!-- STRAFE -->
-	<node pkg="topic_tools" type="mux" name="strafe_mux" ns="cusub_common/motor_controllers" args="mux/strafe_vel/control_effort pid/strafe_vel/control_effort cv/strafe_vel/control_effort">
-		<remap from="mux" to="strafe_mux"/>
+	<node pkg="topic_tools" type="mux" name="strafe_vel_mux" ns="cusub_common/motor_controllers" args="mux/strafe_vel/control_effort pid/strafe_vel/control_effort cv/strafe_vel/control_effort">
+		<remap from="mux" to="strafe_vel_mux"/>
 		<param name="initial_topic " value="pid/strafe_vel/control_effort" />
 	</node>
 	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/strafe_vel">
