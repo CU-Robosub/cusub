@@ -1,0 +1,2 @@
+1) cusub_common build fails
+	- sudo apt install ros-melodic-gsicam

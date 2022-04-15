@@ -11,15 +11,22 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Imu
 from geometry_msgs.msg import PoseStamped
 
-## @package Pose_PID
-# @brief This package translates Pose control efforts to PID states
-#
-# @author "Cody Constine"
+"""
+    Purpose of this file:
 
-## Pose_PID
-# @brief This is the main class of the modules, contains all the Pubs and Subs
-# @ingroup Local_Control
-#
+    Subscribes to estimates and republishes 
+    - yaw
+    - roll
+    - pitch
+    - depth
+    - forward velocity
+    - sideways velocity
+    to the pid loop as the states so it can determine controls.
+
+    - Luke Morrissey (luke.morrissey@colorado.edu)
+"""
+
+
 class Pose_PID():
 
     def __init__(self):
@@ -51,13 +58,10 @@ class Pose_PID():
         #roll pitch control
         orientation = msg.pose.pose.orientation
         (roll, pitch, yaw) = tf.transformations.euler_from_quaternion([orientation.x, orientation.y,orientation.z,orientation.w])
-        #drive and strafe setpoints
 
+        #drive and strafe setpoints
         drive = msg.twist.twist.linear.x
         strafe = msg.twist.twist.linear.y
-        # (drive, strafe ) = self.point_and_shoot_model(position.x, prev_position.x,
-        #                                               position.y, prev_position.y,
-        #                                               yaw)
 
         self.setpoint_publisher(yaw, roll, pitch, depth, drive, strafe)
 

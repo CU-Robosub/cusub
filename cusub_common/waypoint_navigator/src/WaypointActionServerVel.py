@@ -11,6 +11,13 @@ from waypoint_navigator.msg import waypointAction, waypointResult
 
 from WaypointNavigatorVel import WaypointNavigator
 
+
+"""
+    Creates an action server that lets you send the robot to a waypoint.
+
+    - Luke Morrissey(luke.morrissey@colorado.edu)
+"""
+
 class WaypointServer(WaypointNavigator):
     """Waypoint Navigation"""
 

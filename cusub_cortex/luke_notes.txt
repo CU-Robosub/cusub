@@ -1,0 +1,91 @@
+2/27/22
+
+- Looked through the velocity control stuff I did last semester
+- Wrote a quick note on all of those files describing what they do
+- Looked at Adam's start gate code
+	- I have set up velocity control for waypoint navigation
+	- That is outdated and we are now using drive client to control directly the setpoint pretty much
+		- There is drive_client and self.PID_all_set_setpoint that I need to make velocity control
+			- probably also strafe_client
+
+Tomorrow's Plan:
+	- Look into getting drive_client, strafe_client and self.PID_all_set_setpoint to be using velocity control
+
+
+2/28/22
+
+- Looked into the drive_client, and strafe_client stuff
+	- Already set up for velocity control
+	- self.PID_all_set_setpoint just calls drive_client and strafe_client so it is good too 
+- Looked into running the sim with the sub driving in a circle (waypoint_test.py)
+	- Works for both velocity and position control
+	- To use velocity control you need to run "roslaunch cusub_common_bringup leviathan_sim_vel.launch"
+	- Tested yaw and strafe modes and both work 
+
+Tomorrow's Plan
+	- Make a test task script to test out drive_client and strafe_client with the velocity control
+		- Maybe just make a subscriber that sets the drive setpoint and strafe setpoint
+		- Just publish to it from the terminal and be able to have sub move forward, strafe and do 90 degree turns (left or right)
+		- This is pretty much first step of long term plans
+
+3/10/22
+
+- Made a script that is a task that allows you to publish "forward", "backward", "dive", "stop" messages to it to control for line
+following.
+- This will be used by Elie/Xavier to be the api they give inputs to based on the line they are trying to follow.
+- Currently have it so the dive sets the depth setpoint a fixed amount deeper because I assume the horizontal lines will be a fixed amount apart
+it also sets drive velocity to zero
+- Forward/backward set depth to what it is currently and drive to +/- some fixed value
+- Stop sets depth to what it currently is and drive to zero
+
+Next steps:
+	- Make the api easier to use by adjusting it a bit 
+		- add some flexibility
+			- maybe add rise
+			- maybe let user decide what speed to go/ how far to dive or rise
+	- Figure how to allow us to run task without starting up darknet
+	- Look into adding pid loops to laz
+		- need to add yaw and drive
+			- I am worried about the sub yawing if we don't control it when autonomous
+			- Obviously need drive to be able to control for this task
+
+3/16/2022
+
+- Looking into the pid loops because we will want to get a pid loop for yaw, drive and strafe on the sub
+- Here is the pipeline:
+	- /leviathan/cusub_common/motor_controllers/pid/yaw/setpoint
+		- Can pubilish to this topic to set the setpoint
+	- /leviathan/cusub_common/motor_controllers/pid/yaw/pid
+		- This node subscribes to setpoint and state 
+		- Then it outputs a control effort
+		- Looks like it also may be able to use dynamic reconfigure (Could we use this to set up the pid loop constants?)
+	- /leviathan/cusub_common/motor_controllers/pid/yaw/control_effort
+		- The control effort for specfic axis
+	- /leviathan/cusub_common/motor_controllers/yaw_mux
+		- This mux subscribes to the control effort
+		- Publishes a control effort to a different topic (Not sure why this is necissary)
+	- /leviathan/cusub_common/motor_controllers/mux/yaw/control_effort
+		- The control effort again for the axis
+	- /leviathan/pid_pololu
+		- Subscibes to all the control efforts
+		- Publishes the control effort of all the motors
+	- /leviathan/cusub_common/motor_controllers/pololu_control/command
+		- Commands to all 8 motors
+	- This is then sent to the motors  
+
+Long term plans and goals:
+
+	- Do line following
+		- First create a script that will make the sub go forward and turn by publishing commands to it.
+			- Commands could be:
+				- Go forward
+				- Turn left
+				- Turn right
+				- Slow down (when getting close to corner)
+		- Create another script to read in images and determine which command to give to other script
+			- The line will be red 
+				- Use some sort of open CV thing to extract the red
+			- Once the line is extracted, need to determine what we need to do with this pattern
+				- Could train a model
+					- Is this over kill?
+				- Maybe a simpler solution is better

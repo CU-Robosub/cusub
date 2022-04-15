@@ -8,6 +8,16 @@ from pololu_controller.msg import MotorCommand
 from nav_msgs.msg import Odometry
 from cusub_print.cuprint import CUPrint
 
+"""
+    Purpose:
+    Subscribes to all the control efforts and combines them all through some complex
+    operations to send actual commands to the motors.
+
+    - Luke Morrissey(luke.morrissey@colorado.edu)    
+"""
+
+
+
 
 # * Front: 0
 # * front_right: 6
@@ -51,6 +61,7 @@ class PID_Pololu():
         self.motor_pub = rospy.Publisher('cusub_common/motor_controllers/pololu_control/command',
                                          Float64MultiArray, queue_size=1)
 
+        # this repeatedly runs the motor_publish function
         rospy.Timer(rospy.Duration(.02), self.motor_publish)
 
         ## The Float array to be sent to the pololu command
@@ -121,7 +132,7 @@ class PID_Pololu():
     def kill_motors(self):
         self.cmd_data.data = [1500]*8
         self.motor_pub.publish(self.cmd_data)
-        print "kill motors"
+        print("kill motors")
 
 def main():
     rospy.init_node('PID_Pololu')

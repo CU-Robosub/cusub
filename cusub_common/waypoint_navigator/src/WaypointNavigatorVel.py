@@ -13,6 +13,19 @@ from nav_msgs.msg import Odometry
 from cusub_print.cuprint import CUPrint, bcolors
 import numpy as np
 
+"""
+    Purpose:
+
+    Have a service that can be called to add a waypoint to a list and have the sub go to that waypoint.
+    Subscribes to the odometry estimates and the states for the pid loops and then based on where it is
+    and the waypoint it wants to go to it publishes setpoints to get the sub there.
+
+    - Luke Morrissey(luke.morrissey@colorado.edu)
+"""
+
+
+
+
 YAW_MODE = 1
 STRAFE_MODE = 2
 BACKUP_MODE = 3
