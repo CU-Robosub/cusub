@@ -375,7 +375,7 @@ if __name__ == "__main__":
     #     sys.exit(2)
 
     try:
-        t = Trax("/dev/ttyUSB0")
+        t = Trax("/dev/imu")
     except serial.serialutil.SerialException:
         print "Could not open port: %s" % sys.argv[1]
         sys.exit(1)

@@ -1,16 +1,16 @@
-flip_motor_array: [-1, -1, 1, -1, -1, -1, 1, 1]
+flip_motor_array: [1, -1, -1, -1, -1, -1, 1, 1]
 cusub_common:
   motor_controllers:
     pid:
       depth:
         pid:
-#         Kd:  -50.0
-#         Ki:    0.0
-#         Ki:  -15.0
+          #         Kd:  -50.0
+          #         Ki:    0.0
+          #         Ki:  -15.0
           Kp: -100.0
           Kd: 0.0
           Ki: 0.0
-#         Kp: 0.0
+          #         Kp: 0.0
           windup_limit: 100.0
       drive:
         pid:
@@ -26,12 +26,12 @@ cusub_common:
           windup_limit: 100.0
       pitch:
         pid:
-          Kd:   0.0
-          Ki:   0.0
-          Kp:   0.0
-#         Kd: -10.0
-#         Ki: -30.0
-#         Kp: -50.0
+          Kd: 0.0
+          Ki: 0.0
+          Kp: 0.0
+          #         Kd: -10.0
+          #         Ki: -30.0
+          #         Kp: -50.0
           windup_limit: 100.0
       strafe:
         pid:
@@ -45,4 +45,3 @@ cusub_common:
           Ki: 250.0
           Kp: 500.0
           windup_limit: 100.0
-

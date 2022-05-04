@@ -18,9 +18,9 @@
 
             <node name="joy_teleop" pkg="leviathan_control" type="joy_teleop.py">
 
-                <param name="strafe_axes" value="4" />
+                <param name="strafe_axes" value="0" />
                 <param name="drive_axes" value="1" />
-                <param name="yaw_axes" value="0" />
+                <param name="yaw_axes" value="2" />
                 <param name="depth_axes" value="5" />
                 <param name="pitch_axes" value="3" />
                 <param name="roll_axes" value="3" />

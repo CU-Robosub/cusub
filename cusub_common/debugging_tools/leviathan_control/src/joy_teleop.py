@@ -23,7 +23,7 @@ class JoyTeleop(object):
     strafe_axes  = 0
     drive_axes = 1
     yaw_axes = 2
-    depth_axes = 3
+    depth_axes = 5
     pitch_axes = 2
     roll_axes = 2
     gripper_axes = 5
@@ -43,18 +43,19 @@ class JoyTeleop(object):
     twist_effort    = 1.0
     translate_effort = 1.0
 
-    thruster_power = 75.0
+    thruster_power = 250.0
 
     yaw_sensitivity = 0.02
     drive_sensitivity = 0.02
     strafe_sensitivity = 0.02
-    depth_sensitivity = 0.01
+    depth_sensitivity = 0.005
 
     dropper_triggered = False
     left_torpedo_triggered = False
     right_torpedo_triggered = False
 
     gripper_state = False
+    servo_state = 0.0
     dropper_avail = True
     left_torpedo_avail = True
     right_torpedo_avail = True
@@ -72,19 +73,24 @@ class JoyTeleop(object):
             self.gripper_state = False
         #if data.buttons[0] and self.dropper_avail:
         #    self.dropper_triggered = True
-
+        self.servo_state = (1.0 + data.axes[3])/2.0
         if data.buttons[4] and self.left_torpedo_avail:
             self.left_torpedo_triggered = True
         if data.buttons[5] and self.right_torpedo_avail:
             self.right_torpedo_triggered = True
 
         self.strafe_val  = data.axes[self.strafe_axes]
+        # self.strafe_val  = 0
         self.drive_val = data.axes[self.drive_axes]
         self.yaw_val = data.axes[self.yaw_axes]
-        self.depth_val = data.axes[self.depth_axes]
-        self.pitch_val = data.axes[self.pitch_axes]
-        self.roll_val = data.axes[self.roll_axes]
-        self.gripper_val = data.axes[self.gripper_axes]
+        # self.depth_val = - data.buttons[1] + data.buttons[2]
+        self.depth_val = -1 * (-data.axes[self.depth_axes] + 4 * (data.buttons[2] - data.buttons[4]))
+        #self.pitch_val = data.axes[self.pitch_axes]
+        self.pitch_val = 0
+        #self.roll_val = data.axes[self.roll_axes]
+        self.roll_val = 0
+        #self.gripper_val = data.axes[self.gripper_axes]
+        self.gripper_val = data.buttons[0]
 
     def driveStateCallback(self, data):
         if not self.current_drive_updated:
@@ -197,6 +203,7 @@ class JoyTeleop(object):
 
 
         self.gripper_pub = rospy.Publisher('motor_controllers/gripper_state', Bool, queue_size=1)
+        self.servo_pub = rospy.Publisher('motor_controllers/servo_state', Float64, queue_size=1)
 
         gripper_outer_pub = rospy.Publisher('/leviathan/description/outer_controller/command', Float64, queue_size=1)
         gripper_inner_pub = rospy.Publisher('/leviathan/description/inner_controller/command', Float64, queue_size=1)
@@ -309,6 +316,10 @@ class JoyTeleop(object):
 
             gripper_bool = self.gripper_state
             self.gripper_pub.publish(gripper_bool)
+
+            servo_f64 = Float64()
+            servo_f64.data = self.servo_state
+            self.servo_pub.publish(servo_f64)
 
             outer_f64 = Float64(grip)
             inner_f64 = Float64(grip)

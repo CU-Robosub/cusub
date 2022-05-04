@@ -21,18 +21,23 @@ def load_params():
 # params = load_params()
 
 dvl = WlDVL("/dev/dvl")
+# dvl = WlDVL("/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_D30BW6H6-if00-port0")
 while not rospy.is_shutdown():
-    report = dvl.read()
+    try:
+        report = dvl.read()
+    except:
+        print("Failed")
+        report = None
     # print(report)
     if report is not None:
         if report['valid']:
             print(report)
             t = TwistWithCovarianceStamped()
             t.header.stamp = rospy.get_rostime()
-            t.header.frame_id = 'base_link'
+            t.header.frame_id = 'triton/description/base_link'
             t.twist.twist.linear.x = report['vx']
             t.twist.twist.linear.y = -report['vy']
-            t.twist.twist.linear.z = report['vz']
+            t.twist.twist.linear.z = -report['vz']
 
 
             cov = np.diag([0.1, 0.1, -1, -1, -1, -1])

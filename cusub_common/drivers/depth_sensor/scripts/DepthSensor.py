@@ -65,9 +65,11 @@ def initalizePressureSensor(i2c):
 
     except OSError:
         # TODO print error
+        print("OSERROR")
         pass
     except RuntimeError:
         # TODO print error
+        print("RuntimeError")
         pass
 
     return [0, C1, C2, C3, C4, C5, C6]
@@ -114,9 +116,13 @@ def readAndCalibratePressure(i2c, C):
 
         i2c.unlock()
 
-    except OSError:
+    except OSError as e:
+        print("OSERROR2")
+        print(str(e))
+        return None, None
         pass
     except RuntimeError:
+        print("Runtimeerror2")
         pass
 
     return TEMP, P
@@ -124,6 +130,7 @@ def readAndCalibratePressure(i2c, C):
 class DepthSensor():
 
     def __init__(self):
+        print('initializing')
 
         # Load parameters
         subname = "triton" #TODO unhardcode
@@ -170,13 +177,14 @@ class DepthSensor():
         #s = rospy.Service('calibrate_depth', CalibrateDepth, self.calibrate_depth)
 
         # Start Depth Publisher
-        depth_thread = threading.Thread(target = self.depth_publisher)
-        depth_thread.start()
+        # depth_thread = threading.Thread(target = self.depth_publisher)
+        # depth_thread.start()
 
         rospy.loginfo("Initalization Complete")
+        self.depth_publisher()
 
         # Run until we kill the core
-        rospy.spin()
+        # rospy.spin()
 
     def calibrate_depth(self, req):
 
@@ -197,11 +205,17 @@ class DepthSensor():
     def depth_publisher(self):
 
         r = rospy.Rate(10) # Depth 10Hz TODO pick good value
-
+        x = 0
         while not rospy.is_shutdown():
+            x += 1
+            # print(x)
 
             # Publish Depth Data
             _, pressure = readAndCalibratePressure(self.i2c, self.C)
+            if pressure is None:
+                print('broken')
+                # continue
+                break
             pressure_mbar = pressure / 10.0
             depth_m = -1*(pressure_mbar-797.11)*100/(1030*9.8) + rospy.get_param('/triton/depth_offset', 0.0)
 
@@ -227,8 +241,12 @@ class DepthSensor():
 if __name__ == '__main__':
 
     rospy.init_node('depth_sensor')
-
-    try:
-        node = DepthSensor()
-    except rospy.ROSInterruptException:
-        pass
+    r = rospy.Rate(10) # Depth 10Hz TODO pick good value
+    while not rospy.is_shutdown():
+        try:
+            node = DepthSensor()
+        except rospy.ROSInterruptException:
+            pass
+        except:
+            rospy.logwarn("An exception occured")
+            r.sleep()

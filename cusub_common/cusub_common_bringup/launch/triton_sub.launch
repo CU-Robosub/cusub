@@ -29,6 +29,7 @@
 	<!--<include file="$(find depth_sensor)/launch/depth_sensor.launch">
 		<arg name="subname" default="triton"/>
 	</include>-->
+	<!-- <node name="dvl" pkg="ros_dvl" type="real_dvl.py" ns="cusub_common"/> -->
 
 	<node name="imu" pkg="pni_trax_imu" type="pni_trax_imu.py" />
 	<include file="$(find pololu_controller)/launch/pololu_sub.launch">
