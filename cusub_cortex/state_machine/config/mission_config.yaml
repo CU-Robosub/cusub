@@ -73,13 +73,20 @@ tasks:
       timeout_secs: 0
       outcome_not_found: "skip" # skip, later
       outcome_timed_out: "skip"
+  
+  prequal:
+    manager_info:
+      timeout_secs: 0
+      outcome_not_found: 'skip' # skip, later
+      outcome_timed_out: 'skip'
 
 mission_tasks: # Tasks To Do In Order
   # - torpedos
   - startup
+  # - prequal
   # - start_gate
   # - jiangshi
-  # - droppers
+  - droppers
   # - triangle
-  - go_waypoint
+  # - go_waypoint
   # - octagon
