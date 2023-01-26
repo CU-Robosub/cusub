@@ -10,7 +10,7 @@ class Status(enum.Enum):
     RUNNING = 2
     FAILURE = 3
 
-# this stores all the information needed for the robot
+# the blackboard stores all the information needed for the robot
 blackboard = {
         'position' : 0.0,
         'should_move' : False
