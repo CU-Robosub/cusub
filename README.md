@@ -54,6 +54,6 @@ Project layout
       ├── robosub_descriptions/
       ├── stress_tester/
       ├── triton_description/
-      └── uuv_simulator/
+      └── uuv_simulator_test/
 ```
 --------------
