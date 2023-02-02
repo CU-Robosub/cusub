@@ -8,7 +8,7 @@
 #            later : move this task to the end of the mission_tasks queue, essentially coming back to the task later
 #            uh_oh : or any unrecognized string will crash and stop the SM
 
-using_sim_params : True
+using_sim_params: True
 manager_task_status_pub_rate: 1
 
 startup_delay: 0
@@ -23,8 +23,8 @@ tasks:
   start_gate:
     manager_info:
       timeout_secs: 0
-      outcome_not_found: 'skip' # skip, later
-      outcome_timed_out: 'uh_oh'
+      outcome_not_found: "skip" # skip, later
+      outcome_timed_out: "uh_oh"
     dist_behind_gate: 1.0
     third_leg_adjustment: 0.5
     replan_thresh: 1.0
@@ -36,8 +36,8 @@ tasks:
   droppers:
     manager_info:
       timeout_secs: 0
-      outcome_not_found: 'skip' # skip, later
-      outcome_timed_out: 'skip'
+      outcome_not_found: "skip" # skip, later
+      outcome_timed_out: "skip"
     drop_depth: -2
     retrace_hit_count: 1
     retrace_timeout: 15
@@ -45,12 +45,11 @@ tasks:
     xy_dist_thresh_app: 0.5 # how close in xy we need to be before diving
     xy_dist_thresh_drop: 0.1 # how close in xy we need to be before dropping
 
-
   jiangshi:
     manager_info:
       timeout_secs: 0
-      outcome_not_found: 'skip' # skip, later
-      outcome_timed_out: 'skip'
+      outcome_not_found: "skip" # skip, later
+      outcome_timed_out: "skip"
     seconds_in_position: 2
     new_dv_check_rate: 30
     approach_carrot_dist: 2 # when approaching jiangshi, how far ahead to set drive setpoint
@@ -66,16 +65,21 @@ tasks:
   torpedos:
     manager_info:
       timeout_secs: 0
-      outcome_not_found: 'skip' # skip, later
-      outcome_timed_out: 'skip'
+      outcome_not_found: "skip" # skip, later
+      outcome_timed_out: "skip"
 
+  go_waypoint:
+    manager_info:
+      timeout_secs: 0
+      outcome_not_found: "skip" # skip, later
+      outcome_timed_out: "skip"
 
 mission_tasks: # Tasks To Do In Order
   # - torpedos
   - startup
   # - start_gate
   # - jiangshi
-  - droppers
+  # - droppers
   # - triangle
-  
+  - go_waypoint
   # - octagon
