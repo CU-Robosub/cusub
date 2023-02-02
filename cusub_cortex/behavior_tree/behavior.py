@@ -10,8 +10,9 @@ class Status(enum.Enum):
     RUNNING = 2
     FAILURE = 3
 
-# the blackboard stores all the information needed for the robot
+# this stores all the information needed for the robot
 blackboard = {
+        'publisher' : None,
         'position' : 0.0,
         'should_move' : False
     }
@@ -91,22 +92,6 @@ class Condition(Node):
                 return Status.FAILURE
         else:
             return Status.FAILURE
-
-# class Inverter(Node):
-
-#     def __init__(self, name):
-#         self.name = name
-#         self.nodes = [] # inverters should only have 1 child node
-
-#     def activate(self):
-#         if len(self.nodes) == 0:
-#             print(self.name + ' has no child node')
-#             return Status.FAILURE
-#         if len(self.nodes) == 1:
-#             return not self.nodes[0].activate(board)
-#         else:
-#             print(self.name + ' has too many child nodes, it should only have 1')
-#             return Status.FAILURE
 
 
 # moves robot to destination, returns RUNNING while moving and SUCCESS once it reaches it

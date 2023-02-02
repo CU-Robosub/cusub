@@ -25,6 +25,11 @@ class Test:
 
     move3 = bt.Move("move3", 'position')
 
+    sequence2 = bt.Sequence("sequence2", True)
+    move4 = bt.Move("move4", 'position')
+    move5 = bt.Move("move5", 'position')
+    move6 = bt.Move("move6", 'position')
+
 
     # arrange nodes
     root.nodes.append(condition)
@@ -33,6 +38,11 @@ class Test:
     sequence.nodes.append(move2)
 
     root.nodes.append(move3)
+
+    root.nodes.append(sequence2)
+    sequence2.nodes.append(move4)
+    sequence2.nodes.append(move5)
+    sequence2.nodes.append(move6)
 
     # display behaivor tree
     bt.display_tree(root)
