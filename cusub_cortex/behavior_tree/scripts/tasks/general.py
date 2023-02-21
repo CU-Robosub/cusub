@@ -2,6 +2,8 @@
 
 import enum
 import rospy
+import math_utilities as mu
+from detection_listener.listener import DetectionListener
 
 # each node returns one of these statuses when activated
 class Status(enum.Enum):
@@ -12,13 +14,15 @@ class Status(enum.Enum):
 
 # this stores all the information needed for the robot
 blackboard = {
-        'publisher' : None,
-        'position' : 0.0,
-        'should_move' : False
+        "rate" : 2, # this should stay constant, don't change it in the code
+        "drive_publisher" : None,
+        "strafe_publisher" : None,
+        "velocity" : mu.Vector2(1.0, 0.0),
+        "counter" : 1
     }
 
 # basic node class that everything else inherits from
-class Node:       
+class Node:
     
     def __init__(self, name):
         self.name = name
@@ -88,32 +92,32 @@ class Condition(Node):
             if len(self.nodes) == 1:
                 return self.nodes[0].activate(board)
             else:
-                print(self.name + ' has too many child nodes, it should only have 1')
+                print(self.name + " has too many child nodes, it should only have 1")
                 return Status.FAILURE
         else:
             return Status.FAILURE
 
+# modifies the value of a blackboard variable, returns FAILURE if variable does not exist or if the value is not the same type and returns SUCCESS otherwise
+class Set(Node):
 
-# moves robot to destination, returns RUNNING while moving and SUCCESS once it reaches it
-class Move(Node):
-
-    def __init__(self, name, blackboard_variable, destination = 0.0):
+    def __init__(self, name, variable, value, operator = 0):
         self.name = name
-        self.blackboard_variable = blackboard_variable
-        self.destination = destination
-        self.publisher = None
+        self.variable = variable
+        self.value = value
+        self.operator = operator # 0 sets the value, 1 adds the value, 2 multiplies the value
 
     def activate(self, board):
-        if self.publisher != None:
-            if board[self.blackboard_variable] == self.destination:
-                print(self.name + " Robot is already at position " + str(board[self.blackboard_variable]))
-                return Status.SUCCESS
-            else:
-                self.publisher.publish(self.destination)
-                print(self.name + " is moving the robot towards " + str(self.destination) + "(current position is " + str(board[self.blackboard_variable]) + ")")
-                return Status.RUNNING
-        else:
-            return Status.FAILURE
+        if self.variable in board:
+            if type(board[self.variable]) == type(self.value):
+                if self.operator == 0:
+                    board[self.variable] = self.value
+                if self.operator == 1:
+                    board[self.variable] += self.value
+                if self.operator == 2:
+                    board[self.variable] *= self.value
+
+            return Status.SUCCESS
+
 
 # new nodes can be created for new behavior, this is an example of how to create one
 class Example(Node):
@@ -134,5 +138,5 @@ def display_tree(root):
 def iterate(node, level):
     for i in node.nodes:
         print(level * "  " + i.name)
-        if hasattr(i, 'nodes') and len(i.nodes) > 0:
+        if hasattr(i, "nodes") and len(i.nodes) > 0:
             iterate(i, level + 1)

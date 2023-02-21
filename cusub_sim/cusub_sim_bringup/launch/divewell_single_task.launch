@@ -35,13 +35,13 @@
       <arg name="yaw" default="$(arg DROP_yaw)"/>
   </include>
 
-  <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
+  <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="StartGate"/>
       <arg name="x" default="$(arg TASK_x)"/>
       <arg name="y" default="$(arg TASK_y)"/>
       <arg name="z" default="$(arg TASK_z)"/>
       <arg name="yaw" default="$(arg TASK_yaw)"/>
-  </include> -->
+  </include>
 
     <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="buoy_jiangshi"/>
