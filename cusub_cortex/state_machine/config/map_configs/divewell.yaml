@@ -22,8 +22,8 @@ priors:
   jiangshi:
     prior_depth: -1.5
     qtlocation:
-    - 318
-    - 248
+    - 137
+    - 335
     - 105
     sim_model: buoy_jiangshi_1
   leviathan:

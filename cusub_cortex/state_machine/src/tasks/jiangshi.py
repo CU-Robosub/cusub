@@ -37,7 +37,7 @@ class Jiangshi(Task):
         self.link_objectives()
 
     def init_objectives(self):
-        search_classes = ["vampire_cute"]
+        search_classes = ["vampire_cute"] #explore the search class and what methods it has.
         self.search = Search(self.name, self.listener, search_classes, self.get_prior_param())
         self.approach = Approach(self.name, self.listener)
         self.slay = Slay(self.name)
