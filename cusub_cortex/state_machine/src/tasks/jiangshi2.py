@@ -24,11 +24,11 @@ import numpy as np
 from cusub_print.cuprint import bcolors
 import sys
 
-class Jiangshi(Task):
-    name = "Jiangshi"
+class Jiangshi2(Task):
+    name = "Jiangshi2"
 
     def __init__(self):
-        super(Jiangshi, self).__init__(self.name)
+        super(Jiangshi2, self).__init__(self.name)
 
         # All Objectives share the same listener to gaurantee same data between objectives
         self.listener = DetectionListener() 

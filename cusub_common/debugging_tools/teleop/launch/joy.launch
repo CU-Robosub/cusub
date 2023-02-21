@@ -7,11 +7,11 @@
         <arg name="setpoint" default="true"/>       <!-- Use setpoints for controlling, if false we publish directly to control efforts -->
         <arg name="controller" default="ps4"/>      <!-- Controller type: ps4, xbox -->
 
-        <arg name="start_joy" default="false"/> <!-- autolaunch joy node.  This should be launched remotely if running on sub, locally if for sim -->
+        <arg name="start_joy" default="true"/> <!-- autolaunch joy node.  This should be launched remotely if running on sub, locally if for sim CHANGE TO TRUE???-->
 
         <!-- joystic device path for joy node - Special case for ps4 we default to js1 -->
         <arg name="joy_device" default="/dev/input/js0" unless="$(eval arg('controller')=='ps4')" />
-        <arg name="joy_device" default="/dev/input/js1" if="$(eval arg('controller')=='ps4')" />
+        <arg name="joy_device" default="/dev/input/js0" if="$(eval arg('controller')=='ps4')" />
 
         <!-- Use playstation 4 controller mapping -->
         <!-- NOTE: Playstation 4 controller usualy maps imu to js0 and actual controls to j1  -->

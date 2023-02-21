@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import division
 """
-Startup Task, allows the man on the competition dock time to remove the tether from the vehicle before it starts its autonomous run.
+Startup Task, allows the person on the competition dock time to remove the tether from the vehicle before it starts its autonomous run.
 Waits briefly at the surface before diving.
 """
 import rospy

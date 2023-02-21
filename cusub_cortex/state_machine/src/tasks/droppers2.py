@@ -136,7 +136,6 @@ class Approach(Objective):
 
                 if self.check_in_position():
                     self.count += 1
-                    exit() ## just added this @xavier
                     if self.count > self.count_target and not printed:
                         printed = True
                         break
@@ -188,7 +187,7 @@ class Approach(Objective):
     def check_in_position(self): 
         x_diff = round( self.dropper_pose.position.x - self.cur_pose.position.x, 2)
         y_diff = round( self.dropper_pose.position.y - self.cur_pose.position.y, 2)
-        x_str = "{:.2f}".format(x_diff) 
+        x_str = "{:.2f}".format(x_diff)
         y_str = "{:.2f}".format(y_diff)
         self.cuprint("Error x: " + bcolors.HEADER + x_str + bcolors.ENDC + " | y: " + bcolors.HEADER + y_str + bcolors.ENDC, print_prev_line=True)
         return np.linalg.norm([x_diff, y_diff]) < self.xy_distance_thresh

@@ -126,7 +126,7 @@ class PIDClient:
 
     def set_state(self, data, loop=False):
         if self.standard:
-            self.cuprint("Setting state of a 'standard' PID loop, will be overided by robot_localization", warn=True)
+            self.cuprint("Setting state of a 'standard' PID loop, will be overiden by robot_localization", warn=True)
         if not self.enabled and not self.standard:
             self.cuprint("Setting state but PID loop is not enabled!", warn=True)
         f = Float64()
