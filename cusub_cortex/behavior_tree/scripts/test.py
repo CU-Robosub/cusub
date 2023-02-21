@@ -11,7 +11,7 @@ from tasks.basic import *
 class Test:
 
     root = Sequence("root")
-    counter = Set("counter", "counter", 1, 1)
+    counter = Set("counter", "counter", 1, "+")
     cond_counter = Condition("cond_counter", "counter", blackboard["rate"] * 5)
     sequence = Sequence("sequence")
     reset_counter = Set("reset_counter", "counter", 0)

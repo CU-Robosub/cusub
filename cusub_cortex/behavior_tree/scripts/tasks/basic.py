@@ -71,22 +71,26 @@ class Condition(Node):
 # modifies the value of a blackboard variable, returns FAILURE if variable does not exist or if the value is not the same type and returns SUCCESS otherwise
 class Set(Node):
 
-    def __init__(self, name, variable, value, operator = 0):
+    def __init__(self, name, variable, value, operator = "="):
         self.name = name
         self.variable = variable
-        self.value = value
-        self.operator = operator # 0 sets the value, 1 adds the value, 2 multiplies the value
+        self.value = value # value can be a number or the name of a blackboard variable
+        self.operator = operator # use =, +, -, * or /
 
     def activate(self):
         if not is_number(self.value):
             self.value = blackboard[self.value]
         if self.variable in blackboard:
             if type(blackboard[self.variable]) == type(self.value):
-                if self.operator == 0:
+                if self.operator == "=":
                     blackboard[self.variable] = self.value
-                if self.operator == 1:
+                if self.operator == "+":
                     blackboard[self.variable] += self.value
-                if self.operator == 2:
+                if self.operator == "-":
+                    blackboard[self.variable] -= self.value
+                if self.operator == "*":
                     blackboard[self.variable] *= self.value
+                if self.operator == "/":
+                    blackboard[self.variable] /= self.value
 
             return Status.SUCCESS
