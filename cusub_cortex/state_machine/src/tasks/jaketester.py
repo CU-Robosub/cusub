@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# sim subscriber - /leviathan/cusub_common/downcam/image_color
+# sub subscriber - triton/down_cam/image_raw
+
 # ^^^ interpret with the python interpreter
 
 import cv2 # image recognition class
@@ -19,24 +22,25 @@ class Nodo(object):
         self.loop_rate = rospy.Rate(1)
         
         # publishers
-        self.pub = rospy.Publisher('imagetimer', Image, queue_size=10)
+        self.pub = rospy.Publisher('publisher', Image, queue_size=10)
         
         # Subscribers
-        rospy.Subscriber("/leviathan/cusub_common/downcam/image_color", Image, self.callback)
+        rospy.Subscriber("triton/down_cam/image_raw", Image, self.callback)
     
     def callback(self, msg):
         # 0 denotes capture from webcam - may need to change for robosub.
-        frame = self.br.imgmsg_to_cv2(msg) # converts image stream from ROS into openCV object. msg is ROS image stream
+        frame = self.br.imgmsg_to_cv2(msg,desired_encoding="bgr8") # converts image stream from ROS into openCV object. msg is ROS image stream
         # video = cv2.VideoCapture()
 
-        l_b = np.array([0, 200, 150])  # lower hsv bound for red
-        u_b = np.array([275, 275, 250])  # upper hsv bound to red
+        l_b = np.array([10, 100, 20])  # lower hsv bound for red // 10, 100, 20
+        u_b = np.array([25, 255, 255])  # upper hsv bound to red // 25, 255, 255
         cx, cy = 0, 0
         
         # ret, frame = video.read()
-
+        print("callback being run")
+        bgr = cv2.cvtColor(frame, cv2.COLOR_BGR2BGR555)
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        # rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         mask = cv2.inRange(hsv, l_b, u_b)  # color range to look for
 
         _, contours, _ = cv2.findContours(
@@ -55,21 +59,24 @@ class Nodo(object):
 
             # bounding box around object
             rect = cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 5)
+
+            M = cv2.moments(contour)  # for finding the centroid of the rectangle
+            if M["m00"] != 0:  # ensures no division by zero
+                cx = int(M["m10"] / M["m00"])
+                cy = int(M["m01"] / M["m00"])
+                rospy.loginfo(str(cx) + ", " + str(cy))
+            else:
+                cx, cy = 0, 0
+            # finally show the feed
+            # cv2.imshow("feed", rect)
+            
             # centroid dot
             center = cv2.circle(frame, (cx, cy), 10, (0, 255, 0), -1)
             # c centroid label
             ### Publish centroid to ros ###
             cv2.putText(rect, str(cx) + ", " + str(cy), (x, y-10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
-
-            M = cv2.moments(contour)  # for finding the centroid of the rectangle
-            if M["m00"] != 0:  # ensures no division by zero
-                cx = int(M["m10"] / M["m00"])
-                cy = int(M["m01"] / M["m00"])
-            else:
-                cx, cy = 0, 0
-            # finally show the feed
-            # cv2.imshow("feed", rect)
+            
             cv2.imshow("feed", center)
         else:  # only runs when no contours (or objects to detect rather) are detected
             cv2.imshow("feed", frame)
@@ -83,7 +90,7 @@ class Nodo(object):
             cv2.destroyAllWindows()
         
     
-        rospy.loginfo('Feed recieved')
+        # rospy.loginfo('Feed recieved')
         
     def execute(self):
         rospy.loginfo('Timing images...')
