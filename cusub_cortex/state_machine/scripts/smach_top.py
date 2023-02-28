@@ -19,6 +19,7 @@ from tasks.start_gate import StartGate
 from tasks.manager import Manager
 from tasks.task import Timeout
 from tasks.startup_task import Startup
+from tasks.waypoint_test import WaypointTest
 from cusub_print.cuprint import CUPrint, bcolors
 from tasks.prequal import PrequalSm
 cuprint = CUPrint("Startup Script")

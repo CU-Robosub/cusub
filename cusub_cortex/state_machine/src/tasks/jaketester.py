@@ -2,6 +2,7 @@
 
 # sim subscriber - /leviathan/cusub_common/downcam/image_color
 # sub subscriber - triton/down_cam/image_raw
+# sub compressed - triton/down_cam/compressed
 
 # ^^^ interpret with the python interpreter
 
@@ -11,6 +12,8 @@ import rospy # ros implementation
 from cv_bridge import CvBridge # for converting ros images into openCV objects
 from sensor_msgs.msg import Image
 import os
+import behavior as bt
+from std_msgs.msg import Float64
 
 
 class Nodo(object):
@@ -20,17 +23,41 @@ class Nodo(object):
         self.br = CvBridge()
         # Node cycle rate in Hz
         self.loop_rate = rospy.Rate(1)
-        
         # publishers
-        self.pub = rospy.Publisher('publisher', Image, queue_size=10)
-        
+        self.pub = rospy.Publisher('/leviathan/cusub_common/motor_controllers/pid/drive/setpoint', Float64, queue_size=10)
         # Subscribers
         rospy.Subscriber("triton/down_cam/image_raw", Image, self.callback)
     
     def callback(self, msg):
-        # 0 denotes capture from webcam - may need to change for robosub.
+        
+        root = bt.Selector("root")
+        
+        condition = bt.Condition("move_condition", 'should_move') # set to true or false depending on where the red button is
+        sequence = bt.Sequence("move", True)
+        strafe_left = bt.Move("strafe_left", 'position')
+        strafe_right = bt.Move("strafe_right", 'position')
+        move_forward = bt.Move("move_forward", 'position')
+        move_backward = bt.move("move_backward", 'position')
+        alt_up = bt.Move("alt_up", 'position')
+        alt_down = bt.Move("alt_down", 'position')
+        
+        # arrange nodes
+        root.nodes.append(condition)
+        condition.nodes.append(sequence)
+        sequence.nodes.append(strafe_left)
+        sequence.nodes.append(strafe_right)
+        sequence.nodes.append(move_forward)
+        sequence.nodes.append(alt_up)
+        sequence.nodes.append(alt_down)
+        root.nodes.append(move_backward) # returns the sub to the starting position of the task, effectively making it exit the box
+        
+        # display the behavior tree
+        bt.display_tree(root)
+        
+        
         frame = self.br.imgmsg_to_cv2(msg,desired_encoding="bgr8") # converts image stream from ROS into openCV object. msg is ROS image stream
-        # video = cv2.VideoCapture()
+        height = frame.shape[0]
+        width = frame.shape[1]
 
         l_b = np.array([10, 100, 20])  # lower hsv bound for red // 10, 100, 20
         u_b = np.array([25, 255, 255])  # upper hsv bound to red // 25, 255, 255
@@ -40,12 +67,10 @@ class Nodo(object):
         print("callback being run")
         bgr = cv2.cvtColor(frame, cv2.COLOR_BGR2BGR555)
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         mask = cv2.inRange(hsv, l_b, u_b)  # color range to look for
 
         _, contours, _ = cv2.findContours(
             mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # finds contours of object
-        # print(str(contours) + str(_))
         if (contours):  # run only if there are contours found (prevents crashing)
             max_contour = contours[0]
             for contour in contours:
@@ -65,14 +90,28 @@ class Nodo(object):
                 cx = int(M["m10"] / M["m00"])
                 cy = int(M["m01"] / M["m00"])
                 rospy.loginfo(str(cx) + ", " + str(cy))
+                if (cx < (width * 1/3)):
+                    # move right
+                    rospy.loginfo("move rightward")
+                elif (cx > (width * 2/3)):
+                    #move left
+                    rospy.loginfo("move leftward")
+                elif (cy < (height * 1/3)):
+                    # move up
+                    rospy.loginfo("move upward")
+                elif (cx > (height * 2/3)):
+                    #move down
+                    rospy.loginfo("move downward")
+                else:
+                    #move forward
+                    rospy.loginfo("move forward")
+                
             else:
                 cx, cy = 0, 0
-            # finally show the feed
-            # cv2.imshow("feed", rect)
             
             # centroid dot
             center = cv2.circle(frame, (cx, cy), 10, (0, 255, 0), -1)
-            # c centroid label
+            # centroid label
             ### Publish centroid to ros ###
             cv2.putText(rect, str(cx) + ", " + str(cy), (x, y-10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
@@ -95,7 +134,7 @@ class Nodo(object):
     def execute(self):
         rospy.loginfo('Timing images...')
         while not rospy.is_shutdown(): # publish only while ros is active
-            rospy.loginfo('publishing image...')
+            self.root.activate(bt.blackboard)
             if self.image is not None:
                 self.pub.publish(br.cv2_to_imgmsg(self.image))
             self.loop_rate.sleep()

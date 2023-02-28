@@ -68,7 +68,7 @@ tasks:
       outcome_not_found: "skip" # skip, later
       outcome_timed_out: "skip"
 
-  prequal:
+  go_waypoint:
     manager_info:
       timeout_secs: 0
       outcome_not_found: "skip" # skip, later
@@ -81,5 +81,5 @@ mission_tasks: # Tasks To Do In Order
   # - jiangshi
   # - droppers
   # - triangle
-  - prequal
+  - go_waypoint
   # - octagon
