@@ -15,7 +15,7 @@ class Test:
     cond_counter = Condition("cond_counter", "counter", blackboard["rate"] * 5)
     sequence = Sequence("sequence")
     reset_counter = Set("reset_counter", "counter", 0)
-    velocity = Set("velocity", "velocity", Vector2(-1.0, 0.0), 2)
+    velocity = Set("velocity", "velocity", Vector2(-1.0, 0.0), "*")
 
     root.nodes.append(counter)
     root.nodes.append(cond_counter)
