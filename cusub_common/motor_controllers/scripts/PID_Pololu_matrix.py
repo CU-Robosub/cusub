@@ -31,22 +31,22 @@ class PID_Pololu():
         self.servo_state = 0.0
 
         '''roll, pitch, yaw, depth, drive, strafe'''
-        self.motor_array[0] = [   0,    0,  0.2,   0, 0.3,   0] #Front Right
-        self.motor_array[1] = [   0,    0, -0.2,   0, 0.3,   0] #Front Left
-        self.motor_array[2] = [   0,    0,  0.2,   0, 0.3,   0] #Back Right
-        self.motor_array[3] = [   0,    0, -0.2,   0, 0.3,   0] #Back Left
-        self.motor_array[4] = [   0,    0,    0,   0,   0, 0.8] #Front
-        self.motor_array[5] = [   0,    0,    0,   0,   0,   0] #Back
-        self.motor_array[6] = [   0,    0,    0, -.6,   0,   0] #Left -.65
-        self.motor_array[7] = [   0,    0,    0, -.6,   0,   0] #Right -.8
-        # self.motor_array[0] = [ 0.2,  0.2,    0, -.4,   0,   0] #Front Right
-        # self.motor_array[1] = [-0.2,  0.2,    0, -.4,   0,   0] #Front Left
-        # self.motor_array[2] = [ 0.2, -0.2,    0, -.4,   0,   0] #Back Right
-        # self.motor_array[3] = [-0.2, -0.2,    0, -.4,   0,   0] #Back Left
-        # self.motor_array[4] = [   0,    0,    0,   0,   0,   0.8] #Front
+        # self.motor_array[0] = [   0,    0,  0.2,   0, 0.3,   0] #Front Right
+        # self.motor_array[1] = [   0,    0, -0.2,   0, 0.3,   0] #Front Left
+        # self.motor_array[2] = [   0,    0,  0.2,   0, 0.3,   0] #Back Right
+        # self.motor_array[3] = [   0,    0, -0.2,   0, 0.3,   0] #Back Left
+        # self.motor_array[4] = [   0,    0,    0,   0,   0, 0.8] #Front
         # self.motor_array[5] = [   0,    0,    0,   0,   0,   0] #Back
-        # self.motor_array[6] = [   0,    0,  0.5,   0, -.5,   0] #Left -.65
-        # self.motor_array[7] = [   0,    0, -0.5,   0, -.5,   0] #Right -.8
+        # self.motor_array[6] = [   0,    0,    0, -.6,   0,   0] #Left -.65
+        # self.motor_array[7] = [   0,    0,    0, -.6,   0,   0] #Right -.8
+        self.motor_array[0] = [ 0.2,  0.2,    0, -.4,   0,   0] #Front Right
+        self.motor_array[1] = [-0.2,  0.2,    0, -.4,   0,   0] #Front Left
+        self.motor_array[2] = [ 0.2, -0.2,    0, -.4,   0,   0] #Back Right
+        self.motor_array[3] = [-0.2, -0.2,    0, -.4,   0,   0] #Back Left
+        self.motor_array[4] = [   0,    0,    0,   0,   0,   0.8] #Front
+        self.motor_array[5] = [   0,    0,    0,   0,   0,   0] #Back
+        self.motor_array[6] = [   0,    0,  0.5,   0, -.5,   0] #Left -.65
+        self.motor_array[7] = [   0,    0, -0.5,   0, -.5,   0] #Right -.8
 
         '''FR, FL, BR, BL,  F,  B,  L,  R'''
         self.flip_motor_array = np.array(rospy.get_param("flip_motor_array"))

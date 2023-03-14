@@ -1,4 +1,5 @@
-flip_motor_array: [1, -1, -1, -1, -1, -1, 1, 1]
+# flip_motor_array: [1, -1, -1, -1, -1, -1, 1, 1]
+flip_motor_array: [1, 1, 1, -1, -1, -1, 1, 1]
 cusub_common:
   motor_controllers:
     pid:
