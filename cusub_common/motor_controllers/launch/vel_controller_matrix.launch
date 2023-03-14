@@ -1,0 +1,95 @@
+<launch>
+
+	<!-- <arg name="setpoint" default="true" /> -->
+	<arg name="pid_type" default="real" />
+	<arg name="subname" default="leviathan"/>
+
+	<rosparam command="load" file="$(find motor_controllers)/conf/$(arg subname).yaml" />
+
+	<node name="vel_pid" pkg="motor_controllers" type="Vel_PID.py" output="screen"/>
+	<node name="pid_pololu" pkg="motor_controllers" type="Vel_PID_Pololu_matrix.py" output="screen"/>
+
+	<!-- DEPTH -->
+	<node pkg="topic_tools" type="mux" name="depth_mux" ns="cusub_common/motor_controllers" args="mux/depth/control_effort pid/depth/control_effort cv/depth/control_effort">
+		<remap from="mux" to="depth_mux"/>
+		<param name="initial_topic " value="pid/depth/control_effort" />
+	</node>
+	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/depth" >
+		<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_depth.yaml" />
+		<param name="rate" value="25" />
+		<param name="upper_limit" value="100" />
+		<param name="lower_limit" value="-100" />
+		<param name="diagnostic_period" value="0.25" />
+		<param name="max_loop_frequency" value="25.0" />
+		<param name="min_loop_frequency" value="25.0" />
+	</node>
+
+	<!-- PITCH -->
+	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/pitch" >
+		<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_pitch.yaml" />
+		<param name="rate" value="25" />
+		<param name="upper_limit" value="100" />
+		<param name="lower_limit" value="-100" />
+		<param name="diagnostic_period" value="0.25" />
+		<param name="max_loop_frequency" value="25.0" />
+		<param name="min_loop_frequency" value="25.0" />
+	</node>
+
+	<!-- ROLL -->
+	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/roll" >
+		<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_roll.yaml" />
+		<param name="rate" value="25" />
+		<param name="upper_limit" value="100" />
+		<param name="lower_limit" value="-100" />
+		<param name="diagnostic_period" value="0.25" />
+		<param name="max_loop_frequency" value="25.0" />
+		<param name="min_loop_frequency" value="25.0" />
+	</node>
+
+	<!-- YAW -->
+	<node pkg="topic_tools" type="mux" name="yaw_mux" ns="cusub_common/motor_controllers" args="mux/yaw/control_effort pid/yaw/control_effort cv/yaw/control_effort">
+		<remap from="mux" to="yaw_mux"/>
+		<param name="initial_topic " value="pid/yaw/control_effort" />
+	</node>
+	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/yaw" >
+		<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_yaw.yaml" />
+		<param name="rate" value="25" />
+		<param name="upper_limit" value="100" />
+		<param name="lower_limit" value="-100" />
+		<param name="diagnostic_period" value="0.25" />
+		<param name="max_loop_frequency" value="25.0" />
+		<param name="min_loop_frequency" value="25.0" />
+		<param name="angle_error" value="true" />
+	</node>
+
+	<!-- DRIVE -->
+	<node pkg="topic_tools" type="mux" name="drive_vel_mux" ns="cusub_common/motor_controllers" args="mux/drive_vel/control_effort pid/drive_vel/control_effort cv/drive_vel/control_effort">
+		<remap from="mux" to="drive_vel_mux"/>
+		<param name="initial_topic " value="pid/drive_vel/control_effort" />
+	</node>
+	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/drive_vel">
+		<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_drive_vel.yaml" />
+		<param name="rate" value="25" />
+		<param name="upper_limit" value="100" />
+		<param name="lower_limit" value="-100" />
+		<param name="diagnostic_period" value="0.25" />
+		<param name="max_loop_frequency" value="25.0" />
+		<param name="min_loop_frequency" value="25.0" />
+	</node>
+
+	<!-- STRAFE -->
+	<node pkg="topic_tools" type="mux" name="strafe_vel_mux" ns="cusub_common/motor_controllers" args="mux/strafe_vel/control_effort pid/strafe_vel/control_effort cv/strafe_vel/control_effort">
+		<remap from="mux" to="strafe_vel_mux"/>
+		<param name="initial_topic " value="pid/strafe_vel/control_effort" />
+	</node>
+	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/strafe_vel">
+		<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_strafe_vel.yaml" />
+		<param name="rate" value="25" />
+		<param name="upper_limit" value="100" />
+		<param name="lower_limit" value="-100" />
+		<param name="diagnostic_period" value="0.25" />
+		<param name="max_loop_frequency" value="25.0" />
+		<param name="min_loop_frequency" value="25.0" />
+	</node>
+
+</launch>
