@@ -19,30 +19,38 @@ class Node:
         return Status.SUCCESS
 
 # 2 dimensional vector, used for velocity
-class Vector2():
-    def __init__(self, x, y):
+class Vector3():
+    def __init__(self, x, y, z):
         self.x = x
         self.y = y
+        self.z = z
 
     def __add__(self, other):
-        return Vector2(self.x + other.x, self.y + other.y)
+        return Vector3(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def __sub__(self, other):
+        return Vector3(self.x - other.x, self.y - other.y, self.z - other.z)
 
     def __mul__(self, other):
-        return Vector2(self.x * other.x, self.y * other.y)
+        return Vector3(self.x * other.x, self.y * other.y, self.z * other.z)
+
+    def __div__(self, other):
+        return Vector3(self.x / other.x, self.y / other.y, self.z / other.z)
 
     def __float__(self):
         return self.x
 
     def normalized(self, speed = 1.0):
-        self.length = (self.x**2 + self.y**2)**0.5
-        return (Vector2(self.x / self.length * speed, self.y / self.length * speed))
+        self.length = (self.x**2 + self.y**2 + self.z**2)**0.5
+        return Vector3(self.x / self.length * speed, self.y / self.length * speed, self.z / self.length * speed)
 
 # this stores all the information needed for the robot
 blackboard = {
         "rate" : 2, # this should stay constant, don't change it in the code
         "drive_publisher" : None,
         "strafe_publisher" : None,
-        "velocity" : Vector2(0.5, 0.0),
+        "depth_publisher" : None,
+        "velocity" : Vector3(0.5, 0.0, -0.2), # (Drive, Strafe, Depth), depth is a position, not a velocity
         "counter" : 0
 }
 
@@ -59,16 +67,6 @@ def is_number(s):
 
 #######################################################################################
 '''
-# new nodes can be created for new behavior, this is an example of how to create one
-class Example(Node):
-
-    def __init__(self, name):
-        self.name = name
-    
-    def activate(self):
-        print(self.name)
-        return Status.SUCCESS
-
 
 # displays a node and all of its descendents. not necessary now that the visual editor works
 def display_tree(root):
