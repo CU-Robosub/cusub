@@ -25,6 +25,7 @@ class Test:
     sequence.nodes.append(reset_counter)
     sequence.nodes.append(velocity)
     sequence.nodes.append(depth)
+    sequence.nodes.append(yaw)
 
     def create_publishers(self):
         blackboard["drive_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/drive_vel/setpoint", Float64, queue_size=1)
