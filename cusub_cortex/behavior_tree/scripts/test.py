@@ -15,8 +15,9 @@ class Test:
     cond_counter = Condition("cond_counter", "counter", blackboard["rate"] * 5)
     sequence = Sequence("sequence")
     reset_counter = Set("reset_counter", "counter", 0)
-    velocity = Set("velocity", "velocity", Vector3(-1.0, 0.0, 1.0), "*")
-    depth = Set("depth", "velocity", Vector3(0.0, 0.0, 0.1), "-")
+    velocity = Set("velocity", "velocity", Vector2(-1.0, 0.0), "*")
+    depth = Set("depth", "depth", 0.1, "-")
+    yaw = Set("yaw", "yaw", 0.1, "+")
 
     root.nodes.append(counter)
     root.nodes.append(cond_counter)
@@ -29,6 +30,7 @@ class Test:
         blackboard["drive_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/drive_vel/setpoint", Float64, queue_size=1)
         blackboard["strafe_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/strafe_vel/setpoint", Float64, queue_size=1)
         blackboard["depth_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
+        blackboard["yaw_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/yaw/setpoint", Float64, queue_size=1)
 
     def create_subscribers(self):
         rospy.Subscriber("move", Float64MultiArray, self.move_callback)
@@ -45,7 +47,8 @@ class Test:
             if blackboard["drive_publisher"] != None and blackboard["strafe_publisher"] != None:
                 blackboard["drive_publisher"].publish(blackboard["velocity"].x)
                 blackboard["strafe_publisher"].publish(-blackboard["velocity"].y)
-                blackboard["depth_publisher"].publish(blackboard["velocity"].z)
+                blackboard["depth_publisher"].publish(blackboard["depth"])
+                blackboard["yaw_publisher"].publish(blackboard["yaw"])
 
             rate.sleep()
 
@@ -53,7 +56,9 @@ class Test:
     def move_callback(self, data):
         blackboard["velocity"].x = data.data[0]
         blackboard["velocity"].y = data.data[1]
-        blackboard["velocity"].y = data.data[2]
+        blackboard["depth"] = data.data[2]
+        blackboard["yaw"] = data.data[3]
+
 
 
 test = Test()
