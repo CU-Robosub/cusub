@@ -80,7 +80,4 @@ def iterate(node, level):
         print(level * "  " + i.name)
         if hasattr(i, "nodes") and len(i.nodes) > 0:
             iterate(i, level + 1)
-.name)
-        if hasattr(i, "nodes") and len(i.nodes) > 0:
-            iterate(i, level + 1)
 '''
