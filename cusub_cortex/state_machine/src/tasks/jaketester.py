@@ -13,6 +13,7 @@ from cv_bridge import CvBridge # for converting ros images into openCV objects
 from sensor_msgs.msg import Image
 import os
 import behavior as bt
+from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import Float64
 
 
@@ -25,8 +26,14 @@ class Nodo(object):
         self.loop_rate = rospy.Rate(1)
         # publishers
         self.pub = rospy.Publisher('/leviathan/cusub_common/motor_controllers/pid/drive/setpoint', Float64, queue_size=10)
+        
+        bt.blackboard["drive_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/drive_vel/setpoint", Float64, queue_size=1)
+        bt.blackboard["strafe_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/strafe_vel/setpoint", Float64, queue_size=1)
+        bt.blackboard["depth_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
+        bt.blackboard["yaw_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/yaw/setpoint", Float64, queue_size=1)
         # Subscribers
         rospy.Subscriber("triton/down_cam/image_raw", Image, self.callback)
+        rospy.Subscriber("move", Float64MultiArray, bt.move_callback)
     
     def callback(self, msg):
         
