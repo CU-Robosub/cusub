@@ -27,22 +27,32 @@ class Vector2():
     def __add__(self, other):
         return Vector2(self.x + other.x, self.y + other.y)
 
+    def __sub__(self, other):
+        return Vector2(self.x - other.x, self.y - other.y)
+
     def __mul__(self, other):
         return Vector2(self.x * other.x, self.y * other.y)
+
+    def __div__(self, other):
+        return Vector2(self.x / other.x, self.y / other.y)
 
     def __float__(self):
         return self.x
 
     def normalized(self, speed = 1.0):
-        self.length = (self.x**2 + self.y**2)**0.5
-        return (Vector2(self.x / self.length * speed, self.y / self.length * speed))
+        self.length = (self.x**2 + self.y**2 + self.z**2)**0.5
+        return Vector2(self.x / self.length * speed, self.y / self.length * speed)
 
 # this stores all the information needed for the robot
 blackboard = {
         "rate" : 2, # this should stay constant, don't change it in the code
         "drive_publisher" : None,
         "strafe_publisher" : None,
-        "velocity" : Vector2(0.5, 0.0),
+        "depth_publisher" : None,
+        "yaw_publisher" : None,
+        "velocity" : Vector2(0.5, 0.0), # (Drive, Strafe)
+        "depth" : -0.2,
+        "yaw" : 0.0,
         "counter" : 0
 }
 
@@ -59,16 +69,6 @@ def is_number(s):
 
 #######################################################################################
 '''
-# new nodes can be created for new behavior, this is an example of how to create one
-class Example(Node):
-
-    def __init__(self, name):
-        self.name = name
-    
-    def activate(self):
-        print(self.name)
-        return Status.SUCCESS
-
 
 # displays a node and all of its descendents. not necessary now that the visual editor works
 def display_tree(root):
