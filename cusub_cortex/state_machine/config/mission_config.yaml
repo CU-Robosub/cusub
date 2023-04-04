@@ -80,6 +80,7 @@ mission_tasks: # Tasks To Do In Order
   # - start_gate
   # - jiangshi
   # - droppers
+  - prequal
   # - triangle
   - go_waypoint
   # - octagon

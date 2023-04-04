@@ -42,6 +42,7 @@ class Nodo(object):
         alt_down = bt.Move("alt_down", 'position')
         
         # arrange nodes
+        """
         root.nodes.append(condition)
         condition.nodes.append(sequence)
         sequence.nodes.append(strafe_left)
@@ -53,6 +54,7 @@ class Nodo(object):
         
         # display the behavior tree
         bt.display_tree(root)
+        """
         
         
         frame = self.br.imgmsg_to_cv2(msg,desired_encoding="bgr8") # converts image stream from ROS into openCV object. msg is ROS image stream

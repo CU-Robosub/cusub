@@ -114,7 +114,7 @@ class Approach(Objective):
         self.drive_client.enable()
         self.strafe_client.enable()
 
-        drive, strafe = self.get_relative_drive_strafe(self.dropper_pose)
+        drive, strafe = self.get_relative_drive_strafe(dropper_poself.dropper_pose)
         self.clear_new_pose_flag()
         drive_setpoint = self.drive_client.get_standard_state() + drive
         strafe_setpoint = self.strafe_client.get_standard_state() + strafe

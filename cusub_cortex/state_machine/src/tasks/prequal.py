@@ -33,7 +33,7 @@ class Prequal(Objective):
     outcomes=['done']
 
     def __init__(self, task_name):
-        name = task_name + "/PreQual"
+        name = task_name + "/PreQual" # instanciates the name to PrequalSm/PreQual
         super(Prequal, self).__init__(self.outcomes, name)
 
     def execute(self, userdata):
