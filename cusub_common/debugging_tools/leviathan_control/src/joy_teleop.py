@@ -50,6 +50,10 @@ class JoyTeleop(object):
     strafe_sensitivity = 0.02
     depth_sensitivity = 0.005
 
+    mode_yaw_sensitivity = 1
+    mode_drive_sensitivity = 1
+    mode_strafe_sensitivity = 1
+
     dropper_triggered = False
     left_torpedo_triggered = False
     right_torpedo_triggered = False
@@ -79,10 +83,10 @@ class JoyTeleop(object):
         if data.buttons[5] and self.right_torpedo_avail:
             self.right_torpedo_triggered = True
 
-        self.strafe_val  = data.axes[self.strafe_axes]
+        self.strafe_val  = data.axes[self.strafe_axes] * self.mode_strafe_sensitivity
         # self.strafe_val  = 0
-        self.drive_val = data.axes[self.drive_axes]
-        self.yaw_val = data.axes[self.yaw_axes]
+        self.drive_val = data.axes[self.drive_axes] * self.mode_drive_sensitivity
+        self.yaw_val = data.axes[self.yaw_axes] * self.mode_yaw_sensitivity
         # self.depth_val = - data.buttons[1] + data.buttons[2]
         self.depth_val = -1 * (-data.axes[self.depth_axes] + 4 * (data.buttons[2] - data.buttons[4]))
         #self.pitch_val = data.axes[self.pitch_axes]
@@ -91,6 +95,21 @@ class JoyTeleop(object):
         self.roll_val = 0
         #self.gripper_val = data.axes[self.gripper_axes]
         self.gripper_val = data.buttons[0]
+
+        #fine-ctrl mode on
+        if data.buttons[10] == 1:
+            print("slow mode activated")
+            self.mode_yaw_sensitivity = .25
+            self.mode_drive_sensitivity = .5
+            self.mode_strafe_sensitivity = 1
+            
+        
+        #fine-ctrl mode off
+        if data.buttons[11] == 1:
+            print("slow mode deactivated")
+            self.mode_yaw_sensitivity = 1
+            self.mode_drive_sensitivity = 1
+            self.mode_strafe_sensitivity = 1
 
     def driveStateCallback(self, data):
         if not self.current_drive_updated:
