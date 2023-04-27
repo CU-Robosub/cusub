@@ -29,7 +29,7 @@ cusub_common:
         pid:
           Kd: 0.0
           Ki: 0.0
-          Kp: 0.0
+          Kp: 400.0
           #         Kd: -10.0
           #         Ki: -30.0
           #         Kp: -50.0

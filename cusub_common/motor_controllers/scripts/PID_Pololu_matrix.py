@@ -39,10 +39,10 @@ class PID_Pololu():
         # self.motor_array[5] = [   0,    0,    0,   0,   0,   0] #Back
         # self.motor_array[6] = [   0,    0,    0, -.6,   0,   0] #Left -.65
         # self.motor_array[7] = [   0,    0,    0, -.6,   0,   0] #Right -.8
-        self.motor_array[0] = [ 0.2,  0.2,    0, -.4,   0,   0] #Front Right
-        self.motor_array[1] = [-0.2,  0.2,    0, -.4,   0,   0] #Front Left
-        self.motor_array[2] = [ 0.2, -0.2,    0, -.4,   0,   0] #Back Right
-        self.motor_array[3] = [-0.2, -0.2,    0, -.4,   0,   0] #Back Left
+        self.motor_array[0] = [ 0.2,  0.5,    0, -.4,   0,   0] #Front Right
+        self.motor_array[1] = [-0.2,  0.5,    0, -.4,   0,   0] #Front Left
+        self.motor_array[2] = [ 0.2, -0.5,    0, -.4,   0,   0] #Back Right
+        self.motor_array[3] = [-0.2, -0.5,    0, -.4,   0,   0] #Back Left
         self.motor_array[4] = [   0,    0,    0,   0,   0,   0.8] #Front
         self.motor_array[5] = [   0,    0,    0,   0,   0,   0] #Back
         self.motor_array[6] = [   0,    0,  0.5,   0, -.5,   0] #Left -.65
@@ -126,7 +126,7 @@ class PID_Pololu():
         command_order = [0, 1, 2, 3, 4, 5, 6, 7]
         arr = []
         for i in command_order:
-            arr.append(max(1300,min(1700,motor_transform[i])))
+            arr.append(motor_transform[i])
 
         # GRIPPER HACK
         arr.append(1200+600*self.gripper_state)

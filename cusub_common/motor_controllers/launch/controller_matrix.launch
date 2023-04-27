@@ -15,8 +15,8 @@
 	</node>
 	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/depth">
 		<param name="rate" value="25" />
-		<param name="upper_limit" value="100" />
-		<param name="lower_limit" value="-100" />
+		<param name="upper_limit" value="1000" />
+		<param name="lower_limit" value="-1000" />
 		<param name="diagnostic_period" value="0.25" />
 		<param name="max_loop_frequency" value="25.0" />
 		<param name="min_loop_frequency" value="25.0" />
@@ -34,16 +34,16 @@
 
 		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/pitch" >
 			<param name="rate" value="25" />
-			<param name="upper_limit" value="100" />
-			<param name="lower_limit" value="-100" />
+			<param name="upper_limit" value="1000" />
+			<param name="lower_limit" value="-1000" />
 			<param name="diagnostic_period" value="0.25" />
 			<param name="max_loop_frequency" value="25.0" />
 			<param name="min_loop_frequency" value="25.0" />
 		</node>
 		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/roll" >
 			<param name="rate" value="25" />
-			<param name="upper_limit" value="100" />
-			<param name="lower_limit" value="-100" />
+			<param name="upper_limit" value="1000" />
+			<param name="lower_limit" value="-1000" />
 			<param name="diagnostic_period" value="0.25" />
 			<param name="max_loop_frequency" value="25.0" />
 			<param name="min_loop_frequency" value="25.0" />
@@ -54,8 +54,8 @@
 		</node>
 		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/yaw" >
 			<param name="rate" value="25" />
-			<param name="upper_limit" value="100" />
-			<param name="lower_limit" value="-100" />
+			<param name="upper_limit" value="1000" />
+			<param name="lower_limit" value="-1000" />
 			<param name="diagnostic_period" value="0.25" />
 			<param name="max_loop_frequency" value="25.0" />
 			<param name="min_loop_frequency" value="25.0" />
@@ -75,8 +75,8 @@
 		</node>
 		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/drive">
 			<param name="rate" value="25" />
-			<param name="upper_limit" value="100" />
-			<param name="lower_limit" value="-100" />
+			<param name="upper_limit" value="1000" />
+			<param name="lower_limit" value="-1000" />
 			<param name="diagnostic_period" value="0.25" />
 			<param name="max_loop_frequency" value="25.0" />
 			<param name="min_loop_frequency" value="25.0" />
@@ -95,8 +95,8 @@
 		</node>
 		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/strafe">
 			<param name="rate" value="25" />
-			<param name="upper_limit" value="100" />
-			<param name="lower_limit" value="-100" />
+			<param name="upper_limit" value="1000" />
+			<param name="lower_limit" value="-1000" />
 			<param name="diagnostic_period" value="0.25" />
 			<param name="max_loop_frequency" value="25.0" />
 			<param name="min_loop_frequency" value="25.0" />
