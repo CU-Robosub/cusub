@@ -126,6 +126,25 @@ class JoyTeleop(object):
         #self.gripper_val = data.axes[self.gripper_axes]
         self.gripper_val = data.buttons[0]
 
+        drive_topic = "cusub_common/motor_controllers/pid/drive_vel"
+        strafe_topic = "cusub_common/motor_controllers/pid/strafe_vel"
+        enable_drive = drive_topic + "/pid_enable"
+        enable_strafe = strafe_topic + "/pid_enable"
+        disable_drive = drive_topic + "/pid_enable"
+        disable_strafe = strafe_topic + "/pid_enable"
+        """
+        self.enable_pub = rospy.Publisher(enable_topic, Bool, queue_size=10)
+        self.disable_pub = rospy.Publisher(disable_topic, Bool, queue_size=10)
+        """
+
+        if data.buttons[8] == 1:
+            print("drive pidloop enabled")
+            self.enable_pub = rospy.Publisher(enable_drive, True, queue_size=10)
+        if data.buttons[9] == 1:
+            print("drive pidloop disabled")
+            self.disable_pub = rospy.Publisher(disable_drive, True, queue_size=10)
+            
+
         #fine-ctrl mode on
         if data.buttons[10] == 1:
             print("slow mode activated")
