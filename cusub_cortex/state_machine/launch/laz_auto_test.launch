@@ -1,0 +1,14 @@
+<launch>
+
+    <arg name="config_filename" default="mission_config_sub.yaml"/>
+    <arg name="using_darknet" default="false"/> <!-- Tells SM whether or not to configure darknet cameras per task -->
+    <arg name="sub" default="triton" />
+    <!-- Include the mission config parameters -->
+    <rosparam command="load" file="$(find state_machine)/config/$(arg config_filename)"/>
+
+    <node name="auto_test" pkg="state_machine" type="autonmous_test.py" output="screen" ns="triton">
+        <param name="robotname" value="$(arg sub)"/>
+        <param name="using_darknet" value="$(arg using_darknet)" />
+    </node>
+
+</launch>

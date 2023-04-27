@@ -201,7 +201,11 @@ class Trax(object):
         self.write_frame(Trax.kSetFIRFilters_0, frameID["kSetFIRFiltersDone"])
 
     def start(self):
+<<<<<<< HEAD
         self.pub = rospy.Publisher('/imu_raw', Imu, queue_size=1)
+=======
+        self.pub = rospy.Publisher('cusub_common/imu', Imu, queue_size=1)
+>>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
         self.pub_data = Imu()
         '''
         The Trax has two modes: Compass and AHRS
@@ -214,7 +218,11 @@ class Trax(object):
         self.set_functional_mode(1)  # compass mode = 0, AHRS = 1
         #self.setFIR()
 
+<<<<<<< HEAD
         self.set_config(configID["kMountingRef"], 1, value_type="uint8") # Mounting using STD 90 (see user manual)
+=======
+        self.set_config(configID["kMountingRef"], 5, value_type="uint8") # Mounting using STD 180 (see user manual)
+>>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
 
         # Set magnetic declination to have an accurate north direction
         # XXX: THIS WILL HAVE TO BE CHANGED FOR SAN DIEGO
@@ -227,16 +235,26 @@ class Trax(object):
         self.set_config(configID["kTrueNorth"], False) # Use true north reference
 
         self.write_frame((frameID["kStartContinuousMode"],))
+<<<<<<< HEAD
         self.pub_data.orientation_covariance = [1e9,0,0,
                                                 0,1e9,0,
                                                 0,0,1e9]
+=======
+        self.pub_data.orientation_covariance = [1e-6,0,0,
+                                                0,1e-6,0,
+                                                0,0,1e-6]
+>>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
         self.pub_data.angular_velocity_covariance = [  1e-4,  0,   0,
   0,   1e-4,   0,
    0,  0,  1e-4]
         self.pub_data.linear_acceleration_covariance = [  1e2, 0,   0,
   0,  1e2,   0,
   0, 0,   1e2]
+<<<<<<< HEAD
         self.pub_data.header.frame_id = "base_imu"
+=======
+        self.pub_data.header.frame_id = "triton/description/imu_link"
+>>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
         # self.pub_data.header.stamp = rospy.Time.now()
         # print rospy.Time
         while 1:
@@ -284,10 +302,17 @@ class Trax(object):
                 # shm.trax.q1.set(data[35])
                 # shm.trax.q2.set(data[36])
                 # shm.trax.q3.set(data[38])
+<<<<<<< HEAD
                 self.pub_data.orientation.x = data[37]
                 self.pub_data.orientation.y = data[35]
                 self.pub_data.orientation.z = data[36]
                 self.pub_data.orientation.w = data[38]
+=======
+                self.pub_data.orientation.x = data[35] # 37
+                self.pub_data.orientation.y = -1*data[36] # 35
+                self.pub_data.orientation.z = data[37] # 36
+                self.pub_data.orientation.w = data[38] # 38
+>>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
                 self.pub.publish(self.pub_data)
 
             else:
@@ -375,7 +400,11 @@ if __name__ == "__main__":
     #     sys.exit(2)
 
     try:
+<<<<<<< HEAD
         t = Trax("/dev/ttyUSB0")
+=======
+        t = Trax("/dev/imu")
+>>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
     except serial.serialutil.SerialException:
         print "Could not open port: %s" % sys.argv[1]
         sys.exit(1)

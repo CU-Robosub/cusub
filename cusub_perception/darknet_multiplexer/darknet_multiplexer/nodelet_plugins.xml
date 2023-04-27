@@ -13,3 +13,14 @@
     </description>
   </class>
 </library>
+<<<<<<< HEAD:cusub_perception/darknet_multiplexer/darknet_multiplexer/nodelet_plugins.xml
+=======
+
+<library path="lib/libget_classes">
+  <class name="darknet_multiplexer/GetClasses" type="darknet_get_classes_ns::GetClasses" base_class_type="nodelet::Nodelet">
+    <description>
+        Records the classes currently available in darknet for a period of time.
+    </description>
+  </class>
+</library>
+>>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4:cusub_perception/darknet_multiplexer/nodelet_plugins.xml

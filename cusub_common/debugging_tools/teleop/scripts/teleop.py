@@ -17,9 +17,9 @@ import sys, signal
 # * left: 9
 # * right: 8
 #motor to keyboad mappings
-motor_kybrd = {'w': '0', 'e': '1', 'q': '2',
-          'x': '5', 'c': '3', 'z': '4',
-          'a': '6', 'd': '7'}
+# motor_kybrd = {'w': '0', 'e': '1', 'q': '2',
+#           'x': '5', 'c': '3', 'z': '4',
+#           'a': '6', 'd': '7'}
 
 #key stroke interrupt
 def signal_handler(singnal, frame):
@@ -34,21 +34,23 @@ class Motor_Controller():
         self.motor_cmd = Float64MultiArray()
         # self.motor_cmd.speed = 0
         # self.motor_cmd.acceleration = 0
-        self.arr = [1500,1500,1500,1500,1500,1500,1500,1500]
+        self.arr = [1500,1500,1500,1500,1500,1500,1500,1500,1500,1500]
 
 
     def single_motor(self, motor, intensity):
         print motor
         print intensity
 
-        i = int(motor_kybrd[motor])
-        self.arr[i] = int(intensity)*10 + 1500
+        # i = int(motor_kybrd[motor])
+        i = motor
+        # self.arr[i] = int(intensity)*10 + 1500
+        self.arr[i] = int(intensity)*10
         self.motor_cmd.data = self.arr
         self.motor_pub.publish(self.motor_cmd)
         return True
 
     def kill_all(self):
-        self.arr = [1500,1500,1500,1500,1500,1500,1500,1500]
+        self.arr = [1500,1500,1500,1500,1500,1500,1500,1500,1500,1500]
 
         self.motor_cmd.data = self.arr
         self.motor_pub.publish(self.motor_cmd)
@@ -59,6 +61,7 @@ class Motor_Controller():
         inpt = raw_input("enter command [command, intensity]\n")
         if inpt[0] == 's':
             self.kill_all()
+            return False
 
         #TODO max acceptable values
         if len(inpt) < 2 or len(inpt) > 5:
@@ -67,11 +70,13 @@ class Motor_Controller():
         else:
             cmd = inpt[0]
             pwr = inpt[1:]
-            if not cmd.islower():
-                return False
+            # if not cmd.islower():
+            #     return False
+            # if not int(cmd):
+            #     return False
             if not int(pwr):
                 return False
-            return [inpt[0], int(pwr)]
+            return [int(cmd), int(pwr)]
 
 
 def main():
@@ -91,7 +96,7 @@ def main():
         if not cmd_error:
             #try if key exists
             try:
-                motor_kybrd[cmd]
+                # motor_kybrd[cmd]
                 m.single_motor(cmd, pwr)
             except (KeyError):
                 pass

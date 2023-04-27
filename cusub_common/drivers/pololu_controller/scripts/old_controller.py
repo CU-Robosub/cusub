@@ -25,7 +25,9 @@ import serial
 # * right: 8
 
 class Controller():
+
     def __init__(self):
+
         self.map = rospy.get_param("pololu_controller/map")
         port = rospy.get_param("pololu_controller/port_name")
         baud = rospy.get_param("pololu_controller/baud_rate")
@@ -40,10 +42,15 @@ class Controller():
         #arr = [msg.data[0],msg.data[2],msg.data[1],msg.data[3],msg.data[6],msg.data[7],msg.data[4],msg.data[5],0,0]
         arr = []
         for i in range(10):
-            if self.map[i] != 9:
+            if self.map[i] != -1:
                 arr.append(msg.data[int(self.map[i])])
             else:
                 arr.append(0)
+        
+        # a = [msg.data[i] for i in range(9)]
+        # f, fr, fl, br, bl, b, l, r = a
+
+
 
         serialBytes = [
         0x9f,
@@ -60,9 +67,17 @@ class Controller():
         binary_string = binascii.unhexlify(b'A1')
         self.port.write(binary_string)
         self.port.flush()
+<<<<<<< HEAD
         if(self.port.in_waiting > 0):
             s = self.port.read(2)
             out = struct.unpack('<H',s)
+=======
+        # print "Done"
+        if(self.port.in_waiting > 0):
+            s = self.port.read(2)
+            out = struct.unpack('<H',s)
+            # print out[0]
+>>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
     def kill_all(self):
         print("Killing all Motors")
         arr = [1500,1500,1500,1500,1500,1500,1500,1500,1500,1500]
@@ -91,6 +106,7 @@ def signal_handler(singnal, frame):
     m.kill_all()
     print("\nprogram exited gracefully")
     sys.exit(0)
+
 def main():
     rospy.init_node('Controller')
 

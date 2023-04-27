@@ -14,7 +14,7 @@ class PIDClient:
         objective_name : str
         axis : str
             - "drive"
-            - "stfafe"
+            - "strafe"
             - "depth"
             - "yaw"
         root_topic : str

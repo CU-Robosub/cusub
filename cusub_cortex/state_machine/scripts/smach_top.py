@@ -13,16 +13,13 @@ from std_msgs.msg import Empty
 from waypoint_navigator.srv import ToggleControl
 from waypoint_navigator.msg import waypointAction, waypointGoal
 import actionlib
+# from tasks.dropper_task import DropperTask
+# from tasks.bangbang_roulette_task import BangBangRouletteTask
 from tasks.jiangshi import Jiangshi
-from tasks.droppers import Droppers
-from tasks.start_gate import StartGate
+from tasks.triangle_buoy import Triangle_Buoy
 from tasks.manager import Manager
 from tasks.task import Timeout
-from tasks.startup_task import Startup
-from tasks.waypoint_test import WaypointTest
-from cusub_print.cuprint import CUPrint, bcolors
-from tasks.prequal import PrequalSm
-cuprint = CUPrint("Startup Script")
+from tasks.path import Path
 
 def createTransitionsForManager(task_list, final_outcome):
     transition_dict = {}
@@ -41,20 +38,16 @@ def loadStateMachines(task_list):
     sm_list = []
     for task in task_list:
         task_sm = None
-        cuprint("Loading " + bcolors.HEADER + task.capitalize() + bcolors.ENDC + " state machine")
+        rospy.loginfo("Loading " + task + " state machine")
 
         if task == "start_gate":
             task_sm = StartGate()
         elif task == "jiangshi":
             task_sm = Jiangshi()
-        elif task == "droppers":
-            task_sm = Droppers()
-        elif task == "startup":
-            task_sm = Startup()
-        elif task == "debug":
-            task_sm = Debug()
-        elif task == "prequal":
-            task_sm = PrequalSm()
+        elif task == "path0":
+            task_sm = Path("0")
+        elif task == "path1":
+            task_sm = Path("1")
         else:
             raise ValueError("Unrecognized task: {}".format(task))
 
@@ -77,20 +70,20 @@ def main():
     wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
     cuprint("waiting for waypoint server")
     wayClient.wait_for_server()
-    cuprint("...connected")
+    rospy.loginfo("\tconnected to server")
 
     if rospy.get_param('~using_darknet'):
         cuprint("waiting for darknet multiplexer server")
         rospy.wait_for_service("cusub_perception/darknet_multiplexer/configure_active_cameras")
-        cuprint("...connected")
+        rospy.loginfo("\tconnected to server")
     else:
-        cuprint("SM NOT using darknet configuration service.", warn=True)
+        rospy.logwarn("SM not using darknet configuration service.")
 
     # initialize all of the state machines
     cuprint("waiting for rosparams")
     while not rospy.has_param("mission_tasks") and not rospy.is_shutdown():
         rospy.sleep(1)
-    cuprint("...found")
+    rospy.loginfo("\trosparams found")
 
     final_outcome = "mission_completed"
     sm_top = smach.StateMachine(outcomes=[final_outcome])
@@ -113,9 +106,10 @@ def main():
             smach.StateMachine.add(sm_name, sm, \
                 transitions={'manager':'manager'},\
                 remapping={'outcome':'previous_outcome'}) # all states will transition to the manager) # all states will transition to the manager
-    
-        cuprint("starting SM")
+    try:
         outcome = sm_top.execute()
+    except rospy.ROSInterruptException:
+        sys.exit()
 
 if __name__ == '__main__':
     main()

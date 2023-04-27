@@ -68,7 +68,7 @@ class Manager(smach.State):
     def move_on(self):
         self.queued_tasks.pop(0)
     def later(self):
-        self.cuprint("Latering")
+        rospy.loginfo("Latering")
         task = self.queued_tasks.pop(0)
         self.queued_tasks.append(task)
     

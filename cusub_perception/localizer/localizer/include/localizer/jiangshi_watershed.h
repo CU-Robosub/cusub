@@ -32,7 +32,11 @@ namespace pose_generator
                 vector<localizer_msgs::Detection>& detections
             );
         private:
+<<<<<<< HEAD:cusub_perception/localizer/localizer/include/localizer/jiangshi_watershed.h
             void getOrientationFromAspectRatio(const darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat);
+=======
+            void getOrientationFromAspectRatio(darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat);
+>>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4:cusub_perception/localizer/include/localizer/jiangshi_watershed.h
             bool getPoints(Mat& img, int border_size, vector<Point2f>& points);
             void sortPoints(Mat& img, vector<Point2f>& points);
             bool checkBoxes(const vector<darknet_ros_msgs::BoundingBox>& bbs, int border_size);

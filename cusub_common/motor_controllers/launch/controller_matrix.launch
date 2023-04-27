@@ -4,7 +4,7 @@
 	<arg name="pid_type" default="real" />
 	<arg name="subname" default="leviathan"/>
 
-	<rosparam command="load" file="$(find motor_controllers)/conf/$(arg subname).yaml" />
+	<rosparam command="load" file="$(find motor_controllers)/conf/$(arg subname)_$(arg pid_type).yaml" />
 
 	<node name="pose_pid" pkg="motor_controllers" type="Pose_PID.py" output="screen"/>
 	<node name="pid_pololu" pkg="motor_controllers" type="PID_Pololu_matrix.py" output="screen"/>
@@ -14,11 +14,10 @@
 		<remap from="mux" to="depth_mux"/>
 		<param name="initial_topic " value="pid/depth/control_effort" />
 	</node>
-	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/depth" >
-		<rosparam command="load" file="$(find motor_controllers)/conf/$(arg pid_type)_depth.yaml" />
+	<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/depth">
 		<param name="rate" value="25" />
-		<param name="upper_limit" value="100" />
-		<param name="lower_limit" value="-100" />
+		<param name="upper_limit" value="1000" />
+		<param name="lower_limit" value="-1000" />
 		<param name="diagnostic_period" value="0.25" />
 		<param name="max_loop_frequency" value="25.0" />
 		<param name="min_loop_frequency" value="25.0" />
@@ -46,6 +45,7 @@
 		<param name="min_loop_frequency" value="25.0" />
 	</node>
 
+<<<<<<< HEAD
 	<!-- YAW -->
 	<node pkg="topic_tools" type="mux" name="yaw_mux" ns="cusub_common/motor_controllers" args="mux/yaw/control_effort pid/yaw/control_effort cv/yaw/control_effort">
 		<remap from="mux" to="yaw_mux"/>
@@ -61,6 +61,85 @@
 		<param name="min_loop_frequency" value="25.0" />
 		<param name="angle_error" value="true" />
 	</node>
+=======
+		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/pitch" >
+			<param name="rate" value="25" />
+			<param name="upper_limit" value="1000" />
+			<param name="lower_limit" value="-1000" />
+			<param name="diagnostic_period" value="0.25" />
+			<param name="max_loop_frequency" value="25.0" />
+			<param name="min_loop_frequency" value="25.0" />
+		</node>
+		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/roll" >
+			<param name="rate" value="25" />
+			<param name="upper_limit" value="1000" />
+			<param name="lower_limit" value="-1000" />
+			<param name="diagnostic_period" value="0.25" />
+			<param name="max_loop_frequency" value="25.0" />
+			<param name="min_loop_frequency" value="25.0" />
+		</node>
+		<node pkg="topic_tools" type="mux" name="yaw_mux" ns="cusub_common/motor_controllers" args="mux/yaw/control_effort pid/yaw/control_effort cv/yaw/control_effort">
+			<remap from="mux" to="yaw_mux"/>
+			<param name="initial_topic " value="pid/yaw/control_effort" />
+		</node>
+		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/yaw" >
+			<param name="rate" value="25" />
+			<param name="upper_limit" value="1000" />
+			<param name="lower_limit" value="-1000" />
+			<param name="diagnostic_period" value="0.25" />
+			<param name="max_loop_frequency" value="25.0" />
+			<param name="min_loop_frequency" value="25.0" />
+			<param name="angle_error" value="true" />
+		</node>
+		<node name="yaw_cv" pkg="motor_controllers" type="bangbang.py" ns="cusub_common/motor_controllers">
+			<param name="setpoint_topic" value="cv/yaw/setpoint" />
+			<param name="state_topic" value="cv/yaw/state" />
+			<param name="control_effort_topic" value="cv/yaw/control_effort" />
+			<param name="deadzone_size" value="30" />
+			<param name="left_bang_effort" value="40" />
+			<param name="right_bang_effort" value="-40" />
+		</node>
+		<node pkg="topic_tools" type="mux" name="drive_mux" ns="cusub_common/motor_controllers" args="mux/drive/control_effort pid/drive/control_effort cv/drive/control_effort">
+			<remap from="mux" to="drive_mux"/>
+			<param name="initial_topic " value="pid/drive/control_effort" />
+		</node>
+		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/drive">
+			<param name="rate" value="25" />
+			<param name="upper_limit" value="1000" />
+			<param name="lower_limit" value="-1000" />
+			<param name="diagnostic_period" value="0.25" />
+			<param name="max_loop_frequency" value="25.0" />
+			<param name="min_loop_frequency" value="25.0" />
+		</node>
+		<node name="drive_cv" pkg="motor_controllers" type="bangbang.py" ns="cusub_common/motor_controllers">
+			<param name="setpoint_topic" value="cv/drive/setpoint" />
+			<param name="state_topic" value="cv/drive/state" />
+			<param name="control_effort_topic" value="cv/drive/control_effort" />
+			<param name="deadzone_size" value="30" />
+			<param name="left_bang_effort" value="60" />
+			<param name="right_bang_effort" value="-60" />
+		</node>
+		<node pkg="topic_tools" type="mux" name="strafe_mux" ns="cusub_common/motor_controllers" args="mux/strafe/control_effort pid/strafe/control_effort cv/strafe/control_effort">
+			<remap from="mux" to="strafe_mux"/>
+			<param name="initial_topic " value="pid/strafe/control_effort" />
+		</node>
+		<node name="pid" pkg="pid" type="controller" ns="cusub_common/motor_controllers/pid/strafe">
+			<param name="rate" value="25" />
+			<param name="upper_limit" value="1000" />
+			<param name="lower_limit" value="-1000" />
+			<param name="diagnostic_period" value="0.25" />
+			<param name="max_loop_frequency" value="25.0" />
+			<param name="min_loop_frequency" value="25.0" />
+		</node>
+		<node name="strafe_cv" pkg="motor_controllers" type="bangbang.py" ns="cusub_common/motor_controllers">
+			<param name="setpoint_topic" value="cv/strafe/setpoint" />
+			<param name="state_topic" value="cv/strafe/state" />
+			<param name="control_effort_topic" value="cv/strafe/control_effort" />
+			<param name="deadzone_size" value="30" />
+			<param name="left_bang_effort" value="-100" />
+			<param name="right_bang_effort" value="100" />
+		</node>
+>>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
 
 	<!-- DRIVE -->
 	<node pkg="topic_tools" type="mux" name="drive_mux" ns="cusub_common/motor_controllers" args="mux/drive/control_effort pid/drive/control_effort cv/drive/control_effort">

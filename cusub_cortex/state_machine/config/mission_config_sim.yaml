@@ -1,0 +1,93 @@
+# Mission Config of the sub
+# ALL UNITS IN M
+
+# priors: [x,y,z, frame], if frame is omitted, the prior will default to leviathan/description/odom
+# manager_info docs
+# timeout_secs: # of seconds before timing out, if 0 the task won't timeout
+# outcome_* : how the manager should respond when a task exits with this outcome
+#            skip : move on to the next task
+#            later : move this task to the end of the mission_tasks queue, essentially coming back to the task later
+#            uh_oh : or any unrecognized string will crash and stop the SM
+
+using_sim_params : True
+manager_task_status_pub_rate: 1
+
+tasks:
+ start_gate:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'uh_oh'
+#  prior: [-11,25,-1.5, "world"] # TRANSDEC, DIVEWELL 8,0,-1.5
+  prior: [8.0,0,-1.5, "world"] # TRANSDEC, DIVEWELL 8,0,-1.5  
+  dist_behind_gate: 1.0
+  third_leg_adjustment: 0.75
+  replan_thresh: 1.0
+  style_dist: 1.5
+  do_style: True
+  spin_carrot_rads: 0.7
+
+ path0:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip' # skip, later
+    outcome_timed_out: 'skip'
+  prior: [-2.5,2.0,-1.5, "world"] # Won't matter much b/c we'll almost immediately see it after the SG
+  target_pixel_threshold: 20   # Goal box size around our target pixel for visual servoing, if inside the box we will be successful
+  centering_time: 5            # Time between first centered feedback & when we check if we're centered again
+  do_orientation: true
+  depth: -0.5
+  prior_adjustment_dist: 3     # Set to false to not affect the next prior
+
+ jiangshi:
+  manager_info:
+    timeout_secs: 0
+    outcome_not_found: 'skip'
+    outcome_timed_out: 'skip'
+  # prior: [7.0,4.3,-1.5, "world"] # DIVEWELL
+  prior: [5.0,0.0,-1.5, "world"]
+  approach_dist: 2.5
+  slay_dist: 0.5
+  replan_thresh: 3.0
+  imu_axis: 'y'
+  jump_thresh: 0.5
+  use_buoys_yaw: False   # If false, the sub will assume the buoy is facing twd sub
+
+ triangle_buoy:
+  prior: [4,0,-2]
+  approach_dist: 2.0
+  slay_dist: 0.0
+  replan_thresh: 3.0
+  imu_axis: 'y'
+  jump_thresh: 3.0
+  slay_class: 'vampire_flying'
+  orbital_direction: 'left'
+  strafe_setpoint: 0.5
+  number_solo_frames : 1
+
+ dice:
+  prior: [3,0,-2.3]
+  targets: ['dice5', 'dice6']
+  replan_threshold: 1.0
+  approach_method: 'optimal' # optimal, twopoint, direct
+  approach_radius: 1.0
+  orbital_radius: 2.0
+  lockon_time: 5.0
+  carrot_dist: 2.0
+  backup_dist: 2.0
+  accel_spike_thresh: -0.15
+  accel_axis: 'x'
+  attack_timeout: 30
+  object_localizers:
+    dice1: dice_box
+    dice2: dice_box
+    dice5: dice_box
+    dice6: dice_box
+ dropper:
+  prior: [-7,-4.5,-1]
+  object_localizers:
+    roulette: roulette_watershed
+
+mission_tasks: # Tasks To Do In Order
+  - path0
+  

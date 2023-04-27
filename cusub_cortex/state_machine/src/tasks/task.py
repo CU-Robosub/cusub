@@ -13,12 +13,9 @@ import math
 import actionlib
 from tf.transformations import euler_from_quaternion
 from std_msgs.msg import Empty
-from darknet_multiplexer_msgs.srv import DarknetCameras
+from darknet_multiplexer.srv import DarknetCameras
 import numpy as np
 import tf
-from state_machine.msg import TaskStatus
-from waypoint_navigator.srv import *
-from cusub_print.cuprint import CUPrint, bcolors
 
 from optparse import OptionParser
 import inspect
@@ -35,9 +32,7 @@ class Task(smach.StateMachine):
 
     outcome = ["manager"]
 
-    def __init__(self, name):
-        self.cuprint = CUPrint(name)
-        self.name = name
+    def __init__(self):
         super(Task, self).__init__(
             outcomes=self.outcome,\
             input_keys=['timeout_obj'],\
@@ -74,7 +69,7 @@ class Task(smach.StateMachine):
         str : String
              The rosparam name of prior
         """
-        return "tasks/" + self.name.lower() + "/prior"
+        return "tasks/" + self.name + "/prior"
 
 """
 Objectives are subtasks within a task
@@ -99,8 +94,6 @@ class Objective(smach.State):
         """
         self.name = objtv_name
         rospy.Subscriber('cusub_common/odometry/filtered', Odometry, self.sub_pose_cb)
-        rospy.Subscriber('cusub_cortex/state_machine/task_status', TaskStatus, self.current_tasks_cb)
-        self.task_dict = {}
         self._replan_requested = False
         self.wayClient = actionlib.SimpleActionClient('/'+rospy.get_param('~robotname')+'/cusub_common/waypoint', waypointAction)
         self.started = False
@@ -113,21 +106,10 @@ class Objective(smach.State):
         pose.position.z = 0
         self.cur_pose = pose
 
-        self.cuprint = CUPrint(objtv_name)
-
         super(Objective, self).__init__(
             outcomes=outcomes,\
             input_keys=['timeout_obj'],\
             output_keys=['timeout_obj', 'outcome'])
-
-    def toggle_waypoint_control(self, sm_take_control):
-        wayToggle = rospy.ServiceProxy('cusub_common/toggleWaypointControl', ToggleControl)
-        try:
-            res = wayToggle(not sm_take_control)
-            return True
-        except rospy.ServiceException, e:
-            self.cuprint("Toggling waypoint nav control failed: " + str(e), warn=True)
-            return False
 
     def configure_darknet_cameras(self, camera_bool_list):
         """
@@ -161,6 +143,18 @@ class Objective(smach.State):
     def go_to_pose(self, target_pose, timeout_obj, replan_enabled=True, move_mode="yaw"):
         """ @brief traverses to the target_pose given, blocks until reached
 
+        Combination of go_to_pose_non_blocking() and block_on_reaching_pose()
+
+        Call like (if replanning is possible, surround w/ while loop):
+        if self.go_to_pose(target_pose, userdata.timeout_obj):
+            if userdata.timeout_obj.timed_out:
+                userdata.outcome = "timedout"
+                return "done"
+            else: # Replan has been requested loop again
+                pass
+        else: # Pose reached successfully!
+            pass or break # from while, in the case of replan
+
         Parameters
         ----------
         target_pose : Pose
@@ -185,7 +179,7 @@ class Objective(smach.State):
         self.go_to_pose_non_blocking(target_pose, move_mode)
         return self.block_on_reaching_pose(target_pose, timeout_obj, replan_enabled)
 
-    def go_to_pose_non_blocking(self, target_pose, move_mode="yaw", log_print=True):
+    def go_to_pose_non_blocking(self, target_pose, move_mode="yaw"):
         """
         @brief sends a pose to waypoint navigator and returns
         """
@@ -204,8 +198,7 @@ class Objective(smach.State):
         self.wayClient.cancel_all_goals()
         rospy.sleep(0.2)
         self.wayClient.send_goal(wpGoal)
-        if log_print:
-            self.cuprint("goal sent to waypointNav")
+        rospy.loginfo("---goal sent to waypointNav")
     
     def block_on_reaching_pose(self, target_pose, timeout_obj, replan_enabled=True):
         """
@@ -243,8 +236,8 @@ class Objective(smach.State):
     def cancel_way_client_goal(self):
         self.wayClient.cancel_goal()
 
-    def check_reached_pose(self, target_pose, threshold=POSE_REACHED_THRESHOLD):
-        return self.get_distance(self.cur_pose.position, target_pose.position) < threshold
+    def check_reached_pose(self, target_pose):
+        return self.get_distance(self.cur_pose.position, target_pose.position) < POSE_REACHED_THRESHOLD
 
     def sub_pose_cb(self, msg):
         self.cur_pose = msg.pose.pose # store the pose part of the odom msg
@@ -378,72 +371,25 @@ class Objective(smach.State):
         target_pose.orientation = cur_pose.orientation
         return target_pose
 
-    """
-    callback to update our prior dict
-    """
-    def current_tasks_cb(self, msg):
-        for i in range(0, len(msg.task_statuses), 2):
-            task = msg.task_statuses[i]
-            status = msg.task_statuses[i+1]
-            
-            self.task_dict[task] = status
-
-        
-    """
-    Will loop through the next tasks and update the relative priors
-    """
-    def update_next_priors(self, current_task):
-        xyzframe_list = rospy.get_param("tasks/"+current_task+"/prior")
-        cur_estimated_prior = Point()
-        cur_estimated_prior.x = xyzframe_list[0]
-        cur_estimated_prior.y = xyzframe_list[1]
-
-        for task, status in self.task_dict.iteritems():
-            if status == "queued": 
-                task_prior_name = "tasks/"+task+"/prior"
-
-                xyzframe_list = rospy.get_param(task_prior_name)
-                task_prior_pt = Point()
-                task_prior_pt.x = xyzframe_list[0]
-                task_prior_pt.y = xyzframe_list[1]
-                task_prior_pt.z = xyzframe_list[2]
-                
-                delta_x = task_prior_pt.x - cur_estimated_prior.x
-                delta_y = task_prior_pt.y - cur_estimated_prior.y
-
-                adjusted_prior = [self.cur_pose.position.x + delta_x, \
-                                  self.cur_pose.position.y + delta_y, \
-                                  task_prior_pt.z]
-                self.cuprint("updating prior for " + task)
-                rospy.set_param(task_prior_name, adjusted_prior)
-                
 class Timeout():
     """
     @brief Timeout object for tasks
     """
     timer = None
 
-    def __init__(self, name=""):
-        if name == "":
-            self.cuprint = CUPrint("SM Timeout Object")
-        else:
-            self.cuprint = CUPrint(name)
-
-    def set_new_time(self, seconds, print_new_time=True):
+    def set_new_time(self, seconds):
         """ In objectives reference like: userdata.timeout_obj.set_new_time(4) """
         if self.timer != None:
             self.timer.shutdown()
         self.timed_out = False
         if seconds != 0:
             self.timer = rospy.Timer(rospy.Duration(seconds), self.timer_callback)
-            if print_new_time:
-                self.cuprint("Next task time: " + bcolors.HEADER + str(seconds) + bcolors.ENDC + "s")    
         else:
-            self.cuprint("No timeout monitoring on next task", warn=True)
+            rospy.logwarn("No timeout monitoring on next task")
 
     def timer_callback(self, msg):
         self.timer.shutdown()
-        self.cuprint("Timed Out", warn=True)
+        rospy.logerr("Task Timed Out")
         self.timed_out = True
 
     def timed_out(self):

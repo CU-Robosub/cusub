@@ -1,0 +1,14 @@
+localizer:
+  classes:
+    start_gate_pole : hough # hough, ...
+    vampire_cute : jiangshi_watershed
+    vampire_walking : ignore
+    vampire_fathead : ignore
+    vampire_flying : ignore
+    path : ignore
+  hough:
+    three_legs : False  # true, false
+  jiangshi_watershed:
+    use_aspect_ratio : true
+    aspect_ratio_90_deg: 0.1  # 0 degrees is 0.5
+

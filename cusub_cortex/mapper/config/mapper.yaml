@@ -3,6 +3,7 @@
 mapper:
   publish_freq: 10
   classes:
+<<<<<<< HEAD
     start_gate: 50
     jiangshi: 30
     dropper_cover: 10
@@ -10,3 +11,7 @@ mapper:
     bat: 10
     path: 10
     coffin: 10
+=======
+    start_gate: 200
+    jiangshi: 70
+>>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4

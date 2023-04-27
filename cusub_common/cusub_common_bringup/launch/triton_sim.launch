@@ -20,6 +20,7 @@
 
         <include file="$(find motor_controllers)/launch/controller_matrix.launch">
             <arg name="pid_type" default="sim"/>
+            <arg name="subname" default="triton"/>
         </include>
 
         <include file="$(find waypoint_navigator)/launch/waypoint_navigator.launch"/>

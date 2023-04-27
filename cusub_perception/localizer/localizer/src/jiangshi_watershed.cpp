@@ -101,7 +101,11 @@ namespace pose_generator
         return true;
     }
 
+<<<<<<< HEAD:cusub_perception/localizer/localizer/src/jiangshi_watershed.cpp
     void JiangshiWatershed::getOrientationFromAspectRatio(const darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat)
+=======
+    void JiangshiWatershed::getOrientationFromAspectRatio(darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat)
+>>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4:cusub_perception/localizer/src/jiangshi_watershed.cpp
     {
         float aspectRatio = ( (float) (bb.xmax - bb.xmin) ) / ( (float) (bb.ymax - bb.ymin) );
         // Linearly fit the transformation from aspectRatio to yaw angle of the buoy
@@ -156,12 +160,18 @@ namespace pose_generator
             img_points[3].y += bbs[0].ymin - border_size;
 
             // Get pose from image points using a solvepnp
+<<<<<<< HEAD:cusub_perception/localizer/localizer/src/jiangshi_watershed.cpp
             getPoseFromPoints(truth_pts, img_points, det.pose.pose); // inherited
              // Adjust Jiangshi Orientation according to aspect ratio of the bounding box
             if ( useAspectRatio ) { getOrientationFromAspectRatio( bbs[0], det.pose.pose.position.x, det.pose.pose.orientation ); }
 
             detections.push_back(det);
 
+=======
+            getPoseFromPoints(truth_pts, img_points, pose); // inherited
+             // Adjust Jiangshi Orientation according to aspect ratio of the bounding box
+            if ( useAspectRatio ) { getOrientationFromAspectRatio( bbs[0], pose.position.x, pose.orientation ); }
+>>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4:cusub_perception/localizer/src/jiangshi_watershed.cpp
             return true;
 
         }

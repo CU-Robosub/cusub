@@ -12,6 +12,9 @@ class Depth_Sensor():
     '''
 
     def __init__(self):
+
+	self.subname = rospy.get_param("~subname", "leviathan")
+
         self.zero_sub = rospy.Subscriber(
             "zero_command", Empty, self.zero_command, queue_size=1)
 
@@ -27,7 +30,7 @@ class Depth_Sensor():
                                               0, 0, 0, 0, 0, 0,
                                               0, 0, 0, 0, 0, 0,
                                               0, 0, 0, 0, 0, 0]
-        self.pub_odom_data.header.frame_id = "leviathan/description/depth_odom_frame"
+        self.pub_odom_data.header.frame_id = self.subname+"/description/depth_odom_frame"
 
         self.pub_map_data = PoseWithCovarianceStamped()
         self.pub_map_data.pose.covariance = [0, 0, 0, 0, 0, 0,
@@ -36,7 +39,7 @@ class Depth_Sensor():
                                               0, 0, 0, 0, 0, 0,
                                               0, 0, 0, 0, 0, 0,
                                               0, 0, 0, 0, 0, 0]
-        self.pub_map_data.header.frame_id = "leviathan/description/depth_map_frame"
+        self.pub_map_data.header.frame_id = self.subname+"/description/depth_map_frame"
 
         self.ser = serial.Serial(
             '/dev/serial/by-id/usb-Adafruit_Industries_Trinket_M0-if00', '115200')
@@ -77,11 +80,11 @@ class Depth_Sensor():
             # publish
             self.pub_odom_data.header.stamp = rospy.Time.now()
             self.pub_odom_data.header.seq += 1
-            self.pub_odom_data.pose.pose.position.z = depth_m
+            self.pub_odom_data.pose.pose.position.z = depth_m + 2.5
 
             self.pub_map_data.header.stamp = rospy.Time.now()
             self.pub_map_data.header.seq += 1
-            self.pub_map_data.pose.pose.position.z = depth_m
+            self.pub_map_data.pose.pose.position.z = depth_m + 2.5
 
             self.pub_odom.publish(self.pub_odom_data)
             self.pub_map.publish(self.pub_map_data)

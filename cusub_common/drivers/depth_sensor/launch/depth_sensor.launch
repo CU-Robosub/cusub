@@ -1,3 +1,6 @@
 <launch>
-  <node name="depth_pub" pkg="depth_sensor" type="depth_pub.py" output="screen" ns="cusub_common"/>
+  <arg name="subname" default="leviathan"/>
+  <node name="depth_pub" pkg="depth_sensor" type="depth_pub.py" output="screen" ns="cusub_common">
+    <param name="subname" value="$(arg subname)"/>
+  </node>
 </launch>
