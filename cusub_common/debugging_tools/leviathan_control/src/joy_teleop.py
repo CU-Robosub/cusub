@@ -55,13 +55,13 @@ class JoyTeleop(object):
     mode_drive_sensitivity = 1
     mode_strafe_sensitivity = 1
 
-    left_dropper_triggered = False
-    right_dropper_triggered = False
+    dropper_triggered = False
     left_torpedo_triggered = False
     right_torpedo_triggered = False
 
-    left_dropper_avail = True
-    right_dropper_avail = True
+    gripper_state = False
+    servo_state = 0.0
+    dropper_avail = True
     left_torpedo_avail = True
     right_torpedo_avail = True
 
@@ -141,11 +141,6 @@ class JoyTeleop(object):
             self.mode_drive_sensitivity = 1
             self.mode_strafe_sensitivity = 1
 
-    def yawStateCallback(self, data):
-        if not self.current_yaw_updated:
-            self.yaw_f64.data = data.data
-            self.current_yaw_updated = True
-
     def driveStateCallback(self, data):
         if not self.current_drive_updated:
             self.drive_f64.data = data.data
@@ -192,6 +187,9 @@ class JoyTeleop(object):
         self.strafe_f64.data = 0.0
         depth_f64 = Float64()
         depth_f64.data = 0.0
+
+        self.gripper_bool = Bool()
+        self.gripper_bool.data = False
 
         self.gripper_bool = Bool()
         self.gripper_bool.data = False
@@ -298,14 +296,16 @@ class JoyTeleop(object):
 
             if mode == JoyTeleop.SETPOINT_MODE:
 
-                    self.yaw_f64.data = self.yaw_f64.data + self.yaw_val * self.yaw_sensitivity
-                    pub_yaw.publish(self.yaw_f64)
+                yaw_f64.data = yaw_f64.data + self.yaw_val * self.yaw_sensitivity
+                pub_yaw.publish(yaw_f64)
 
-                    self.drive_f64.data = self.drive_f64.data + self.drive_val * self.drive_sensitivity
-                    pub_drive.publish(self.drive_f64)
+                self.drive_f64 = Float64()
+                self.drive_f64.data = self.drive_val * self.thruster_power
+                pub_drive.publish(self.drive_f64)
 
-                    self.strafe_f64.data = self.strafe_f64.data - self.strafe_val * self.strafe_sensitivity
-                    pub_strafe.publish(self.strafe_f64)
+                self.strafe_f64 = Float64()
+                self.strafe_f64.data = -1 * self.strafe_val * self.thruster_power
+                pub_strafe.publish(self.strafe_f64)
 
                 pitch_f64.data = self.pitch_val*math.radians(45.0) # allow 15 deg pitch
                 pub_pitch.publish(pitch_f64)
@@ -350,17 +350,17 @@ class JoyTeleop(object):
 
             elif mode == JoyTeleop.QUAD_DIRECT_MODE: 
 
-                    self.yaw_f64 = Float64()
-                    self.yaw_f64.data = self.yaw_val * self.thruster_power * self.twist_effort
-                    pub_yaw.publish(self.yaw_f64)
+                yaw_f64 = Float64()
+                yaw_f64.data = self.yaw_val * self.thruster_power * self.twist_effort
+                pub_yaw.publish(yaw_f64)
 
-                    self.drive_f64 = Float64()
-                    self.drive_f64.data = self.drive_val * self.thruster_power
-                    pub_drive.publish(self.drive_f64)
+                self.drive_f64 = Float64()
+                self.drive_f64.data = self.drive_val * self.thruster_power
+                pub_drive.publish(self.drive_f64)
 
-                    self.strafe_f64 = Float64()
-                    self.strafe_f64.data = -1 * self.strafe_val * self.thruster_power
-                    pub_strafe.publish(self.strafe_f64)
+                self.strafe_f64 = Float64()
+                self.strafe_f64.data = -1 * self.strafe_val * self.thruster_power
+                pub_strafe.publish(self.strafe_f64)
 
                 pitch_f64 = Float64()
                 pitch_f64.data = self.pitch_val * self.thruster_power * 0.5

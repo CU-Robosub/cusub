@@ -132,6 +132,7 @@ class Attack(Objective):
                 self.dist_behind, \
                 self.small_leg_left_side, \
                 self.leg_adjustment_meters)
+
             if self.go_to_pose(target_pose, userdata.timeout_obj):
                 if userdata.timeout_obj.timed_out:
                     userdata.outcome = "timed_out"

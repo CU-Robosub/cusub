@@ -234,6 +234,7 @@ namespace darknet_ros
         boost::unique_lock<boost::shared_mutex> lockImageCallback(mutexImageCallback_);
         camImageCopy_ = cam_image->image.clone();
         imageHeader_ = msg->header;
+        imageHeader_ = msg->header;
       }
       {
         boost::unique_lock<boost::shared_mutex> lockImageStatus(mutexImageStatus_);
@@ -602,7 +603,7 @@ namespace darknet_ros
     const auto wait_duration = std::chrono::milliseconds(2000);
     while (!getImageStatus() && ros::ok())
     {
-      cuprint("Waiting for image.\n");
+      printf("Waiting for image.\n");
       if (!isNodeRunning())
       {
         return;
@@ -658,8 +659,8 @@ namespace darknet_ros
     while (!demoDone_ && ros::ok())
     {
       buffIndex_ = (buffIndex_ + 1) % 3;
-      // fetch_thread = std::thread(&YoloObjectDetector::fetchInThread, this);
-      // detect_thread = std::thread(&YoloObjectDetector::detectInThread, this);
+      // //fetch_thread = std::thread(&YoloObjectDetector::fetchInThread, this);
+      // //detect_thread = std::thread(&YoloObjectDetector::detectInThread, this);
       if (!demoPrefix_)
       {
         fps_ = 1. / (what_time_is_it_now() - demoTime_);
@@ -671,6 +672,8 @@ namespace darknet_ros
         publishInThread();
         fetchInThread();
         detectInThread();
+        fetchInThread();
+        detectInThread();
       }
       else
       {
@@ -678,8 +681,8 @@ namespace darknet_ros
         sprintf(name, "%s_%08d", demoPrefix_, count);
         save_image(buff_[(buffIndex_ + 1) % 3], name);
       }
-      // fetch_thread.join();
-      // detect_thread.join();
+      // //fetch_thread.join();
+      // //detect_thread.join();
       ++count;
       if (!isNodeRunning())
       {
@@ -692,6 +695,7 @@ namespace darknet_ros
   {
     boost::shared_lock<boost::shared_mutex> lock(mutexImageCallback_);
     IplImage *ROS_img = new IplImage(camImageCopy_);
+    curr_header = imageHeader_;
     curr_header = imageHeader_;
     return ROS_img;
   }

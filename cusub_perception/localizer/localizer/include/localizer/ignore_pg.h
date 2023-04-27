@@ -19,19 +19,12 @@ namespace pose_generator
 {
     class IgnorePG : public PoseGenerator
     {
-        public:
+    public:
         bool generatePose(
-<<<<<<< HEAD:cusub_perception/localizer/localizer/include/localizer/ignore_pg.h
-                const sensor_msgs::Image& image, 
-                const vector<darknet_ros_msgs::BoundingBox>& bbs,
-                vector<localizer_msgs::Detection>& detections
-=======
-                sensor_msgs::Image& image, 
-                vector<darknet_ros_msgs::BoundingBox>& bbs,
-                geometry_msgs::Pose& pose,
-                string& class_name
->>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4:cusub_perception/localizer/include/localizer/ignore_pg.h
-            ){ return false;}
+            sensor_msgs::Image &image,
+            vector<darknet_ros_msgs::BoundingBox> &bbs,
+            geometry_msgs::Pose &pose,
+            string &class_name) { return false; }
     };
 }
 

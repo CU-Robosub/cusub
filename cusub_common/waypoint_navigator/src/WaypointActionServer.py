@@ -69,25 +69,17 @@ class WaypointServer(WaypointNavigator):
 
             if self.server.is_preempt_requested():
 
-<<<<<<< HEAD
-                self.cuprint("preempt received")
-=======
                 rospy.logwarn("Waypoint Preempt Received!")
->>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
 
                 result = waypointResult()
                 result.complete = False
                 self.server.set_preempted(result)
                 self.waypoint = None
-<<<<<<< HEAD
-                self.do_freeze()
-=======
                 self.yawFreeze = self.currentYaw
                 self.driveFreeze = self.currentDrive
                 self.strafeFreeze = self.currentStrafe
                 self.depthFreeze = self.currentDepth
                 self.freeze_controls()
->>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
 
                 return
 

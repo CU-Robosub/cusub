@@ -1,8 +1,5 @@
 <launch>
     <rosparam command="load" file="$(find waypoint_navigator)/config/waypoint_navigator.yaml"/>
-<<<<<<< HEAD
-    <node name="waypoint" pkg="waypoint_navigator" type="WaypointActionServer.py" ns="cusub_common" output="screen"/>
-=======
     <node name="waypoint" pkg="waypoint_navigator" type="WaypointActionServer.py" ns="cusub_common"/>
 >>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
 </launch>

@@ -2,8 +2,6 @@
 from __future__ import division
 """
 Manager State
-Manages state transitions between tasks
-Reads in the state transitions from the mission_config parameters
 """
 import smach
 import smach_ros
@@ -11,14 +9,11 @@ from tasks.task import Timeout
 import rospy
 from state_machine.msg import TaskStatus
 from state_machine.srv import *
-from cusub_print.cuprint import CUPrint
 
 class Manager(smach.State):
-    name = "Manager"
 
     def __init__(self, task_names, mission_end_outcome='mission_success'):
-        self.cuprint = CUPrint(self.name)
-        self.cuprint("initializing")
+        rospy.loginfo("Loading manager obj")
         self.queued_tasks = task_names
         self.mission_end_outcome = mission_end_outcome
         outcomes = self.queued_tasks + [mission_end_outcome]
@@ -86,3 +81,4 @@ class Manager(smach.State):
             return GetNextTaskResponse("mission_complete")
         else:
             return GetNextTaskResponse(self.queued_tasks[1])
+

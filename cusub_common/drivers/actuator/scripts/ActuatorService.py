@@ -6,10 +6,6 @@ import crc8
 import struct
 
 from actuator.srv import ActivateActuator
-<<<<<<< HEAD
-from cusub_print.cuprint import CUPrint, bcolors
-=======
->>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
 
 class ActuatorService():
 

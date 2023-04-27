@@ -33,12 +33,7 @@ class Path(Task):
         self.link_objectives()
 
     def init_objectives(self, path_num_str):
-<<<<<<< HEAD
-        frame = "leviathan/description/downcam_frame_optical"
-        self.search = Search.from_bounding_box(self.get_prior_param(), "path", frame)
-=======
         self.search = Search.from_bounding_box(self.get_prior_param(), "path", [0,0,0,0,0,1])
->>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
         self.follow = Follow(path_num_str)
 
     def link_objectives(self):
@@ -75,13 +70,8 @@ class Follow(Objective):
             rospy.loginfo("\tfound get_next_task server")
         self.feedback = False
         self.was_centered = False
-<<<<<<< HEAD
-        # self.depth_pub = rospy.Publisher("cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
-        # self.depth_msg = Float64(); self.depth_msg.data = rospy.get_param("tasks/path"+path_num_str+"/depth")
-=======
         self.depth_pub = rospy.Publisher("cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
         self.depth_msg = Float64(); self.depth_msg.data = rospy.get_param("tasks/path"+path_num_str+"/depth")
->>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
         self.target_pixel_box = rospy.get_param("tasks/path"+path_num_str+"/target_pixel_threshold")
         
         super(Follow, self).__init__(self.outcomes, "Follow")
@@ -106,37 +96,19 @@ class Follow(Objective):
             rospy.set_param("tasks/"+res.next_task+"/prior", new_prior)
 
     def execute(self, userdata):
-<<<<<<< HEAD
-        self.configure_darknet_cameras([0,0,0,0,0,1])
         goal = VisualServoGoal()
         goal.target_class = "path"
         goal.camera = goal.DOWNCAM
-        goal.x_axis = goal.STRAFE_AXIS
-        goal.y_axis = goal.DRIVE_AXIS
-        goal.area_axis = goal.NO_AXIS
-=======
-        goal = VisualServoGoal()
-        goal.target_class = "path"
-        goal.camera = goal.DOWNCAM
->>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
         goal.target_frame = rospy.get_param("~robotname") +"/description/downcam_frame_optical"
         goal.visual_servo_type = goal.PROPORTIONAL
         goal.target_pixel_x = goal.CAMERAS_CENTER_X
         goal.target_pixel_y = goal.CAMERAS_CENTER_Y
-<<<<<<< HEAD
-        goal.target_pixel_y = goal.CAMERAS_CENTER_Y
-=======
->>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
         goal.target_pixel_threshold = self.target_pixel_box
         rospy.loginfo("...centering over path marker")
         self.vs_client.send_goal(goal, feedback_cb=self.vs_feedback_callback)
         
         while not rospy.is_shutdown() :
-<<<<<<< HEAD
-            # self.depth_pub.publish(self.depth_msg)
-=======
             self.depth_pub.publish(self.depth_msg)
->>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
             if userdata.timeout_obj.timed_out:
                 self.vs_client.cancel_goal()
                 userdata.outcome = "timed_out"
@@ -159,11 +131,7 @@ class Follow(Objective):
             self.ori_client.send_goal(ori_goal, done_cb=self.orientation_result_callback)
             r = rospy.Rate(1)
             while not rospy.is_shutdown() and self.orientation_result == None:
-<<<<<<< HEAD
-                # self.depth_pub.publish(self.depth_msg)
-=======
                 self.depth_pub.publish(self.depth_msg)
->>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
                 if userdata.timeout_obj.timed_out:
                     self.vs_client.cancel_goal()
                     self.ori_client.cancel_goal()
@@ -172,11 +140,7 @@ class Follow(Objective):
                 r.sleep()
             rospy.loginfo("\toriented")
         else:
-<<<<<<< HEAD
-            rospy.logwarn("...skipping orpientation")
-=======
             rospy.logwarn("...skipping orientation")
->>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
         
         self.vs_client.cancel_goal()  # Tell VS to stop servoing
 

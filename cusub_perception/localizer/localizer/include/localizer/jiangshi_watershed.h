@@ -24,30 +24,25 @@ namespace pose_generator
 {
     class JiangshiWatershed : public PoseGenerator
     {
-        public:
-            JiangshiWatershed();
-            bool generatePose(
-                const sensor_msgs::Image& image, 
-                const vector<darknet_ros_msgs::BoundingBox>& bbs,
-                vector<localizer_msgs::Detection>& detections
-            );
-        private:
-<<<<<<< HEAD:cusub_perception/localizer/localizer/include/localizer/jiangshi_watershed.h
-            void getOrientationFromAspectRatio(const darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat);
-=======
-            void getOrientationFromAspectRatio(darknet_ros_msgs::BoundingBox& bb, float horizontalDist, geometry_msgs::Quaternion& quat);
->>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4:cusub_perception/localizer/include/localizer/jiangshi_watershed.h
-            bool getPoints(Mat& img, int border_size, vector<Point2f>& points);
-            void sortPoints(Mat& img, vector<Point2f>& points);
-            bool checkBoxes(const vector<darknet_ros_msgs::BoundingBox>& bbs, int border_size);
-            vector<Point3f> truth_pts{      // TODO lookup the actual dimensions of jiangshi
-                Point3f(0,-0.3048,-0.61595),
-                Point3f(0,-0.3048, 0.61595),
-                Point3f(0, 0.3048,-0.61595),
-                Point3f(0, 0.3048, 0.61595)
-            };
-            bool useAspectRatio;
-            float aspectRatio90Deg;
+    public:
+        JiangshiWatershed();
+        bool generatePose(
+            const sensor_msgs::Image &image,
+            const vector<darknet_ros_msgs::BoundingBox> &bbs,
+            vector<localizer_msgs::Detection> &detections);
+
+    private:
+        void getOrientationFromAspectRatio(darknet_ros_msgs::BoundingBox &bb, float horizontalDist, geometry_msgs::Quaternion &quat);
+        bool getPoints(Mat &img, int border_size, vector<Point2f> &points);
+        void sortPoints(Mat &img, vector<Point2f> &points);
+        bool checkBoxes(const vector<darknet_ros_msgs::BoundingBox> &bbs, int border_size);
+        vector<Point3f> truth_pts{// TODO lookup the actual dimensions of jiangshi
+                                  Point3f(0, -0.3048, -0.61595),
+                                  Point3f(0, -0.3048, 0.61595),
+                                  Point3f(0, 0.3048, -0.61595),
+                                  Point3f(0, 0.3048, 0.61595)};
+        bool useAspectRatio;
+        float aspectRatio90Deg;
     };
 }
 

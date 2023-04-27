@@ -9,38 +9,11 @@
   <arg name="PM1_y" default="1.8"/>
   <arg name="PM1_z" default="-3.5"/>
   <arg name="PM1_yaw" default="-0.75"/>
-<<<<<<< HEAD
-
-  <arg name="droppers" default="false"/>
-  <arg name="DROP_x" default="3.0"/>
-  <arg name="DROP_y" default="0.0"/>
-  <arg name="DROP_z" default="-3.5"/>
-  <arg name="DROP_yaw" default="-0.75"/>
-=======
->>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
 
   <!-- Start the a underwater world simulation scenario -->
   <include file="$(find robosub_descriptions)/launch/divewell.launch"/>
 
   <include file="$(find robosub_descriptions)/launch/upload.launch">
-<<<<<<< HEAD
-      <arg name="obstacle" default="vampire_stake"/>
-      <arg name="x" default="$(arg TASK_x)"/>
-      <arg name="y" default="$(arg TASK_y)"/>
-      <arg name="z" default="$(arg TASK_z)"/>
-      <arg name="yaw" default="$(arg TASK_yaw)"/>
-  </include>
-
-  <include file="$(find robosub_descriptions)/launch/upload.launch">
-      <arg name="obstacle" default="dropper_garlic"/>
-      <arg name="x" default="$(arg DROP_x)"/>
-      <arg name="y" default="$(arg DROP_y)"/>
-      <arg name="z" default="$(arg DROP_z)"/>
-      <arg name="yaw" default="$(arg DROP_yaw)"/>
-  </include>
-
-  <include file="$(find robosub_descriptions)/launch/upload.launch">
-=======
       <arg name="obstacle" default="PathMarker"/>
       <arg name="x" default="$(arg PM1_x)"/>
       <arg name="y" default="$(arg PM1_y)"/>
@@ -55,13 +28,8 @@
       <arg name="y" default="$(arg TASK_y)"/>
       <arg name="z" default="$(arg TASK_z)"/>
       <arg name="yaw" default="$(arg TASK_yaw)"/>
-<<<<<<< HEAD
-  </include>
-
-=======
   </include> -->
 <!-- 
->>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4
     <include file="$(find robosub_descriptions)/launch/upload.launch">
       <arg name="obstacle" default="buoy_jiangshi"/>
       <arg name="x" default="$(arg TASK_x)"/>
@@ -77,19 +45,6 @@
       <arg name="z" default="$(arg TASK_z)"/>
       <arg name="yaw" default="$(arg TASK_yaw)"/>
   </include> -->
-  <!-- <rosparam file="$(find robosub_descriptions)/config/triangular_bouy_control.yaml" command="load"/>
-  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-	   output="screen" ns="/triangular_buoy_1" args="joint_state_controller buoy_velocity_controller"/>
-  <node pkg="rostopic" type="rostopic" name="bouy_speed" args="pub /triangular_buoy_1/buoy_velocity_controller/command std_msgs/Float64 &quot;data: 0.4&quot;"/> -->
-
-    <!-- <include file="$(find robosub_descriptions)/launch/upload.launch">
-      <arg name="obstacle" default="triangular_buoy"/>
-      <arg name="x" default="$(arg TASK_x)"/>
-      <arg name="y" default="$(arg TASK_y)"/>
-      <arg name="z" default="$(arg TASK_z)"/>
-      <arg name="yaw" default="$(arg TASK_yaw)"/>
-  </include> -->
-
   <!-- <rosparam file="$(find robosub_descriptions)/config/triangular_bouy_control.yaml" command="load"/>
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
 	   output="screen" ns="/triangular_buoy_1" args="joint_state_controller buoy_velocity_controller"/>

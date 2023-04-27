@@ -1,7 +1,3 @@
 cusub_common:
   waypoint_navigator:
-<<<<<<< HEAD
-    carrot_drive: 3.0
-=======
     carrot_drive: 1.5
->>>>>>> 55b802e28458c62ab95e20ed72a51b3f095bb9e4

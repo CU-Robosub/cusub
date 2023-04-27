@@ -13,6 +13,11 @@ from std_msgs.msg import Empty
 from waypoint_navigator.srv import ToggleControl
 from waypoint_navigator.msg import waypointAction, waypointGoal
 import actionlib
+from tasks.dice import Dice
+from tasks.start_gate import StartGate
+from tasks.bangbang_dice_task import BangBangDiceTask
+from tasks.bangbang_roulette_task import BangBangRouletteTask
+from tasks.naive_visual_servo_objective import NaiveVisualServoTask
 # from tasks.dropper_task import DropperTask
 # from tasks.bangbang_roulette_task import BangBangRouletteTask
 from tasks.jiangshi import Jiangshi

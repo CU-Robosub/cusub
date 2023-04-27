@@ -1,0 +1,23 @@
+<library path="lib/libmultiplexer">
+  <class name="darknet_multiplexer/Multiplexer" type="darknet_multiplexer_ns::Multiplexer" base_class_type="nodelet::Nodelet">
+    <description>
+        Funnels occam and downcam frames into darknet on a single topic. Configurable via rosservice.
+    </description>
+  </class>
+</library>
+
+<library path="lib/libdrawer">
+  <class name="darknet_multiplexer/DarknetDrawer" type="darknet_drawer_ns::DarknetDrawer" base_class_type="nodelet::Nodelet">
+    <description>
+        Draws on images according to the bounding box and republishes the image.
+    </description>
+  </class>
+</library>
+
+<library path="lib/libget_classes">
+  <class name="darknet_multiplexer/GetClasses" type="darknet_get_classes_ns::GetClasses" base_class_type="nodelet::Nodelet">
+    <description>
+        Records the classes currently available in darknet for a period of time.
+    </description>
+  </class>
+</library>
