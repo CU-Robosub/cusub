@@ -12,7 +12,6 @@ import rospy # ros implementation
 from cv_bridge import CvBridge # for converting ros images into openCV objects
 from sensor_msgs.msg import Image
 import os
-import behavior as bt
 from std_msgs.msg import Float64
 
 
@@ -44,17 +43,6 @@ class Nodo(object):
         return counter
     
     def callback(self, msg):
-        
-        root = bt.Selector("root")
-        
-        condition = bt.Condition("move_condition", 'should_move') # set to true or false depending on where the red button is
-        sequence = bt.Sequence("move", True)
-        strafe_left = bt.Move("strafe_left", 'position')
-        strafe_right = bt.Move("strafe_right", 'position')
-        move_forward = bt.Move("move_forward", 'position')
-        move_backward = bt.move("move_backward", 'position')
-        alt_up = bt.Move("alt_up", 'position')
-        alt_down = bt.Move("alt_down", 'position')
         
         # arrange nodes
         """
@@ -138,7 +126,6 @@ class Nodo(object):
     def execute(self):
         rospy.loginfo('Timing images...')
         while not rospy.is_shutdown(): # publish only while ros is active
-            self.root.activate(bt.blackboard)
             if self.image is not None:
                 self.pub.publish(br.cv2_to_imgmsg(self.image))
             self.loop_rate.sleep()

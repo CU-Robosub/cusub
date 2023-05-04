@@ -13,8 +13,12 @@ from cv_bridge import CvBridge # for converting ros images into openCV objects
 from sensor_msgs.msg import Image
 import os
 import behavior as bt
+from tasks.pid_client import PIDClient
 from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import Float64
+
+from cusub_cortex.behavior_tree.scripts.tasks.general import *
+from cusub_cortex.behavior_tree.scripts.tasks.basic import *
 
 
 class Nodo(object):
@@ -27,38 +31,48 @@ class Nodo(object):
         # publishers
         self.pub = rospy.Publisher('/leviathan/cusub_common/motor_controllers/pid/drive/setpoint', Float64, queue_size=10)
         
-        bt.blackboard["drive_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/drive_vel/setpoint", Float64, queue_size=1)
-        bt.blackboard["strafe_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/strafe_vel/setpoint", Float64, queue_size=1)
-        bt.blackboard["depth_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
-        bt.blackboard["yaw_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/yaw/setpoint", Float64, queue_size=1)
+        drive_client = PIDClient(self.name, "drive")
+        strafe_client = PIDClient(self.name, "strafe")
+        depth_client = PIDClient(self.name, "depth")
+        clients = {'drive_client' : drive_client, 'strafe_client' : strafe_client, 'depth_client' : depth_client}
+        
+        # bt.blackboard["drive_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/drive_vel/setpoint", Float64, queue_size=1)
+        # bt.blackboard["strafe_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/strafe_vel/setpoint", Float64, queue_size=1)
+        # bt.blackboard["depth_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
+        # bt.blackboard["yaw_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/yaw/setpoint", Float64, queue_size=1)
         # Subscribers
         rospy.Subscriber("triton/down_cam/image_raw", Image, self.callback)
-        rospy.Subscriber("move", Float64MultiArray, bt.move_callback)
+        # rospy.Subscriber("move", Float64MultiArray, bt.move_callback)
     
     def callback(self, msg):
         
-        root = bt.Selector("root")
+        # root = bt.Selector("root")
         
-        condition = bt.Condition("move_condition", 'should_move') # set to true or false depending on where the red button is
-        sequence = bt.Sequence("move", True)
-        strafe_left = bt.Move("strafe_left", 'position',5,'-')
-        strafe_right = bt.Move("strafe_right", 'position',5,'+')
-        move_forward = bt.Move("move_forward", 'position',5,'+')
-        move_backward = bt.move("move_backward", 'position',5,'-')
-        alt_up = bt.Move("alt_up", 'position',5,'+')
-        alt_down = bt.Move("alt_down", 'position',5,'-')
+        # condition = bt.Condition("move_condition", 'should_move') # set to true or false depending on where the red button is
+        # sequence = bt.Sequence("move", True)
+        # strafe_left = bt.Move("strafe_left", 'position',5,'-')
+        # strafe_right = bt.Move("strafe_right", 'position',5,'+')
+        # move_forward = bt.Move("move_forward", 'position',5,'+')
+        # move_backward = bt.move("move_backward", 'position',5,'-')
+        # alt_up = bt.Move("alt_up", 'position',5,'+')
+        # alt_down = bt.Move("alt_down", 'position',5,'-')
         
         # arrange nodes
         
-        root.nodes.append(condition)
-        condition.nodes.append(sequence)
+        # root.nodes.append(condition)
+        # condition.nodes.append(sequence)
         """
         root.nodes.append(move_backward) # returns the sub to the starting position of the task, effectively making it exit the box
         """
         # display the behavior tree
-        bt.display_tree(root)
+        # bt.display_tree(root)
         
-        
+        self.drive_client = self.clients["drive_client"]
+        self.strafe_client = self.clients["strafe_client"]
+        self.depth_client = self.clients["depth_client"]
+        self.drive_client.enable()
+        self.strafe_client.enable()
+        self.depth_client.enable()
         
         frame = self.br.imgmsg_to_cv2(msg,desired_encoding="bgr8") # converts image stream from ROS into openCV object. msg is ROS image stream
         height = frame.shape[0]
@@ -97,23 +111,23 @@ class Nodo(object):
                 rospy.loginfo(str(cx) + ", " + str(cy))
                 if (cx < (width * 1/3)):
                     # move right
-                    sequence.nodes.append(strafe_right)
+                    strafe_setpoint = self.strafe_client.get_standard_state() + 5
                     rospy.loginfo("move rightward")
                 elif (cx > (width * 2/3)):
                     #move left
-                    sequence.nodes.append(strafe_left)
+                    strafe_setpoint = self.strafe_client.get_standard_state() - 5
                     rospy.loginfo("move leftward")
                 elif (cy < (height * 1/3)):
                     # move up
-                    sequence.nodes.append(alt_up)
+                    depth_setpoint = self.depth_client.get_standard_state() + 5
                     rospy.loginfo("move upward")
                 elif (cx > (height * 2/3)):
                     #move down
-                    sequence.nodes.append(alt_down)
+                    depth_setpoint = self.depth_client.get_standard_state() - 5
                     rospy.loginfo("move downward")
                 else:
                     #move forward
-                    sequence.nodes.append(move_forward)
+                    drive_setpoint = self.drive_client.get_standard_State() + 5
                     rospy.loginfo("move forward")
                 
             else:

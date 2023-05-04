@@ -26,6 +26,7 @@ class PIDClient:
         if root_topic[-1] != "/":
             root_topic = root_topic + "/"
         
+        # to use position control, delete this if statement. This uses velocity control
         if axis in ["drive", "strafe"]:
             axis = axis + "_vel"
             
