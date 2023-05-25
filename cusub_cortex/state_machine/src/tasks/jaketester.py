@@ -12,18 +12,15 @@ import rospy # ros implementation
 from cv_bridge import CvBridge # for converting ros images into openCV objects
 from sensor_msgs.msg import Image
 import os
-import behavior as bt
 from tasks.pid_client import PIDClient
 from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import Float64
-
-from cusub_cortex.behavior_tree.scripts.tasks.general import *
-from cusub_cortex.behavior_tree.scripts.tasks.basic import *
-
+from tasks.task import Task, Objective, Timeout
 
 class Nodo(object):
     def __init__(self):
         # parameters
+        self.name = "jaketester"
         self.image = None
         self.br = CvBridge()
         # Node cycle rate in Hz
@@ -34,38 +31,11 @@ class Nodo(object):
         drive_client = PIDClient(self.name, "drive")
         strafe_client = PIDClient(self.name, "strafe")
         depth_client = PIDClient(self.name, "depth")
-        clients = {'drive_client' : drive_client, 'strafe_client' : strafe_client, 'depth_client' : depth_client}
-        
-        # bt.blackboard["drive_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/drive_vel/setpoint", Float64, queue_size=1)
-        # bt.blackboard["strafe_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/strafe_vel/setpoint", Float64, queue_size=1)
-        # bt.blackboard["depth_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/depth/setpoint", Float64, queue_size=1)
-        # bt.blackboard["yaw_publisher"] = rospy.Publisher("/leviathan/cusub_common/motor_controllers/pid/yaw/setpoint", Float64, queue_size=1)
-        # Subscribers
+        self.clients = {'drive_client' : drive_client, 'strafe_client' : strafe_client, 'depth_client' : depth_client}
         rospy.Subscriber("triton/down_cam/image_raw", Image, self.callback)
         # rospy.Subscriber("move", Float64MultiArray, bt.move_callback)
     
     def callback(self, msg):
-        
-        # root = bt.Selector("root")
-        
-        # condition = bt.Condition("move_condition", 'should_move') # set to true or false depending on where the red button is
-        # sequence = bt.Sequence("move", True)
-        # strafe_left = bt.Move("strafe_left", 'position',5,'-')
-        # strafe_right = bt.Move("strafe_right", 'position',5,'+')
-        # move_forward = bt.Move("move_forward", 'position',5,'+')
-        # move_backward = bt.move("move_backward", 'position',5,'-')
-        # alt_up = bt.Move("alt_up", 'position',5,'+')
-        # alt_down = bt.Move("alt_down", 'position',5,'-')
-        
-        # arrange nodes
-        
-        # root.nodes.append(condition)
-        # condition.nodes.append(sequence)
-        """
-        root.nodes.append(move_backward) # returns the sub to the starting position of the task, effectively making it exit the box
-        """
-        # display the behavior tree
-        # bt.display_tree(root)
         
         self.drive_client = self.clients["drive_client"]
         self.strafe_client = self.clients["strafe_client"]
@@ -111,23 +81,23 @@ class Nodo(object):
                 rospy.loginfo(str(cx) + ", " + str(cy))
                 if (cx < (width * 1/3)):
                     # move right
-                    strafe_setpoint = self.strafe_client.get_standard_state() + 5
+                    self.strafe_client.set_setpoint(self.strafe_client.get_standard_state() + 5)
                     rospy.loginfo("move rightward")
                 elif (cx > (width * 2/3)):
                     #move left
-                    strafe_setpoint = self.strafe_client.get_standard_state() - 5
+                    self.strafe_client.set_setpoint(self.strafe_client.get_standard_state() - 5)
                     rospy.loginfo("move leftward")
                 elif (cy < (height * 1/3)):
                     # move up
-                    depth_setpoint = self.depth_client.get_standard_state() + 5
+                    self.depth_client.set_setpoint(self.depth_client.get_standard_state() + 5)
                     rospy.loginfo("move upward")
                 elif (cx > (height * 2/3)):
                     #move down
-                    depth_setpoint = self.depth_client.get_standard_state() - 5
+                    self.depth_client.set_setpoint(self.depth_client.get_standard_state() - 5)
                     rospy.loginfo("move downward")
                 else:
                     #move forward
-                    drive_setpoint = self.drive_client.get_standard_State() + 5
+                    self.drive_client.set_setpoint(self.drive_client.get_standard_State() + 5)
                     rospy.loginfo("move forward")
                 
             else:
@@ -152,15 +122,14 @@ class Nodo(object):
         if c == 27:
             cv2.destroyAllWindows()
         
-    
         # rospy.loginfo('Feed recieved')
         
     def execute(self):
         rospy.loginfo('Timing images...')
         while not rospy.is_shutdown(): # publish only while ros is active
-            self.root.activate(bt.blackboard)
+            # self.root.activate(bt.blackboard)
             if self.image is not None:
-                self.pub.publish(br.cv2_to_imgmsg(self.image))
+                self.pub.publish(self.br.cv2_to_imgmsg(self.image))
             self.loop_rate.sleep()
                 
 
