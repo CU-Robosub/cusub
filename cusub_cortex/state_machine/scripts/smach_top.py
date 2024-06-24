@@ -15,7 +15,7 @@ from waypoint_navigator.msg import waypointAction, waypointGoal
 import actionlib
 from tasks.jiangshi import Jiangshi
 from tasks.droppers import Droppers
-from tasks.start_gate import StartGate
+from tasks.start_gate_det_adam import StartGate
 from tasks.manager import Manager
 from tasks.task import Timeout
 from tasks.startup_task import Startup
